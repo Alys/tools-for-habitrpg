@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>HabitRPG Unofficial User Data Display</title>
+
+<!--
+
+This code is licenced under the same terms as HabitRPG:
+	https://raw2.github.com/HabitRPG/habitrpg/develop/LICENSE
+
+Alys (Alice Harris)
+lady_alys@oldgods.net
+
+version 1.0 - Tue Mar 25 18:08:36 EST 2014
+
+-->
+
+
+<!-- ---------------------------------------------------------------
+///// 
+///// 
+///// IMPORTANT NOTE TO PROGRAMMERS:
+///// 
+///// Do not add ANY features to this page which can modify a user's
+///// account (at least not without making large changes to 
+///// "Privacy and security notes" and "Suspected Bugs", both of
+///// which currently promise users that their accounts will not
+///// be changed by this page).
+///// 
+///// 
+--------------------------------------------------------------- -->
+
+
+    <meta name="description" content="HabitRPG Unofficial User Data Display" />
+    <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
+    <meta name="original-source" content="https://github.com/Alys/tools-for-habitrpg" />
+
+
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script><!-- This is a widely used and trusted third-party library that contains no code directly related to HabitRPG. It does not contain anything that could cause damage to your HabitRPG account. -->
+
+
+    <script type="text/javascript">
+var dataFetchStatus = 'not attempted'; // also "succeeded" and "failed"
+var knownTags = [];
+
+
+// Are you tired of entering your User ID and API Token into the form?
+// Save this page to your computer and edit it in a plain-text editor
+// (e.g., Notepad) to add your ID and TOKEN just below here between
+// the quote marks.
+// Once you have done that, do NOT SHARE THE EDITED FILE WITH ANYONE!
+// Your token is a password. If anyone discovers your token, they 
+// can log into your account and make you die over and over and over
+// again and again and again.
+// Also, if you do add your ID and Token here, this page's behaviour
+// will change slightly: it will fetch your data automatically every
+// time you reload the page or click on the "clear my data" link.
+// EDIT THIS FILE AT YOUR OWN RISK! You are responsible for your
+// own changes.
+var userId   = '';
+var apiToken = '';
+
+
+var serverUrl = 'https://habitrpg.com:443/api/v2';
+
+$(document).ready(function() {
+    toggleVisibilityForStuff(); // hide some elements for initial page view
+                                // (we have not yet fetched data)
+
+    if (userId && apiToken) {
+        /* This is only executed if the user has edited this file
+           to hard-code their User ID and API Token into the variable
+           declarations above. It fetches the user's data (no need to
+           manually submit the API connection form), and also inserts the
+           uid and token into the form, in case the user later
+           chooses to view the form.
+        */
+        fetchData();
+        $('#userId').val(userId);
+        $('#apiToken').val(apiToken);
+    }
+
+    $('#userApiDetailsForm').submit(function(event){
+        /* The user manually submitted the API connection form. */
+        userId   = $('#userId').val();
+        apiToken = $('#apiToken').val();
+        event.preventDefault();
+        fetchData();
+    });
+
+    // After data fetched, let the user hide/show the explanations and form:
+    $('#explanationToggle').click(function(event){
+        event.preventDefault();
+        $('#userApiDetailsForm').toggleClass('show').toggleClass('hide');
+        $('#introduction'      ).toggleClass('show').toggleClass('hide');
+        $('#outroduction'      ).toggleClass('show').toggleClass('hide');
+        toggleApiDetailsFormLinkText();
+    });
+
+    // After data fetched, let the user clear the fetched data:
+    $('#clearData').click(function(){
+        window.location.hash = '#'; // top of page
+        window.location.reload(true);
+    });
+
+    // // Let the user close the "Missing Equipment" section
+    // // (a longer explanation is below, where this section is populated):
+    // $('#missingEquipmentClose').click(function(event){
+        // event.preventDefault();
+        // $('#missingEquipment').hide(); // Can show again jby using TOC.
+        // $('#missingEquipment .tocClose').hide(); // Never shown again.
+    // });
+});
+
+function toggleApiDetailsFormLinkText() {
+    // change text for the hide/show link (for the intro, API form, etc)
+    // based on the form's visibility
+    var linkText = 'explanations and the "Fetch My Data" form';
+    if ($('#userApiDetailsForm').is(':visible')) {
+        $('#explanationToggle').text('hide ' + linkText);
+    } else {
+        $('#explanationToggle').text('show ' + linkText);
+    }
+}
+
+function toggleVisibilityForStuff() {
+    $("#loading").hide(); // when we get here, we're done trying to load
+    if (dataFetchStatus == 'succeeded') {
+        $('.showOnlyIfHave_Not_FetchedData').removeClass('show')
+                                               .addClass('hide');
+        $('.showOnlyIfHaveFetchedData').removeClass('hide')
+                                          .addClass('show');
+    } else {
+        // dataFetchStatus is 'not attempted' or 'failed' or anything else
+        $('.showOnlyIfHave_Not_FetchedData').removeClass('hide')
+                                               .addClass('show');
+        $('.showOnlyIfHaveFetchedData').removeClass('show')
+                                          .addClass('hide');
+    }
+
+    // special case for errors:
+    if (dataFetchStatus == 'failed') {
+        $("#errors").show();
+    }
+    else {
+        $("#errors").hide();
+    }
+
+    toggleApiDetailsFormLinkText();
+}
+
+function fetchData() {
+    dataFetchStatus = 'not attempted'; // but is about to be...
+    toggleVisibilityForStuff();
+    $("#loading").show();
+    $.when($.ajax({
+        url: serverUrl + '/user',
+        type: 'GET',
+        dataType: 'json',
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            }
+        })).then(
+    displayData,
+    function(){
+        $('#errors').html("There was an error obtaining your data."
+                + " Please check that your User ID and API Token"
+                + " are correct and then try again."
+                + "<br />"
+                + "<br />"
+                + " If problems persist see"
+                + " <strong>Suspected Bugs</strong> and"
+                + " <strong>Contact Details</strong> at the bottom"
+                + " of this page."
+                + " It might help to upgrade your browser to its"
+                + " latest version, if not already done.");
+        dataFetchStatus = 'failed';
+        toggleVisibilityForStuff();
+    });
+}
+
+function displayData(data) {
+    dataFetchStatus = 'succeeded';
+    toggleVisibilityForStuff();
+
+    $('#userNameDisplay').text(data.profile.name); // user's name in header
+
+    if (data.stats.points > 0 && data.stats.lvl >= 10) {
+        var points = (data.stats.points == 1) ? "point" : "points";
+        var them   = (data.stats.points == 1) ? "it"    : "them";
+        $('#unallocatedPoints p').html('<span class="highlight">You have '
+            + data.stats.points
+            + ' unallocated ' + points + '.</span>'
+            + ' Go to <a href="https://habitrpg.com/#/options/profile/stats">'
+            + 'your Profile -&gt; Stats page</a> to allocate ' + them + '. '
+            + '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
+            + 'Learn more.</a>');
+        $('#unallocatedPoints').show();
+    }
+
+    var missing = [];
+    $.each(data.items.gear.owned, function(key, value){
+        if (value === false) {
+            missing.push(key);
+        }
+    });
+    if (missing.length > 0) {
+        $('#missingEquipment p').html('You are missing this equipment: '
+            + '<span id="equipmentNames" class="highlight">'
+            + missing.join(', ') // will be replaced with names later by ajax
+            + '</span>. '
+            + '<a href="http://habitrpg.wikia.com/wiki/'
+            + 'Death_Mechanics#Lost_Equipment">Learn more.</a> '
+            // + '<a class="tocClose narrowContent" href="#" '
+            // + 'id="missingEquipmentClose">close</a>'
+            );
+            // // XXX_LATER Doesn't work properly - fix later or (better?)
+			// // just forget it and remove it::
+            // // NB: The Missing Equipment section is designed to start
+            // // off shown as soon as the data is fetched, so it's clear
+            // // to the user that they have lost something. Hence it needs
+            // // a special close action to close it. After it's been
+            // // closed once, it no longer needs that action (the normal
+            // // TOC open/close mechanism will handle it correctly).
+        // $('#missingEquipment').show();
+        convertGearKeysToNames(missing); // replaces equip keys with names
+        $('#missingEquipmentTOC').show();
+    }
+
+    $('#drops .output').text('Drops received so far today: '
+                           + data.items.lastDrop.count);
+
+    if (data.party.quest.key && data.party.quest.key != 'vice2') {
+        // on a quest:
+        // "quest":{"completed":null,"key":"ghost_stag",
+        //          "progress":{"collect":{},"down":0,"up":13.780066986139815}},
+        // not on a quest:
+        // "quest":{"progress":{"collect":{},"down":0,"up":0}},
+        $('#quest .output').html('Your progress today towards your '
+                // + data.party.quest.key // XXX_SOON get name, and Boss name
+                + ' quest is estimated to be: <span class="highlight">'
+                + Math.floor(data.party.quest.progress.up * 100) / 100
+                + "</span> (this will be subtracted from the Boss's health)"
+                );
+        // We round DOWN with floor because we must never let the user think
+        // they have even slightly more progress than they really have.
+        // Imagine if they missed ending a quest overnight by 0.1 health
+        // because this page exaggerated their progress!
+        $('#questTOC').show();
+    }
+
+    var habitHistory = '';
+    $.each(data.habits, function(index, obj){
+        //// The commented out code below is only useful if ALL recent habit
+        //// clicks are recorded in the user's data.
+        //// Currently they are not:
+        ////    https://github.com/HabitRPG/habitrpg/issues/3079
+        ////    "habit history condenses current day's data"
+
+        var habitText = obj.text;
+        //// var canDoDown = obj.down;
+        //// var canDoUp   = obj.up;
+        //// var canDoBoth = canDoDown && canDoUp;
+
+        // Here we take each history item, convert its date to a
+        // standard format (my histories have varying formats,
+        // presumably from different apps I've used), and store
+        // it in an array; then we sort the array by date:
+        var historyItems = [];
+        $.each(obj.history, function(index, histObj){
+            var value = histObj.value;
+            var date = new Date(histObj.date); // ASSUME 'date' is a real date!
+            historyItems.push({"date":date, "value":value});
+        });
+        historyItems.sort(function(a,b) {
+            return a.date - b.date;
+        });
+
+        //// var previousValue; // used to work out if user hit + or -
+        var historyList = [];
+        $.each(historyItems, function(index, histObj){
+            var value = histObj.value;
+            var date  = myDateConverter(histObj.date);
+            //// var buttonUsed = '?up/down?'; // default value
+            //// if (canDoBoth) {
+                //// if (previousValue != undefined) {
+                    //// buttonUsed = (value > previousValue) ? 'up' : 'down';
+                //// }
+            //// }
+            //// else {
+                //// buttonUsed = (canDoUp) ? 'up' : 'down';
+            //// }
+            value = Math.round(value * 100) / 100;
+            historyList.push('<li>'
+                    + date
+                    //// + ': ' + ' <span class="buttonUsed">'
+                    //// + buttonUsed
+                    //// + '</span>'
+                    + ' <span class="historyValue">(value: '
+                    + value + ')</span>'
+                    + '</li>');
+            //// previousValue = value;
+        });
+        if (historyList.length == 0) {
+            habitText += ' <span class="noHistory">(no history)</span>';
+        }
+        else {
+            historyList.reverse(); // put most recent at top (we couldn't
+                   // do this earlier when we sorted the items because the 
+                   // 'buttonUsed' code needed them in chronological order
+            habitText += "<ul>" + historyList.join("") + "</ul>";
+        }
+        habitHistory += '<li>' + habitText + '</li>';
+    });
+    $("#habits .output").html(habitHistory);
+
+
+    // Get an array of all of the user's tags so that when we are
+    // examining a task's tags, we can ignore any tags that don't appear
+    // in that array (e.g., tags the user has deleted but that weren't
+    // removed from the task).
+    $.each(data.tags, function(index, obj){
+        knownTags.push(obj.id);
+    });
+    $("#untagged .output").html(''); // remove output from a previous fetch
+    $("#untagged .output").append(displayUntagged(data.habits,  'Habits' ));
+    $("#untagged .output").append(displayUntagged(data.dailys,  'Dailies'));
+    $("#untagged .output").append(displayUntagged(data.todos,   'To-Dos' ));
+    $("#untagged .output").append(displayUntagged(data.rewards, 'Rewards'));
+    if ($("#untagged .output").html()) {
+        $('#untaggedTOC').show();
+    }
+}
+
+function displayUntagged(tasks, title) {
+    var untaggedTasks = [];
+    $.each(tasks, function(index, obj){
+        if (obj.completed === true) {
+            return true; // go to next iteration
+        }
+        var taskText = obj.text;
+        tagFound = false; // we have not yet found any valid tags for this task
+        $.each(obj.tags, function(tagId, value){
+            if (value === false) {
+                // this tag was once applied to the task, but no longer
+                return true; // go to next iteration
+            }
+            if ($.inArray(tagId, knownTags) >= 0) {
+                tagFound = true;
+                return false; // break out of the loop
+            }
+        });
+        if (! tagFound) {
+            untaggedTasks.push('<li>' + taskText + '</li>');
+        }
+    });
+    if (untaggedTasks.length !== 0) {
+        return '<h3>' + title + '</h3><ul>\n'
+             + untaggedTasks.join('\n')
+             + '</ul>';
+    }
+    else {
+        return '';
+    }
+}
+
+function convertGearKeysToNames(keys) {
+    //// XXX_SOON This function will be ripped open and gutted for parts.
+    //// It will be replaced by something that much more gracefully
+    //// looks through all the created content and replaces all
+    //// instances of gear keys, based on a class-ified span tag.
+
+    // HabitRPG's "content" information includes things like the
+    // names for the equipment. If we are fetching this content,
+    // it's only so that we can make nicer messages for the user.
+    // Thus if fetching the content fails, we ignore the problem,
+    // and put up with showing slightly less-nice messages to the 
+    // user. This is better than forcing the user to see and try
+    // to deal with fetch errors.
+    return $.when($.ajax({
+        url: serverUrl + '/content',
+        type: 'GET',
+        dataType: 'json',
+        })).then(
+    function(data){
+        var names = [];
+        $.each(keys, function(index, gearKey){
+            var okay = false;
+            if (data.gear.flat[gearKey]) {
+                name  = data.gear.flat[gearKey].text;  // Acolyte Robe, etc
+                klass = data.gear.flat[gearKey].klass; // healer, etc
+                type  = data.gear.flat[gearKey].type;  // armour, etc
+                if (name) {
+                    names.push(name + ' (' + klass + ' ' + type + ')');
+                    // assume klass and type are also defined (very likely)
+                    okay = true;
+                }
+            }
+            if (! okay) {
+                names.push(gearKey);
+            }
+        })
+$('#equipmentNames').text(names.join(', ')); // update HTML page
+    },
+    function(){
+        console.log('Warning: Could not fetch HabitRPG content object.');
+        // We don't really care because the HTML page already shows the
+        // keys of the missing equipment (e.g., 'weapon_warrior_3',
+        // which will just have to do.
+    });
+}
+
+var myDateConverter = function(date) {
+    var y = date.getFullYear();
+    var m = date.getMonth() + 1;
+    var d = date.getDate();
+    var H = date.getHours();
+    var M = date.getMinutes();
+    var S = date.getSeconds();
+    var dateStr = y
+         + '-' + (m<=9 ? '0'+m : m)
+         + '-' + (d<=9 ? '0'+d : d)
+         + ' ' + (H<=9 ? '0'+H : H)
+         + ':' + (M<=9 ? '0'+M : M)
+         + ':' + (S<=9 ? '0'+S : S);
+    return dateStr;
+    // return dateStr + " (" + date.toLocaleString() + ")" + " (" + value + ")";
+};
+
+    </script>
+
+
+
+    <style>
+
+/* classes to control show/hide for blocks of content */
+.showOnlyIfHave_Not_FetchedData { /* e.g., show API form before data fetch */
+    /* no styles go here - this class is just for jquery to act on */
+}
+.showOnlyIfHaveFetchedData { /* e.g., show "main" div when we have data */
+    /* no styles go here - this class is just for jquery to act on */
+}
+.show {
+    display: block;
+}
+.hide {
+    display: none;
+}
+#loading { /* visible only during actual fetch attempt */
+    display: none;
+    color: orange;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    background-color: rgb(173, 208, 215);
+}
+#innerBody {
+    margin: 20px;
+    padding: 5px 20px;
+    background-color: rgb(242, 242, 230);
+}
+hr {
+    width: 95%;
+}
+
+
+.clear {
+    clear: both;
+}
+.highlight {
+    font-weight: bold;
+}
+.explanation {
+    font-style: italic;
+}
+#errors {
+    font-weight: bold;
+    color: orange;
+    margin: 30px;
+}
+
+
+h1 {
+    float: left;
+}
+#version {
+    font-size: 50%;
+}
+#userNameDisplay {
+    text-align: right;
+    font-weight: bold;
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+#explanationAndClearLinks {
+    text-align: right;
+}
+#explanationAndClearLinks  a {
+    padding-left: 20px;
+}
+
+#userApiDetailsForm {
+    margin: 30px;
+}
+#userApiDetailsForm fieldset {
+    max-width: 40em;
+}
+#userApiDetailsForm fieldset label,
+#userApiDetailsForm fieldset input[type="submit"] {
+    display: block;
+    float: left;
+    clear: left;
+    margin: 10px 0;
+}
+#userApiDetailsForm fieldset label span {
+    display: block;
+    float: left;
+    width: 6em;
+}
+#userApiDetailsForm fieldset label input {
+    float: left;
+    width: 30em;
+}
+#userApiDetailsForm fieldset p {
+    clear: both;
+}
+#userApiDetailsForm legend .highlight {
+    font-size: 130%;
+}
+#userApiDetailsForm fieldset li {
+    margin-bottom: 7px;
+}
+
+#outroduction {
+    max-width: 700px;
+}
+#outroduction h2 {
+    font-weight: bold;
+    font-size: 130%;
+}
+#outroduction .subheading {
+    font-weight: bold;
+}
+#outroduction li {
+    margin-bottom: 10px;
+}
+
+h2 {
+    margin-top: 30px;
+}
+.tocSection {        /* each section of data is hidden by default ... */
+    display: none;
+}
+.tocSection:target { /* ... until the user clicks on its TOC link     */
+    display: block;
+}
+.tocClose {
+    display: block;
+    text-align: right;
+    font-size: 1em;
+}
+h2 .tocClose {
+    margin-top: -1em;
+    font-size: .7em;
+    font-weight: normal;
+}
+a.tocClose {
+    margin-top: -1.3em;
+}
+div.tocClose { /* usually at bottom of page, so add a gap as you get for <p> */
+    margin-bottom: 15px;
+}
+
+.narrowContent {       /* The DATA should be as wide as the user's window */
+    max-width: 500px;  /* but explanatory paragraphs should be narrow.    */
+}
+.urgent {                     /* "urgent" is a bit of an exaggeration but */
+    margin: 30px 0 30px 50px; /* we do want these messages to stand out   */
+}
+
+.buttonUsed { /* which habit button (+ or -) was pressed */
+    font-weight: bold;
+}
+.historyValue {
+    font-size: .8em;
+}
+.noHistory {
+    font-size:  .8em;
+    font-style: italic;
+}
+
+    </style>
+</head>
+<body><div id="innerBody">
+
+<h1>HabitRPG Unofficial User Data Display
+    <span id="version">(v1.0)</span></h1>
+
+<div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
+
+<div id="explanationAndClearLinks" class="showOnlyIfHaveFetchedData">
+    <a id="explanationToggle" href="#">show explanations and the
+                                       "Fetch My Data" form</a>
+    <a id="clearData" href="#top">clear my data</a>
+</div>
+<hr class="clear" />
+
+<div id="errors" class="narrowContent">
+</div>
+
+<div id="loading">
+   <p>Please wait. Your data is being fetched from HabitRPG...</p>
+</div>
+
+<div id="introduction" class="showOnlyIfHave_Not_FetchedData">
+   <p>This page will show you certain information from your <a href="https://habitrpg.com">HabitRPG</a> account. You can read the full list below, or just enter your details and try it out.</p>
+</div>
+
+<form id="userApiDetailsForm" method="POST" action="#" class="showOnlyIfHave_Not_FetchedData">
+    <fieldset>
+        <legend><span class="highlight">Enter your HabitRPG API details</span>
+        (from the <a href="https://habitrpg.com/#/options/settings/api">Settings
+         -&gt; API page</a>)
+        </legend>
+        <label for="userId"><span>User ID</span>
+            <input type="text" name="userId" id="userId" />
+        </label>
+        <label for="apiToken"><span>API Token</span>
+            <input type="password" name="apiToken" id="apiToken" />
+        </label>
+        <input type="submit" value="Fetch My Data">
+        <p class="highlight">Privacy and security notes:</p>
+        <ul>
+        <li>Your API Token is a password - do not share it with anyone,
+        not even the maintainer of this page if you are seeking help.</li>
+        <li>When you enter your User ID and API Token here and click
+        "Fetch My Data", your ID and Token are sent to HabitRPG's servers.
+        They are not sent anywhere else.
+        To confirm that, you can ask someone who knows the JavaScript
+        programming language to examine the source of this page.</li>
+        <li>This page does not save you User ID and API Token to any 
+        location, but your browser might, if it has been configured to
+        save form and password information. If you are using this page
+        on a shared computer, you should clear any data that the browser
+        has saved.</li>
+        <li>You cannot damage your HabitRPG account in any way by using
+        this page. It fetches data from HabitRPG's servers but it
+        does not make any other kind of request. Your account will not be
+        changed by this.</li>
+        <li>You cannot view anyone else's data by using this page.<!-- XXX_LATER:  add this if more party code is put in (and improve wording): "except the most basic details (e.g., name) that you can already see on the party page" --></li>
+        </ul>
+    </fieldset>
+</form>
+
+
+<div id="main" class="showOnlyIfHaveFetchedData">
+
+    <ul id="tableOfContents">
+        <li><a href="#habits">Habit History</a></li>
+        <li id="questTOC" class="hide"><a href="#quest">Quest Progress</a></li><!-- shown only if the user is on a quest -->
+        <li id="missingEquipmentTOC" class="hide"><a href="#missingEquipment">Missing Equipment</a></li><!-- shown only if there IS missing equipment -->
+        <li><a href="#drops">Drops Received Today</a></li>
+        <li id="untaggedTOC" class="hide"><a href="#untagged">Tasks That Have Not Been Tagged</a></li><!-- shown only if there ARE untagged tasks -->
+    </ul>
+
+    <div class="hide urgent" id="unallocatedPoints">
+        <!-- section is shown automatically if there are points -->
+        <p></p>
+    </div>
+
+    <div class="tocSection" id="habits">
+        <h2>Habit History
+            <span class="tocClose narrowContent"><a href="#">close</a></span>
+        </h2>
+        <p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks.  <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. --></p>
+        <ul class="output"></ul>
+        <div class="tocClose narrowContent"><a href="#">close</a></div>
+    </div>
+
+    <div class="tocSection" id="quest">
+        <h2>Quest Progress</h2>
+        <p class="output"></p>
+        <!-- hopefully everything's clear enough that this won't be needed:
+        <p class="narrowContent explanation">This shows an estimate of
+        the progress that you yourself have made so far today
+        (not on previous days) towards the quest that your party is on.
+        It does not include progress from other people in your party
+        (it is not possible to show you data for other people).</p>
+        -->
+        <p class="narrowContent explanation">This currently works for only
+        boss quests. Collection quests will be added soon.</p>
+    </div>
+
+    <div class="tocSection" id="missingEquipment">
+        <p></p>
+    </div>
+
+    <div class="tocSection" id="drops">
+        <h2>Drops Received Today</h2>
+        <p class="output"></p>
+    </div>
+
+    <div class="tocSection" id="untagged">
+        <h2>Tasks That Have Not Been Tagged</h2>
+        <div class="output"></div>
+    </div>
+
+</div>
+
+
+
+<div id="outroduction" class="showOnlyIfHave_Not_FetchedData">
+   <h2>What's On This Page?</h2>
+   <ul>
+        <li><span class="subheading">Unallocated Points</span>: If you have any <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">unallocated points</a>, you'll see how many and a link to the HabitRPG <a href="https://habitrpg.com/#/options/profile/stats">Profile -&gt; Stats page</a> so you can allocate them.</li>
+        <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
+        <li><span class="subheading">Quest Progress</span>: If you are on a <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much damage you have done so far today to the Boss. (Coming soon: Collection quests will be shown here too.)</li>
+        <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
+        <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown.</li>
+        <li><span class="subheading">Tasks That Have Not Been Tagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
+   </ul>
+<p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
+
+   <h2>Possible future features</h2><!-- XXX_SOON look into this -->
+   <ul>
+        <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are.</li>
+        <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
+        <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
+        <li><span class="subheading">Better Browser Support</span>: Testing in a wider range of browsers and on mobile devices, will be done soon-ish...</li><!-- XXX_SOON do this -->
+        <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
+   </ul>
+
+   <h2>Suspected Bugs</h2><!-- XXX_SOON look into this -->
+   <p>This page has only recently been created and has been tested on only three accounts and in only a few browsers (Chrome, Chromium, Firefox, Safari) on a Mac. There might be bugs on other browsers, other operating systems, and for other accounts. Please tell me about them! Contact details are below.</p>
+   <p>It's highly likely to fail completely on any version of Internet Explorer except (perhaps) the most recent (they're known for not following internet standards). It will fail on very old versions of other browsers. <a href="http://browsehappy.com/">Updating your browser is important for general safety on the internet!</a></p>
+   <p>Regardless of what bugs there might be, this page cannot damage your account. It does not contain any code that could result in any changes being made on HabitRPG.</p>
+
+
+   <h2>Help and Contact Details</h2>
+   <p>This page has been created by <a href="http://habitrpg.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me.</p>
+
+    <p>If you have general questions about HabitRPG, post them to <a href="https://habitrpg.com/#/options/groups/tavern">Tavern Talk</a> or <a href="http://habitrpg.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
+</div>
+
+</div></body>
+</html>

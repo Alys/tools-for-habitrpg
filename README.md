@@ -1,5 +1,16 @@
-Various small scripts for working with exported data from HabitRPG
-( http://habitrpg.com/  http://habitrpg.wikia.com/ ).
+Various small scripts for working with exported data or API data from
+HabitRPG ( http://habitrpg.com/  http://habitrpg.wikia.com/ ).
+
+--------------------------------------------
+
+habitrpg_user_data_display.html
+
+A stand-alone JavaScript-enabled web page that reads a user's data and
+displays such things as an unallocated points reminder, limited habit
+history, quest progress, equipment lost from death, number of drops
+received today, tasks that have not been tagged, etc.
+
+More features added upon request (if possible and if time permits).
 
 --------------------------------------------
 
@@ -41,7 +52,8 @@ Comments, suggestions, and pull requests welcome.
 
 --------------------------------------------
 
-SOON:
+Contact:
 
-A stand-alone JavaScript web page that reads a user's data and
-displays habit history, number of drops so far today, etc.
+	Alys (Alice Harris)
+	http://habitrpg.wikia.com/wiki/User:LadyAlys
+	lady_alys@oldgods.net
