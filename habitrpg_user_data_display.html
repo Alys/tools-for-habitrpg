@@ -12,7 +12,12 @@ This code is licenced under the same terms as HabitRPG:
 Alys (Alice Harris)
 lady_alys@oldgods.net
 
-version 1.0 - Tue Mar 25 18:08:36 EST 2014
+https://github.com/Alys/tools-for-habitrpg/blob/master/habitrpg_user_data_display.html
+
+https://oldgods.net/habitrpg/habitrpg_user_data_display.html 
+	or http://is.gd/hrpguserdata
+
+version 1.01 - Thu Mar 27 19:08:18 EST 2014
 
 -->
 
@@ -20,7 +25,7 @@ version 1.0 - Tue Mar 25 18:08:36 EST 2014
 <!-- ---------------------------------------------------------------
 ///// 
 ///// 
-///// IMPORTANT NOTE TO PROGRAMMERS:
+///// IMPORTANT NOTE TO PROGRAMMERS EDITING THIS PAGE:
 ///// 
 ///// Do not add ANY features to this page which can modify a user's
 ///// account (at least not without making large changes to 
@@ -34,10 +39,9 @@ version 1.0 - Tue Mar 25 18:08:36 EST 2014
 
     <meta name="description" content="HabitRPG Unofficial User Data Display" />
     <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
-    <meta name="original-source" content="https://github.com/Alys/tools-for-habitrpg" />
 
 
-    <script src="http://code.jquery.com/jquery-latest.min.js"></script><!-- This is a widely used and trusted third-party library that contains no code directly related to HabitRPG. It does not contain anything that could cause damage to your HabitRPG account. -->
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script><!-- This is a widely used and trusted third-party library that contains no code directly related to HabitRPG. It does not contain anything that could cause damage to your HabitRPG account. -->
 
 
     <script type="text/javascript">
@@ -47,7 +51,7 @@ var knownTags = [];
 
 // Are you tired of entering your User ID and API Token into the form?
 // Save this page to your computer and edit it in a plain-text editor
-// (e.g., Notepad) to add your ID and TOKEN just below here between
+// (e.g., Notepad) to add your ID and Token just below here between
 // the quote marks.
 // Once you have done that, do NOT SHARE THE EDITED FILE WITH ANYONE!
 // Your token is a password. If anyone discovers your token, they 
@@ -59,12 +63,15 @@ var knownTags = [];
 // EDIT THIS FILE AT YOUR OWN RISK! You are responsible for your
 // own changes.
 // You can leave your edited file on your computer and run it in a
-// browser from there, but it is more secure to upload it to 
-// your own HTTPS web server so that you token is sent encrypted
-// to HabitRPG.
+// browser from there, but that will cause your token to be sent
+// unencrypted over the internet, which is a security risk.
+// It is MUCH more secure to upload it to your own HTTPS web server,
+// if you have one (or to a trusted friend's).
 var userId   = '';
 var apiToken = '';
 
+var userId   = '3b7d59d1-9c79-4c96-a9ac-6e01664d4251'; // test
+var apiToken = '3c9c4d69-53e8-42af-a5ec-942c27e8a9ff';
 
 var serverUrl = 'https://habitrpg.com:443/api/v2';
 
@@ -108,13 +115,6 @@ $(document).ready(function() {
         window.location.reload(true);
     });
 
-    // // Let the user close the "Missing Equipment" section
-    // // (a longer explanation is below, where this section is populated):
-    // $('#missingEquipmentClose').click(function(event){
-        // event.preventDefault();
-        // $('#missingEquipment').hide(); // Can show again jby using TOC.
-        // $('#missingEquipment .tocClose').hide(); // Never shown again.
-    // });
 });
 
 function toggleApiDetailsFormLinkText() {
@@ -216,19 +216,7 @@ function displayData(data) {
             + missing.join(', ') // will be replaced with names later by ajax
             + '</span>. '
             + '<a href="http://habitrpg.wikia.com/wiki/'
-            + 'Death_Mechanics#Lost_Equipment">Learn more.</a> '
-            // + '<a class="tocClose narrowContent" href="#" '
-            // + 'id="missingEquipmentClose">close</a>'
-            );
-            // // XXX_LATER Doesn't work properly - fix later or (better?)
-			// // just forget it and remove it::
-            // // NB: The Missing Equipment section is designed to start
-            // // off shown as soon as the data is fetched, so it's clear
-            // // to the user that they have lost something. Hence it needs
-            // // a special close action to close it. After it's been
-            // // closed once, it no longer needs that action (the normal
-            // // TOC open/close mechanism will handle it correctly).
-        // $('#missingEquipment').show();
+            + 'Death_Mechanics#Lost_Equipment">Learn more.</a> ');
         convertGearKeysToNames(missing); // replaces equip keys with names
         $('#missingEquipmentTOC').show();
     }
@@ -733,6 +721,7 @@ div.tocClose { /* usually at bottom of page, so add a gap as you get for <p> */
 
    <h2>Possible future features</h2><!-- XXX_SOON look into this -->
    <ul>
+        <li><span class="subheading">Task Values</span>: This will show the <a href="http://habitrpg.wikia.com/wiki/Task_Value">value</a> for each of your habits, dailies, and to-dos, which can be helpful when choosing a task for casting a spell against. This will be added very soon.</li>
         <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are.</li>
         <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
         <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
