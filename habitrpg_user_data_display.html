@@ -7,7 +7,7 @@
 <!--
 
 This code is licenced under the same terms as HabitRPG:
-	https://raw2.github.com/HabitRPG/habitrpg/develop/LICENSE
+    https://raw2.github.com/HabitRPG/habitrpg/develop/LICENSE
 
 Alys (Alice Harris)
 lady_alys@oldgods.net
@@ -15,9 +15,7 @@ lady_alys@oldgods.net
 https://github.com/Alys/tools-for-habitrpg/blob/master/habitrpg_user_data_display.html
 
 https://oldgods.net/habitrpg/habitrpg_user_data_display.html 
-	or http://is.gd/hrpguserdata
-
-version 1.10 - Thu Mar 27 21:11:59 EST 2014
+    or http://is.gd/hrpguserdata
 
 -->
 
@@ -79,6 +77,10 @@ $(document).ready(function() {
     toggleVisibilityForStuff(); // hide some elements for initial page view
                                 // (we have not yet fetched data)
 
+    if ($('#userId').is(':visible')) { // need because of IE bug
+        $("#userId").focus();
+    }
+
     if (userId && apiToken) {
         /* This is only executed if the user has edited this file
            to hard-code their User ID and API Token into the variable
@@ -112,29 +114,37 @@ $(document).ready(function() {
 
     // After data fetched, let the user clear the fetched data:
     $('#clearData').click(function(){
-		window.scrollTo(0, 0);
+        window.scrollTo(0, 0);
         window.location.reload(true);
     });
 
 
-	// Table of Contents (TOC) hide/show:
+    // Version Changes hide/show:
+    $('.versionToggle').click(function(event){
+        event.preventDefault();
+        $('#versionChanges').toggle();
+        window.scrollTo(0, 0); // for closing with link under version history
+    });
+
+
+    // Table of Contents (TOC) hide/show:
     $('#tableOfContents a').click(function(event){
         event.preventDefault();
-		var sectionId = this.parentNode.id + 'Section';
-		$('.tocSection').hide();
-		$('#' + sectionId).toggle();
-		if ($('#' + sectionId).hasClass("longContent")) {
-			$('#tocClose').show();
-		}
-		else {
-			$('#tocClose').hide();
-		}
+        var sectionId = this.parentNode.id + 'Section';
+        $('.tocSection').hide();
+        $('#' + sectionId).toggle();
+        if ($('#' + sectionId).hasClass("longContent")) {
+            $('#tocClose').show();
+        }
+        else {
+            $('#tocClose').hide();
+        }
     });
     $('#tocClose').click(function(event){
         event.preventDefault();
-		$('.tocSection').hide();
-		$('#tocClose').hide();
-		window.scrollTo(0, 0);
+        $('.tocSection').hide();
+        $('#tocClose').hide();
+        window.scrollTo(0, 0);
     });
 
 });
@@ -480,13 +490,13 @@ body {
     background-color: rgb(242, 242, 230);
 }
 #main {
-	padding-bottom: 30px;
+    padding-bottom: 30px;
 }
 hr {
     width: 95%;
 }
 hr.separator {
-	margin-bottom: 30px;
+    margin-bottom: 30px;
 }
 
 
@@ -504,14 +514,39 @@ hr.separator {
     color: orange;
     margin: 30px;
 }
+.tip {
+    font-style: italic;
+}
 
 
 h1 {
     float: left;
 }
-#version {
+h1>a:first-child { /* "HabitRPG" link in header */
+    color: black;
+    text-decoration: none;
+}
+h1 .versionToggle {
     font-size: 50%;
 }
+#versionChanges dl {
+    margin-left: 30px;
+}
+#versionChanges dl dt {
+    font-size: 115%;
+    font-weight: bold;
+}
+#versionChanges dl dt .date {
+    padding-left: 10px;
+    font-size: 80%;
+    font-weight: normal;
+}
+#versionChanges .versionToggle {
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+}
+
+
 #userNameDisplay {
     text-align: right;
     font-weight: bold;
@@ -575,11 +610,11 @@ h1 {
 }
 
 ul#tableOfContents {
-	list-style-type: none;
+    list-style-type: none;
 }
 #tableOfContents li {
-	font-size: 110%;
-	padding: 2px 0;
+    font-size: 110%;
+    padding: 2px 0;
 }
 
 h2 {
@@ -588,15 +623,14 @@ h2 {
 .tocSection {        /* each section of data is hidden by default */
     display: none;
 }
-#tocClose {
-    display: none;
+.closer { /* as in "a thing that closes", not "nearer" */
     font-size: 90%;
     margin-top: 30px;
     padding-top: 15px;
     padding-bottom: 15px;
 }
-#tocClose:hover {
-	border: 1px dashed lightgrey;
+.closer:hover {
+    border: 1px dashed lightgrey;
 }
 
 .narrowContent {       /* The DATA should be as wide as the user's window */
@@ -621,8 +655,8 @@ h2 {
 </head>
 <body><div id="innerBody">
 
-<h1>HabitRPG Unofficial User Data Display
-    <span id="version">(v1.10)</span></h1>
+<h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
+    <a class="versionToggle" href="">(v1.10)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
@@ -632,6 +666,52 @@ h2 {
     <a id="clearData" href="#top">clear my data</a>
 </div>
 <hr class="clear" />
+
+
+<div id="versionChanges" class="hide">
+    <h2>Version History</h2>
+    <dl>
+        <dt>1.20  <span class="date">2014-03-29</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>
+</li>
+                </ul>
+            </li>
+            <li>Documentation:
+                <ul>
+                    <li>added Version History</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>1.10 - initial release <span class="date">2014-03-27</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Unallocated Points</li>
+                    <li>Habit History</li>
+                    <li>Quest Progress</li>
+                    <li>Missing Equipment</li>
+                    <li>Drops Received Today</li>
+                    <li>Tasks That Have Not Been Tagged</li>
+                </ul>
+            </li>
+            <li>Documentation:
+                <ul>
+                    <li>Privacy and security notes (also related comments within the code)</li>
+                    <li>What's On This Page? (descriptions of each feature)</li>
+                    <li>Possible Future Features</li>
+                    <li>Suspected Bugs (no support for old browsers; mobile support unknown)</li>
+                    <li>Help and Contact Details</li>
+                </ul>
+            </li>
+        </ul></dd>
+    </dl>
+    <div class="versionToggle closer"><a href="">close version history</a> <span class="tip">(or click the version number again to close)</span></div>
+    <hr class="separator" />
+</div>
+
 
 <div id="errors" class="narrowContent">
 </div>
@@ -643,9 +723,9 @@ h2 {
 <div id="main" class="showOnlyIfHaveFetchedData">
 
     <ul id="tableOfContents"><!-- TOC toc -->
-		<!-- Some of these items are hidden by default so that they can
-			 be shown only if relevant (e.g., you see Quest Progress
-			 only if you are on a quest).
+        <!-- Some of these items are hidden by default so that they can
+             be shown only if relevant (e.g., you see Quest Progress
+             only if you are on a quest).
         -->
         <li id="habitHistory"><a href="">Habit History</a></li>
         <li id="questProgress" class="hide"><a href="">Quest Progress</a></li>
@@ -693,7 +773,7 @@ h2 {
         <div class="output"></div>
     </div>
 
-	<div id="tocClose"><a href="">close / back to top</a></div>
+    <div id="tocClose" class="closer hide"><a href="">close / back to top</a></div>
 </div>
 
 
@@ -701,7 +781,7 @@ h2 {
 
 
 <div id="introduction" class="showOnlyIfHave_Not_FetchedData">
-   <p>This page will show you certain information from your <a href="https://habitrpg.com">HabitRPG</a> account. You can read the full list below, or just enter your details and try it out.</p>
+   <p>This page shows you certain information from your <a href="https://habitrpg.com/">HabitRPG</a> account. You can read the full list below, or just enter your details and try it out.</p>
 </div>
 
 <form id="userApiDetailsForm" method="POST" action="#" class="showOnlyIfHave_Not_FetchedData">
@@ -755,7 +835,7 @@ h2 {
    </ul>
 <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
-   <h2>Possible future features</h2><!-- XXX_SOON look into this -->
+   <h2>Possible Future Features</h2><!-- XXX_SOON look into this -->
    <ul>
         <li><span class="subheading">Task Values</span>: This will show the <a href="http://habitrpg.wikia.com/wiki/Task_Value">value</a> for each of your habits, dailies, and to-dos, which can be helpful when choosing a task for casting a spell against. This will be added very soon.</li>
         <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are.</li>
@@ -779,7 +859,7 @@ h2 {
 
 <div id="end">
     <a class="explanationToggle separator hide" href="">hide
-					explanations and the "Fetch My Data" form</a>
+                    explanations and the "Fetch My Data" form</a>
 </div>
 
 </div></body>
