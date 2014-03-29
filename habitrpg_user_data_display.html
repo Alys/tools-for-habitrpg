@@ -45,6 +45,7 @@ https://oldgods.net/habitrpg/habitrpg_user_data_display.html
     <script type="text/javascript">
 var dataFetchStatus = 'not attempted'; // also "succeeded" and "failed"
 var knownTags = [];
+var collectionDrops = false; // control Drops + Quest Progress opening
 
 
 // Are you tired of entering your User ID and API Token into the form?
@@ -67,7 +68,6 @@ var knownTags = [];
 // if you have one (or to a trusted friend's).
 var userId   = '';
 var apiToken = '';
-
 
 var serverUrl = 'https://habitrpg.com:443/api/v2';
 
@@ -139,11 +139,17 @@ $(document).ready(function() {
         else {
             $('#tocClose').hide();
         }
+        if ($('#dropsTodaySection').is(':visible') && collectionDrops) {
+            // The user is on a collection quest and has viewed the
+            // Drops Received Today section, so also show them the
+            // Quest Progress section (collection quests have drops):
+            $('#questProgressSection').show();
+        }
     });
     $('#tocClose').click(function(event){
         event.preventDefault();
         $('.tocSection').hide();
-        $('#tocClose').hide();
+        $('#tocClose'  ).hide();
         window.scrollTo(0, 0);
     });
 
@@ -243,35 +249,105 @@ function displayData(data) {
         }
     });
     if (missing.length > 0) {
-        $('#missingEquipmentSection p').html('You are missing this equipment: '
+		// XXX_SOON: turn into ul list if more than 3 items
+        $('#missingEquipmentSection .output').html(
+            'You are missing this equipment: '
             + '<span id="equipmentNames" class="highlight">'
             + missing.join(', ') // will be replaced with names later by ajax
             + '</span>. '
             + '<a href="http://habitrpg.wikia.com/wiki/'
             + 'Death_Mechanics#Lost_Equipment">Learn more.</a> ');
         convertGearKeysToNames(missing); // replaces equip keys with names
+        if (data.achievements.rebirths > 0 && missing.length > 6) {
+            // We show the message below when rebirthers are missing
+            // lots of gear, but not when they've bought back most of it,
+            // because by that time, they're unlikely to be confused by
+            // a long list of missing items, and the items are more and
+            // more likely to be missing due to actual, recent deaths.
+            $('#missingEquipmentSection #rebirth').html("You have used an"
+                + " Orb of Rebirth so this list will include all the"
+                + " equipment you owned in your previous life that you have"
+                + " not yet repurchased. Unfortunately it is not currently"
+                + " possible to limit this list to recent death-induced"
+                + " losses - but I have some interesting ideas to work on...");
+        }
         $('#missingEquipment').show();
     }
 
-    $('#dropsTodaySection .output').text('Drops received so far today: '
-                           + data.items.lastDrop.count);
+    $('#dropsTodaySection .output').html(
+			'Drops received so far today: <span class="highlight">'
+            + data.items.lastDrop.count + '</span>.');
 
-    if (data.party.quest.key && data.party.quest.key != 'vice2') {
+    if (data.party.quest.key) { // user is on a quest
         // on a quest:
         // "quest":{"completed":null,"key":"ghost_stag",
         //          "progress":{"collect":{},"down":0,"up":13.780066986139815}},
+        // 
+        // on a collection quest but found nothing yet:
+        // "quest":{"completed":null,"key":"vice2","progress":{"collect":
+        //          {"lightCrystal":0},"down":0,"up":0}},
+        // 
+        // on a collection quest and found stuff:
+        // "quest":{"completed":null,"key":"vice2","progress":{"collect":
+        //          {"lightCrystal":2},"down":0,"up":2.4434153558001794}},
+        // 
         // not on a quest:
         // "quest":{"progress":{"collect":{},"down":0,"up":0}},
-        $('#questProgressSection .output').html('Your progress today towards your '
+        // 
+        // before the user has ever joined a party or started a quest:
+        // "party":{"current":null,"invitation":null,"quest":
+        // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
+        // 
+        var msg = '';
+        var progressObj = $.extend({}, data.party.quest.progress);
+        if (jQuery.isEmptyObject(progressObj.collect)) {
+            // user is on a boss quest
+            msg = 'So far today you have done an estimated '
+                + '<span class="highlight">'
+                + Math.floor(progressObj.up * 100) / 100
+                + '</span>'
+                + ' points of damage to the Boss in your quest.';
                 // + data.party.quest.key // XXX_SOON get name, and Boss name
-                + ' quest is estimated to be: <span class="highlight">'
-                + Math.floor(data.party.quest.progress.up * 100) / 100
-                + "</span> (this will be subtracted from the Boss's health)"
-                );
-        // We round DOWN with floor because we must never let the user think
-        // they have even slightly more progress than they really have.
-        // Imagine if they missed ending a quest overnight by 0.1 health
-        // because this page exaggerated their progress!
+            // We round DOWN with floor because we must never let the user
+            // think they have even slightly more progress than they really
+            // have. Imagine if they missed ending a quest overnight by 0.1
+            // health because this page exaggerated their progress!
+        }
+        else {
+            // user is on a collection quest
+            collectionDrops = true; // Quest Progress will open when Drops opens
+            var total = 0;
+            var stuff = '';
+            var uniqueItemsCount = 0;
+            $.each(progressObj.collect, function(tagId, value){
+                uniqueItemsCount++;
+                total += value;
+                var itemName = tagId;
+                if (itemName == 'lightCrystal') {
+                    itemName = "Light Crystal"; // XXX_LATER get from Content
+                }
+                if (uniqueItemsCount > 1) { // we have stuff already
+                    stuff += ", ";
+                }
+                stuff += value + " " + itemName;
+                if (value != 1) {
+                    // pluralise itemName (possibly badly - XXX_LATER fix)
+                    stuff += "s";
+                }
+            });
+            var replaceStr = (uniqueItemsCount > 2) ? ", and" : " and";
+            stuff = stuff.replace(/(.+),/, "$1" + replaceStr);
+            msg = 'So far today you have found ' + '<span class="highlight">';
+            if (total == 0) {
+                msg += 'no items';
+            }
+            else {
+                msg += stuff;
+            }
+            msg += '</span> for your quest.';
+            // + data.party.quest.key // XXX_SOON get name
+        }
+        $('#questProgressSection .output').html(msg);
         $('#questProgress').show();
     }
 
@@ -514,6 +590,9 @@ hr.separator {
     color: orange;
     margin: 30px;
 }
+.subheading {
+    font-weight: bold;
+}
 .tip {
     font-style: italic;
 }
@@ -602,9 +681,6 @@ h1 .versionToggle {
     font-weight: bold;
     font-size: 130%;
 }
-#outroduction .subheading {
-    font-weight: bold;
-}
 #outroduction li {
     margin-bottom: 10px;
 }
@@ -656,7 +732,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.10)</a></h1>
+    <a class="versionToggle" href="">(v1.20)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
@@ -675,13 +751,14 @@ h2 {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>
-</li>
+                    <li><span class="subheading">Quest Progress</span> now works for <span class="subheading">Collection Quests</span>. While on a collection quest, opening Drops Received Today automatically opens Quest Progress too.</li>
+                    <li><span class="subheading">Missing Equipment</span> now includes apologetic message for Orb of Rebirthers (feature is unhelpful for them but that might change).</li>
                 </ul>
             </li>
             <li>Documentation:
                 <ul>
-                    <li>added Version History</li>
+                    <li>Updated Possible Future Features</li>
+                    <li>Added Version History</li>
                 </ul>
             </li>
         </ul></dd>
@@ -689,12 +766,12 @@ h2 {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>Unallocated Points</li>
-                    <li>Habit History</li>
-                    <li>Quest Progress</li>
-                    <li>Missing Equipment</li>
-                    <li>Drops Received Today</li>
-                    <li>Tasks That Have Not Been Tagged</li>
+                    <li class="subheading">Unallocated Points</li>
+                    <li class="subheading">Habit History</li>
+                    <li class="subheading">Quest Progress</li>
+                    <li class="subheading">Missing Equipment</li>
+                    <li class="subheading">Drops Received Today</li>
+                    <li class="subheading">Tasks That Have Not Been Tagged</li>
                 </ul>
             </li>
             <li>Documentation:
@@ -745,6 +822,16 @@ h2 {
         <ul class="output"></ul>
     </div>
 
+    <div class="tocSection" id="missingEquipmentSection">
+        <p class="output"></p>
+        <p id="rebirth"></p>
+    </div>
+
+    <div class="tocSection" id="dropsTodaySection">
+        <h2>Drops Received Today</h2>
+        <p class="output"></p>
+    </div>
+
     <div class="tocSection" id="questProgressSection">
         <h2>Quest Progress</h2>
         <p class="output"></p>
@@ -755,17 +842,6 @@ h2 {
         It does not include progress from other people in your party
         (it is not possible to show you data for other people).</p>
         -->
-        <p class="narrowContent explanation">This currently works for only
-        boss quests. Collection quests will be added soon.</p>
-    </div>
-
-    <div class="tocSection" id="missingEquipmentSection">
-        <p></p>
-    </div>
-
-    <div class="tocSection" id="dropsTodaySection">
-        <h2>Drops Received Today</h2>
-        <p class="output"></p>
     </div>
 
     <div class="tocSection longContent" id="untaggedTasksSection">
@@ -828,7 +904,7 @@ h2 {
    <ul>
         <li><span class="subheading">Unallocated Points</span>: If you have any <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">unallocated points</a>, you'll see how many and a link to the HabitRPG <a href="https://habitrpg.com/#/options/profile/stats">Profile -&gt; Stats page</a> so you can allocate them.</li>
         <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
-        <li><span class="subheading">Quest Progress</span>: If you are on a <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much damage you have done so far today to the Boss. (Coming soon: Collection quests will be shown here too.)</li>
+        <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
         <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
         <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown.</li>
         <li><span class="subheading">Tasks That Have Not Been Tagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
@@ -837,10 +913,14 @@ h2 {
 
    <h2>Possible Future Features</h2><!-- XXX_SOON look into this -->
    <ul>
-        <li><span class="subheading">Task Values</span>: This will show the <a href="http://habitrpg.wikia.com/wiki/Task_Value">value</a> for each of your habits, dailies, and to-dos, which can be helpful when choosing a task for casting a spell against. This will be added very soon.</li>
+        <li><em>Up next:</em> <span class="subheading">Task Values</span>: This will show the <a href="http://habitrpg.wikia.com/wiki/Task_Value">value</a> for each of your habits, dailies, and to-dos, which can be helpful when choosing a task for casting a spell against.</li>
         <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are.</li>
+        <li><span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li>
+        <li><span class="subheading">Damage Expected</span>: an <em>estimate</em> of the amount of damage you would receive overnight if you did no more dailies for the rest of the day.</li>
+        <li><em>Maybe:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
         <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
         <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
+        <li><em>Maybe:</em> <span class="subheading">Missing Equipment for Orb of Rebirthers</span>: do something to make the feature more useful for them.</li>
         <li><span class="subheading">Better Browser Support</span>: Testing in a wider range of browsers and on mobile devices, will be done soon-ish...</li><!-- XXX_SOON do this -->
         <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
    </ul>
