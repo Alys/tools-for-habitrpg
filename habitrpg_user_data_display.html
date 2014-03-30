@@ -138,13 +138,16 @@ $(document).ready(function() {
         fetchData();
     });
 
-    // After data fetched, let the user hide/show the explanations and form:
+    // After data fetched, let the user hide/show the explanations (but
+    // not the Fetch My Data form because fetching data on top of existing
+    // data causes issues with the DataTables code and I'm too lazy to
+    // troubleshoot it properly):
     $('.explanationToggle').click(function(event){
         event.preventDefault();
-        $('#userApiDetailsForm').toggleClass('show').toggleClass('hide');
-        $('#introduction'      ).toggleClass('show').toggleClass('hide');
-        $('#outroduction'      ).toggleClass('show').toggleClass('hide');
+        // $('#userApiDetailsForm').toggleClass('show').toggleClass('hide');
+        // $('#introduction'      ).toggleClass('show').toggleClass('hide');
         $('.separator'         ).toggleClass('show').toggleClass('hide');
+        $('#outroduction'      ).toggleClass('show').toggleClass('hide');
         toggleApiDetailsFormLinkText();
     });
 
@@ -192,10 +195,10 @@ $(document).ready(function() {
 });
 
 function toggleApiDetailsFormLinkText() {
-    // change text for the hide/show link (for the intro, API form, etc)
-    // based on the form's visibility
-    var linkText = 'explanations and the "Fetch My Data" form';
-    if ($('#userApiDetailsForm').is(':visible')) {
+    // change text for the hide/show link (for the outro, etc)
+    // based on the outro's visibility
+    var linkText = 'documentation';
+    if ($('#outroduction').is(':visible')) {
         $('.explanationToggle').text('hide ' + linkText);
     } else {
         $('.explanationToggle').text('show ' + linkText);
@@ -418,7 +421,6 @@ function displayData(data) {
     $.each(data.dailys, function(index, obj){
         numberDailys++;
         countHabitsDailysTodos++;
-        // if (numberDailys > maxItems) { return; } // FOR TESTING
         // obj.streak, obj.repeat..., obj.completed, obj.dateCompleted  XXX_SOON use them?
         // "streak":107,"checklist":[],"collapseChecklist":false,"repeat":{"su":true,"s":true,"f":true,"th":true,"w":true,"t":true,"m":true}
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
@@ -426,7 +428,6 @@ function displayData(data) {
     $.each(data.todos, function(index, obj){
         numberTodos++;
         countHabitsDailysTodos++;
-        // if (numberTodos > maxItems) { return; } // FOR TESTING
         // obj.priority, obj.dateCompleted   XXX_SOON use them?
         if (obj.completed == true) {
             return true; // currently we don't display completed to-dos
@@ -593,8 +594,10 @@ function displayData(data) {
                     + '</li>');
             //// previousValue = value;
         });
+        var noHistoryClass = '';
         if (historyList.length == 0) {
-            habitText += ' <span class="noHistory">(no history)</span>';
+            noHistoryClass = 'noHistory';
+            habitText += ' <span>(no history)</span>';
         }
         else {
             historyList.reverse(); // put most recent at top (we couldn't
@@ -602,7 +605,8 @@ function displayData(data) {
                    // 'buttonUsed' code needed them in chronological order
             habitText += "<ul>" + historyList.join("") + "</ul>";
         }
-        habitHistory += '<li>' + habitText + '</li>';
+        habitHistory += '<li class="' + noHistoryClass + '">'
+                      + habitText + '</li>';
     });
     $("#habitHistorySection .output").html(habitHistory);
 
@@ -1001,15 +1005,25 @@ h2 {
 .colourRed        { background-color: rgb(250,214,214); }
 .colourDarkRed    { background-color: rgb(240,197,190); }
 
-.buttonUsed { /* which habit button (+ or -) was pressed */
+#habitHistorySection .buttonUsed { /* which habit button (+ or -) was pressed */
     font-weight: bold;
 }
-.historyValue {
+#habitHistorySection .historyValue {
     font-size: .8em;
 }
-.noHistory {
+#habitHistorySection li {
+    padding: 3px 0;
+}
+#habitHistorySection li li {
+    padding: 1px 0;
+}
+#habitHistorySection .noHistory {
+    font-weight: bold;
+}
+#habitHistorySection .noHistory span {
     font-size:  .8em;
     font-style: italic;
+    font-weight: normal;
 }
 
     </style>
@@ -1017,13 +1031,12 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.30)</a></h1>
+    <a class="versionToggle" href="">(v1.31)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
 <div id="explanationAndClearLinks" class="showOnlyIfHaveFetchedData">
-    <a class="explanationToggle" href="">show explanations and the
-                                        "Fetch My Data" form</a>
+    <a class="explanationToggle" href="">show documentation</a>
     <a id="clearData" href="#top">clear my data</a>
 </div>
 <hr class="clear" />
@@ -1032,11 +1045,30 @@ h2 {
 <div id="versionChanges" class="hide">
     <h2>Version History</h2>
     <dl>
+        <dt>1.31  <span class="date">2014-03-30</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Habit History</span> now has bolding when there's no history, as they could be habits that you need a bit more encouragement to do - thanks to <a href="http://habitrpg.wikia.com/wiki/User:Malkin">Malkin</a> for the <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display#comm-11572">suggestion</a></li>
+                </ul>
+            </li>
+            <li>Documentation:
+                <ul>
+                    <li>Added wiki blog post to Contact Details (you can comment on the post)</li>
+                    <li><span class="subheading">show documentation</span> link (used to be "show explanations...") no longer unhides the Fetch My Data form because fetching new data over the top of old data was causing problems.</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>1.30  <span class="date">2014-03-30</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
                     <li><span class="subheading">Task Overview</span></li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>To run this page locally, you must now install <a href="http://datatables.net/">Data Tables</a> and <a href="http://www.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a>. A cut-down version of both (e.g., no documentation) can be found <a href="https://github.com/Alys/tools-for-habitrpg/blob/master/js--for--habitrpg_user_data_display.tar.gz">on github</a>.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -1127,7 +1159,10 @@ h2 {
 
     <div class="tocSection longContent" id="habitHistorySection">
         <h2>Habit History</h2>
-        <p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks.  <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. --></p>
+        <p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks.  
+<!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. -->
+Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.
+</p>
         <ul class="output"></ul>
     </div>
 
@@ -1191,7 +1226,7 @@ h2 {
         They are not sent anywhere else.
         To confirm that, you can ask someone who knows the JavaScript
         programming language to examine the source of this page.</li>
-        <li>This page does not save you User ID and API Token to any 
+        <li>This page does not save your User ID and API Token to any 
         location, but your browser might, if it has been configured to
         save form and password information. If you are using this page
         on a shared computer, you should clear any data that the browser
@@ -1240,7 +1275,7 @@ h2 {
 
 
    <h2>Help and Contact Details</h2>
-   <p>This page has been created by <a href="http://habitrpg.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me.</p>
+   <p>This page has been created by <a href="http://habitrpg.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
 
     <p>If you have general questions about HabitRPG, post them to <a href="https://habitrpg.com/#/options/groups/tavern">Tavern Talk</a> or <a href="http://habitrpg.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
 </div>
