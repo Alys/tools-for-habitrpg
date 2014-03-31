@@ -84,12 +84,12 @@ var serverPathContent = '/content';
 var serverPathUser    = '/user';
 
 // FOR TESTING:
-/*
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
 var userId   = 'a';
 var apiToken = 'a';
+/* TST
 */
 
 function d(msg) { console.log(msg) } /* laziness FTW! */
@@ -196,6 +196,8 @@ function toggleApiDetailsFormLinkText() {
     // based on the form's visibility
     var linkText = 'documentation and Fetch My Data form';
     if ($('#userApiDetailsForm').is(':visible')) {
+        $('.tocSection').hide();
+        $('#tocClose'  ).hide();
         $('.explanationToggle').text('hide ' + linkText);
     } else {
         $('.explanationToggle').text('show ' + linkText);
@@ -1027,7 +1029,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.32)</a></h1>
+    <a class="versionToggle" href="">(v1.33)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
@@ -1042,6 +1044,15 @@ h2 {
 <div id="versionChanges" class="hide">
     <h2>Version History</h2>
     <dl>
+        <dt>1.33  <span class="date">2014-03-31</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">"show documentation and Fetch My Data form"</span>: now when you use that link, it hides any other sections that you had open, so that you can more easily get to the form. Tell me if that's inconvenient for you.
+</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>1.32  <span class="date">2014-03-31</span></dt>
         <dd><ul>
             <li>Features:
@@ -1286,8 +1297,8 @@ Habits with no history are highlighted in bold, in case you would like to consid
 </div>
 
 <div id="end">
-    <a class="explanationToggle separator hide" href="">hide
-                    explanations and the "Fetch My Data" form</a>
+    <a class="explanationToggle separator closer hide" href="">hide
+                    documentation and Fetch My Data form</a>
 </div>
 
 </div></body>
