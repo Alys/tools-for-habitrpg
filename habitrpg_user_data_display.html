@@ -196,8 +196,9 @@ function toggleApiDetailsFormLinkText() {
     // based on the form's visibility
     var linkText = 'documentation and Fetch My Data form';
     if ($('#userApiDetailsForm').is(':visible')) {
-        $('.tocSection').hide();
-        $('#tocClose'  ).hide();
+        $('#versionChanges').hide();
+        $('.tocSection'    ).hide();
+        $('#tocClose'      ).hide();
         $('.explanationToggle').text('hide ' + linkText);
     } else {
         $('.explanationToggle').text('show ' + linkText);
@@ -1048,8 +1049,7 @@ h2 {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">"show documentation and Fetch My Data form"</span>: now when you use that link, it hides any other sections that you had open, so that you can more easily get to the form. Tell me if that's inconvenient for you.
-</li>
+                    <li><span class="subheading">"show documentation and Fetch My Data form"</span>: now when you use that link, it hides any other sections that you had open, so that you can more easily get to the form. Tell me if that's inconvenient for you.</li>
                 </ul>
             </li>
         </ul></dd>
