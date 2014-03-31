@@ -138,15 +138,12 @@ $(document).ready(function() {
         fetchData();
     });
 
-    // After data fetched, let the user hide/show the explanations (but
-    // not the Fetch My Data form because fetching data on top of existing
-    // data causes issues with the DataTables code and I'm too lazy to
-    // troubleshoot it properly):
+    // After data fetched, let the user hide/show the explanations and form:
     $('.explanationToggle').click(function(event){
         event.preventDefault();
-        // $('#userApiDetailsForm').toggleClass('show').toggleClass('hide');
-        // $('#introduction'      ).toggleClass('show').toggleClass('hide');
         $('.separator'         ).toggleClass('show').toggleClass('hide');
+        $('#introduction'      ).toggleClass('show').toggleClass('hide');
+        $('#userApiDetailsForm').toggleClass('show').toggleClass('hide');
         $('#outroduction'      ).toggleClass('show').toggleClass('hide');
         toggleApiDetailsFormLinkText();
     });
@@ -195,10 +192,10 @@ $(document).ready(function() {
 });
 
 function toggleApiDetailsFormLinkText() {
-    // change text for the hide/show link (for the outro, etc)
-    // based on the outro's visibility
-    var linkText = 'documentation';
-    if ($('#outroduction').is(':visible')) {
+    // change text for the hide/show link (for the intro, API form, etc)
+    // based on the form's visibility
+    var linkText = 'documentation and Fetch My Data form';
+    if ($('#userApiDetailsForm').is(':visible')) {
         $('.explanationToggle').text('hide ' + linkText);
     } else {
         $('.explanationToggle').text('show ' + linkText);
@@ -436,9 +433,7 @@ function displayData(data) {
     });
 
 
-
     $('#taskOverviewSection').show(); // need so table is laid out correctly
-
     // https://datatables.net/usage/columns
     $('#taskOverviewTable').dataTable({
         'aaData': allTasksArray,
@@ -524,6 +519,7 @@ function displayData(data) {
         // 'bSortClasses': false,
         "sScrollX": "100%", 
         // "sScrollXInner": "200%",
+        "bDestroy": true, // allows table to recreate if Fetch Data is repeated
         'oColumnFilterWidgets': {
             'aiExclude': [ 0, 4, 5, 6, 7, 8 ],
         }
@@ -1031,12 +1027,13 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.31)</a></h1>
+    <a class="versionToggle" href="">(v1.32)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
 <div id="explanationAndClearLinks" class="showOnlyIfHaveFetchedData">
-    <a class="explanationToggle" href="">show documentation</a>
+    <a class="explanationToggle" href="">show documentation and the
+                                        "Fetch My Data" form</a>
     <a id="clearData" href="#top">clear my data</a>
 </div>
 <hr class="clear" />
@@ -1045,6 +1042,14 @@ h2 {
 <div id="versionChanges" class="hide">
     <h2>Version History</h2>
     <dl>
+        <dt>1.32  <span class="date">2014-03-31</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">"show documentation and Fetch My Data form"</span> is back and the bug that prompted me to remove it has been fixed. Thanks to <a href="http://habitrpg.wikia.com/wiki/User:BrightBold">BrightBold</a> for <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display#comm-11596">explaining</a> that it was an important feature for people who use the tool a lot.</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>1.31  <span class="date">2014-03-30</span></dt>
         <dd><ul>
             <li>Features:
@@ -1259,7 +1264,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
    <ul>
         <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
         <li><span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li>
-        <li><span class="subheading">Damage Expected</span>: an <em>estimate</em> of the amount of damage you would receive overnight if you did no more dailies for the rest of the day.</li>
+        <li><span class="subheading">Damage Expected</span>: an <em>estimate</em> of the amount of damage you would receive overnight if you did no more dailies for the rest of the day, and how much additional damage you and your party members would take from a quest boss.</li>
         <li><em>Maybe:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
         <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
         <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
