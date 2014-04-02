@@ -391,6 +391,7 @@ function displayData(data) {
     }
 
 
+
     // Get an array of all of the user's tags so that when we are
     // examining a task's tags, we can ignore any tags that don't appear
     // in that array (e.g., tags the user has deleted but that weren't
@@ -401,9 +402,10 @@ function displayData(data) {
 
 
 
-//////////////////////////////////////////////////////////////////////////
-////   Task Overview starts here   ///////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    ////   Cycle through each task to pull out data //////////////////////
+    ////   for Task Overview and other purposes     //////////////////////
+    //////////////////////////////////////////////////////////////////////
 
     // var maxItems =  10; // FOR TESTING
     var allTasksArray = [];
@@ -418,13 +420,37 @@ function displayData(data) {
         // if (numberHabits > maxItems) { return; } // FOR TESTING
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
     });
+
+    var dailysDamage = 0;
+    var today = ["su","m","t","w","th","f","s"][(new Date()).getDay()];
     $.each(data.dailys, function(index, obj){
         numberDailys++;
         countHabitsDailysTodos++;
         // obj.streak, obj.repeat..., obj.completed, obj.dateCompleted  XXX_SOON use them?
         // "streak":107,"checklist":[],"collapseChecklist":false,"repeat":{"su":true,"s":true,"f":true,"th":true,"w":true,"t":true,"m":true}
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
+
+        // calculate cron damaage if daily not actioned:
+        // d(data.stats.hp + "  " + obj.completed + " " + obj.text); // TST
+        if (! obj.completed && obj.repeat[today]) {
+            var currVal = obj.value;
+            var valueMin = -47.27;
+            var valueMax =  21.27;
+            if (currVal < valueMin) { currVal = valueMin; }
+            if (currVal > valueMax) { currVal = valueMax; }
+            var nextDelta = Math.abs(Math.pow(0.9747, currVal));
+            dailysDamage += nextDelta; // note this is NOT a negative number
+            // d(nextDelta + " " + dailysDamage + " " + obj.text); // TST
+        }
     });
+    var questDamage = dailysDamage / 2 * 2.5; // XXX 2.5 is for stag boss. Equation wrong?
+    dailysDamage = Math.ceil(dailysDamage * 10) / 10;
+    questDamage  = Math.ceil(questDamage  * 10) / 10;
+    // We round UP with ceil because we must never let the user
+    // think they will take even slightly less damage than they really
+    // will. Imagine if they died from an extra 0.1 damage that this
+    // page didn't tell them they had!
+
     $.each(data.todos, function(index, obj){
         numberTodos++;
         countHabitsDailysTodos++;
@@ -435,6 +461,10 @@ function displayData(data) {
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
     });
 
+
+    //////////////////////////////////////////////////////////////////////
+    ////   Task Overview starts here   ///////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
     $('#taskOverviewSection').show(); // need so table is laid out correctly
     // https://datatables.net/usage/columns
@@ -537,9 +567,9 @@ function displayData(data) {
 // XXX_SOON strikethrough for completed? Include dailies?
 // XXX_SOON totals for filtered data in footer? https://datatables.net/examples/advanced_init/footer_callback.html
 
-//////////////////////////////////////////////////////////////////////////
-////   Task Overview ends here   /////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    ////   Task Overview ends here   /////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
     var habitHistory = '';
     $.each(data.habits, function(index, obj){ // XXX_LATER merge into each loop above
@@ -619,6 +649,39 @@ function displayData(data) {
     if ($("#untaggedTasksSection .output").html()) {
         $('#untaggedTasks').show();
     }
+
+
+    // $('#damageDailiesSection').show(); // TST
+    $('#damageDailiesSection .output').html(
+          '<p class="highlight">'
+        + 'This section is new and highly experimental!'
+        + ' Until it has been proved with more testing, do not rely on it to prevent death!</p>'
+        + '<p>If you do no more dailies today, you will take an '
+        + ' <span class="highlight">estimated '
+        + dailysDamage
+        + '</span> damage. Your current health is <span class="highlight">'
+        + Math.round(data.stats.hp * 10) / 10
+        + '</span>.'
+        + '</p>'
+        + '<p>If you are on a quest, the boss will inflict additional damage'
+        + ' to you and to your fellow quest participants'
+        + ' <em>(coming soon: an estimate of how much boss damage you and they will receive).</em>'
+        // + ' <span class="highlight">' + questDamage + '</span> damage.'
+        + '</p>'
+        + '<p>If you are <strong>not</strong> on a quest, I would love to get feedback about whether this is accurate for you - check this page after you have finished ticking off all of dailies and habits for the day, and record the estimated damage and your current health. In the morning, make note of your new health (before you click on any negative habits!). Your new health should be your previous health minus the damage. If it is not, <a href="mailto:lady_alys@oldgods.net">please tell me</a>.</p>'
+        + '<p>Possible sources of error in this estimate are:</p>'
+        + '<ul>'
+        + '<li>Programmer error (this will disappear after more testing).</li>'
+        + '<li>Buffs such as Stealth. These are currently not considered and they will cause you to take less damage than is shown here. (Stealth will be considered here soon.)</li>'
+        + '<li>Partially-completed checklists will cause you to take less damage than shown here.</li>'
+        + '<li>If you have not logged in to HabitRPG for more than a day, the damage <!--you (and your fellow quest participants) will take--> will be much greater than shown here.</li>' // XXX remove quest if not on boss quest
+        + '<li>If you are resting in the Tavern, you will take no damage from your dailies (this will be considered here soon).</li>' // XXX daily damage: none if tavern - if user.preferences.sleep is true (no damage for party members, but you can take damage from them)
+        // + '<li>HabitRPG's code being updated without me noticing</li>'
+        + '</ul>'
+        );
+    // XXX boss damage: only if boss quest
+    // XXX boss damage: only if > 0 dailies damage
+    // XXX daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
 }
 
 function createTaskTableCellObj(obj, orderNumber) {
@@ -1030,7 +1093,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.33)</a></h1>
+    <a class="versionToggle" href="">(v1.4)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
@@ -1045,6 +1108,14 @@ h2 {
 <div id="versionChanges" class="hide">
     <h2>Version History</h2>
     <dl>
+        <dt>1.4  <span class="date">2014-04-03</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Damage from Dailies</span>: an <span class="highlight">estimate</span> of how much damage you would take if you did no more dailies today. This is a new feature and might still be inaccurate.</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>1.33  <span class="date">2014-03-31</span></dt>
         <dd><ul>
             <li>Features:
@@ -1148,6 +1219,7 @@ h2 {
         <li id="taskOverview"><a href="">Task Overview</a></li>
         <li id="habitHistory"><a href="">Habit History</a></li>
         <li id="questProgress" class="hide"><a href="">Quest Progress</a></li>
+        <li id="damageDailies"><a href="">Damage from Dailies</a></li>
         <li id="missingEquipment" class="hide"><a href="">Missing Equipment</a></li>
         <li id="dropsToday"><a href="">Drops Received Today</a></li>
         <li id="untaggedTasks" class="hide"><a href="">Tasks That Have Not Been Tagged</a></li>
@@ -1202,6 +1274,11 @@ Habits with no history are highlighted in bold, in case you would like to consid
         It does not include progress from other people in your party
         (it is not possible to show you data for other people).</p>
         -->
+    </div>
+
+    <div class="tocSection" id="damageDailiesSection">
+        <h2>Damage from Dailies</h2>
+        <div class="output"></div>
     </div>
 
     <div class="tocSection longContent" id="untaggedTasksSection">
@@ -1265,6 +1342,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</li>
         <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
         <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
+        <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. This is a new feature and might still be inaccurate.</li>
         <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
         <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown.</li>
         <li><span class="subheading">Tasks That Have Not Been Tagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
@@ -1273,9 +1351,9 @@ Habits with no history are highlighted in bold, in case you would like to consid
 
    <h2>Possible Future Features</h2><!-- XXX_SOON look into this -->
    <ul>
+        <li><em>Up next:</em> <span class="subheading">Damage from Dailies</span> will include an <em>estimate</em> of how much additional damage you and your party members would take from a quest boss.</li>
         <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
         <li><span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li>
-        <li><span class="subheading">Damage Expected</span>: an <em>estimate</em> of the amount of damage you would receive overnight if you did no more dailies for the rest of the day, and how much additional damage you and your party members would take from a quest boss.</li>
         <li><em>Maybe:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
         <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
         <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
