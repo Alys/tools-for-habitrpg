@@ -46,7 +46,6 @@ https://oldgods.net/habitrpg/habitrpg_user_data_display.html
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
-
     <!-- These are a widely used and trusted third-party libraries that contain no code directly related to HabitRPG. They do not contain anything that could cause damage to your HabitRPG account. -->
 
 
@@ -56,40 +55,19 @@ var dataFetchStatus = 'not attempted'; // also "succeeded" and "failed"
 var knownTags = [];
 var collectionDrops = false; // control Drops + Quest Progress opening
 
-
-// Are you tired of entering your User ID and API Token into the form?
-// Save this page to your computer and edit it in a plain-text editor
-// (e.g., Notepad) to add your ID and Token just below here between
-// the quote marks.
-// Once you have done that, do NOT SHARE THE EDITED FILE WITH ANYONE!
-// Your token is a password. If anyone discovers your token, they 
-// can log into your account and make you die over and over and over
-// again and again and again.
-// Also, if you do add your ID and Token here, this page's behaviour
-// will change slightly: it will fetch your data automatically every
-// time you reload the page or click on the "clear my data" link.
-// EDIT THIS FILE AT YOUR OWN RISK! You are responsible for your
-// own changes.
-// You can leave your edited file on your computer and run it in a
-// browser from there, but that will cause your token to be sent
-// unencrypted over the internet, which is a security risk.
-// It is MUCH more secure to upload it to your own HTTPS web server,
-// if you have one (or to a trusted friend's).
-var userId   = '';
-var apiToken = '';
-
-
 var serverUrl         = 'https://habitrpg.com:443/api/v2';
 var serverPathContent = '/content';
 var serverPathUser    = '/user';
+var userId            = '';
+var apiToken          = '';
 
 // FOR TESTING:
 /*
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
-var userId   = 'a';
-var apiToken = 'a';
+var userId        = 'a';
+var apiToken      = 'a';
 */
 
 function d(msg) { console.log(msg) } /* laziness FTW! */
@@ -267,6 +245,7 @@ function displayData(data) {
     toggleVisibilityForStuff();
 
     $('#userNameDisplay').text(data.profile.name); // user's name in header
+    var sleeping = data.preferences.sleep; // true if resting in the inn
 
     if (data.stats.points > 0 && data.stats.lvl >= 10) {
         var points = (data.stats.points == 1) ? "point" : "points";
@@ -421,7 +400,18 @@ function displayData(data) {
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
     });
 
+    var conComputed = data.stats.con  // XXX_SOON put into function for any stat
+                    + data.stats.buffs.con
+                    + ((data.stats.lvl - 1) / 2)
+                    + 0 // XXX_SOON add CON from gear, including class bonus
+                    ;
+    var conBonus = 1 - (conComputed / 250);
+    if (conBonus < 0.1) { conBonus = 0.1; }
+
     var dailysDamage = 0;
+    var questDamage  = 0;
+    var valueMin = -47.27; // task values are capped ...
+    var valueMax =  21.27; // ... for some purposes
     var today = ["su","m","t","w","th","f","s"][(new Date()).getDay()];
     $.each(data.dailys, function(index, obj){
         numberDailys++;
@@ -430,22 +420,37 @@ function displayData(data) {
         // "streak":107,"checklist":[],"collapseChecklist":false,"repeat":{"su":true,"s":true,"f":true,"th":true,"w":true,"t":true,"m":true}
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
 
-        // calculate cron damaage if daily not actioned:
-        // d(data.stats.hp + "  " + obj.completed + " " + obj.text); // TST
-        if (! obj.completed && obj.repeat[today]) {
-            var currVal = obj.value;
-            var valueMin = -47.27;
-            var valueMax =  21.27;
-            if (currVal < valueMin) { currVal = valueMin; }
-            if (currVal > valueMax) { currVal = valueMax; }
-            var nextDelta = Math.abs(Math.pow(0.9747, currVal));
-            dailysDamage += nextDelta; // note this is NOT a negative number
-            // d(nextDelta + " " + dailysDamage + " " + obj.text); // TST
+        if (! sleeping) {
+            // calculate cron damaage if daily not actioned:
+            if (! obj.completed && obj.repeat[today]) {
+                // this Daily has not been completed but is due today, so
+                // calculate HP damage:
+                var currVal = obj.value; // task value
+                if (currVal < valueMin) { currVal = valueMin; } // capped
+                if (currVal > valueMax) { currVal = valueMax; } // capped
+                var nextDelta = Math.abs(Math.pow(0.9747, currVal));
+                var checklist = describeChecklist(obj);
+                if (checklist.exists) {
+                    nextDelta *= (1 - checklist.proportionDone);
+                    // NOTE: If you tick off all the items in a Daily
+                    // checklist but don't tick off the Daily itself,
+                    // you take zero damage (confirmed by testing).
+                }
+                var delta = nextDelta; // Change this if we ever take account of
+                                       // multiple missed days.
+                questDamage += delta;
+                var hpMod = delta * conBonus * obj.priority * 2;
+                hpMod = Math.round(hpMod * 10) / 10
+                dailysDamage += hpMod; // note this is NOT a negative number
+                // d("\n" + obj.value + " " + delta + " " + obj.priority + " " + obj.text + "\n" + data.stats.con + " " + conBonus + " " + hpMod + " " + dailysDamage); // TST
+            }
         }
     });
-    var questDamage = dailysDamage / 2 * 2.5; // XXX 2.5 is for stag boss. Equation wrong?
+    questDamage = questDamage / 2 * 2.5; // XXX_SOON 2.5 is for stag boss. Equation wrong?
     dailysDamage = Math.ceil(dailysDamage * 10) / 10;
     questDamage  = Math.ceil(questDamage  * 10) / 10;
+    // d("dailysDamage: " + dailysDamage);
+    // d("questDamage: " + questDamage);
     // We round UP with ceil because we must never let the user
     // think they will take even slightly less damage than they really
     // will. Imagine if they died from an extra 0.1 damage that this
@@ -652,37 +657,78 @@ function displayData(data) {
 
 
     // $('#damageDailiesSection').show(); // TST
-    $('#damageDailiesSection .output').html(
-          '<p class="highlight">'
-        + 'This section is new and highly experimental!'
-        + ' Until it has been proved with more testing, do not rely on it to prevent death!</p>'
-        + '<p>If you do no more dailies today, you will take an '
-        + ' <span class="highlight">estimated '
-        + dailysDamage
-        + '</span> damage. Your current health is <span class="highlight">'
-        + Math.round(data.stats.hp * 10) / 10
-        + '</span>.'
-        + '</p>'
-        + '<p>If you are on a quest, the boss will inflict additional damage'
-        + ' to you and to your fellow quest participants'
-        + ' <em>(coming soon: an estimate of how much boss damage you and they will receive).</em>'
-        // + ' <span class="highlight">' + questDamage + '</span> damage.'
-        + '</p>'
-        + '<p>If you are <strong>not</strong> on a quest, I would love to get feedback about whether this is accurate for you - check this page after you have finished ticking off all of dailies and habits for the day, and record the estimated damage and your current health. In the morning, make note of your new health (before you click on any negative habits!). Your new health should be your previous health minus the damage. If it is not, <a href="mailto:lady_alys@oldgods.net">please tell me</a>.</p>'
-        + '<p>Possible sources of error in this estimate are:</p>'
-        + '<ul>'
-        + '<li>Programmer error (this will disappear after more testing).</li>'
-        + '<li>Buffs such as Stealth. These are currently not considered and they will cause you to take less damage than is shown here. (Stealth will be considered here soon.)</li>'
-        + '<li>Partially-completed checklists will cause you to take less damage than shown here.</li>'
-        + '<li>If you have not logged in to HabitRPG for more than a day, the damage <!--you (and your fellow quest participants) will take--> will be much greater than shown here.</li>' // XXX remove quest if not on boss quest
-        + '<li>If you are resting in the Tavern, you will take no damage from your dailies (this will be considered here soon).</li>' // XXX daily damage: none if tavern - if user.preferences.sleep is true (no damage for party members, but you can take damage from them)
-        // + '<li>HabitRPG's code being updated without me noticing</li>'
-        + '</ul>'
-        );
-    // XXX boss damage: only if boss quest
-    // XXX boss damage: only if > 0 dailies damage
-    // XXX daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
+    var damageDailiesHtml = '';
+    if (sleeping) {
+        damageDailiesHtml = '<p>You are'
+            + ' <a href="http://habitrpg.wikia.com/wiki/Tavern">resting'
+            + ' in the inn</a>'
+            + ' so you will not take any damage from your uncompleted dailies.'
+            + '<br />'
+            + ' However if you are on a'
+            + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
+            + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>'
+            + ' you <span class="highlight">will</span> still take damage'
+            + ' from the uncompleted dailies of other quest participants.</p>';
+            // XXX_SOON only talk about quest if on a BOSS quest
+    }
+    else {
+        damageDailiesHtml = '<p class="highlight">'
+            + 'This section is new and highly experimental!'
+            + ' Until it has been proved with more testing,'
+            + ' do not rely on it to prevent death!</p>'
+            + '<p>If you do no more dailies today, you will take an '
+            + ' <span class="highlight">estimated '
+            + dailysDamage
+            + '</span> damage. Your current health is <span class="highlight">'
+            + Math.round(data.stats.hp * 10) / 10
+            + '</span>.</p>';
+        if (dailysDamage > 0) {
+            damageDailiesHtml += '<p class="highlight">'
+            // XXX_SOON only talk about quest if on a BOSS quest
+                + '<p>If you are on a'
+                + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
+                + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>,'
+                + ' the boss will inflict additional damage to you and to'
+                + ' your fellow quest participants'
+                + ' <em>(coming soon: an estimate of how much boss damage you'
+                + ' and they will receive).</em>'
+                // + '<span class="highlight">'+ questDamage + '</span> damage.'
+                + '</p>';
+        }
+        damageDailiesHtml += '<p>If you are <strong>not</strong> on a quest, I would love to get feedback about whether this is accurate for you - check this page after you have finished ticking off all of dailies and habits for the day, and record the estimated damage and your current health. In the morning, make note of your new health (before you click on any negative habits!). Your new health should be your previous health minus the damage. If it is not, <a href="mailto:lady_alys@oldgods.net">please tell me</a>.</p>'
+            + '<p>Possible sources of error in this estimate are:</p>'
+            + '<ul>'
+            + '<li>Programmer error (this will disappear after more testing).</li>'
+            + '<li>Skills such as Stealth. These are currently not considered and they will cause you to take less damage than is shown here. (Stealth will be considered here soon.)</li>'
+            + '<li>The CON you gain from your equipment is not being considered, which will cause you to take less damage than is shown here. (This will be fixed soon.)</li>'
+            + '<li>If you have not logged in to HabitRPG for more than a day, the damage <!--you (and your fellow quest participants) will take--> will be much greater than shown here.</li>' // XXX_LATER highlight parts of that when it's the major error
+            // + '<li>HabitRPG's code being updated without me noticing</li>'
+            + '</ul>'
+            + ' .</p>';
+    }
+    $('#damageDailiesSection .output').html(damageDailiesHtml);
+    // XXX_SOON boss damage: only if boss quest
+    // XXX_SOON daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
 }
+
+
+function describeChecklist(task) {
+    // Takes a task object. Returns an object describing aspects of the
+    // task object's checklist (including whether it exists or not).
+    if (! task.checklist || task.checklist.length == 0) {
+        return {'exists': false};
+    }
+    var countDone   = 0;
+    $.each(task.checklist, function(index, obj){
+        if (obj.completed == true) { countDone++; };
+    });
+    return {
+        'exists': true,
+        'proportionDone': (countDone / task.checklist.length),
+        // 'numberOfItems': task.checklist.length,
+        };
+}
+
 
 function createTaskTableCellObj(obj, orderNumber) {
     var fullText = escapeHtml(obj.text);
@@ -894,6 +940,8 @@ abbr.discrete {
 .explanation {
     font-style: italic;
 }
+.longExplanation {
+}
 #errors {
     font-weight: bold;
     color: orange;
@@ -1093,14 +1141,14 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.4)</a></h1>
+    <a class="versionToggle" href="">(v1.4.3)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
 <div id="explanationAndClearLinks" class="showOnlyIfHaveFetchedData">
     <a class="explanationToggle" href="">show documentation and the
                                         "Fetch My Data" form</a>
-    <a id="clearData" href="#top">clear my data</a>
+    <a id="clearData" href="">clear my data</a>
 </div>
 <hr class="clear" />
 
@@ -1108,6 +1156,15 @@ h2 {
 <div id="versionChanges" class="hide">
     <h2>Version History</h2>
     <dl>
+        <dt>1.4.3  <span class="date">2014-04-05</span></dt>
+        <dd><ul>
+            <li>Features: none</li>
+            <li>Code: 
+                <ul>
+                    <li>Improvements to <span class="subheading">Damage from Dailies</span> but it's still experimental and not to be trusted. Damage reduction from checklists is now included; CON buffs are now included (but not CON gear nor Stealth)</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>1.4  <span class="date">2014-04-03</span></dt>
         <dd><ul>
             <li>Features:
@@ -1116,7 +1173,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.33  <span class="date">2014-03-31</span></dt>
+        <dt>1.3.3  <span class="date">2014-03-31</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1124,7 +1181,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.32  <span class="date">2014-03-31</span></dt>
+        <dt>1.3.2  <span class="date">2014-03-31</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1132,7 +1189,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.31  <span class="date">2014-03-30</span></dt>
+        <dt>1.3.1  <span class="date">2014-03-30</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1146,7 +1203,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.30  <span class="date">2014-03-30</span></dt>
+        <dt>1.3  <span class="date">2014-03-30</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1159,7 +1216,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.20  <span class="date">2014-03-29</span></dt>
+        <dt>1.2  <span class="date">2014-03-29</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1174,7 +1231,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.10 - initial release <span class="date">2014-03-27</span></dt>
+        <dt>1.1 - initial release <span class="date">2014-03-27</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1232,6 +1289,7 @@ h2 {
 
     <div class="tocSection longContent" id="taskOverviewSection">
         <h2>Task Overview</h2>
+        <div class="longExplanation"><!-- XXX_SOON implement show/hide -->
         <!-- XXX_SOON if STR is only attrib, leave out attrib column -->
         <p class="highlight">NOTE: This new feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, send screenshots <a href="mailto:lady_alys@oldgods.net">to Alys</a> and tell her what browser you are using (browser name AND version e.g., "Firefox 28.0") and what operating system (e.g., Windows XP).</p>
 
@@ -1242,6 +1300,7 @@ h2 {
         <li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li>
         <li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://www.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li>
         </ul>
+        </div>
         <table id="taskOverviewTable" class="output"></table>
     </div>
 
