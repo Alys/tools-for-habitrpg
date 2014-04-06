@@ -51,6 +51,7 @@ https://oldgods.net/habitrpg/habitrpg_user_data_display.html
 
 
     <script type="text/javascript">
+var content; // hold site-wide content (gear names and stats, quests, etc)
 var dataFetchStatus = 'not attempted'; // also "succeeded" and "failed"
 var knownTags = [];
 var collectionDrops = false; // control Drops + Quest Progress opening
@@ -61,8 +62,7 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
-// FOR TESTING:
-/*
+/* TST - FOR TESTING:
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
@@ -103,16 +103,15 @@ $(document).ready(function() {
            uid and token into the form, in case the user later
            chooses to view the form.
         */
-        fetchData();
         $('#userId').val(userId);
         $('#apiToken').val(apiToken);
+        fetchData();
     }
 
     $('#userApiDetailsForm').submit(function(event){
         /* The user manually submitted the API connection form. */
         userId   = $('#userId').val();
         apiToken = $('#apiToken').val();
-        event.preventDefault();
         fetchData();
     });
 
@@ -140,24 +139,41 @@ $(document).ready(function() {
         window.scrollTo(0, 0); // for closing with link under version history
     });
 
+    // Task Overview explanation hide/show:
+    $('.taskOverviewExplanationToggle').click(function(event){
+        event.preventDefault();
+        $('#taskOverviewSection .longExplanation').toggle();
+        var linkText = 'explanation';
+        if ($('#taskOverviewSection .longExplanation').is(':visible')) {
+            $('.taskOverviewExplanationToggle a').text('hide ' + linkText);
+        } else {
+            $('.taskOverviewExplanationToggle a').text('show ' + linkText);
+        }
+    });
 
     // Table of Contents (TOC) hide/show:
     $('#tableOfContents a').click(function(event){
         event.preventDefault();
         var sectionId = this.parentNode.id + 'Section';
+        var wantToShow = true;
+        if ($('#' + sectionId).is(':visible')) {
+            // The ToC item that the user clicked on is already open,
+            // so the user wants to close it.
+            wantToShow = false;
+        }
         $('.tocSection').hide();
-        $('#' + sectionId).toggle();
-        if ($('#' + sectionId).hasClass("longContent")) {
-            $('#tocClose').show();
-        }
-        else {
-            $('#tocClose').hide();
-        }
-        if ($('#dropsTodaySection').is(':visible') && collectionDrops) {
-            // The user is on a collection quest and has viewed the
-            // Drops Received Today section, so also show them the
-            // Quest Progress section (collection quests have drops):
-            $('#questProgressSection').show();
+        $('#tocClose').hide();
+        if (wantToShow) {
+            $('#' + sectionId).toggle();
+            if ($('#' + sectionId).hasClass("longContent")) {
+                $('#tocClose').show();
+            }
+            if ($('#dropsTodaySection').is(':visible') && collectionDrops) {
+                // The user is on a collection quest and has viewed the
+                // Drops Received Today section, so also show them the
+                // Quest Progress section (collection quests have drops):
+                $('#questProgressSection').show();
+            }
         }
     });
     $('#tocClose').click(function(event){
@@ -213,6 +229,19 @@ function fetchData() {
     dataFetchStatus = 'not attempted'; // but is about to be...
     toggleVisibilityForStuff();
     $("#loading").show();
+    // first fetch the site-wide content (gear names and stats, etc):
+    $.when($.ajax({
+        url: serverUrl + serverPathContent,
+        type: 'GET',
+        dataType: 'json',
+        })).then(
+    saveContentAndFetchUserData,
+    fetchFailure
+    );
+}
+function saveContentAndFetchUserData(data) {
+    content = data;
+    // now fetch the user's own content (tasks, gear owned, etc):
     $.when($.ajax({
         url: serverUrl + serverPathUser,
         type: 'GET',
@@ -223,21 +252,23 @@ function fetchData() {
             }
         })).then(
     displayData,
-    function(){
-        $('#errors').html("There was an error obtaining your data."
-                + " Please check that your User ID and API Token"
-                + " are correct and then try again."
-                + "<br />"
-                + "<br />"
-                + " If problems persist see"
-                + " <strong>Suspected Bugs</strong> and"
-                + " <strong>Contact Details</strong> at the bottom"
-                + " of this page."
-                + " It might help to upgrade your browser to its"
-                + " latest version, if not already done.");
-        dataFetchStatus = 'failed';
-        toggleVisibilityForStuff();
-    });
+    fetchFailure
+    );
+}
+function fetchFailure() {
+    $('#errors').html("There was an error obtaining your data."
+            + " Please check that your User ID and API Token"
+            + " are correct and then try again."
+            + "<br />"
+            + "<br />"
+            + " If problems persist see"
+            + " <strong>Suspected Bugs</strong> and"
+            + " <strong>Contact Details</strong> at the bottom"
+            + " of this page."
+            + " It might help to upgrade your browser to its"
+            + " latest version, if not already done.");
+    dataFetchStatus = 'failed';
+    toggleVisibilityForStuff();
 }
 
 function displayData(data) {
@@ -263,32 +294,35 @@ function displayData(data) {
     var missing = [];
     $.each(data.items.gear.owned, function(key, value){
         if (value === false) {
-            missing.push(key);
+            missing.push( prettyPrintKey(key, 'gear', {'includeStats':true}) );
         }
     });
     if (missing.length > 0) {
-        // XXX_SOON: turn into ul list if more than 3 items
-        $('#missingEquipmentSection .output').html(
-            'You are missing this equipment: '
-            + '<span id="equipmentNames" class="highlight">'
-            + missing.join(', ') // will be replaced with names later by ajax
-            + '</span>. '
-            + '<a href="http://habitrpg.wikia.com/wiki/'
-            + 'Death_Mechanics#Lost_Equipment">Learn more.</a> ');
-        convertGearKeysToNames(missing); // replaces equip keys with names
+        var missingHtml = '<p>You are missing this equipment: ';
+        if (missing.length > 1) {
+            missingHtml += '</p><ul><li>'
+                         + missing.join('</li><li>')
+                         + '</li></ul><p>';
+        }
+        else {
+            missingHtml += missing.join(', ') + '. ';
+        }
+        missingHtml += '<a href="http://habitrpg.wikia.com/wiki/'
+                     + 'Death_Mechanics#Lost_Equipment">Learn more.</a></p>';
         if (data.achievements.rebirths > 0 && missing.length > 6) {
             // We show the message below when rebirthers are missing
             // lots of gear, but not when they've bought back most of it,
             // because by that time, they're unlikely to be confused by
             // a long list of missing items, and the items are more and
             // more likely to be missing due to actual, recent deaths.
-            $('#missingEquipmentSection #rebirth').html("You have used an"
-                + " Orb of Rebirth so this list will include all the"
-                + " equipment you owned in your previous life that you have"
-                + " not yet repurchased. Unfortunately it is not currently"
-                + " possible to limit this list to recent death-induced"
-                + " losses - but I have some interesting ideas to work on...");
+            missingHtml += '<p>You have used an Orb of Rebirth'
+                + ' so this list will include all the equipment you owned'
+                + ' in your previous life that you have not yet repurchased.'
+                + ' Unfortunately it is not currently possible to limit'
+                + ' this list to recent death-induced losses - but'
+                + ' I have some interesting ideas to work on...</p>';
         }
+        $('#missingEquipmentSection .output').html(missingHtml);
         $('#missingEquipment').show();
     }
 
@@ -325,7 +359,7 @@ function displayData(data) {
                 + Math.floor(progressObj.up * 100) / 100
                 + '</span>'
                 + ' points of damage to the Boss in your quest.';
-                // + data.party.quest.key // XXX_SOON get name, and Boss name
+                // + data.party.quest.key // XXX_VERY_SOON get name, and Boss name
             // We round DOWN with floor because we must never let the user
             // think they have even slightly more progress than they really
             // have. Imagine if they missed ending a quest overnight by 0.1
@@ -363,7 +397,7 @@ function displayData(data) {
                 msg += stuff;
             }
             msg += '</span> for your quest.';
-            // + data.party.quest.key // XXX_SOON get name
+            // + data.party.quest.key // XXX_VERY_SOON get name
         }
         $('#questProgressSection .output').html(msg);
         $('#questProgress').show();
@@ -400,11 +434,8 @@ function displayData(data) {
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
     });
 
-    var conComputed = data.stats.con  // XXX_SOON put into function for any stat
-                    + data.stats.buffs.con
-                    + ((data.stats.lvl - 1) / 2)
-                    + 0 // XXX_SOON add CON from gear, including class bonus
-                    ;
+    var conComputed = computeStat(data.stats, 'con');
+    // d("conComputed: " + conComputed); // TST
     var conBonus = 1 - (conComputed / 250);
     if (conBonus < 0.1) { conBonus = 0.1; }
 
@@ -446,7 +477,7 @@ function displayData(data) {
             }
         }
     });
-    questDamage = questDamage / 2 * 2.5; // XXX_SOON 2.5 is for stag boss. Equation wrong?
+    questDamage = questDamage / 2 * 2.5; // XXX_VERY_SOON 2.5 is for stag boss. Equation wrong?
     dailysDamage = Math.ceil(dailysDamage * 10) / 10;
     questDamage  = Math.ceil(questDamage  * 10) / 10;
     // d("dailysDamage: " + dailysDamage);
@@ -669,7 +700,7 @@ function displayData(data) {
             + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>'
             + ' you <span class="highlight">will</span> still take damage'
             + ' from the uncompleted dailies of other quest participants.</p>';
-            // XXX_SOON only talk about quest if on a BOSS quest
+            // XXX_VERY_SOON only talk about quest if on a BOSS quest
     }
     else {
         damageDailiesHtml = '<p class="highlight">'
@@ -684,7 +715,7 @@ function displayData(data) {
             + '</span>.</p>';
         if (dailysDamage > 0) {
             damageDailiesHtml += '<p class="highlight">'
-            // XXX_SOON only talk about quest if on a BOSS quest
+            // XXX_VERY_SOON only talk about quest if on a BOSS quest
                 + '<p>If you are on a'
                 + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
                 + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>,'
@@ -707,8 +738,62 @@ function displayData(data) {
             + ' .</p>';
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
-    // XXX_SOON boss damage: only if boss quest
+    // XXX_VERY_SOON boss damage: only if boss quest
     // XXX_SOON daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
+}
+
+
+function prettyPrintKey(key, type, options) {
+    // Takes a "key" (e.g., weapon_warrior_0) from HabitRPG's "content" data
+    // and returns the name of the item (and sometimes other info).
+    // If the name can't be found, it treats the key as the name.
+    var name  = key;
+    var extra = '';  // e.g., for gear: klass and type (weapon/armour/etc)
+    if (type == 'gear') {
+        var obj = content.gear.flat[key];
+        name = obj.text
+        extra = obj.klass + " " + obj.type;
+        if (options && options.includeStats) {
+            extra += '; <span class="stats">'
+                   + prettyPrintStats(obj, {'includeGold':true})
+                   + '</span>';
+        }
+    }
+    var html = '<span class="item">'
+             + '<span class="name">' + name + '</span>';
+    if (extra) {
+        html += '<span class="extra">' + extra + '</span>';
+    }
+    html += '<span class="key">' + key + '</span>';
+    html += '</span>';
+    return html;
+}
+
+
+function prettyPrintStats(obj, options) {
+    var stats = [];
+    if (options && options.includeGold) {
+        stats.push(obj.value + " gp");
+    }
+    if (obj.con) { stats.push(obj.con + " con"); }
+    if (obj.int) { stats.push(obj.int + " int"); }
+    if (obj.per) { stats.push(obj.per + " per"); }
+    if (obj.str) { stats.push(obj.str + " str"); }
+    return stats.join(", ");
+}
+
+
+function computeStat(statsData, stat) {
+    var computed = statsData[stat]
+                 + statsData.buffs[stat]
+                 + ((statsData.lvl - 1) / 2)
+                 + 0 // XXX_VERY_SOON add CON from gear, including class bonus
+                 ;
+    /*
+    "gear":
+        "equipped":{"back":"back_base_0","headAccessory":"headAccessory_base_0","shield":"shield_special_0","head":"head_wizard_5","armor":"armor_rogue_5","weapon":"weapon_special_2"},
+    */
+    return computed;
 }
 
 
@@ -815,52 +900,6 @@ function displayUntagged(tasks, title) {
     }
 }
 
-function convertGearKeysToNames(keys) {
-    //// XXX_SOON This function will be ripped open and gutted for parts.
-    //// It will be replaced by something that much more gracefully
-    //// looks through all the created content and replaces all
-    //// instances of gear keys, based on a class-ified span tag.
-
-    // HabitRPG's "content" information includes things like the
-    // names for the equipment. If we are fetching this content,
-    // it's only so that we can make nicer messages for the user.
-    // Thus if fetching the content fails, we ignore the problem,
-    // and put up with showing slightly less-nice messages to the 
-    // user. This is better than forcing the user to see and try
-    // to deal with fetch errors.
-    return $.when($.ajax({
-        url: serverUrl + serverPathContent,
-        type: 'GET',
-        dataType: 'json',
-        })).then(
-    function(data){
-        var names = [];
-        $.each(keys, function(index, gearKey){
-            var okay = false;
-            if (data.gear.flat[gearKey]) {
-                name  = data.gear.flat[gearKey].text;  // Acolyte Robe, etc
-                klass = data.gear.flat[gearKey].klass; // healer, etc
-                type  = data.gear.flat[gearKey].type;  // armour, etc
-                if (name) {
-                    names.push(name + ' (' + klass + ' ' + type + ')');
-                    // assume klass and type are also defined (very likely)
-                    okay = true;
-                }
-            }
-            if (! okay) {
-                names.push(gearKey);
-            }
-        })
-$('#equipmentNames').text(names.join(', ')); // update HTML page
-    },
-    function(){
-        console.log('Warning: Could not fetch HabitRPG content object.');
-        // We don't really care because the HTML page already shows the
-        // keys of the missing equipment (e.g., 'weapon_warrior_3',
-        // which will just have to do.
-    });
-}
-
 var myDateConverter = function(date) {
     var y = date.getFullYear();
     var m = date.getMonth() + 1;
@@ -931,16 +970,26 @@ abbr.discrete {
     border-bottom: none;
 }
 
+
+.selfClear:after {
+    content: "";
+    clear: both;
+    display: table;
+}
 .clear {
     clear: both;
 }
 .highlight {
     font-weight: bold;
 }
+.lowlight { /* like highlight but less so */
+    font-style: italic;
+}
 .explanation {
     font-style: italic;
 }
 .longExplanation {
+    display: none;
 }
 #errors {
     font-weight: bold;
@@ -1049,6 +1098,10 @@ ul#tableOfContents {
     font-size: 110%;
     padding: 2px 0;
 }
+ul#tableOfContents > li {
+    float: left;
+    margin-right: 20px;
+}
 
 h2 {
     margin-top: 30px;
@@ -1075,6 +1128,9 @@ h2 {
 
 #taskOverviewSection > ul > li {
     padding: 3px 0;
+}
+.taskOverviewExplanationToggle {
+    margin-bottom: 1em;
 }
 #taskOverviewTable {
     width: 100%;
@@ -1136,12 +1192,40 @@ h2 {
     font-weight: normal;
 }
 
+#missingEquipmentSection ul {
+    list-style-type: none;
+}
+#missingEquipmentSection .item .name {
+    font-weight: bold;
+}
+#missingEquipmentSection .item .extra {
+}
+#missingEquipmentSection .item .stats {
+    font-variant: small-caps;
+}
+#missingEquipmentSection .item .extra:before {
+    content: " (";
+}
+#missingEquipmentSection .item .extra:after {
+    content: ")";
+}
+#missingEquipmentSection .item .key {
+    display: none;
+    font-style: italic;
+}
+#missingEquipmentSection .item .key:before {
+    content: " {";
+}
+#missingEquipmentSection .item .key:after {
+    content: "}";
+}
+
     </style>
 </head>
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.4.3)</a></h1>
+    <a class="versionToggle" href="">(v1.4.4)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
@@ -1153,10 +1237,31 @@ h2 {
 <hr class="clear" />
 
 
-<div id="versionChanges" class="hide">
+<div id="versionChanges" class="hide"><!-- VERSION -->
     <h2>Version History</h2>
     <dl>
-        <dt>1.4.3  <span class="date">2014-04-05</span></dt>
+        <dt>1.4.4 <span class="date">2014-04-06</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Missing Equipment contains the cost and stats for each item to help you work out if it's worth changing class to buy it back (also, layout is neater for several items)</li>
+                </ul>
+            </li>
+            <li>Documentation / Layout:
+                <ul>
+                    <li>Table of Contents is split into Tasks and Other. It was threatening to become cluttered.</li>
+                    <li>Table of Contents links will now hide their respective sections when clicked on a second time (consistent with all other hide/show links on the page)</li>
+                    <li>Task Overview explanation is now hidden by default to save precious screen space.</li>
+                </ul>
+            </li>
+            <li>Code: 
+                <ul>
+                    <li>Inserted a slightly nasty hack to allow Chrome to save the User ID and API Token if the user chooses to do that. (<a href="http://www.zdnet.com/do-you-save-passwords-in-chrome-maybe-you-should-reconsider-7000019074/">Obligatory warning about problems with storing passwords in browsers</a> - be careful especially on shared computers).</li>
+                    <li>HabitRPG's "content" json data is now fetched before the user data so that we can use it for displaying attractive gear names, and calculating stats from gear.</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>1.4.3 <span class="date">2014-04-05</span></dt>
         <dd><ul>
             <li>Features: none</li>
             <li>Code: 
@@ -1165,7 +1270,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.4  <span class="date">2014-04-03</span></dt>
+        <dt>1.4 <span class="date">2014-04-03</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1173,7 +1278,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.3.3  <span class="date">2014-03-31</span></dt>
+        <dt>1.3.3 <span class="date">2014-03-31</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1181,7 +1286,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.3.2  <span class="date">2014-03-31</span></dt>
+        <dt>1.3.2 <span class="date">2014-03-31</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1189,7 +1294,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.3.1  <span class="date">2014-03-30</span></dt>
+        <dt>1.3.1 <span class="date">2014-03-30</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1203,7 +1308,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.3  <span class="date">2014-03-30</span></dt>
+        <dt>1.3 <span class="date">2014-03-30</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1216,7 +1321,7 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.2  <span class="date">2014-03-29</span></dt>
+        <dt>1.2 <span class="date">2014-03-29</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -1268,19 +1373,24 @@ h2 {
 
 <div id="main" class="showOnlyIfHaveFetchedData">
 
-    <ul id="tableOfContents"><!-- TOC toc -->
+    <ul id="tableOfContents" class="selfClear"><!-- TOC toc -->
         <!-- Some of these items are hidden by default so that they can
              be shown only if relevant (e.g., you see Quest Progress
              only if you are on a quest).
         -->
-        <li id="taskOverview"><a href="">Task Overview</a></li>
-        <li id="habitHistory"><a href="">Habit History</a></li>
-        <li id="questProgress" class="hide"><a href="">Quest Progress</a></li>
-        <li id="damageDailies"><a href="">Damage from Dailies</a></li>
-        <li id="missingEquipment" class="hide"><a href="">Missing Equipment</a></li>
-        <li id="dropsToday"><a href="">Drops Received Today</a></li>
-        <li id="untaggedTasks" class="hide"><a href="">Tasks That Have Not Been Tagged</a></li>
+        <li>Tasks:<ul>
+            <li id="habitHistory"><a href="">Habit History</a></li>
+            <li id="taskOverview"><a href="">Task Overview</a></li>
+            <li id="untaggedTasks" class="hide"><a href="">Tasks that have not been Tagged</a></li>
+        </ul></li>
+        <li>Other:<ul>
+            <li id="damageDailies"><a href="">Damage from Dailies</a></li>
+            <li id="dropsToday"><a href="">Drops Received Today</a></li>
+            <li id="questProgress" class="hide"><a href="">Quest Progress</a></li>
+            <li id="missingEquipment" class="hide"><a href="">Missing Equipment</a></li>
+        </ul></li>
     </ul>
+    <hr />
 
     <div class="hide urgent" id="unallocatedPoints">
         <!-- section is shown automatically if there are points -->
@@ -1289,9 +1399,10 @@ h2 {
 
     <div class="tocSection longContent" id="taskOverviewSection">
         <h2>Task Overview</h2>
-        <div class="longExplanation"><!-- XXX_SOON implement show/hide -->
+        <div class="taskOverviewExplanationToggle"><a href="">show explanation</a></div>
+        <div class="longExplanation">
         <!-- XXX_SOON if STR is only attrib, leave out attrib column -->
-        <p class="highlight">NOTE: This new feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, send screenshots <a href="mailto:lady_alys@oldgods.net">to Alys</a> and tell her what browser you are using (browser name AND version e.g., "Firefox 28.0") and what operating system (e.g., Windows XP).</p>
+        <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, send screenshots <a href="mailto:lady_alys@oldgods.net">to Alys</a> and tell her what browser you are using (browser name AND version e.g., "Firefox 28.0") and what operating system (e.g., Windows XP).</p>
 
         <p>The table below shows your tasks (habits, dailies, and to-dos), with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</p>
         <ul>
@@ -1300,6 +1411,7 @@ h2 {
         <li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li>
         <li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://www.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li>
         </ul>
+        <div class="taskOverviewExplanationToggle closer"><a href="">hide explanation</a></div>
         </div>
         <table id="taskOverviewTable" class="output"></table>
     </div>
@@ -1314,8 +1426,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
     </div>
 
     <div class="tocSection" id="missingEquipmentSection">
-        <p class="output"></p>
-        <p id="rebirth"></p>
+        <div class="output"></div>
     </div>
 
     <div class="tocSection" id="dropsTodaySection">
@@ -1341,7 +1452,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
     </div>
 
     <div class="tocSection longContent" id="untaggedTasksSection">
-        <h2>Tasks That Have Not Been Tagged</h2>
+        <h2>Tasks that have not been Tagged</h2>
         <div class="output"></div>
     </div>
 
@@ -1349,14 +1460,12 @@ Habits with no history are highlighted in bold, in case you would like to consid
 </div>
 
 
-<hr class="separator hide" />
-
-
 <div id="introduction" class="showOnlyIfHave_Not_FetchedData">
    <p>This page shows you certain information from your <a href="https://habitrpg.com/">HabitRPG</a> account. You can read the full list below, or just enter your details and try it out.</p>
 </div>
 
-<form id="userApiDetailsForm" method="POST" action="#" class="showOnlyIfHave_Not_FetchedData">
+<iframe src="null.htm" id="formPasswdSaveFix" name="formPasswdSaveFix" style="display:none"></iframe><!-- DAMN YOU CHROME!! DAMN YOU!!!! http://stackoverflow.com/a/9116737 -->
+<form  id="userApiDetailsForm" method="POST" action="" class="showOnlyIfHave_Not_FetchedData" target="formPasswdSaveFix">
     <fieldset>
         <legend><span class="highlight">Enter your HabitRPG API details</span>
         (from the <a href="https://habitrpg.com/#/options/settings/api">Settings
@@ -1422,10 +1531,8 @@ Habits with no history are highlighted in bold, in case you would like to consid
    </ul>
 
    <h2>Suspected Bugs</h2><!-- XXX_SOON look into this -->
-   <p>This page has only recently been created and has been tested on only three accounts and in only a few browsers (Chrome, Chromium, Firefox, Safari) on a Mac. There might be bugs on other browsers, other operating systems, and for other accounts. Please tell me about them! Contact details are below.</p>
-   <p>It's highly likely to fail completely on any version of Internet Explorer except (perhaps) the most recent (they're known for not following internet standards). It will fail on very old versions of other browsers. <a href="http://browsehappy.com/">Updating your browser is important for general safety on the internet!</a></p>
+   <p>This page will not work correctly on old browsers because it uses modern website features and relies on compliance to standards (both can be lacking in old browsers). <a href="http://browsehappy.com/">Updating your browser is important for general safety on the internet!</a> If you have upgraded your browser to the latest version and are still having problems, please tell me! Contact details are below.</p>
    <p>Regardless of what bugs there might be, this page cannot damage your account. It does not contain any code that could result in any changes being made on HabitRPG.</p>
-
 
    <h2>Help and Contact Details</h2>
    <p>This page has been created by <a href="http://habitrpg.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
