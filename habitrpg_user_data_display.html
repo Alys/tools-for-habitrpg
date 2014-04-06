@@ -56,6 +56,7 @@ var dataFetchStatus = 'not attempted'; // also "succeeded" and "failed"
 var knownTags = [];
 var collectionDrops = false; // control Drops + Quest Progress opening
 
+var serverName        = 'HabitRPG'; // used in "loading" message
 var serverUrl         = 'https://habitrpg.com:443/api/v2';
 var serverPathContent = '/content';
 var serverPathUser    = '/user';
@@ -63,11 +64,10 @@ var userId            = '';
 var apiToken          = '';
 
 /* TST - FOR TESTING:
+serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
-var userId        = 'a';
-var apiToken      = 'a';
 */
 
 function d(msg) { console.log(msg) } /* laziness FTW! */
@@ -88,6 +88,8 @@ function escapeHtml(string) {
 
 
 $(document).ready(function() {
+    $('#serverName').text(serverName);
+
     toggleVisibilityForStuff(); // hide some elements for initial page view
                                 // (we have not yet fetched data)
 
@@ -174,6 +176,14 @@ $(document).ready(function() {
                 // Quest Progress section (collection quests have drops):
                 $('#questProgressSection').show();
             }
+            // if ($('#questProgressSection').is(':visible') && quest
+                // && quest.content.boss
+               // ) {    /////   Doesn't work - quest not defined yet, duh.
+                // // The user is on a boss quest and has viewed the
+                // // Quest Progress section, so also show them the
+                // // Daily Damage section (dailies cause bosses to do damage):
+                // $('#damageDailiesSection').show();
+            // }
         }
     });
     $('#tocClose').click(function(event){
@@ -275,8 +285,16 @@ function displayData(data) {
     dataFetchStatus = 'succeeded';
     toggleVisibilityForStuff();
 
+    // get some basic details about the user:
     $('#userNameDisplay').text(data.profile.name); // user's name in header
     var sleeping = data.preferences.sleep; // true if resting in the inn
+
+    var quest;
+    if (data.party.quest.key) {
+        quest = $.extend({}, data.party.quest);
+        quest.content = $.extend({}, content.quests[ data.party.quest.key ] );
+    }
+
 
     if (data.stats.points > 0 && data.stats.lvl >= 10) {
         var points = (data.stats.points == 1) ? "point" : "points";
@@ -330,7 +348,8 @@ function displayData(data) {
         'Drops received so far today: <span class="highlight">'
         + data.items.lastDrop.count + '</span>.');
 
-    if (data.party.quest.key) { // user is on a quest
+    // Quest Progress section:
+    if (quest) {
         // on a quest:
         // "quest":{"completed":null,"key":"ghost_stag",
         //          "progress":{"collect":{},"down":0,"up":13.780066986139815}},
@@ -351,27 +370,27 @@ function displayData(data) {
         // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
         // 
         var msg = '';
-        var progressObj = $.extend({}, data.party.quest.progress);
-        if (jQuery.isEmptyObject(progressObj.collect)) {
+        if (quest.content.boss) {
             // user is on a boss quest
             msg = 'So far today you have done an estimated '
                 + '<span class="highlight">'
-                + Math.floor(progressObj.up * 100) / 100
+                + Math.floor(quest.progress.up * 100) / 100
                 + '</span>'
-                + ' points of damage to the Boss in your quest.';
-                // + data.party.quest.key // XXX_VERY_SOON get name, and Boss name
+                + ' points of damage to '
+                + quest.content.boss.name
+                + '.';
             // We round DOWN with floor because we must never let the user
             // think they have even slightly more progress than they really
             // have. Imagine if they missed ending a quest overnight by 0.1
             // health because this page exaggerated their progress!
         }
-        else {
+        else if (quest.content.collect) {
             // user is on a collection quest
             collectionDrops = true; // Quest Progress will open when Drops opens
             var total = 0;
             var stuff = '';
             var uniqueItemsCount = 0;
-            $.each(progressObj.collect, function(tagId, value){
+            $.each(quest.progress.collect, function(tagId, value){
                 uniqueItemsCount++;
                 total += value;
                 var itemName = tagId;
@@ -396,8 +415,9 @@ function displayData(data) {
             else {
                 msg += stuff;
             }
-            msg += '</span> for your quest.';
-            // + data.party.quest.key // XXX_VERY_SOON get name
+            msg += '</span> for the '
+                 + quest.content.text
+                 + ' quest.';
         }
         $('#questProgressSection .output').html(msg);
         $('#questProgress').show();
@@ -471,17 +491,17 @@ function displayData(data) {
                                        // multiple missed days.
                 questDamage += delta;
                 var hpMod = delta * conBonus * obj.priority * 2;
-                hpMod = Math.round(hpMod * 10) / 10
+                hpMod = Math.round(hpMod * 10) / 10; // HabitRPG uses round
                 dailysDamage += hpMod; // note this is NOT a negative number
                 // d("\n" + obj.value + " " + delta + " " + obj.priority + " " + obj.text + "\n" + data.stats.con + " " + conBonus + " " + hpMod + " " + dailysDamage); // TST
             }
         }
     });
-    questDamage = questDamage / 2 * 2.5; // XXX_VERY_SOON 2.5 is for stag boss. Equation wrong?
+    if (quest && quest.content.boss) {
+        questDamage = questDamage * quest.content.boss.str; // XXX CHECK THIS - wiki disagrees with HabitRPG's code, unless I am stupid
+        questDamage = Math.ceil(questDamage  * 10) / 10;
+    }
     dailysDamage = Math.ceil(dailysDamage * 10) / 10;
-    questDamage  = Math.ceil(questDamage  * 10) / 10;
-    // d("dailysDamage: " + dailysDamage);
-    // d("questDamage: " + questDamage);
     // We round UP with ceil because we must never let the user
     // think they will take even slightly less damage than they really
     // will. Imagine if they died from an extra 0.1 damage that this
@@ -693,14 +713,16 @@ function displayData(data) {
         damageDailiesHtml = '<p>You are'
             + ' <a href="http://habitrpg.wikia.com/wiki/Tavern">resting'
             + ' in the inn</a>'
-            + ' so you will not take any damage from your uncompleted dailies.'
-            + '<br />'
-            + ' However if you are on a'
-            + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
-            + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>'
-            + ' you <span class="highlight">will</span> still take damage'
-            + ' from the uncompleted dailies of other quest participants.</p>';
-            // XXX_VERY_SOON only talk about quest if on a BOSS quest
+            + ' so you will not take any damage from your uncompleted dailies.';
+        if (quest && quest.content.boss) {
+            damageDailiesHtml += '<br />'
+                + ' However, you are also on a'
+                + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
+                + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>'
+                + ' so you <span class="highlight">will</span> still take'
+                + ' damage from the uncompleted dailies of other quest'
+                + ' participants.</p>';
+        }
     }
     else {
         damageDailiesHtml = '<p class="highlight">'
@@ -713,21 +735,27 @@ function displayData(data) {
             + '</span> damage. Your current health is <span class="highlight">'
             + Math.round(data.stats.hp * 10) / 10
             + '</span>.</p>';
-        if (dailysDamage > 0) {
-            damageDailiesHtml += '<p class="highlight">'
-            // XXX_VERY_SOON only talk about quest if on a BOSS quest
-                + '<p>If you are on a'
+        if (quest && quest.content.boss) {
+            damageDailiesHtml += '<p>You are on a'
                 + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
-                + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>,'
-                + ' the boss will inflict additional damage to you and to'
-                + ' your fellow quest participants'
-                + ' <em>(coming soon: an estimate of how much boss damage you'
-                + ' and they will receive).</em>'
-                // + '<span class="highlight">'+ questDamage + '</span> damage.'
+                + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>'
+            if (dailysDamage == 0) {
+                damageDailiesHtml +=
+                  ' so you <span class="highlight">will</span> still take'
+                + ' damage from the uncompleted dailies of other quest'
+                + ' participants.</p>';
+            }
+            else {
+                damageDailiesHtml += ' so the boss will inflict an'
+                + ' <span class="highlight">estimated '
+                + questDamage
+                + ' additional</span> damage to you and to your fellow'
+                + ' quest participants.'
                 + '</p>';
+            }
         }
-        damageDailiesHtml += '<p>If you are <strong>not</strong> on a quest, I would love to get feedback about whether this is accurate for you - check this page after you have finished ticking off all of dailies and habits for the day, and record the estimated damage and your current health. In the morning, make note of your new health (before you click on any negative habits!). Your new health should be your previous health minus the damage. If it is not, <a href="mailto:lady_alys@oldgods.net">please tell me</a>.</p>'
-            + '<p>Possible sources of error in this estimate are:</p>'
+        damageDailiesHtml += 
+              '<p>Possible sources of error in this estimate are:</p>'
             + '<ul>'
             + '<li>Programmer error (this will disappear after more testing).</li>'
             + '<li>Skills such as Stealth. These are currently not considered and they will cause you to take less damage than is shown here. (Stealth will be considered here soon.)</li>'
@@ -738,7 +766,6 @@ function displayData(data) {
             + ' .</p>';
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
-    // XXX_VERY_SOON boss damage: only if boss quest
     // XXX_SOON daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
 }
 
@@ -1225,7 +1252,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.4.4)</a></h1>
+    <a class="versionToggle" href="">(v1.4.5)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
@@ -1240,11 +1267,19 @@ h2 {
 <div id="versionChanges" class="hide"><!-- VERSION -->
     <h2>Version History</h2>
     <dl>
+        <dt>1.4.5 <span class="date">2014-04-06</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Damage from Dailies</span> now includes a (wildly inaccurate?) <span class="highlight">estimate</span> of how much damage you and your fellow quest participants will take from a quest boss if you do no more dailies today. This is experimental and still being tested.</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>1.4.4 <span class="date">2014-04-06</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>Missing Equipment contains the cost and stats for each item to help you work out if it's worth changing class to buy it back (also, layout is neater for several items)</li>
+                    <li><span class="subheading">Missing Equipment</span> contains the cost and stats for each item to help you work out if it's worth changing class to buy it back (also, layout is neater for several items)</li>
                 </ul>
             </li>
             <li>Documentation / Layout:
@@ -1368,7 +1403,8 @@ h2 {
 </div>
 
 <div id="loading">
-   <p>Please wait. Your data is being fetched from HabitRPG...</p>
+    <p>Please wait. Your data is being fetched from
+    <span id="serverName">HabitRPG</span>...</p>
 </div>
 
 <div id="main" class="showOnlyIfHaveFetchedData">
@@ -1510,7 +1546,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</li>
         <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
         <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
-        <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. This is a new feature and might still be inaccurate.</li>
+        <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. This is a new feature and might still be inaccurate.</li>
         <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
         <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown.</li>
         <li><span class="subheading">Tasks That Have Not Been Tagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
@@ -1519,7 +1555,6 @@ Habits with no history are highlighted in bold, in case you would like to consid
 
    <h2>Possible Future Features</h2><!-- XXX_SOON look into this -->
    <ul>
-        <li><em>Up next:</em> <span class="subheading">Damage from Dailies</span> will include an <em>estimate</em> of how much additional damage you and your party members would take from a quest boss.</li>
         <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
         <li><span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li>
         <li><em>Maybe:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
@@ -1541,7 +1576,8 @@ Habits with no history are highlighted in bold, in case you would like to consid
 </div>
 
 <div id="end">
-    <a class="explanationToggle separator closer hide" href="">hide
+    <a class="explanationToggle showOnlyIfHave_Not_FetchedData
+              separator closer hide" href="">hide
                     documentation and Fetch My Data form</a>
 </div>
 
