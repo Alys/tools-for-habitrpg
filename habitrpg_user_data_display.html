@@ -70,10 +70,10 @@ serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
-userId            = 'work';
-userId            = 'test';
-userId            = 'home';
 apiToken          = 'null';
+userId            = 'test';
+userId            = 'work';
+userId            = 'home';
 */
 
 function d(msg) { console.log(msg) } /* laziness FTW! */
@@ -552,13 +552,16 @@ function displayData(data) {
     });
     if (quest && quest.content.boss) {
         questDamage = questDamage * quest.content.boss.str;
-        questDamage = Math.ceil(questDamage  * 10) / 10;
+        questDamage = Math.ceil(questDamage * 10) / 10;
     }
     dailysDamage = Math.ceil(dailysDamage * 10) / 10;
     // We round UP with ceil because we must never let the user
     // think they will take even slightly less damage than they really
     // will. Imagine if they died from an extra 0.1 damage that this
     // page didn't tell them they had!
+    // But for the total, rounding is safe, since excess decimals are
+    // just due to float arithmetic weirdness:
+    var totalDamage = Math.round((dailysDamage + questDamage) * 10) / 10;
 
     ////// Todos:
     $.each(data.todos, function(index, obj){
@@ -745,10 +748,10 @@ function displayData(data) {
     if (sleeping) {
         damageDailiesHtml = '<p>You are'
             + ' <a href="http://habitrpg.wikia.com/wiki/Tavern">resting'
-            + ' in the inn</a>'
-            + ' so you will not take any damage from your uncompleted dailies.';
+            + ' in the inn</a> so you will not take any damage from'
+            + ' your uncompleted dailies.</p>';
         if (quest && quest.content.boss) {
-            damageDailiesHtml += '<br />'
+            damageDailiesHtml += '<p>'
                 + ' However, you are also on a'
                 + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
                 + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>'
@@ -761,34 +764,54 @@ function displayData(data) {
         damageDailiesHtml = '<p class="highlight">'
             + 'This section is new and highly experimental!'
             + ' Until it has been proved with more testing,'
-            + ' do not rely on it to prevent death!</p>'
-            + '<p>If you do no more dailies today, you will take an '
-            + ' <span class="highlight">estimated '
-            + dailysDamage
-            + '</span> damage. Your current health is <span class="highlight">'
-            + currentHealth
-            + '</span>.</p>';
+            + ' do not rely on it to prevent death!</p>';
         if (quest && quest.content.boss) {
-            damageDailiesHtml += '<p>You are on a'
-                + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
-                + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>'
             if (dailysDamage == 0) {
-                damageDailiesHtml +=
-                  ' so you <span class="highlight">will</span> still take'
-                + ' damage from the uncompleted dailies of other quest'
-                + ' participants.</p>';
+                damageDailiesHtml += '<p>You and your fellow'
+                    + ' <a href="http://habitrpg.wikia.com/wiki/Quests">'
+                    + 'quest</a> participants will take an'
+                    + ' <span class="highlight">estimated '
+                    + dailysDamage
+                    + '</span> damage from your own dailies.</p><p>However you'
+                    + ' <span class="highlight">will</span> still take'
+                    + ' damage from the uncompleted dailies of other quest'
+                    + ' participants.</p>';
             }
             else {
-                damageDailiesHtml += ' so the boss will inflict an'
-                + ' <span class="highlight">estimated '
-                + questDamage
-                + ' additional</span> damage to you and to your fellow'
-                + ' quest participants.'
-                + '</p>';
+                damageDailiesHtml += '<p>If you do no more dailies today,'
+                    + ' you will take an <span class="highlight">estimated '
+                    + dailysDamage
+                    + '</span> damage from your dailies directly.</p>'
+                    + '<p>In addition, you are on a'
+                    + ' <a href="http://habitrpg.wikia.com/wiki/Quests">'
+                    + 'quest</a>, so the'
+                    + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
+                    + ' will inflict an <span class="highlight">estimated '
+                    + questDamage
+                    + '</span> damage to you and to your fellow quest'
+                    + ' participants because of your uncompleted dailies.</p>'
+                    + '<p>Thus your total damage due to your own'
+                    + ' uncompleted dailies will be '
+                    + ' <span class="highlight">approximately '
+                    + totalDamage
+                    + '</span>. Your current health is <span class="highlight">'
+                    + currentHealth
+                    + '</span>.</p>'
+                    + '<p>You will also take damage from the uncompleted'
+                    + ' dailies of other quest participants.</p>';
             }
         }
-        damageDailiesHtml +=
-              '<p>Possible sources of error in this estimate are:</p>'
+        else {
+            damageDailiesHtml += '<p>If you do no more dailies today,'
+                + ' you will take an <span class="highlight">estimated '
+                + dailysDamage
+                + '</span> damage. Your current health is'
+                + ' <span class="highlight">'
+                + currentHealth
+                + '</span>.</p>';
+        }
+        damageDailiesHtml += '<p style="margin-top:2em">Possible sources of'
+            + ' error in these estimates are:</p>'
             + '<ul>'
             + '<li>Programmer error (this will disappear after more testing).</li>'
             + '<li>Skills such as Stealth. These are currently not considered and they will cause you to take less damage than is shown here. (Stealth will be considered here soon.)</li>'
@@ -1626,6 +1649,7 @@ h2 {
             <li>Documentation / Layout:
                 <ul>
                     <li>renamed "Tasks that have not been Tagged" to "Tasks Untagged"</li>
+                    <li>Damage from Dailies: Improved (I hope) wording to explain the two kinds of damage you can take (normal and boss). Feedback welcome if it's actually become worse. You can just look at the bolded parts if you already understand what's going on.</li>
                 </ul>
             </li>
             <li>Code:
