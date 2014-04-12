@@ -9,15 +9,16 @@
 This code is licenced under the same terms as HabitRPG:
     https://raw2.github.com/HabitRPG/habitrpg/develop/LICENSE
 
-Alys (Alice Harris)
-lady_alys@oldgods.net
-
 https://github.com/Alys/tools-for-habitrpg/blob/master/habitrpg_user_data_display.html
 AND required JavaScript libraries:
 https://github.com/Alys/tools-for-habitrpg/blob/master/js--for--habitrpg_user_data_display.tar.gz
 
 https://oldgods.net/habitrpg/habitrpg_user_data_display.html
     or http://is.gd/hrpguserdata
+
+Contributors:
+    Alys (Alice Harris), lady_alys@oldgods.net
+    thepeopleseason (James Hsiao)
 
 -->
 
@@ -318,6 +319,7 @@ function displayData(data) {
             + 'Learn more.</a>');
         $('#unallocatedPoints').show();
     }
+    $('#dashUnallocPoints').text(data.stats.points||0);
 
 
     var missing = [];
@@ -382,6 +384,7 @@ function displayData(data) {
     $('#dropsTodaySection .output').html(
         'Drops received so far today: <span class="highlight">'
         + data.items.lastDrop.count + '</span>.' + dropsExtra);
+    $('#dashDropCount').text(data.items.lastDrop.count||0);
 
     // Quest Progress section:
     if (quest) {
@@ -405,11 +408,13 @@ function displayData(data) {
         // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
         //
         var msg = '';
+        var qProgress = 0;
         if (quest.content.boss) {
+            qProgress = Math.floor(quest.progress.up * 100) / 100;
             // user is on a boss quest
             msg = 'So far today you have done an estimated '
                 + '<span class="highlight">'
-                + Math.floor(quest.progress.up * 100) / 100
+                + qProgress
                 + '</span>'
                 + ' points of damage to '
                 + quest.content.boss.name
@@ -418,6 +423,7 @@ function displayData(data) {
             // think they have even slightly more progress than they really
             // have. Imagine if they missed ending a quest overnight by 0.1
             // health because this page exaggerated their progress!
+            $('#dashQuestProgressDamage').text(qProgress);
         }
         else if (quest.content.collect) {
             // user is on a collection quest
@@ -734,6 +740,8 @@ function displayData(data) {
     }
 
     var damageDailiesHtml = '';
+    var currentHealth = Math.round(data.stats.hp * 10) / 10;
+    $('#dashCurrentHealth').text(currentHealth);
     if (sleeping) {
         damageDailiesHtml = '<p>You are'
             + ' <a href="http://habitrpg.wikia.com/wiki/Tavern">resting'
@@ -758,7 +766,7 @@ function displayData(data) {
             + ' <span class="highlight">estimated '
             + dailysDamage
             + '</span> damage. Your current health is <span class="highlight">'
-            + Math.round(data.stats.hp * 10) / 10
+            + currentHealth
             + '</span>.</p>';
         if (quest && quest.content.boss) {
             damageDailiesHtml += '<p>You are on a'
@@ -790,8 +798,9 @@ function displayData(data) {
             + ' .</p>';
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
+    $('#dashDamage').text(dailysDamage);
+    $('#dashBossDamage').text(questDamage);
     // XXX_VERY_SOON daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
-
 }
 
 
@@ -1154,6 +1163,7 @@ function chooseColour(value) {
     } else if (value > -20) { colourObj = {'order':6, 'name':'Red'};
     } else                  { colourObj = {'order':7, 'name':'Dark Red'};
     }
+
     colourObj.label       = colourObj.order + ") " + colourObj.name;
     colourObj.nameNoSpace = colourObj.name.replace(/ /, '');
     colourObj.id          = 'colour' + colourObj.nameNoSpace;
@@ -1549,6 +1559,42 @@ h2 {
 }
 
 
+#dashboard {
+    display: none; /* FOR TESTING WHILE UNDER DEVELOPMENT */
+    float: right;
+    width: 130px;
+}
+#dashboardInner {
+    float: right;
+}
+#dashboard li {
+    text-align: center;
+    width: 120px;
+    background-color: #fffbd0;
+    border: 1px;
+    padding: 4px;
+    margin-bottom: 4px;
+    font-family: sans-serif;
+    float: left;
+    list-style-type: none;
+}
+#dashboard .health {
+    background-color: #ffcccc;
+}
+#dashboard .stat {
+    font-size: 30px;
+    font-weight: bold;
+    padding: 2px;
+}
+#dashboard .stat-label {
+    font-size: 8pt;
+    padding: 1px;
+}
+#dashboard .stats {
+    box-shadow: 1px 1px 1px 1px #666666;
+}
+
+
     </style>
 </head>
 <body><div id="innerBody">
@@ -1585,6 +1631,7 @@ h2 {
             <li>Code:
                 <ul>
                     <li>Various code improvements.</li>
+                    <li>Initial code for a dashboard, thanks to thepeopleseason! The dashboard is currently hidden while development continues.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -1753,6 +1800,34 @@ h2 {
 </div>
 
 <div id="main" class="showOnlyIfHaveFetchedData">
+    <div id="dashboard">
+    <ul id="dashboardInner">
+        <li><div class="stats">
+            <div id="dashCurrentHealth" class="stat"></div>
+            <div class="stat-label">Current Health</div></div>
+        </li>
+        <li><div class="stats">
+            <div id="dashUnallocPoints" class="stat"></div>
+            <div class="stat-label">Unallocated Points</div></div>
+        </li>
+        <li><div class="stats health">
+            <div id="dashDamage" class="stat"></div>
+            <div class="stat-label">Est. Damage</div></div>
+        </li>
+        <li><div class="stats health">
+            <div id="dashBossDamage" class="stat"></div>
+            <div class="stat-label">Est. Boss Damage</div></div>
+        </li>
+        <li><div class="stats">
+            <div id="dashQuestProgressDamage" class="stat"></div>
+            <div class="stat-label">Quest Damage</div></div>
+        </li>
+        <li><div class="stats">
+            <div id="dashDropCount" class="stat"></div>
+            <div class="stat-label">Drop Count</div></div>
+        </li>
+    </ul>
+    </div>
 
     <ul id="tableOfContents" class="selfClear"><!-- TOC toc -->
         <!-- Some of these items are hidden by default so that they can
