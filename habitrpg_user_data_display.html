@@ -296,6 +296,13 @@ function displayData(data) {
     dataFetchStatus = 'succeeded';
     toggleVisibilityForStuff();
 
+    user.computedStat = [];
+    user.computedStat['con'] = computeStat('con');
+    user.computedStat['int'] = computeStat('int');
+    user.computedStat['per'] = computeStat('per');
+    user.computedStat['str'] = computeStat('str');
+
+
     // get some basic details about the user:
     $('#userNameDisplay').text(user.profile.name); // user's name in header
     var sleeping = user.preferences.sleep; // true if resting in the inn
@@ -368,14 +375,13 @@ function displayData(data) {
     var dropChance = 1/150+0.2  // assume new task
                    * 1          // assume task priority easy
                    * 1          // assume no streak
-                   * (1 + computeStat('per') / 100)
+                   * (1 + user.computedStat['per'] / 100)
                    * (1 + user.achievements.streak / 200);
     if (user.contributor.level) {
         dropChance *= (1 + user.contributor.level / 20);
     }
     dropChance = diminishingReturns(dropChance, 0.75);
-    var perComputed = computeStat('per');
-    // dropsExtra = ' (' + perComputed + ', ' + dropChance + ')';  // TST
+    // dropsExtra=' ('+ user.computedStat['per'] +', '+ dropChance +')'; // TST
 
 
     $('#dropsTodaySection .output').html(
@@ -469,11 +475,6 @@ function displayData(data) {
     });
 
 
-    var conComputed = computeStat('con');
-    var conBonus = 1 - (conComputed / 250);
-    if (conBonus < 0.1) { conBonus = 0.1; }
-
-
     //////////////////////////////////////////////////////////////////////
     ////   Cycle through each task to pull out data //////////////////////
     ////   for Task Overview and other purposes     //////////////////////
@@ -506,6 +507,8 @@ function displayData(data) {
     var valueMin = -47.27; // task values are capped ...
     var valueMax =  21.27; // ... for some purposes
     var today = ["su","m","t","w","th","f","s"][(new Date()).getDay()];
+    var conBonus = 1 - (user.computedStat['con'] / 250);
+    if (conBonus < 0.1) { conBonus = 0.1; }
     $.each(user.dailys, function(index, obj){
         obj.text = escapeHtml(obj.text);
         numberDailys++;
@@ -1117,7 +1120,11 @@ function computeStat(stat) {
     $.each(user.items.gear.equipped, function(index,key){
         var obj = content.gear.flat[key];
         var value = obj[stat];
-        if (obj.klass == user.stats.class) { value *= 1.5; }
+        if (obj.klass        == user.stats.class ||
+            obj.specialClass == user.stats.class
+           ) {
+            value *= 1.5;
+        }
         computed += value;
     });
     return computed;
@@ -1654,7 +1661,8 @@ h2 {
             </li>
             <li>Code:
                 <ul>
-                    <li>Various code improvements.</li>
+                    <li>When computing CON for "Damage from Dailies", the code now includes the recent change which gives class equipment bonus for special event gear.</li>
+                    <li>Various other code improvements.</li>
                     <li>Initial code for a dashboard, thanks to thepeopleseason! The dashboard is currently hidden while development continues.</li>
                 </ul>
             </li>
