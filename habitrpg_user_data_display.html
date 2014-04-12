@@ -52,6 +52,7 @@ https://oldgods.net/habitrpg/habitrpg_user_data_display.html
 
     <script type="text/javascript">
 var content; // hold site-wide content (gear names and stats, quests, etc)
+var user;    // hold user's data
 var dataFetchStatus = 'not attempted'; // also "succeeded" and "failed"
 var knownTags = [];
 var collectionDrops = false; // control Drops + Quest Progress opening
@@ -68,6 +69,9 @@ serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
+userId            = 'test';
+userId            = 'home';
+apiToken          = 'null';
 */
 
 function d(msg) { console.log(msg) } /* laziness FTW! */
@@ -169,6 +173,10 @@ $(document).ready(function() {
             $('#' + sectionId).toggle();
             if ($('#' + sectionId).hasClass("longContent")) {
                 $('#tocClose').show();
+            }
+            if ($('#damageDailiesSection').is(':visible') &&
+                $('#dailiesIncomplete').is(':visible')) {
+                $('#dailiesIncompleteSection').show();
             }
             if ($('#dropsTodaySection').is(':visible') && collectionDrops) {
                 // The user is on a collection quest and has viewed the
@@ -282,6 +290,7 @@ function fetchFailure() {
 }
 
 function displayData(data) {
+    user = data; // XXX_SOON convert all (messy!) 'data' to this global 'user'
     dataFetchStatus = 'succeeded';
     toggleVisibilityForStuff();
 
@@ -309,10 +318,12 @@ function displayData(data) {
         $('#unallocatedPoints').show();
     }
 
+
     var missing = [];
     $.each(data.items.gear.owned, function(key, value){
         if (value === false) {
-            missing.push( prettyPrintKey(key, 'gear', {'includeStats':true}) );
+            missing.push( prettyPrintKey(key, 'gear',
+                            {'includeStats':true, 'includeGold':true, }) );
         }
     });
     if (missing.length > 0) {
@@ -344,9 +355,32 @@ function displayData(data) {
         $('#missingEquipment').show();
     }
 
+
+    $('#currentGearSection .output').html(
+            createCurrentGearSection(data.stats, data.preferences,
+                data.items.gear.equipped, data.items.gear.costume,
+                data.items) );
+
+
+
+    var dropsExtra = ''; // normally leave this blank!
+    // FOR TESTING (this does NOT contain all code for most drop chances):
+    var dropChance = 1/150+0.2  // assume new task
+                   * 1          // assume task priority easy
+                   * 1          // assume no streak
+                   * (1 + computeStat('per') / 100)
+                   * (1 + data.achievements.streak / 200);
+    if (data.contributor.level) {
+        dropChance *= (1 + data.contributor.level / 20);
+    }
+    dropChance = diminishingReturns(dropChance, 0.75);
+    var perComputed = computeStat('per');
+    // dropsExtra = ' (' + perComputed + ', ' + dropChance + ')';  // TST
+
+
     $('#dropsTodaySection .output').html(
         'Drops received so far today: <span class="highlight">'
-        + data.items.lastDrop.count + '</span>.');
+        + data.items.lastDrop.count + '</span>.' + dropsExtra);
 
     // Quest Progress section:
     if (quest) {
@@ -393,10 +427,7 @@ function displayData(data) {
             $.each(quest.progress.collect, function(tagId, value){
                 uniqueItemsCount++;
                 total += value;
-                var itemName = tagId;
-                if (itemName == 'lightCrystal') {
-                    itemName = "Light Crystal"; // XXX_LATER get from Content
-                }
+                var itemName = quest.content.collect[tagId].text;
                 if (uniqueItemsCount > 1) { // we have stuff already
                     stuff += ", ";
                 }
@@ -446,7 +477,9 @@ function displayData(data) {
     var numberDailys            = 0;
     var numberTodos             = 0;
     var numberRewards           = 0;
-    var countHabitsDailysTodos = 0;
+    var countHabitsDailysTodos  = 0;
+    var dailiesIncomplete       = [];
+    var dailiesIncompleteGrey   = [];
     $.each(data.habits, function(index, obj){
         numberHabits++;
         countHabitsDailysTodos++;
@@ -454,8 +487,7 @@ function displayData(data) {
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
     });
 
-    var conComputed = computeStat(data.stats, 'con');
-    // d("conComputed: " + conComputed); // TST
+    var conComputed = computeStat('con');
     var conBonus = 1 - (conComputed / 250);
     if (conBonus < 0.1) { conBonus = 0.1; }
 
@@ -472,10 +504,11 @@ function displayData(data) {
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
 
         if (! sleeping) {
-            // calculate cron damaage if daily not actioned:
+            // calculate cron damage if daily not actioned:
             if (! obj.completed && obj.repeat[today]) {
                 // this Daily has not been completed but is due today, so
-                // calculate HP damage:
+                // record its text and calculate HP damage:
+                dailiesIncomplete.push(obj.text);
                 var currVal = obj.value; // task value
                 if (currVal < valueMin) { currVal = valueMin; } // capped
                 if (currVal > valueMax) { currVal = valueMax; } // capped
@@ -491,14 +524,20 @@ function displayData(data) {
                                        // multiple missed days.
                 questDamage += delta;
                 var hpMod = delta * conBonus * obj.priority * 2;
+                // priority is easy (1), medium (1.5), hard (2)
                 hpMod = Math.round(hpMod * 10) / 10; // HabitRPG uses round
                 dailysDamage += hpMod; // note this is NOT a negative number
                 // d("\n" + obj.value + " " + delta + " " + obj.priority + " " + obj.text + "\n" + data.stats.con + " " + conBonus + " " + hpMod + " " + dailysDamage); // TST
             }
+            else if (! obj.completed && ! obj.repeat[today]) {
+                // this Daily has not been completed and is NOT due today,
+                // but we record its text in case the user cares:
+                dailiesIncompleteGrey.push(obj.text);
+            }
         }
     });
     if (quest && quest.content.boss) {
-        questDamage = questDamage * quest.content.boss.str; // XXX CHECK THIS - wiki disagrees with HabitRPG's code, unless I am stupid
+        questDamage = questDamage * quest.content.boss.str;
         questDamage = Math.ceil(questDamage  * 10) / 10;
     }
     dailysDamage = Math.ceil(dailysDamage * 10) / 10;
@@ -627,6 +666,7 @@ function displayData(data) {
     ////   Task Overview ends here   /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
+
     var habitHistory = '';
     $.each(data.habits, function(index, obj){ // XXX_LATER merge into each loop above
         //// The commented out code below is only useful if ALL recent habit
@@ -707,7 +747,44 @@ function displayData(data) {
     }
 
 
-    // $('#damageDailiesSection').show(); // TST
+    // $('#dailiesIncompleteSection').show(); // TST
+    var uncomplHtml = '';
+    if (dailiesIncomplete.length > 0) {
+        uncomplHtml += '<p>';
+        uncomplHtml += (dailiesIncomplete.length > 1)
+                     ? 'These dailies are due today and have'
+                     : 'This daily is due today and has';
+        uncomplHtml += ' not been completed:</p><ul><li>'
+                     + dailiesIncomplete.join('</li><li>')
+                     + '</li></ul>';
+    }
+    if (dailiesIncompleteGrey.length > 0) {
+        var wordThis  = 'This';
+        var wordDaily = 'daily';
+        var wordIs    = 'is';
+        var wordIt    = 'it';
+        if (dailiesIncompleteGrey.length > 1) {
+            wordThis  = 'These';
+            wordDaily = 'dailies';
+            wordIs    = 'are';
+            wordIt    = 'them';
+        }
+        uncomplHtml += '<p>' + wordThis
+                     + ' <a href="http://habitrpg.wikia.com/wiki/Dailies#'
+                     + 'Grey_Dailies">grey '
+                     + wordDaily
+                     + '</a> ' + wordIs
+                     + ' <span class="highlight">not</span> due today but'
+                     + ' you can still complete '
+                     + wordIt + ' for extra rewards:</p><ul><li>'
+                     + dailiesIncompleteGrey.join('</li><li>')
+                     + '</li></ul>';
+    }
+    if (uncomplHtml) {
+        $('#dailiesIncompleteSection .output').html(uncomplHtml);
+        $('#dailiesIncomplete').show();
+    }
+
     var damageDailiesHtml = '';
     if (sleeping) {
         damageDailiesHtml = '<p>You are'
@@ -759,44 +836,171 @@ function displayData(data) {
             + '<ul>'
             + '<li>Programmer error (this will disappear after more testing).</li>'
             + '<li>Skills such as Stealth. These are currently not considered and they will cause you to take less damage than is shown here. (Stealth will be considered here soon.)</li>'
-            + '<li>The CON you gain from your equipment is not being considered, which will cause you to take less damage than is shown here. (This will be fixed soon.)</li>'
             + '<li>If you have not logged in to HabitRPG for more than a day, the damage <!--you (and your fellow quest participants) will take--> will be much greater than shown here.</li>' // XXX_LATER highlight parts of that when it's the major error
             // + '<li>HabitRPG's code being updated without me noticing</li>'
             + '</ul>'
             + ' .</p>';
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
-    // XXX_SOON daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
+    // XXX_VERY_SOON daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
+
+
+
+
+}
+
+function createCurrentGearSection(stats, prefs, equipped, costume, items) {
+    var pastels = ['pblue','pgreen','porange','ppink','ppurple','pyellow'];
+    var basicSkins = {'ddc994':'palest brown (1st)','f5a76e':'pink (2nd)',
+            'ea8349':'orange (3rd)','c06534':'light brown (4th)',
+            '98461a':'medium brown (5th)','915533':'dark brown (6th)',
+            'c3e1dc':'blue (7th)','6bd049':'green (8th)'};
+    var rainbowSkins = {'eb052b':'red','f69922':'orange','f5d70f':'yellow',
+                        '0ff591':'green','2b43f6':'blue','d7a9f7':'pink',
+                        '800ed0':'violet','rainbow':'rainbow'};
+    var spookySkins=['monster','pumpkin','skeleton','zombie','ghost','shadow'];
+
+    var klass = (stats.class == 'healer' ) ? 'Healer'
+              : (stats.class == 'rogue'  ) ? 'Rogue'
+              : (stats.class == 'wizard' ) ? 'Mage'
+              : (stats.class == 'warrior') ? 'Warrior'
+              :  stats.class;
+    var currentGearEtcHtml = '';
+    var appearance = [ 'class: <span class="attributeValue">'
+                      + klass + '</span>' ];
+    if (stats.buffs.snowball) {
+        appearance.push('<span class="attributeValue">Snowball!</span>');
+    }
+    $.each([
+        ['',      'size',         'build'                     ],
+        ['',      'shirt',        'shirt'                     ],
+        ['hair',  'color',        'hair colour'               ],
+        ['hair',  'bangs',        'bangs',     'convertNumber'],
+        ['hair',  'base',         'hair base', 'convertNumber'],
+        ['hair',  'flower',       'flower',    'convertNumber'],
+        ['hair',  'mustache',     'mustache',  'convertNumber'],
+        ['hair',  'beard',        'beard',     'convertNumber'],
+        ['',      'skin',         'skin colour'               ],
+    ], function(index,obj) {
+        var value;
+        if (obj[0]) { value = prefs[obj[0]][obj[1]]; }
+        else        { value = prefs[obj[1]];         }
+        if (obj[1] == 'color' && ($.inArray(value, pastels) !== -1)) {
+            value = value.replace(/^p/, "pastel ");
+        }
+        if (obj[3] == 'convertNumber') {
+            value = convertCardinalToOrdinal(++value); // start from 1 not 0
+            if (value == '1st') { value += ' (none)'; }
+        }
+        if (obj[1] == 'skin') {
+            if ($.inArray(value, spookySkins) !== -1) {
+                value = 'spooky: ' + value;
+            }
+            else if (rainbowSkins[value]) {
+                value = 'rainbow: ' + rainbowSkins[value];
+            }
+            else if (basicSkins[value]) {
+                value = 'basic: ' + basicSkins[value];
+            }
+            // if no match, we use the skin key (e.g., f133ee)
+        }
+        if (value) {
+            appearance.push(obj[2] + ': <span class="attributeValue">'
+                                   + value + '</span>');
+        }
+    });
+    if (appearance.length > 0) {
+        currentGearEtcHtml += '<div class="subsection">'
+                            + '<p class="forCopyPaste">&nbsp;</p>'
+                            + '<h3>Avatar</h3>'
+                            + '<ul><li>'
+                            + appearance.join('</li><li>')
+                            + '</li></ul>'
+                            + '</div>';
+    }
+
+    var equipped = prettyPrintGear(user.items.gear.equipped);
+    if (equipped) {
+        currentGearEtcHtml += '<div class="subsection">'
+                            + '<p class="forCopyPaste">&nbsp;</p>'
+                            + '<h3>Battle Gear</h3>'
+                            + equipped
+                            + '</div>';
+    }
+
+    var costume = '';
+    if (user.preferences.costume) {
+        costume = prettyPrintGear(user.items.gear.costume);
+    }
+    if (costume) {
+        currentGearEtcHtml += '<div class="subsection">'
+                            + '<p class="forCopyPaste">&nbsp;</p>'
+                            + '<h3>Costume</h3>'
+                            + costume
+                            + '</div>';
+    }
+
+    var beasts = [];
+    $.each([ 'currentMount', 'currentPet' ], function(index,type) {
+        var value = items[type];
+        if (value) {
+            // improve display of pets/mounts (BearCub-Red -> Red Bear Cub):
+            var speciesAndColour = value.split('-');
+            value = speciesAndColour[1] + speciesAndColour[0];
+            value = value.replace(/([A-Z])/g, " $1"); // spaces before Caps
+            value += (type == 'currentPet') ? ' pet' : ' mount';
+            beasts.push(value);
+        }
+    });
+    if (beasts.length > 0) {
+        currentGearEtcHtml += '<div class="subsection">'
+                            + '<p class="forCopyPaste">&nbsp;</p>'
+                            + '<h3>Beasts</h3>'
+                            + '<ul><li>'
+                            + beasts.join('</li><li>')
+                            + '</li></ul>'
+                            + '</div>';
+    }
+    return currentGearEtcHtml;
 }
 
 
-function prettyPrintKey(key, type, options) {
+function prettyPrintKey(key, itemType, options) {
     // Takes a "key" (e.g., weapon_warrior_0) from HabitRPG's "content" data
     // and returns the name of the item (and sometimes other info).
     // If the name can't be found, it treats the key as the name.
     var name  = key;
     var extra = '';  // e.g., for gear: klass and type (weapon/armour/etc)
-    if (type == 'gear') {
+    if (itemType == 'gear') {
         var obj = content.gear.flat[key];
         name = obj.text
-        extra = obj.klass + " " + obj.type;
+        if (name == 'Mustaine\'s Milestone Mashing Morning Star') {
+            name = '<abbr title="Mustaine\'s Milestone Mashing Morning Star">'
+                 + 'Mashing Morning Star</a>';
+        }
+        if (name == 'Stephen Weber\'s Shaft of the Dragon') {
+            name = '<abbr title="Stephen Weber\'s Shaft of the Dragon">'
+                 + 'Shaft of the Dragon</a>';
+        }
+        var type = obj.type;
+        if (type == 'head') { type = 'headwear'; }
+        extra = obj.klass + " " + type;
         if (options && options.includeStats) {
             extra += '; <span class="stats">'
-                   + prettyPrintStats(obj, {'includeGold':true})
+                   + prettyPrintStats(obj,
+                        {'includeGold':(options.includeGold || false)} )
                    + '</span>';
         }
     }
     var html = '<span class="item">'
              + '<span class="name">' + name + '</span>';
     if (extra) {
-        html += '<span class="extra">' + extra + '</span>';
+        html += ' <span class="extra">(' + extra + ')</span>';
     }
-    html += '<span class="key">' + key + '</span>';
+    html += ' <span class="key">{' + key + '}</span>';
     html += '</span>';
     return html;
 }
-
-
 function prettyPrintStats(obj, options) {
     var stats = [];
     if (options && options.includeGold) {
@@ -808,18 +1012,54 @@ function prettyPrintStats(obj, options) {
     if (obj.str) { stats.push(obj.str + " str"); }
     return stats.join(", ");
 }
+function prettyPrintGear(origObj, nakedMessage) {
+    var obj = $.extend({}, origObj);
+    var result = [];
+    // Go through gear in a specific order, and then handle any gear we
+    // missed (e.g., if there's a new type of gear):
+    $.each([ 'head', 'headAccessory', 'armor', 'weapon', 'shield', 'back'
+    ], function(index,gearType){
+        if (obj[gearType]) {
+            var html = prettyPrintOneGear(obj[gearType]);
+            if (html) { result.push(html); }
+            delete obj[gearType];
+        }
+    });
+    $.each(obj, function(index,value){
+        var html = prettyPrintOneGear(value);
+        if (html) { result.push(html); }
+    });
+
+    if (result.length > 0) {
+        return '<ul><li>'
+             + result.join('</li><li>')
+             + '</li></ul>';
+    }
+    else if (nakedMessage) {
+        return '<p>' + nakedMessage + '</p>';
+    }
+    else {
+        return false;
+    }
+}
+function prettyPrintOneGear(key) {
+    if (key.match(/_base_0$/)) { return false; } // ignore "No Helm/Armour/etc"
+    var html = prettyPrintKey(key, 'gear');
+    return html;
+}
 
 
-function computeStat(statsData, stat) {
-    var computed = statsData[stat]
-                 + statsData.buffs[stat]
-                 + ((statsData.lvl - 1) / 2)
-                 + 0 // XXX_VERY_SOON add CON from gear, including class bonus
-                 ;
-    /*
-    "gear":
-        "equipped":{"back":"back_base_0","headAccessory":"headAccessory_base_0","shield":"shield_special_0","head":"head_wizard_5","armor":"armor_rogue_5","weapon":"weapon_special_2"},
-    */
+function computeStat(stat) {
+    var computed = user.stats[stat]
+                 + user.stats.buffs[stat]
+                 + ((user.stats.lvl - 1) / 2);
+    // get appropriate stat for each piece of Battle Gear:
+    $.each(user.items.gear.equipped, function(index,key){
+        var obj = content.gear.flat[key];
+        var value = obj[stat];
+        if (obj.klass == user.stats.class) { value *= 1.5; }
+        computed += value;
+    });
     return computed;
 }
 
@@ -927,6 +1167,36 @@ function displayUntagged(tasks, title) {
     }
 }
 
+function convertCardinalToOrdinal(num) {
+    var numStr = num.toString();
+    var last   = numStr.slice(-1);
+    var len    = numStr.length;
+    var ord    = '';
+    switch (last) {
+        case '1':
+            ord = numStr.slice(-2) === '11' ? 'th' : 'st';
+            break;
+        case '2':
+            ord = numStr.slice(-2) === '12' ? 'th' : 'nd';
+            break;
+        case '3':
+            ord = numStr.slice(-2) === '13' ? 'th' : 'rd';
+            break;
+        default:
+            ord = 'th';
+            break;
+    }
+    return num.toString() + ord;
+}
+
+
+function diminishingReturns(bonus, max) {
+    var halfway = max/2;
+    var diminished = max * bonus / (bonus + halfway);
+    return diminished;
+}
+
+
 var myDateConverter = function(date) {
     var y = date.getFullYear();
     var m = date.getMonth() + 1;
@@ -1001,7 +1271,7 @@ abbr.discrete {
 .selfClear:after {
     content: "";
     clear: both;
-    display: table;
+    display: block;
 }
 .clear {
     clear: both;
@@ -1028,6 +1298,11 @@ abbr.discrete {
 }
 .tip {
     font-style: italic;
+}
+.forCopyPaste {
+    /* used to add blank lines that we want when copying text to clipboard,
+       but we don't want to see extra whitespace on the screen */
+    margin-top: -1em;
 }
 
 
@@ -1219,40 +1494,57 @@ h2 {
     font-weight: normal;
 }
 
-#missingEquipmentSection ul {
-    list-style-type: none;
-}
-#missingEquipmentSection .item .name {
-    font-weight: bold;
-}
-#missingEquipmentSection .item .extra {
-}
-#missingEquipmentSection .item .stats {
+.gearList .item .stats {
     font-variant: small-caps;
 }
-#missingEquipmentSection .item .extra:before {
-    content: " (";
-}
-#missingEquipmentSection .item .extra:after {
-    content: ")";
-}
-#missingEquipmentSection .item .key {
+.gearList .item .key {
     display: none;
+}
+
+#missingEquipmentSection .gearList ul {
+    list-style-type: none;
+}
+#missingEquipmentSection .gearList .item .name {
+    font-weight: bold;
+}
+#missingEquipmentSection .gearList .item .extra {
+}
+
+#currentGearSection .subsection {
+    float: left;
+    margin-right: 2em;
+}
+#currentGearSection .gearList ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+#currentGearSection .gearList .item .name {
+}
+#currentGearSection .gearList .item .extra {
     font-style: italic;
 }
-#missingEquipmentSection .item .key:before {
-    content: " {";
+#currentGearSection .attributeValue {
+    font-weight: bold;
 }
-#missingEquipmentSection .item .key:after {
-    content: "}";
+
+#dailiesIncompleteSection ul {
+    list-style-type: none;
 }
+#dailiesIncompleteSection ul li {
+    padding: 3px 0;
+}
+#dailiesIncompleteSection p:nth-of-type(2) {
+    margin-top: 2em;
+}
+
 
     </style>
 </head>
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.4.5)</a></h1>
+    <a class="versionToggle" href="">(v1.6)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
@@ -1267,6 +1559,29 @@ h2 {
 <div id="versionChanges" class="hide"><!-- VERSION -->
     <h2>Version History</h2>
     <dl>
+        <dt>1.6 <span class="date">2014-04-10</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Dailies Incomplete</span>: Lists the dailies scheduled for today that you have not yet completed. Also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed. This section won't appear if you have completed all of your dailies.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>1.5 <span class="date">2014-04-08</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Current Appearance and Gear</span>: Lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
+                </ul>
+            </li>
+            <li>Code: 
+                <ul>
+                    <li>Improvements to <span class="subheading">Damage from Dailies</span>. CON from gear (including class bonuses) is now included; Stealth buff is still NOT included (but will be soon). This seems pretty accurate now but there's still more testing to be done before it could be called reliable.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>1.4.5 <span class="date">2014-04-06</span></dt>
         <dd><ul>
             <li>Features:
@@ -1417,6 +1732,7 @@ h2 {
         <li>Tasks:<ul>
             <li id="habitHistory"><a href="">Habit History</a></li>
             <li id="taskOverview"><a href="">Task Overview</a></li>
+            <li id="dailiesIncomplete" class="hide"><a href="">Dailies Incomplete</a></li>
             <li id="untaggedTasks" class="hide"><a href="">Tasks that have not been Tagged</a></li>
         </ul></li>
         <li>Other:<ul>
@@ -1424,6 +1740,7 @@ h2 {
             <li id="dropsToday"><a href="">Drops Received Today</a></li>
             <li id="questProgress" class="hide"><a href="">Quest Progress</a></li>
             <li id="missingEquipment" class="hide"><a href="">Missing Equipment</a></li>
+            <li id="currentGear"><a href="">Current Appearance and Gear</a></li>
         </ul></li>
     </ul>
     <hr />
@@ -1462,7 +1779,12 @@ Habits with no history are highlighted in bold, in case you would like to consid
     </div>
 
     <div class="tocSection" id="missingEquipmentSection">
-        <div class="output"></div>
+        <div class="output gearList"></div>
+    </div>
+
+    <div class="tocSection" id="currentGearSection">
+        <h2>Current Appearance and Gear</h2>
+        <div class="output gearList selfClear"></div>
     </div>
 
     <div class="tocSection" id="dropsTodaySection">
@@ -1484,6 +1806,11 @@ Habits with no history are highlighted in bold, in case you would like to consid
 
     <div class="tocSection" id="damageDailiesSection">
         <h2>Damage from Dailies</h2>
+        <div class="output"></div>
+    </div>
+
+    <div class="tocSection" id="dailiesIncompleteSection">
+        <h2>Dailies Incomplete</h2>
         <div class="output"></div>
     </div>
 
@@ -1543,25 +1870,27 @@ Habits with no history are highlighted in bold, in case you would like to consid
    <h2>What's On This Page?</h2>
    <ul>
         <li><span class="subheading">Unallocated Points</span>: If you have any <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">unallocated points</a>, you'll see how many and a link to the HabitRPG <a href="https://habitrpg.com/#/options/profile/stats">Profile -&gt; Stats page</a> so you can allocate them.</li>
-        <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</li>
         <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
-        <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
-        <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. This is a new feature and might still be inaccurate.</li>
-        <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
-        <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown.</li>
+        <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</li>
+        <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
         <li><span class="subheading">Tasks That Have Not Been Tagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
+        <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. This is a new feature and might still be inaccurate.</li>
+        <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown.</li>
+        <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
+        <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
+        <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
    </ul>
 <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
    <h2>Possible Future Features</h2><!-- XXX_SOON look into this -->
    <ul>
+        <li><span class="subheading">Recommended Equipment for Maximising Stats</span>: Some kind of tool (possibly similar to the wiki's <a href="http://habitrpg.wikia.com/wiki/Equipment_Table">Equipment Table</a>) that helps you choose the best items from the gear you own for maximising specific stats.</li>
         <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
         <li><span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li>
         <li><em>Maybe:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
         <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
         <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
         <li><em>Maybe:</em> <span class="subheading">Missing Equipment for Orb of Rebirthers</span>: do something to make the feature more useful for them.</li>
-        <li><span class="subheading">Better Browser Support</span>: Testing in a wider range of browsers and on mobile devices, will be done soon-ish...</li><!-- XXX_SOON do this -->
         <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
    </ul>
 
