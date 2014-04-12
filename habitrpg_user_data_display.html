@@ -192,11 +192,14 @@ $(document).ready(function() {
                 $('#dailiesIncomplete').is(':visible')) {
                 $('#dailiesIncompleteSection').show();
             }
-            if ($('#dropsTodaySection').is(':visible') && collectionDrops) {
-                // The user is on a collection quest and has viewed the
-                // Drops Received Today section, so also show them the
-                // Quest Progress section (collection quests have drops):
-                $('#questProgressSection').show();
+            if ($('#dropsTodaySection').is(':visible')) {
+                $('#dashDrop').show();
+                if (collectionDrops) {
+                    // The user is on a collection quest and has viewed the
+                    // Drops Received Today section, so also show them the
+                    // Quest Progress section (collection quests have drops):
+                    $('#questProgressSection').show();
+                }
             }
             // if ($('#questProgressSection').is(':visible') && quest
                 // && quest.content.boss
@@ -329,6 +332,9 @@ function displayData(data) {
     }
 
 
+    //////////////////////////////////////////////////////////////////////
+    ////   Unallocated Points        /////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
     if (user.stats.points > 0 && user.stats.lvl >= 10) {
         var points = (user.stats.points == 1) ? "point" : "points";
         var them   = (user.stats.points == 1) ? "it"    : "them";
@@ -342,9 +348,18 @@ function displayData(data) {
         $('#unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
                                                     .addClass('show');
     }
-    $('#dashUnallocPoints').text(user.stats.points||0);
+    if (data.stats.points) {
+        $('#dashUnallocPoints').text(data.stats.points);
+        $('#dashUnallocated').show(); // needed for re-fetch - XXX see if still needed after entire dashboard refetch has been implemented
+    }
+    else {
+        $('#dashUnallocated').hide();
+    }
 
 
+    //////////////////////////////////////////////////////////////////////
+    ////   Missing Equipment         /////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
     var missing = [];
     $.each(user.items.gear.owned, function(key, value){
         if (value === false) {
@@ -545,7 +560,6 @@ function displayData(data) {
                 if (stealth > 0) {
                     // user evades this daily
                     stealth--;
-                    // XXX Test this. Daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
                 }
                 else {
                     dailiesIncomplete.push(obj.text);
@@ -776,6 +790,11 @@ function displayData(data) {
         $('#dailiesIncomplete.showOnlyIfDataExists').removeClass('hide')
                                                     .addClass('show');
     }
+    $('#dashIncompleteDailies').text(dailiesIncomplete.length);
+    if (dailiesIncomplete.length == 0) { // XXX fix this for data re-fetch
+        $('#dashIncompleteContainer').removeClass('danger')
+                                     .addClass('safe');
+    }
 
 
     //////////////////////////////////////////////////////////////////////
@@ -847,8 +866,14 @@ function displayData(data) {
         }
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
-    $('#dashDamage').text(dailysDamage);
+    $('#dashDamage'    ).text(dailysDamage);
     $('#dashBossDamage').text(questDamage);
+    if (questDamage == 0) { // XXX fix this for data re-fetch?
+        $('#dashDamageContainer').removeClass('danger')
+                                 .addClass('safe');
+        $('#dashBossContainer'  ).removeClass('danger')
+                                 .addClass('safe');
+    }
 }
 
 
@@ -1630,11 +1655,9 @@ h2 {
 
 #dashboard {
     display: none; /* FOR TESTING WHILE UNDER DEVELOPMENT */
-    float: right;
-    width: 130px;
 }
 #dashboardInner {
-    float: right;
+    float: left;
 }
 #dashboard li {
     text-align: center;
@@ -1642,34 +1665,38 @@ h2 {
     background-color: #fffbd0;
     border: 1px;
     padding: 4px;
-    margin-bottom: 4px;
-    font-family: sans-serif;
+    margin-right: 4px;
     float: left;
     list-style-type: none;
 }
-#dashboard .health {
+#dashboard .danger {
     background-color: #ffcccc;
+}
+#dashboard .safe {
+    background-color: #ccffcc;
 }
 #dashboard .stat {
     font-size: 30px;
     font-weight: bold;
     padding: 2px;
 }
-#dashboard .stat-label {
+#dashboard .statLabel {
     font-size: 8pt;
     padding: 1px;
 }
 #dashboard .stats {
     box-shadow: 1px 1px 1px 1px #666666;
 }
-
+#dashboard #dashDrop { /* XXX when implementing dashboard re-fetch fix, do NOT reset the user's choice to show this */
+    display: none;
+}
 
     </style>
 </head>
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.6.1)</a></h1>
+    <a class="versionToggle" href="">(v1.6.2)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
@@ -1684,6 +1711,15 @@ h2 {
 <div id="versionChanges" class="hide"><!-- VERSION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>1.6.2 <span class="date">2014-04-13</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Changes to the dashboard code, from thepeopleseason.</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>1.6.1 <span class="date">2014-04-13</span></dt>
         <dd><ul>
@@ -1872,31 +1908,36 @@ h2 {
 </div>
 
 <div id="main" class="showOnlyIfHaveFetchedData">
-    <div id="dashboard"><!-- XXX_SOON wipe data before refetch -->
-    <ul id="dashboardInner">
+
+    <div id="dashboard" class="selfClear">
+    <ul id="dashboardInner"><!-- XXX wipe data before refetch -->
         <li><div class="stats">
             <div id="dashCurrentHealth" class="stat"></div>
-            <div class="stat-label">Current Health</div></div>
+            <div class="statLabel">Current Health</div></div>
         </li>
-        <li><div class="stats">
-            <div id="dashUnallocPoints" class="stat"></div>
-            <div class="stat-label">Unallocated Points</div></div>
+        <li><div id="dashIncompleteContainer" class="stats danger">
+            <div id="dashIncompleteDailies" class="stat"></div>
+            <div class="statLabel">Incomplete Dailies</div></div>
         </li>
-        <li><div class="stats health">
+        <li><div id="dashDamageContainer" class="stats danger">
             <div id="dashDamage" class="stat"></div>
-            <div class="stat-label">Est. Damage</div></div>
+            <div class="statLabel">Est. Damage</div></div>
         </li>
-        <li><div class="stats health">
+        <li><div id="dashBossContainer" class="stats danger">
             <div id="dashBossDamage" class="stat"></div>
-            <div class="stat-label">Est. Boss Damage</div></div>
+            <div class="statLabel">Est. Boss Damage</div></div>
         </li>
         <li><div class="stats">
             <div id="dashQuestProgressDamage" class="stat"></div>
-            <div class="stat-label">Quest Damage</div></div>
+            <div class="statLabel">Quest Damage</div></div>
         </li>
-        <li><div class="stats">
+        <li id="dashDrop"><div class="stats">
             <div id="dashDropCount" class="stat"></div>
-            <div class="stat-label">Drop Count</div></div>
+            <div class="statLabel">Drop Count</div></div>
+        </li>
+        <li id="dashUnallocated"><div class="stats">
+            <div id="dashUnallocPoints" class="stat"></div>
+            <div class="statLabel">Unallocated Points</div></div>
         </li>
     </ul>
     </div>
