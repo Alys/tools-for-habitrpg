@@ -16,24 +16,24 @@ https://github.com/Alys/tools-for-habitrpg/blob/master/habitrpg_user_data_displa
 AND required JavaScript libraries:
 https://github.com/Alys/tools-for-habitrpg/blob/master/js--for--habitrpg_user_data_display.tar.gz
 
-https://oldgods.net/habitrpg/habitrpg_user_data_display.html 
+https://oldgods.net/habitrpg/habitrpg_user_data_display.html
     or http://is.gd/hrpguserdata
 
 -->
 
 
 <!-- ---------------------------------------------------------------
-///// 
-///// 
+/////
+/////
 ///// IMPORTANT NOTE TO PROGRAMMERS EDITING THIS PAGE:
-///// 
+/////
 ///// Do not add ANY features to this page which can modify a user's
-///// account (at least not without making large changes to 
+///// account (at least not without making large changes to
 ///// "Privacy and security notes" and "Suspected Bugs", both of
 ///// which currently promise users that their accounts will not
 ///// be changed by this page).
-///// 
-///// 
+/////
+/////
 --------------------------------------------------------------- -->
 
 
@@ -41,7 +41,7 @@ https://oldgods.net/habitrpg/habitrpg_user_data_display.html
     <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
 
 
-    <script src="//code.jquery.com/jquery-latest.min.js"></script>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <link href="js/DataTables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
@@ -316,6 +316,7 @@ function displayData(data) {
             + '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
             + 'Learn more.</a>');
         $('#unallocatedPoints').show();
+        $('#unallocPoints').text(data.stats.points||0);
     }
 
 
@@ -381,34 +382,37 @@ function displayData(data) {
     $('#dropsTodaySection .output').html(
         'Drops received so far today: <span class="highlight">'
         + data.items.lastDrop.count + '</span>.' + dropsExtra);
+    $('#dropCount').text(data.items.lastDrop.count||0);
 
     // Quest Progress section:
     if (quest) {
         // on a quest:
         // "quest":{"completed":null,"key":"ghost_stag",
         //          "progress":{"collect":{},"down":0,"up":13.780066986139815}},
-        // 
+        //
         // on a collection quest but found nothing yet:
         // "quest":{"completed":null,"key":"vice2","progress":{"collect":
         //          {"lightCrystal":0},"down":0,"up":0}},
-        // 
+        //
         // on a collection quest and found stuff:
         // "quest":{"completed":null,"key":"vice2","progress":{"collect":
         //          {"lightCrystal":2},"down":0,"up":2.4434153558001794}},
-        // 
+        //
         // not on a quest:
         // "quest":{"progress":{"collect":{},"down":0,"up":0}},
-        // 
+        //
         // before the user has ever joined a party or started a quest:
         // "party":{"current":null,"invitation":null,"quest":
         // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
-        // 
-        var msg = '';
+        //
+        var msg = ''
+        var qProgress = 0;
         if (quest.content.boss) {
+            qProgress = Math.floor(quest.progress.up * 100) / 100;
             // user is on a boss quest
             msg = 'So far today you have done an estimated '
                 + '<span class="highlight">'
-                + Math.floor(quest.progress.up * 100) / 100
+                + qProgress
                 + '</span>'
                 + ' points of damage to '
                 + quest.content.boss.name
@@ -417,6 +421,7 @@ function displayData(data) {
             // think they have even slightly more progress than they really
             // have. Imagine if they missed ending a quest overnight by 0.1
             // health because this page exaggerated their progress!
+            $('#questProgressDamage').text(qProgress);
         }
         else if (quest.content.collect) {
             // user is on a collection quest
@@ -567,7 +572,7 @@ function displayData(data) {
         'aaData': allTasksArray,
         'aoColumns': [
     { 'mData' : 'order', // needed to ensure correst starting sort
-      'sTitle': '#',    'bVisible': false, 
+      'sTitle': '#',    'bVisible': false,
     },
     { 'mData' : 'type',       'sClass': 'center',
       'sTitle': 'type',       'sWidth': '10%',
@@ -645,7 +650,7 @@ function displayData(data) {
         'bPaginate': false,
         'bDeferRender': true,
         // 'bSortClasses': false,
-        "sScrollX": "100%", 
+        "sScrollX": "100%",
         // "sScrollXInner": "200%",
         "bDestroy": true, // allows table to recreate if Fetch Data is repeated
         'oColumnFilterWidgets': {
@@ -726,7 +731,7 @@ function displayData(data) {
         }
         else {
             historyList.reverse(); // put most recent at top (we couldn't
-                   // do this earlier when we sorted the items because the 
+                   // do this earlier when we sorted the items because the
                    // 'buttonUsed' code needed them in chronological order
             habitText += "<ul>" + historyList.join("") + "</ul>";
         }
@@ -786,6 +791,7 @@ function displayData(data) {
     }
 
     var damageDailiesHtml = '';
+    var currentHealth = Math.round(data.stats.hp * 10) / 10;
     if (sleeping) {
         damageDailiesHtml = '<p>You are'
             + ' <a href="http://habitrpg.wikia.com/wiki/Tavern">resting'
@@ -831,7 +837,7 @@ function displayData(data) {
                 + '</p>';
             }
         }
-        damageDailiesHtml += 
+        damageDailiesHtml +=
               '<p>Possible sources of error in this estimate are:</p>'
             + '<ul>'
             + '<li>Programmer error (this will disappear after more testing).</li>'
@@ -842,11 +848,10 @@ function displayData(data) {
             + ' .</p>';
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
-    // XXX_VERY_SOON daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
-
-
-
-
+    // XXX_VERY_SOON daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailie
+    $('#damage').text(dailysDamage);
+    $('#bossDamage').text(questDamage);
+    $('#currentHealth').text(currentHealth);
 }
 
 function createCurrentGearSection(stats, prefs, equipped, costume, items) {
@@ -1129,6 +1134,7 @@ function chooseColour(value) {
     } else if (value > -20) { colourObj = {'order':6, 'name':'Red'};
     } else                  { colourObj = {'order':7, 'name':'Dark Red'};
     }
+
     colourObj.label       = colourObj.order + ") " + colourObj.name;
     colourObj.nameNoSpace = colourObj.name.replace(/ /, '');
     colourObj.id          = 'colour' + colourObj.nameNoSpace;
@@ -1437,7 +1443,7 @@ h2 {
 #taskOverviewTable {
     width: 100%;
     table-layout: fixed;
-    word-wrap: break-word;  
+    word-wrap: break-word;
 }
 #taskOverviewTable .sorting_1,
 #taskOverviewTable .sorting_2,
@@ -1537,7 +1543,36 @@ h2 {
 #dailiesIncompleteSection p:nth-of-type(2) {
     margin-top: 2em;
 }
-
+#dashboard { float: right; }
+#dashboard li {
+   text-align: center;
+   width: 120px;
+   background-color: #fffbd0;
+   border: 1px;
+   padding: 4px;
+   margin-bottom: 4px;
+   font-family: sans-serif;
+   float: left;
+   list-style-type: none;
+}
+.health {
+   background-color: #ffcccc;
+}
+.stat
+{
+  font-size: 30px;
+  font-weight: bold;
+  padding: 2px;
+}
+.stat-label
+{
+  font-size: 8pt;
+  padding: 1px;
+}
+.stats
+{
+  box-shadow: 1px 1px 1px 1px #666666;
+}
 
     </style>
 </head>
@@ -1575,7 +1610,7 @@ h2 {
                     <li><span class="subheading">Current Appearance and Gear</span>: Lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
                 </ul>
             </li>
-            <li>Code: 
+            <li>Code:
                 <ul>
                     <li>Improvements to <span class="subheading">Damage from Dailies</span>. CON from gear (including class bonuses) is now included; Stealth buff is still NOT included (but will be soon). This seems pretty accurate now but there's still more testing to be done before it could be called reliable.</li>
                 </ul>
@@ -1604,7 +1639,7 @@ h2 {
                     <li>Task Overview explanation is now hidden by default to save precious screen space.</li>
                 </ul>
             </li>
-            <li>Code: 
+            <li>Code:
                 <ul>
                     <li>Inserted a slightly nasty hack to allow Chrome to save the User ID and API Token if the user chooses to do that. (<a href="http://www.zdnet.com/do-you-save-passwords-in-chrome-maybe-you-should-reconsider-7000019074/">Obligatory warning about problems with storing passwords in browsers</a> - be careful especially on shared computers).</li>
                     <li>HabitRPG's "content" json data is now fetched before the user data so that we can use it for displaying attractive gear names, and calculating stats from gear.</li>
@@ -1614,7 +1649,7 @@ h2 {
         <dt>1.4.3 <span class="date">2014-04-05</span></dt>
         <dd><ul>
             <li>Features: none</li>
-            <li>Code: 
+            <li>Code:
                 <ul>
                     <li>Improvements to <span class="subheading">Damage from Dailies</span> but it's still experimental and not to be trusted. Damage reduction from checklists is now included; CON buffs are now included (but not CON gear nor Stealth)</li>
                 </ul>
@@ -1723,6 +1758,34 @@ h2 {
 </div>
 
 <div id="main" class="showOnlyIfHaveFetchedData">
+    <div style="float: right; width: 130px;">
+    <ul id="dashboard">
+        <li><div class="stats">
+            <div id="currentHealth" class="stat"></div>
+            <div class="stat-label">Current Health</div></div>
+        </li>
+        <li><div class="stats">
+            <div id="unallocPoints" class="stat"></div>
+            <div class="stat-label">Unallocated Points</div></div>
+        </li>
+        <li><div class="stats health">
+            <div id="damage" class="stat"></div>
+            <div class="stat-label">Est. Damage</div></div>
+        </li>
+        <li><div class="stats health">
+            <div id="bossDamage" class="stat"></div>
+            <div class="stat-label">Est. Boss Damage</div></div>
+        </li>
+        <li><div class="stats">
+            <div id="questProgressDamage" class="stat"></div>
+            <div class="stat-label">Quest Damage</div></div>
+        </li>
+        <li><div class="stats">
+            <div id="dropCount" class="stat"></div>
+            <div class="stat-label">Drop Count</div></div>
+        </li>
+    </ul>
+    </div>
 
     <ul id="tableOfContents" class="selfClear"><!-- TOC toc -->
         <!-- Some of these items are hidden by default so that they can
@@ -1771,7 +1834,7 @@ h2 {
 
     <div class="tocSection longContent" id="habitHistorySection">
         <h2>Habit History</h2>
-        <p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks.  
+        <p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks.
 <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. -->
 Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.
 </p>
@@ -1850,7 +1913,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
         They are not sent anywhere else.
         To confirm that, you can ask someone who knows the JavaScript
         programming language to examine the source of this page.</li>
-        <li>This page does not save your User ID and API Token to any 
+        <li>This page does not save your User ID and API Token to any
         location, but your browser might, if it has been configured to
         save form and password information. If you are using this page
         on a shared computer, you should clear any data that the browser
