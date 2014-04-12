@@ -220,7 +220,7 @@ function toggleApiDetailsFormLinkText() {
 }
 
 function toggleVisibilityForStuff() {
-    $("#loading").hide(); // when we get here, we're done trying to load
+    $("#loading").hide();
     if (dataFetchStatus == 'succeeded') {
         $('.showOnlyIfHave_Not_FetchedData').removeClass('show')
                                                .addClass('hide');
@@ -228,10 +228,13 @@ function toggleVisibilityForStuff() {
                                           .addClass('show');
     } else {
         // dataFetchStatus is 'not attempted' or 'failed' or anything else
+        $('.showOnlyIfDataExists').removeClass('show')
+                                  .addClass('hide');
         $('.showOnlyIfHave_Not_FetchedData').removeClass('hide')
                                                .addClass('show');
         $('.showOnlyIfHaveFetchedData').removeClass('show')
                                           .addClass('hide');
+        $('.output').html(''); // wipe any data inserted from a previous run
     }
 
     // special case for errors:
@@ -317,14 +320,15 @@ function displayData(data) {
     if (user.stats.points > 0 && user.stats.lvl >= 10) {
         var points = (user.stats.points == 1) ? "point" : "points";
         var them   = (user.stats.points == 1) ? "it"    : "them";
-        $('#unallocatedPoints p').html('<span class="highlight">You have '
+        $('#unallocatedPoints .output').html('<span class="highlight">You have '
             + user.stats.points
             + ' unallocated ' + points + '.</span>'
             + ' Go to <a href="https://habitrpg.com/#/options/profile/stats">'
             + 'your Profile -&gt; Stats page</a> to allocate ' + them + '. '
             + '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
             + 'Learn more.</a>');
-        $('#unallocatedPoints').show();
+        $('#unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
+                                                    .addClass('show');
     }
     $('#dashUnallocPoints').text(user.stats.points||0);
 
@@ -362,7 +366,8 @@ function displayData(data) {
                 + ' I have some interesting ideas to work on...</p>';
         }
         $('#missingEquipmentSection .output').html(missingHtml);
-        $('#missingEquipment').show();
+        $('#missingEquipment.showOnlyIfDataExists').removeClass('hide')
+                                                   .addClass('show');
     }
 
 
@@ -461,7 +466,8 @@ function displayData(data) {
                  + ' quest.';
         }
         $('#questProgressSection .output').html(msg);
-        $('#questProgress').show();
+        $('#questProgress.showOnlyIfDataExists').removeClass('hide')
+                                                .addClass('show');
     }
 
 
@@ -714,9 +720,14 @@ function displayData(data) {
                      + formatUntaggedTasks('Rewards', untaggedTasks['rewards']);
     if (untaggedHtml) {
         $('#untaggedTasksSection .output').html(untaggedHtml);
-        $('#untaggedTasks').show();
+        $('#untaggedTasks.showOnlyIfDataExists').removeClass('hide')
+                                                .addClass('show');
     }
 
+
+    //////////////////////////////////////////////////////////////////////
+    ////   Dailies Incomplete        /////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
     var uncomplHtml = '';
     if (dailiesIncomplete.length > 0) {
         uncomplHtml += '<p>';
@@ -751,9 +762,14 @@ function displayData(data) {
     }
     if (uncomplHtml) {
         $('#dailiesIncompleteSection .output').html(uncomplHtml);
-        $('#dailiesIncomplete').show();
+        $('#dailiesIncomplete.showOnlyIfDataExists').removeClass('hide')
+                                                    .addClass('show');
     }
 
+
+    //////////////////////////////////////////////////////////////////////
+    ////   Damage from Dailies       /////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
     var damageDailiesHtml = '';
     var currentHealth = Math.round(user.stats.hp * 10) / 10;
     $('#dashCurrentHealth').text(currentHealth);
@@ -829,8 +845,7 @@ function displayData(data) {
             + '<li>If you have not logged in to HabitRPG for more than a day, the damage <!--you (and your fellow quest participants) will take--> will be much greater than shown here.</li>' // XXX_LATER highlight parts of that when it's the major error
             + '<li>Programmer error (this will disappear after more testing).</li>'
             // + '<li>HabitRPG's code being updated without me noticing</li>'
-            + '</ul>'
-            + ' .</p>';
+            + '</ul>';
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
     $('#dashDamage').text(dailysDamage);
@@ -1290,6 +1305,9 @@ var myDateConverter = function(date) {
 .showOnlyIfHaveFetchedData { /* e.g., show "main" div when we have data */
     /* no styles go here - this class is just for jquery to act on */
 }
+.showOnlyIfDataExists { /* e.g., show ToC link when optional section has data */
+    /* no styles go here - this class is just for jquery to act on */
+}
 .show {
     display: block;
 }
@@ -1674,8 +1692,9 @@ h2 {
             </li>
             <li>Code:
                 <ul>
-                    <li>Various code improvements.</li>
                     <li>Initial code for a dashboard, thanks to thepeopleseason! The dashboard is currently hidden while development continues.</li>
+                    <li>Code now erases generated HTML and hides optional ToC entries before data is (re-)fetched to prevent incorrect display of old data.</li>
+                    <li>Various other code improvements.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -1844,7 +1863,7 @@ h2 {
 </div>
 
 <div id="main" class="showOnlyIfHaveFetchedData">
-    <div id="dashboard">
+    <div id="dashboard"><!-- XXX_SOON wipe data before refetch -->
     <ul id="dashboardInner">
         <li><div class="stats">
             <div id="dashCurrentHealth" class="stat"></div>
@@ -1873,7 +1892,7 @@ h2 {
     </ul>
     </div>
 
-    <ul id="tableOfContents" class="selfClear"><!-- TOC toc -->
+    <ul id="tableOfContents" class="selfClear"><!-- TOC ToC toc -->
         <!-- Some of these items are hidden by default so that they can
              be shown only if relevant (e.g., you see Quest Progress
              only if you are on a quest).
@@ -1881,22 +1900,22 @@ h2 {
         <li>Tasks:<ul>
             <li id="habitHistory"><a href="">Habit History</a></li>
             <li id="taskOverview"><a href="">Task Overview</a></li>
-            <li id="dailiesIncomplete" class="hide"><a href="">Dailies Incomplete</a></li>
-            <li id="untaggedTasks" class="hide"><a href="">Tasks Untagged</a></li>
+            <li id="dailiesIncomplete" class="showOnlyIfDataExists"><a href="">Dailies Incomplete</a></li>
+            <li id="untaggedTasks" class="showOnlyIfDataExists"><a href="">Tasks Untagged</a></li>
         </ul></li>
         <li>Other:<ul>
             <li id="damageDailies"><a href="">Damage from Dailies</a></li>
             <li id="dropsToday"><a href="">Drops Received Today</a></li>
-            <li id="questProgress" class="hide"><a href="">Quest Progress</a></li>
-            <li id="missingEquipment" class="hide"><a href="">Missing Equipment</a></li>
+            <li id="questProgress" class="showOnlyIfDataExists"><a href="">Quest Progress</a></li>
+            <li id="missingEquipment" class="showOnlyIfDataExists"><a href="">Missing Equipment</a></li>
             <li id="currentGear"><a href="">Current Appearance and Gear</a></li>
         </ul></li>
     </ul>
     <hr />
 
-    <div class="hide urgent" id="unallocatedPoints">
+    <div id="unallocatedPoints" class="showOnlyIfDataExists urgent">
         <!-- section is shown automatically if there are points -->
-        <p></p>
+        <p class="output"></p>
     </div>
 
     <div class="tocSection longContent" id="taskOverviewSection">
