@@ -1047,7 +1047,11 @@ function prettyPrintKey(key, itemType, options) {
         }
         var type = obj.type;
         if (type == 'head') { type = 'headwear'; }
-        extra = obj.klass + " " + type;
+        extra = obj.klass;
+        if (obj.klass == 'special' && obj.specialClass) {
+            extra += " " + obj.specialClass;
+        }
+        extra += " " + type;
         if (options && options.includeStats) {
             extra += '; <span class="stats">'
                    + prettyPrintStats(obj,
@@ -1648,9 +1652,10 @@ h2 {
 
         <dt>1.6.1 <span class="date">2014-04-12</span></dt>
         <dd><ul>
-            <li>Features:
+            <li>Features (very minor):
                 <ul>
-                    <li>none</li>
+                    <li><span class="subheading">Damage from Dailies</span> now takes into consideration the class equipment bonus for special gear.</li>
+                    <li><span class="subheading">Current Appearance and Gear</span> and <span class="subheading">Missing Equipment</span> now specify the class for special gear that has a class.</li>
                 </ul>
             </li>
             <li>Documentation / Layout:
@@ -1661,8 +1666,7 @@ h2 {
             </li>
             <li>Code:
                 <ul>
-                    <li>When computing CON for "Damage from Dailies", the code now includes the recent change which gives class equipment bonus for special event gear.</li>
-                    <li>Various other code improvements.</li>
+                    <li>Various code improvements.</li>
                     <li>Initial code for a dashboard, thanks to thepeopleseason! The dashboard is currently hidden while development continues.</li>
                 </ul>
             </li>
