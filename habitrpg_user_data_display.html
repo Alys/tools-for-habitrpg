@@ -509,6 +509,8 @@ function displayData(data) {
     var today = ["su","m","t","w","th","f","s"][(new Date()).getDay()];
     var conBonus = 1 - (user.computedStat['con'] / 250);
     if (conBonus < 0.1) { conBonus = 0.1; }
+    var stealth = user.stats.buffs.stealth; // user avoids damage from dailies
+    // d("stealth: " + stealth); // TST
     $.each(user.dailys, function(index, obj){
         obj.text = escapeHtml(obj.text);
         numberDailys++;
@@ -523,25 +525,32 @@ function displayData(data) {
             if (! obj.completed && obj.repeat[today]) {
                 // this Daily has not been completed but is due today, so
                 // record its text and calculate HP damage:
-                dailiesIncomplete.push(obj.text);
-                var currVal = obj.value; // task value
-                if (currVal < valueMin) { currVal = valueMin; } // capped
-                if (currVal > valueMax) { currVal = valueMax; } // capped
-                var nextDelta = Math.abs(Math.pow(0.9747, currVal));
-                var checklist = describeChecklist(obj);
-                if (checklist.exists) {
-                    nextDelta *= (1 - checklist.proportionDone);
-                    // NOTE: If you tick off all the items in a Daily
-                    // checklist but don't tick off the Daily itself,
-                    // you take zero damage (confirmed by testing).
+                if (stealth > 0) {
+                    // user evades this daily
+                    stealth--;
+                    // XXX Test this. Daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
                 }
-                var delta = nextDelta; // Change this if we ever take account of
-                                       // multiple missed days.
-                questDamage += delta;
-                var hpMod = delta * conBonus * obj.priority * 2;
-                // priority is easy (1), medium (1.5), hard (2)
-                hpMod = Math.round(hpMod * 10) / 10; // HabitRPG uses round
-                dailysDamage += hpMod; // note this is NOT a negative number
+                else {
+                    dailiesIncomplete.push(obj.text);
+                    var currVal = obj.value; // task value
+                    if (currVal < valueMin) { currVal = valueMin; } // capped
+                    if (currVal > valueMax) { currVal = valueMax; } // capped
+                    var nextDelta = Math.abs(Math.pow(0.9747, currVal));
+                    var checklist = describeChecklist(obj);
+                    if (checklist.exists) {
+                        nextDelta *= (1 - checklist.proportionDone);
+                        // NOTE: If you tick off all the items in a Daily
+                        // checklist but don't tick off the Daily itself,
+                        // you take zero damage (confirmed by testing).
+                    }
+                    var delta = nextDelta; // Change this if we ever take
+                                           // account of multiple missed days.
+                    questDamage += delta;
+                    var hpMod = delta * conBonus * obj.priority * 2;
+                    // priority is easy (1), medium (1.5), hard (2)
+                    hpMod = Math.round(hpMod * 10) / 10; // HabitRPG uses round
+                    dailysDamage += hpMod; // note this is NOT a negative number
+                }
             }
             else if (! obj.completed && ! obj.repeat[today]) {
                 // this Daily has not been completed and is NOT due today,
@@ -816,9 +825,9 @@ function displayData(data) {
         damageDailiesHtml += '<p style="margin-top:2em">Possible sources of'
             + ' error in these estimates are:</p>'
             + '<ul>'
-            + '<li>Programmer error (this will disappear after more testing).</li>'
-            + '<li>Skills such as Stealth. These are currently not considered and they will cause you to take less damage than is shown here. (Stealth will be considered here soon.)</li>'
+            + '<li>The warrior\'s Defensive Stance skill is currently not considered and will cause you to take less damage than is shown here. (The rogue\'s Stealth skill <strong>is</strong> now being considered.)</li>'
             + '<li>If you have not logged in to HabitRPG for more than a day, the damage <!--you (and your fellow quest participants) will take--> will be much greater than shown here.</li>' // XXX_LATER highlight parts of that when it's the major error
+            + '<li>Programmer error (this will disappear after more testing).</li>'
             // + '<li>HabitRPG's code being updated without me noticing</li>'
             + '</ul>'
             + ' .</p>';
@@ -826,7 +835,6 @@ function displayData(data) {
     $('#damageDailiesSection .output').html(damageDailiesHtml);
     $('#dashDamage').text(dailysDamage);
     $('#dashBossDamage').text(questDamage);
-    // XXX_VERY_SOON daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
 }
 
 
@@ -1652,9 +1660,9 @@ h2 {
 
         <dt>1.6.1 <span class="date">2014-04-12</span></dt>
         <dd><ul>
-            <li>Features (very minor):
+            <li>Features (minor):
                 <ul>
-                    <li><span class="subheading">Damage from Dailies</span> now takes into consideration the class equipment bonus for special gear.</li>
+                    <li><span class="subheading">Damage from Dailies</span> now takes into consideration the rogue's <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth skill</a> and the class equipment bonus for special gear. <strong>The warrior's Defensive Stance skill is still not considered.</strong></li>
                     <li><span class="subheading">Current Appearance and Gear</span> and <span class="subheading">Missing Equipment</span> now specify the class for special gear that has a class.</li>
                 </ul>
             </li>
