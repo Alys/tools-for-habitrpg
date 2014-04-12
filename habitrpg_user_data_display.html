@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -1129,6 +1130,7 @@ function chooseColour(value) {
     } else if (value > -20) { colourObj = {'order':6, 'name':'Red'};
     } else                  { colourObj = {'order':7, 'name':'Dark Red'};
     }
+
     colourObj.label       = colourObj.order + ") " + colourObj.name;
     colourObj.nameNoSpace = colourObj.name.replace(/ /, '');
     colourObj.id          = 'colour' + colourObj.nameNoSpace;
