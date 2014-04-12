@@ -159,6 +159,18 @@ $(document).ready(function() {
         }
     });
 
+    // Damage from Dailies explanation hide/show:
+    $('.damageDailiesExplanationToggle').click(function(event){
+        event.preventDefault();
+        $('#damageDailiesSection .longExplanation').toggle();
+        var linkText = 'explanation';
+        if ($('#damageDailiesSection .longExplanation').is(':visible')) {
+            $('.damageDailiesExplanationToggle a').text('hide ' + linkText);
+        } else {
+            $('.damageDailiesExplanationToggle a').text('show ' + linkText);
+        }
+    });
+
     // Table of Contents (TOC) hide/show:
     $('#tableOfContents a').click(function(event){
         event.preventDefault();
@@ -516,7 +528,6 @@ function displayData(data) {
     var conBonus = 1 - (user.computedStat['con'] / 250);
     if (conBonus < 0.1) { conBonus = 0.1; }
     var stealth = user.stats.buffs.stealth; // user avoids damage from dailies
-    // d("stealth: " + stealth); // TST
     $.each(user.dailys, function(index, obj){
         obj.text = escapeHtml(obj.text);
         numberDailys++;
@@ -789,10 +800,6 @@ function displayData(data) {
         }
     }
     else {
-        damageDailiesHtml = '<p class="highlight">'
-            + 'This section is new and highly experimental!'
-            + ' Until it has been proved with more testing,'
-            + ' do not rely on it to prevent death!</p>';
         if (quest && quest.content.boss) {
             if (dailysDamage == 0) {
                 damageDailiesHtml += '<p>You and your fellow'
@@ -838,14 +845,6 @@ function displayData(data) {
                 + currentHealth
                 + '</span>.</p>';
         }
-        damageDailiesHtml += '<p style="margin-top:2em">Possible sources of'
-            + ' error in these estimates are:</p>'
-            + '<ul>'
-            + '<li>The warrior\'s Defensive Stance skill is currently not considered and will cause you to take less damage than is shown here. (The rogue\'s Stealth skill <strong>is</strong> now being considered.)</li>'
-            + '<li>If you have not logged in to HabitRPG for more than a day, the damage <!--you (and your fellow quest participants) will take--> will be much greater than shown here.</li>' // XXX_LATER highlight parts of that when it's the major error
-            + '<li>Programmer error (this will disappear after more testing).</li>'
-            // + '<li>HabitRPG's code being updated without me noticing</li>'
-            + '</ul>';
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
     $('#dashDamage').text(dailysDamage);
@@ -1473,8 +1472,14 @@ h1 .versionToggle {
     margin-bottom: 10px;
 }
 
-ul#tableOfContents {
+ul#tableOfContents,
+ul#tableOfContents ul {
     list-style-type: none;
+    margin-right: 20px;
+}
+ul#tableOfContents ul {
+    margin-left: 1em;
+    padding: 0;
 }
 #tableOfContents li {
     font-size: 110%;
@@ -1572,6 +1577,10 @@ h2 {
     font-size:  .8em;
     font-style: italic;
     font-weight: normal;
+}
+
+#damageDailiesSection li {
+    padding: 3px 0;
 }
 
 .gearList .item .stats {
@@ -1676,24 +1685,24 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
-        <dt>1.6.1 <span class="date">2014-04-12</span></dt>
+        <dt>1.6.1 <span class="date">2014-04-13</span></dt>
         <dd><ul>
             <li>Features (minor):
                 <ul>
-                    <li><span class="subheading">Damage from Dailies</span> now takes into consideration the rogue's <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth skill</a> and the class equipment bonus for special gear. <strong>The warrior's Defensive Stance skill is still not considered.</strong></li>
+                    <li><span class="subheading">Damage from Dailies</span> is now complete and seems to be accurate. But don't trust it with your life! Please read the warning in that section (click its "show explanation" link).</li>
                     <li><span class="subheading">Current Appearance and Gear</span> and <span class="subheading">Missing Equipment</span> now specify the class for special gear that has a class.</li>
                 </ul>
             </li>
             <li>Documentation / Layout:
                 <ul>
-                    <li>renamed "Tasks that have not been Tagged" to "Tasks Untagged"</li>
-                    <li>Damage from Dailies: Improved (I hope) wording to explain the two kinds of damage you can take (normal and boss). Feedback welcome if it's actually become worse. You can just look at the bolded parts if you already understand what's going on.</li>
+                    <li>Renamed <span class="subheading">Tasks that have not been Tagged</span> to <span class="subheading">Tasks Untagged</span>.</li>
+                    <li><span class="subheading">Damage from Dailies</span>: Improved (I hope) wording to explain the two kinds of damage you can take (normal and boss), to help new users. Feedback welcome if it's actually become worse. You can just look at the bolded parts if you already understand what's going on.</li>
                 </ul>
             </li>
             <li>Code:
                 <ul>
                     <li>Initial code for a dashboard, thanks to thepeopleseason! The dashboard is currently hidden while development continues.</li>
-                    <li>Code now erases generated HTML and hides optional ToC entries before data is (re-)fetched to prevent incorrect display of old data.</li>
+                    <li>The page now erases generated HTML and hides optional ToC entries before data is (re-)fetched to prevent incorrect display of old data.</li>
                     <li>Various other code improvements.</li>
                 </ul>
             </li>
@@ -1764,7 +1773,7 @@ h2 {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Damage from Dailies</span>: an <span class="highlight">estimate</span> of how much damage you would take if you did no more dailies today. This is a new feature and might still be inaccurate.</li>
+                    <li><span class="subheading">Damage from Dailies</span>: an <span class="highlight">estimate</span> of how much damage you would take if you did no more dailies today. Be cautious about using this if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
                 </ul>
             </li>
         </ul></dd>
@@ -1973,6 +1982,13 @@ Habits with no history are highlighted in bold, in case you would like to consid
 
     <div class="tocSection" id="damageDailiesSection">
         <h2>Damage from Dailies</h2>
+        <p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span class="damageDailiesExplanationToggle"><a href="">show explanation</a></span></p>
+        <ul class="longExplanation">
+        <li>These estimates have been accurate during testing but your usage of HabitRPG might involve factors that were not considered, and so this information can't be guaranteed to be correct.</li>
+        <li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you won't die.</li>
+        <li>If you have not logged in to HabitRPG for more than a day, the damage that you (and your fellow quest participants) will take will be <span class="highlight">much greater</span> than shown here.</li>
+        <li class="damageDailiesExplanationToggle lowlight" style="list-style-type: none; padding: 8px 0 20px 0"><a href="">hide explanation</a></li>
+        </ul>
         <div class="output"></div>
     </div>
 
@@ -2041,7 +2057,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</li>
         <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
         <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
-        <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. This is a new feature and might still be inaccurate.</li>
+        <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
         <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown.</li>
         <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
         <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
