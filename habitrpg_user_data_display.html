@@ -292,26 +292,26 @@ function fetchFailure() {
 }
 
 function displayData(data) {
-    user = data; // XXX_SOON convert all (messy!) 'data' to this global 'user'
+    user = data;
     dataFetchStatus = 'succeeded';
     toggleVisibilityForStuff();
 
     // get some basic details about the user:
-    $('#userNameDisplay').text(data.profile.name); // user's name in header
-    var sleeping = data.preferences.sleep; // true if resting in the inn
+    $('#userNameDisplay').text(user.profile.name); // user's name in header
+    var sleeping = user.preferences.sleep; // true if resting in the inn
 
     var quest;
-    if (data.party.quest.key) {
-        quest = $.extend({}, data.party.quest);
-        quest.content = $.extend({}, content.quests[ data.party.quest.key ] );
+    if (user.party.quest.key) {
+        quest = $.extend({}, user.party.quest);
+        quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
     }
 
 
-    if (data.stats.points > 0 && data.stats.lvl >= 10) {
-        var points = (data.stats.points == 1) ? "point" : "points";
-        var them   = (data.stats.points == 1) ? "it"    : "them";
+    if (user.stats.points > 0 && user.stats.lvl >= 10) {
+        var points = (user.stats.points == 1) ? "point" : "points";
+        var them   = (user.stats.points == 1) ? "it"    : "them";
         $('#unallocatedPoints p').html('<span class="highlight">You have '
-            + data.stats.points
+            + user.stats.points
             + ' unallocated ' + points + '.</span>'
             + ' Go to <a href="https://habitrpg.com/#/options/profile/stats">'
             + 'your Profile -&gt; Stats page</a> to allocate ' + them + '. '
@@ -319,11 +319,11 @@ function displayData(data) {
             + 'Learn more.</a>');
         $('#unallocatedPoints').show();
     }
-    $('#dashUnallocPoints').text(data.stats.points||0);
+    $('#dashUnallocPoints').text(user.stats.points||0);
 
 
     var missing = [];
-    $.each(data.items.gear.owned, function(key, value){
+    $.each(user.items.gear.owned, function(key, value){
         if (value === false) {
             missing.push( prettyPrintKey(key, 'gear',
                             {'includeStats':true, 'includeGold':true, }) );
@@ -341,7 +341,7 @@ function displayData(data) {
         }
         missingHtml += '<a href="http://habitrpg.wikia.com/wiki/'
                      + 'Death_Mechanics#Lost_Equipment">Learn more.</a></p>';
-        if (data.achievements.rebirths > 0 && missing.length > 6) {
+        if (user.achievements.rebirths > 0 && missing.length > 6) {
             // We show the message below when rebirthers are missing
             // lots of gear, but not when they've bought back most of it,
             // because by that time, they're unlikely to be confused by
@@ -360,10 +360,7 @@ function displayData(data) {
 
 
     $('#currentGearSection .output').html(
-            createCurrentGearSection(data.stats, data.preferences,
-                data.items.gear.equipped, data.items.gear.costume,
-                data.items) );
-
+            createCurrentGearSection() );
 
 
     var dropsExtra = ''; // normally leave this blank!
@@ -372,9 +369,9 @@ function displayData(data) {
                    * 1          // assume task priority easy
                    * 1          // assume no streak
                    * (1 + computeStat('per') / 100)
-                   * (1 + data.achievements.streak / 200);
-    if (data.contributor.level) {
-        dropChance *= (1 + data.contributor.level / 20);
+                   * (1 + user.achievements.streak / 200);
+    if (user.contributor.level) {
+        dropChance *= (1 + user.contributor.level / 20);
     }
     dropChance = diminishingReturns(dropChance, 0.75);
     var perComputed = computeStat('per');
@@ -383,8 +380,8 @@ function displayData(data) {
 
     $('#dropsTodaySection .output').html(
         'Drops received so far today: <span class="highlight">'
-        + data.items.lastDrop.count + '</span>.' + dropsExtra);
-    $('#dashDropCount').text(data.items.lastDrop.count||0);
+        + user.items.lastDrop.count + '</span>.' + dropsExtra);
+    $('#dashDropCount').text(user.items.lastDrop.count||0);
 
     // Quest Progress section:
     if (quest) {
@@ -467,7 +464,7 @@ function displayData(data) {
     // examining a task's tags, we can ignore any tags that don't appear
     // in that array (e.g., tags the user has deleted but that weren't
     // removed from the task).
-    $.each(data.tags, function(index, obj){
+    $.each(user.tags, function(index, obj){
         knownTags.push(obj.id);
     });
 
@@ -509,7 +506,7 @@ function displayData(data) {
     var valueMin = -47.27; // task values are capped ...
     var valueMax =  21.27; // ... for some purposes
     var today = ["su","m","t","w","th","f","s"][(new Date()).getDay()];
-    $.each(data.dailys, function(index, obj){
+    $.each(user.dailys, function(index, obj){
         obj.text = escapeHtml(obj.text);
         numberDailys++;
         countHabitsDailysTodos++;
@@ -554,6 +551,9 @@ function displayData(data) {
         questDamage = questDamage * quest.content.boss.str;
         questDamage = Math.ceil(questDamage * 10) / 10;
     }
+    else {
+        questDamage = 'n/a'; // need if we permanently show damage on dashboard
+    }
     dailysDamage = Math.ceil(dailysDamage * 10) / 10;
     // We round UP with ceil because we must never let the user
     // think they will take even slightly less damage than they really
@@ -564,7 +564,7 @@ function displayData(data) {
     var totalDamage = Math.round((dailysDamage + questDamage) * 10) / 10;
 
     ////// Todos:
-    $.each(data.todos, function(index, obj){
+    $.each(user.todos, function(index, obj){
         obj.text = escapeHtml(obj.text);
         numberTodos++;
         countHabitsDailysTodos++;
@@ -577,7 +577,7 @@ function displayData(data) {
     });
 
     ////// Rewards:
-    $.each(data.rewards, function(index, obj){
+    $.each(user.rewards, function(index, obj){
         obj.text = escapeHtml(obj.text);
         if (! taskIsTagged(obj.tags)) { untaggedTasks['rewards'].push(obj); }
     });
@@ -743,7 +743,7 @@ function displayData(data) {
     }
 
     var damageDailiesHtml = '';
-    var currentHealth = Math.round(data.stats.hp * 10) / 10;
+    var currentHealth = Math.round(user.stats.hp * 10) / 10;
     $('#dashCurrentHealth').text(currentHealth);
     if (sleeping) {
         damageDailiesHtml = '<p>You are'
@@ -909,7 +909,7 @@ function collateHistoryForOneHabit (obj){
 }
 
 
-function createCurrentGearSection(stats, prefs, equipped, costume, items) {
+function createCurrentGearSection() {
     var pastels = ['pblue','pgreen','porange','ppink','ppurple','pyellow'];
     var basicSkins = {'ddc994':'palest brown (1st)','f5a76e':'pink (2nd)',
             'ea8349':'orange (3rd)','c06534':'light brown (4th)',
@@ -920,15 +920,15 @@ function createCurrentGearSection(stats, prefs, equipped, costume, items) {
                         '800ed0':'violet','rainbow':'rainbow'};
     var spookySkins=['monster','pumpkin','skeleton','zombie','ghost','shadow'];
 
-    var klass = (stats.class == 'healer' ) ? 'Healer'
-              : (stats.class == 'rogue'  ) ? 'Rogue'
-              : (stats.class == 'wizard' ) ? 'Mage'
-              : (stats.class == 'warrior') ? 'Warrior'
-              :  stats.class;
+    var klass = (user.stats.class == 'healer' ) ? 'Healer'
+              : (user.stats.class == 'rogue'  ) ? 'Rogue'
+              : (user.stats.class == 'wizard' ) ? 'Mage'
+              : (user.stats.class == 'warrior') ? 'Warrior'
+              :  user.stats.class;
     var currentGearEtcHtml = '';
     var appearance = [ 'class: <span class="attributeValue">'
                       + klass + '</span>' ];
-    if (stats.buffs.snowball) {
+    if (user.stats.buffs.snowball) {
         appearance.push('<span class="attributeValue">Snowball!</span>');
     }
     $.each([
@@ -943,8 +943,8 @@ function createCurrentGearSection(stats, prefs, equipped, costume, items) {
         ['',      'skin',         'skin colour'               ],
     ], function(index,obj) {
         var value;
-        if (obj[0]) { value = prefs[obj[0]][obj[1]]; }
-        else        { value = prefs[obj[1]];         }
+        if (obj[0]) { value = user.preferences[obj[0]][obj[1]]; }
+        else        { value = user.preferences[obj[1]];         }
         if (obj[1] == 'color' && ($.inArray(value, pastels) !== -1)) {
             value = value.replace(/^p/, "pastel ");
         }
@@ -1002,7 +1002,7 @@ function createCurrentGearSection(stats, prefs, equipped, costume, items) {
 
     var beasts = [];
     $.each([ 'currentMount', 'currentPet' ], function(index,type) {
-        var value = items[type];
+        var value = user.items[type];
         if (value) {
             // improve display of pets/mounts (BearCub-Red -> Red Bear Cub):
             var speciesAndColour = value.split('-');
