@@ -42,7 +42,7 @@ Contributors:
     <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
 
 
-    <script src="//code.jquery.com/jquery-latest.min.js"></script>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <link href="js/DataTables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
@@ -180,11 +180,14 @@ $(document).ready(function() {
                 $('#dailiesIncomplete').is(':visible')) {
                 $('#dailiesIncompleteSection').show();
             }
-            if ($('#dropsTodaySection').is(':visible') && collectionDrops) {
+            if ($('#dropsTodaySection').is(':visible')) {
                 // The user is on a collection quest and has viewed the
                 // Drops Received Today section, so also show them the
                 // Quest Progress section (collection quests have drops):
-                $('#questProgressSection').show();
+                if (collectionDrops) {
+                    $('#questProgressSection').show();
+                }
+                $('#dashDrop').show();
             }
             // if ($('#questProgressSection').is(':visible') && quest
                 // && quest.content.boss
@@ -319,8 +322,12 @@ function displayData(data) {
             + 'Learn more.</a>');
         $('#unallocatedPoints').show();
     }
-    $('#dashUnallocPoints').text(data.stats.points||0);
-
+    if (data.stats.points > 0) {
+        $('#dashUnallocPoints').text(data.stats.points);
+    }
+    else {
+        $('#dashUnallocated').hide();
+    }
 
     var missing = [];
     $.each(data.items.gear.owned, function(key, value){
@@ -550,6 +557,10 @@ function displayData(data) {
             }
         }
     });
+    $('#dashUnfinishedDailies').text(dailiesIncomplete.length);
+    if (dailiesIncomplete.length == 0) {
+        $('#dashUnfinishedContainer').switchClass('damage', 'clear');
+    }
     if (quest && quest.content.boss) {
         questDamage = questDamage * quest.content.boss.str;
         questDamage = Math.ceil(questDamage  * 10) / 10;
@@ -799,7 +810,13 @@ function displayData(data) {
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
     $('#dashDamage').text(dailysDamage);
+    if (questDamage == 0) {
+        $('#dashDamageContainer').switchClass('damage','clear');
+    }
     $('#dashBossDamage').text(questDamage);
+    if (questDamage == 0) {
+        $('#dashBossContainer').switchClass('damage','clear');
+    }
     // XXX_VERY_SOON daily damage: stealth (inaccurate if applied to tasks in a different order):         return if (type is 'daily') && !completed && user.stats.buffs.stealth && user.stats.buffs.stealth-- # User "evades" a certain number of uncompleted dailies
 }
 
@@ -1560,12 +1577,9 @@ h2 {
 
 
 #dashboard {
-    display: none; /* FOR TESTING WHILE UNDER DEVELOPMENT */
-    float: right;
-    width: 130px;
 }
 #dashboardInner {
-    float: right;
+    float: left;
 }
 #dashboard li {
     text-align: center;
@@ -1573,13 +1587,16 @@ h2 {
     background-color: #fffbd0;
     border: 1px;
     padding: 4px;
-    margin-bottom: 4px;
+    margin-right: 4px;
     font-family: sans-serif;
     float: left;
     list-style-type: none;
 }
-#dashboard .health {
+#dashboard .damage {
     background-color: #ffcccc;
+}
+#dashboard .clear {
+    background-color: #ccffcc;
 }
 #dashboard .stat {
     font-size: 30px;
@@ -1593,7 +1610,9 @@ h2 {
 #dashboard .stats {
     box-shadow: 1px 1px 1px 1px #666666;
 }
-
+#dashDrop {
+    display: none;
+}
 
     </style>
 </head>
@@ -1806,15 +1825,19 @@ h2 {
             <div id="dashCurrentHealth" class="stat"></div>
             <div class="stat-label">Current Health</div></div>
         </li>
-        <li><div class="stats">
+        <li id="dashUnallocated"><div class="stats">
             <div id="dashUnallocPoints" class="stat"></div>
             <div class="stat-label">Unallocated Points</div></div>
         </li>
-        <li><div class="stats health">
+        <li><div id="dashUnfinishedContainer" class="stats damage">
+            <div id="dashUnfinishedDailies" class="stat"></div>
+            <div class="stat-label">Unfinished Dailies</div></div>
+        </li>
+        <li><div id="dashDamageContainer" class="stats damage">
             <div id="dashDamage" class="stat"></div>
             <div class="stat-label">Est. Damage</div></div>
         </li>
-        <li><div class="stats health">
+        <li><div id="dashBossContainer" class="stats damage">
             <div id="dashBossDamage" class="stat"></div>
             <div class="stat-label">Est. Boss Damage</div></div>
         </li>
@@ -1822,12 +1845,13 @@ h2 {
             <div id="dashQuestProgressDamage" class="stat"></div>
             <div class="stat-label">Quest Damage</div></div>
         </li>
-        <li><div class="stats">
+        <li id="dashDrop"><div class="stats">
             <div id="dashDropCount" class="stat"></div>
             <div class="stat-label">Drop Count</div></div>
         </li>
     </ul>
     </div>
+    <br clear="all" />
 
     <ul id="tableOfContents" class="selfClear"><!-- TOC toc -->
         <!-- Some of these items are hidden by default so that they can
