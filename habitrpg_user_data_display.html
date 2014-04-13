@@ -194,6 +194,13 @@ $(document).ready(function() {
             }
             if ($('#dropsTodaySection').is(':visible')) {
                 $('#dashDrop').show();
+                // NOTE: We unhide the number of drops in the dashboard
+                // only after the user has opened the main drops section,
+                // because some users might prefer to not know (less
+                // motivation if they know they've got all of today's drops).
+                // BUT we do not reset the dashboard drops show/hide status
+                // on re-fetch, because if the user wanted to see drops once,
+                // they'll presumably want it again.
                 if (collectionDrops) {
                     // The user is on a collection quest and has viewed the
                     // Drops Received Today section, so also show them the
@@ -345,15 +352,11 @@ function displayData(data) {
             + 'your Profile -&gt; Stats page</a> to allocate ' + them + '. '
             + '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
             + 'Learn more.</a>');
+        $('#dashUnallocated .output').text(user.stats.points);
         $('#unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
                                                     .addClass('show');
-    }
-    if (data.stats.points) {
-        $('#dashUnallocPoints').text(data.stats.points);
-        $('#dashUnallocated').show(); // needed for re-fetch - XXX see if still needed after entire dashboard refetch has been implemented
-    }
-    else {
-        $('#dashUnallocated').hide();
+        $('#dashUnallocated.showOnlyIfDataExists'  ).removeClass('hide')
+                                                    .addClass('show');
     }
 
 
@@ -419,7 +422,7 @@ function displayData(data) {
     $('#dropsTodaySection .output').html(
         'Drops received so far today: <span class="highlight">'
         + user.items.lastDrop.count + '</span>.' + dropsExtra);
-    $('#dashDropCount').text(user.items.lastDrop.count||0);
+    $('#dashDrop .output').text(user.items.lastDrop.count||0);
 
     // Quest Progress section:
     if (quest) {
@@ -443,10 +446,12 @@ function displayData(data) {
         // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
         //
         var msg = '';
-        var qProgress = 0;
-        if (quest.content.boss) {
-            qProgress = Math.floor(quest.progress.up * 100) / 100;
-            // user is on a boss quest
+        if (quest.content.boss) { // User is on a boss quest.
+            var qProgress = Math.floor(quest.progress.up * 100) / 100;
+            // We round DOWN with floor because we must never let the user
+            // think they have even slightly more progress than they really
+            // have. Imagine if they missed ending a quest overnight by 0.1
+            // health because this page exaggerated their progress!
             msg = 'So far today you have done an estimated '
                 + '<span class="highlight">'
                 + qProgress
@@ -454,14 +459,9 @@ function displayData(data) {
                 + ' points of damage to '
                 + quest.content.boss.name
                 + '.';
-            // We round DOWN with floor because we must never let the user
-            // think they have even slightly more progress than they really
-            // have. Imagine if they missed ending a quest overnight by 0.1
-            // health because this page exaggerated their progress!
-            $('#dashQuestProgressDamage').text(qProgress);
+            $('#dashQuestProgress .output').text(qProgress);
         }
-        else if (quest.content.collect) {
-            // user is on a collection quest
+        else if (quest.content.collect) { // User is on a collection quest.
             collectionDrops = true; // Quest Progress will open when Drops opens
             var total = 0;
             var stuff = '';
@@ -491,10 +491,14 @@ function displayData(data) {
             msg += '</span> for the '
                  + quest.content.text
                  + ' quest.';
+            $('#dashQuestProgress .output').text(total);
         }
         $('#questProgressSection .output').html(msg);
         $('#questProgress.showOnlyIfDataExists').removeClass('hide')
                                                 .addClass('show');
+    }
+    else { // user is not on a quest
+        $('#dashQuestProgress .output').text('n/a');
     }
 
 
@@ -536,7 +540,7 @@ function displayData(data) {
     var dailiesIncomplete       = [];
     var dailiesIncompleteGrey   = [];
     var dailysDamage = 0;
-    var questDamage  = 0;
+    var bossDamage   = 0;
     var valueMin = -47.27; // task values are capped ...
     var valueMax =  21.27; // ... for some purposes
     var today = ["su","m","t","w","th","f","s"][(new Date()).getDay()];
@@ -576,7 +580,7 @@ function displayData(data) {
                     }
                     var delta = nextDelta; // Change this if we ever take
                                            // account of multiple missed days.
-                    questDamage += delta;
+                    bossDamage += delta;
                     var hpMod = delta * conBonus * obj.priority * 2;
                     // priority is easy (1), medium (1.5), hard (2)
                     hpMod = Math.round(hpMod * 10) / 10; // HabitRPG uses round
@@ -591,11 +595,8 @@ function displayData(data) {
         }
     });
     if (quest && quest.content.boss) {
-        questDamage = questDamage * quest.content.boss.str;
-        questDamage = Math.ceil(questDamage * 10) / 10;
-    }
-    else {
-        questDamage = 'n/a'; // need if we permanently show damage on dashboard
+        bossDamage = bossDamage * quest.content.boss.str;
+        bossDamage = Math.ceil(bossDamage * 10) / 10;
     }
     dailysDamage = Math.ceil(dailysDamage * 10) / 10;
     // We round UP with ceil because we must never let the user
@@ -604,7 +605,7 @@ function displayData(data) {
     // page didn't tell them they had!
     // But for the total, rounding is safe, since excess decimals are
     // just due to float arithmetic weirdness:
-    var totalDamage = Math.round((dailysDamage + questDamage) * 10) / 10;
+    var totalDamage = Math.round((dailysDamage + bossDamage) * 10) / 10;
 
     ////// Todos:
     $.each(user.todos, function(index, obj){
@@ -754,6 +755,7 @@ function displayData(data) {
     ////   Dailies Incomplete        /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
     var uncomplHtml = '';
+    $('#dashIncompleteDailies .output').text(dailiesIncomplete.length);
     if (dailiesIncomplete.length > 0) {
         uncomplHtml += '<p>';
         uncomplHtml += (dailiesIncomplete.length > 1)
@@ -762,6 +764,10 @@ function displayData(data) {
         uncomplHtml += ' not been completed:</p><ul><li>'
                      + dailiesIncomplete.join('</li><li>')
                      + '</li></ul>';
+        $('#dashIncompleteDailies').removeClass('safe').addClass('danger');
+    }
+    else {
+        $('#dashIncompleteDailies').removeClass('danger').addClass('safe');
     }
     if (dailiesIncompleteGrey.length > 0) {
         var wordThis  = 'This';
@@ -790,11 +796,6 @@ function displayData(data) {
         $('#dailiesIncomplete.showOnlyIfDataExists').removeClass('hide')
                                                     .addClass('show');
     }
-    $('#dashIncompleteDailies').text(dailiesIncomplete.length);
-    if (dailiesIncomplete.length == 0) { // XXX fix this for data re-fetch
-        $('#dashIncompleteContainer').removeClass('danger')
-                                     .addClass('safe');
-    }
 
 
     //////////////////////////////////////////////////////////////////////
@@ -802,7 +803,7 @@ function displayData(data) {
     //////////////////////////////////////////////////////////////////////
     var damageDailiesHtml = '';
     var currentHealth = Math.round(user.stats.hp * 10) / 10;
-    $('#dashCurrentHealth').text(currentHealth);
+    $('#dashCurrentHealth .output').text(currentHealth);
     if (sleeping) {
         damageDailiesHtml = '<p>You are'
             + ' <a href="http://habitrpg.wikia.com/wiki/Tavern">resting'
@@ -841,7 +842,7 @@ function displayData(data) {
                     + 'quest</a>, so the'
                     + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
                     + ' will inflict an <span class="highlight">estimated '
-                    + questDamage
+                    + bossDamage
                     + '</span> damage to you and to your fellow quest'
                     + ' participants because of your uncompleted dailies.</p>'
                     + '<p>Thus your total damage due to your own'
@@ -866,14 +867,21 @@ function displayData(data) {
         }
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
-    $('#dashDamage'    ).text(dailysDamage);
-    $('#dashBossDamage').text(questDamage);
-    if (questDamage == 0) { // XXX fix this for data re-fetch?
-        $('#dashDamageContainer').removeClass('danger')
-                                 .addClass('safe');
-        $('#dashBossContainer'  ).removeClass('danger')
-                                 .addClass('safe');
+    if (dailysDamage == 0) {
+        $('#dashDailiesDamage').removeClass('danger').addClass('safe');
     }
+    else {
+        $('#dashDailiesDamage').removeClass('safe').addClass('danger');
+    }
+    $('#dashDailiesDamage .output').text(dailysDamage);
+    if (quest && quest.content.boss && bossDamage > 0) {
+        $('#dashBossDamage').removeClass('safe').addClass('danger');
+    }
+    else {
+        $('#dashBossDamage').removeClass('danger').addClass('safe');
+    }
+    $('#dashBossDamage .output').text(
+                (quest && quest.content.boss) ? bossDamage : 'n/a' );
 }
 
 
@@ -1321,7 +1329,6 @@ var myDateConverter = function(date) {
 
     <style>
 
-
 /* classes to control show/hide for blocks of content */
 .showOnlyIfHave_Not_FetchedData { /* e.g., show API form before data fetch */
     /* no styles go here - this class is just for jquery to act on */
@@ -1418,18 +1425,18 @@ h1>a:first-child { /* "HabitRPG" link in header */
     text-decoration: none;
 }
 h1 .versionToggle {
-    font-size: 50%;
+    font-size: 0.5em;
 }
 #versionChanges dl {
     margin-left: 30px;
 }
 #versionChanges dl dt {
-    font-size: 115%;
+    font-size: 1.15em;
     font-weight: bold;
 }
 #versionChanges dl dt .date {
     padding-left: 10px;
-    font-size: 80%;
+    font-size: 0.8em;
     font-weight: normal;
 }
 #versionChanges .versionToggle {
@@ -1480,7 +1487,7 @@ h1 .versionToggle {
     clear: both;
 }
 #userApiDetailsForm legend .highlight {
-    font-size: 130%;
+    font-size: 1.3em;
 }
 #userApiDetailsForm fieldset li {
     margin-bottom: 7px;
@@ -1491,7 +1498,7 @@ h1 .versionToggle {
 }
 #outroduction h2 {
     font-weight: bold;
-    font-size: 130%;
+    font-size: 1.3em;
 }
 #outroduction li {
     margin-bottom: 10px;
@@ -1507,7 +1514,7 @@ ul#tableOfContents ul {
     padding: 0;
 }
 #tableOfContents li {
-    font-size: 110%;
+    font-size: 1.1em;
     padding: 2px 0;
 }
 ul#tableOfContents > li {
@@ -1522,7 +1529,7 @@ h2 {
     display: none;
 }
 .closer { /* as in "a thing that closes", not "nearer" */
-    font-size: 90%;
+    font-size: 0.9em;
     margin-top: 30px;
     padding-top: 15px;
     padding-bottom: 15px;
@@ -1654,7 +1661,7 @@ h2 {
 
 
 #dashboard {
-    display: none; /* FOR TESTING WHILE UNDER DEVELOPMENT */
+    TSTdisplay: none; /* FOR TESTING WHILE UNDER DEVELOPMENT */
 }
 #dashboardInner {
     float: left;
@@ -1669,6 +1676,9 @@ h2 {
     float: left;
     list-style-type: none;
 }
+#dashboard .stats {
+    box-shadow: 1px 1px 1px 1px #666666;
+}
 #dashboard .danger {
     background-color: #ffcccc;
 }
@@ -1676,18 +1686,15 @@ h2 {
     background-color: #ccffcc;
 }
 #dashboard .stat {
-    font-size: 30px;
+    font-size: 2.15em;
     font-weight: bold;
     padding: 2px;
 }
 #dashboard .statLabel {
-    font-size: 8pt;
+    font-size: 0.75em;
     padding: 1px;
 }
-#dashboard .stats {
-    box-shadow: 1px 1px 1px 1px #666666;
-}
-#dashboard #dashDrop { /* XXX when implementing dashboard re-fetch fix, do NOT reset the user's choice to show this */
+#dashboard #dashDrop {
     display: none;
 }
 
@@ -1910,33 +1917,33 @@ h2 {
 <div id="main" class="showOnlyIfHaveFetchedData">
 
     <div id="dashboard" class="selfClear">
-    <ul id="dashboardInner"><!-- XXX wipe data before refetch -->
-        <li><div class="stats">
-            <div id="dashCurrentHealth" class="stat"></div>
+    <ul id="dashboardInner">
+        <li><div id="dashCurrentHealth" class="stats">
+            <div class="stat output"></div>
             <div class="statLabel">Current Health</div></div>
         </li>
-        <li><div id="dashIncompleteContainer" class="stats danger">
-            <div id="dashIncompleteDailies" class="stat"></div>
+        <li><div id="dashIncompleteDailies" class="stats danger">
+            <div class="stat output"></div>
             <div class="statLabel">Incomplete Dailies</div></div>
         </li>
-        <li><div id="dashDamageContainer" class="stats danger">
-            <div id="dashDamage" class="stat"></div>
+        <li><div id="dashDailiesDamage" class="stats danger">
+            <div class="stat output"></div>
             <div class="statLabel">Est. Damage</div></div>
         </li>
-        <li><div id="dashBossContainer" class="stats danger">
-            <div id="dashBossDamage" class="stat"></div>
+        <li><div id="dashBossDamage" class="stats danger">
+            <div class="stat output"></div>
             <div class="statLabel">Est. Boss Damage</div></div>
         </li>
-        <li><div class="stats">
-            <div id="dashQuestProgressDamage" class="stat"></div>
-            <div class="statLabel">Quest Damage</div></div>
+        <li><div id="dashQuestProgress" class="stats">
+            <div class="stat output"></div>
+            <div class="statLabel">Quest Progress</div></div>
         </li>
         <li id="dashDrop"><div class="stats">
-            <div id="dashDropCount" class="stat"></div>
+            <div class="stat output"></div>
             <div class="statLabel">Drop Count</div></div>
         </li>
-        <li id="dashUnallocated"><div class="stats">
-            <div id="dashUnallocPoints" class="stat"></div>
+        <li id="dashUnallocated" class="showOnlyIfDataExists"><div class="stats">
+            <div class="stat output"></div>
             <div class="statLabel">Unallocated Points</div></div>
         </li>
     </ul>
@@ -2093,46 +2100,46 @@ Habits with no history are highlighted in bold, in case you would like to consid
 <div id="outroduction" class="showOnlyIfHave_Not_FetchedData">
    <h2>What's On This Page?</h2>
    <ul>
-        <li><span class="subheading">Unallocated Points</span>: If you have any <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">unallocated points</a>, you'll see how many and a link to the HabitRPG <a href="https://habitrpg.com/#/options/profile/stats">Profile -&gt; Stats page</a> so you can allocate them.</li>
-        <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
-        <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</li>
-        <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
-        <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
-        <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
-        <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown.</li>
-        <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
-        <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
-        <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
-   </ul>
-<p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
+            <li><span class="subheading">Unallocated Points</span>: If you have any <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">unallocated points</a>, you'll see how many and a link to the HabitRPG <a href="https://habitrpg.com/#/options/profile/stats">Profile -&gt; Stats page</a> so you can allocate them.</li>
+            <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
+            <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</li>
+            <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
+            <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
+            <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
+            <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown.</li>
+            <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
+            <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
+            <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
+       </ul>
+    <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
-   <h2>Possible Future Features</h2><!-- XXX_SOON look into this -->
-   <ul>
-        <li><span class="subheading">Recommended Equipment for Maximising Stats</span>: Some kind of tool (possibly similar to the wiki's <a href="http://habitrpg.wikia.com/wiki/Equipment_Table">Equipment Table</a>) that helps you choose the best items from the gear you own for maximising specific stats.</li>
-        <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
-        <li><span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li>
-        <li><em>Maybe:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
-        <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
-        <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
-        <li><em>Maybe:</em> <span class="subheading">Missing Equipment for Orb of Rebirthers</span>: do something to make the feature more useful for them.</li>
-        <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
-   </ul>
+       <h2>Possible Future Features</h2><!-- XXX_SOON look into this -->
+       <ul>
+            <li><span class="subheading">Recommended Equipment for Maximising Stats</span>: Some kind of tool (possibly similar to the wiki's <a href="http://habitrpg.wikia.com/wiki/Equipment_Table">Equipment Table</a>) that helps you choose the best items from the gear you own for maximising specific stats.</li>
+            <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
+            <li><span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li>
+            <li><em>Maybe:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
+            <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
+            <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
+            <li><em>Maybe:</em> <span class="subheading">Missing Equipment for Orb of Rebirthers</span>: do something to make the feature more useful for them.</li>
+            <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
+       </ul>
 
-   <h2>Suspected Bugs</h2><!-- XXX_SOON look into this -->
-   <p>This page will not work correctly on old browsers because it uses modern website features and relies on compliance to standards (both can be lacking in old browsers). <a href="http://browsehappy.com/">Updating your browser is important for general safety on the internet!</a> If you have upgraded your browser to the latest version and are still having problems, please tell me! Contact details are below.</p>
-   <p>Regardless of what bugs there might be, this page cannot damage your account. It does not contain any code that could result in any changes being made on HabitRPG.</p>
+       <h2>Suspected Bugs</h2><!-- XXX_SOON look into this -->
+       <p>This page will not work correctly on old browsers because it uses modern website features and relies on compliance to standards (both can be lacking in old browsers). <a href="http://browsehappy.com/">Updating your browser is important for general safety on the internet!</a> If you have upgraded your browser to the latest version and are still having problems, please tell me! Contact details are below.</p>
+       <p>Regardless of what bugs there might be, this page cannot damage your account. It does not contain any code that could result in any changes being made on HabitRPG.</p>
 
-   <h2>Help and Contact Details</h2>
-   <p>This page has been created by <a href="http://habitrpg.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
+       <h2>Help and Contact Details</h2>
+       <p>This page has been created by <a href="http://habitrpg.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
 
-    <p>If you have general questions about HabitRPG, post them to <a href="https://habitrpg.com/#/options/groups/tavern">Tavern Talk</a> or <a href="http://habitrpg.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
-</div>
+        <p>If you have general questions about HabitRPG, post them to <a href="https://habitrpg.com/#/options/groups/tavern">Tavern Talk</a> or <a href="http://habitrpg.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
+    </div>
 
-<div id="end">
-    <a class="explanationToggle showOnlyIfHave_Not_FetchedData
-              separator closer hide" href="">hide
-                    documentation and Fetch My Data form</a>
-</div>
+    <div id="end">
+        <a class="explanationToggle showOnlyIfHave_Not_FetchedData
+                  separator closer hide" href="">hide
+                        documentation and Fetch My Data form</a>
+    </div>
 
-</div></body>
+    </div></body>
 </html>
