@@ -193,7 +193,7 @@ $(document).ready(function() {
                 $('#dailiesIncompleteSection').show();
             }
             if ($('#dropsTodaySection').is(':visible')) {
-                $('#dashDrop').show();
+                $('#dash_dropsToday').show();
                 // NOTE: We unhide the number of drops in the dashboard
                 // only after the user has opened the main drops section,
                 // because some users might prefer to not know (less
@@ -225,6 +225,35 @@ $(document).ready(function() {
         window.scrollTo(0, 0);
     });
 
+    // Dashboard hide/show:
+    // This works differently than the ToC hide/show. Because different
+    // dashboard boxes can point to the same main section, and because
+    // we want that section to always open when the user clicks on the
+    // dashboard box, we can't use the same mechanism as for ToC, which
+    // will HIDE a section that's already showning when you click on the
+    // link.
+    $('#dashboard li').click(function(event){
+        // event.preventDefault();
+        var sectionId = this.id.replace(/dash_/, '') + 'Section';
+        $('.tocSection').hide();
+        $('#tocClose').hide();
+        $('#' + sectionId).toggle();
+        if ($('#' + sectionId).hasClass("longContent")) {
+            $('#tocClose').show(); // XXX move to function? make it unnecessary?
+        }
+        if ($('#damageDailiesSection').is(':visible') && // XXX move to function
+            $('#dailiesIncomplete').is(':visible')) {
+            $('#dailiesIncompleteSection').show();
+        }
+        if ($('#dropsTodaySection').is(':visible')) { // XXX move to function
+            if (collectionDrops) {
+                // The user is on a collection quest and has viewed the
+                // Drops Received Today section, so also show them the
+                // Quest Progress section (collection quests have drops):
+                $('#questProgressSection').show();
+            }
+        }
+    });
 });
 
 function toggleApiDetailsFormLinkText() {
@@ -352,11 +381,11 @@ function displayData(data) {
             + 'your Profile -&gt; Stats page</a> to allocate ' + them + '. '
             + '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
             + 'Learn more.</a>');
-        $('#dashUnallocated .output').text(user.stats.points);
-        $('#unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
-                                                    .addClass('show');
-        $('#dashUnallocated.showOnlyIfDataExists'  ).removeClass('hide')
-                                                    .addClass('show');
+        $('#dash_unallocatedPoints .output').text(user.stats.points);
+        $('#dash_unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
+                                                         .addClass('show');
+        $('#dash_unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
+                                                         .addClass('show');
     }
 
 
@@ -441,7 +470,7 @@ function displayData(data) {
         + '</span>. '
         + msg
         + '</p>');
-    $('#dashDrop .output').text(user.items.lastDrop.count||0);
+    $('#dash_dropsToday .output').text(user.items.lastDrop.count||0);
 
     // FOR TESTING (this does NOT contain all code for most drop chances):
     var dropChance = 1/150+0.2  // assume new task
@@ -1694,12 +1723,13 @@ h2 {
 
 
 #dashboard {
-    display: none; /* FOR TESTING WHILE UNDER DEVELOPMENT */
+    TSTdisplay: none; /* FOR TESTING WHILE UNDER DEVELOPMENT */
 }
 #dashboardInner {
     float: left;
 }
 #dashboard li {
+    cursor: pointer; /* XXX make this happen only when the li is a "link" */
     text-align: center;
     width: 120px;
     background-color: #fffbd0;
@@ -1727,7 +1757,7 @@ h2 {
     font-size: 0.75em;
     padding: 1px;
 }
-#dashboard #dashDrop {
+#dashboard #dash_dropsToday {
     display: none;
 }
 
@@ -1958,31 +1988,38 @@ h2 {
 
     <div id="dashboard" class="selfClear">
     <ul id="dashboardInner">
-        <li><div id="dashCurrentHealth" class="stats">
+        <li>
+            <div id="dashCurrentHealth" class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Current Health</div></div>
         </li>
-        <li><div id="dashIncompleteDailies" class="stats danger">
+        <li id="dash_dailiesIncomplete">
+            <div id="dashIncompleteDailies" class="stats danger">
             <div class="stat output"></div>
             <div class="statLabel">Incomplete Dailies</div></div>
         </li>
-        <li><div id="dashDailiesDamage" class="stats danger">
+        <li id="dash_damageDailies">
+            <div id="dashDailiesDamage" class="stats danger">
             <div class="stat output"></div>
             <div class="statLabel">Est. Damage</div></div>
         </li>
-        <li><div id="dashBossDamage" class="stats danger">
+        <li id="dash_damageDailies">
+            <div id="dashBossDamage" class="stats danger">
             <div class="stat output"></div>
             <div class="statLabel">Est. Boss Damage</div></div>
         </li>
-        <li><div id="dashQuestProgress" class="stats">
+        <li id="dash_questProgress">
+            <div id="dashQuestProgress" class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Quest Progress</div></div>
         </li>
-        <li id="dashDrop"><div class="stats">
+        <li id="dash_dropsToday">
+            <div class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Drop Count</div></div>
         </li>
-        <li id="dashUnallocated" class="showOnlyIfDataExists"><div class="stats">
+        <li id="dash_unallocatedPoints" class="showOnlyIfDataExists">
+            <div class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Unallocated Points</div></div>
         </li>
@@ -2146,7 +2183,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
         <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
         <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
-        <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown.</li>
+        <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
         <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
         <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
         <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
