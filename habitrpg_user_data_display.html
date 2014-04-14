@@ -218,6 +218,18 @@ $(document).ready(function() {
         window.scrollTo(0, 0);
     });
 
+    $('#dashIncompleteContainer').click(function() {
+        $('#dailiesIncompleteSection').show();
+    });
+    $('#dashDamageContainer').click(function() {
+        $('#damageDailiesSection').show();
+    });
+    $('#dashBossContainer').click(function() {
+        $('#damageDailiesSection').show();
+    });
+    $('#dashQuestProgressDamage').click(function() {
+        $('#questProgressSection').show();
+    });
 });
 
 function toggleApiDetailsFormLinkText() {
@@ -1652,10 +1664,6 @@ h2 {
     margin-top: 2em;
 }
 
-
-#dashboard {
-    display: none; /* FOR TESTING WHILE UNDER DEVELOPMENT */
-}
 #dashboardInner {
     float: left;
 }
