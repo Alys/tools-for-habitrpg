@@ -193,7 +193,7 @@ $(document).ready(function() {
                 $('#dailiesIncompleteSection').show();
             }
             if ($('#dropsTodaySection').is(':visible')) {
-                $('#dash_dropsToday').show();
+                $('#dashDrop').show();
                 // NOTE: We unhide the number of drops in the dashboard
                 // only after the user has opened the main drops section,
                 // because some users might prefer to not know (less
@@ -225,33 +225,41 @@ $(document).ready(function() {
         window.scrollTo(0, 0);
     });
 
-    // Dashboard hide/show:
-    // This works differently than the ToC hide/show. Because different
-    // dashboard boxes can point to the same main section, and because
-    // we want that section to always open when the user clicks on the
-    // dashboard box, we can't use the same mechanism as for ToC, which
-    // will HIDE a section that's already showning when you click on the
-    // link.
-    $('#dashboard li').click(function(event){
-        // event.preventDefault();
-        var sectionId = this.id.replace(/dash_/, '') + 'Section';
+    $('#dashIncompleteDailies').click(function() {
         $('.tocSection').hide();
         $('#tocClose').hide();
-        $('#' + sectionId).toggle();
-        if ($('#' + sectionId).hasClass("longContent")) {
-            $('#tocClose').show(); // XXX move to function? make it unnecessary?
-        }
-        if ($('#damageDailiesSection').is(':visible') && // XXX move to function
-            $('#dailiesIncomplete').is(':visible')) {
+        $('#dailiesIncompleteSection').show();
+    });
+    $('#dashDailiesDamage').click(function() {
+        $('.tocSection').hide();
+        $('#tocClose').hide();
+        $('#damageDailiesSection').show();
+        if ($('#dailiesIncomplete').is(':visible')) {
             $('#dailiesIncompleteSection').show();
         }
-        if ($('#dropsTodaySection').is(':visible')) { // XXX move to function
-            if (collectionDrops) {
-                // The user is on a collection quest and has viewed the
-                // Drops Received Today section, so also show them the
-                // Quest Progress section (collection quests have drops):
-                $('#questProgressSection').show();
-            }
+    });
+    $('#dashBossDamage').click(function() {
+        $('.tocSection').hide();
+        $('#tocClose').hide();
+        $('#damageDailiesSection').show();
+        if ($('#dailiesIncomplete').is(':visible')) {
+            $('#dailiesIncompleteSection').show();
+        }
+    });
+    $('#dashQuestProgress').click(function() {
+        $('.tocSection').hide();
+        $('#tocClose').hide();
+        $('#questProgressSection').show();
+    });
+    $('#dashDrop').click(function() {
+        $('.tocSection').hide();
+        $('#tocClose').hide();
+        $('#dropsTodaySection').show();
+        if (collectionDrops) {
+            // The user is on a collection quest and has viewed the
+            // Drops Received Today section, so also show them the
+            // Quest Progress section (collection quests have drops):
+            $('#questProgressSection').show();
         }
     });
 });
@@ -280,7 +288,7 @@ function toggleVisibilityForStuff() {
     } else {
         // dataFetchStatus is 'not attempted' or 'failed' or anything else
         $('.showOnlyIfDataExists').removeClass('show')
-                                  .addClass('hide');
+                                     .addClass('hide');
         $('.showOnlyIfHave_Not_FetchedData').removeClass('hide')
                                                .addClass('show');
         $('.showOnlyIfHaveFetchedData').removeClass('show')
@@ -381,11 +389,20 @@ function displayData(data) {
             + 'your Profile -&gt; Stats page</a> to allocate ' + them + '. '
             + '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
             + 'Learn more.</a>');
-        $('#dash_unallocatedPoints .output').text(user.stats.points);
-        $('#dash_unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
-                                                         .addClass('show');
-        $('#dash_unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
-                                                         .addClass('show');
+/// XXX test this and the re-hide code below:
+        $('#dashUnallocated .output').text(user.stats.points);
+        $('#unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
+                                                    .addClass('show');
+        $('#dashUnallocated.showOnlyIfDataExists').removeClass('hide')
+                                                  .addClass('show');
+    }
+	else {
+		// XXX_SOON this should already be handled by the
+		// standard showOnlyIfDataExists code:
+        $('#unallocatedPoints.showOnlyIfDataExists').removeClass('show')
+                                                    .addClass('hide');
+        $('#dashUnallocated.showOnlyIfDataExists').removeClass('show')
+                                                  .addClass('hide');
     }
 
 
@@ -470,7 +487,7 @@ function displayData(data) {
         + '</span>. '
         + msg
         + '</p>');
-    $('#dash_dropsToday .output').text(user.items.lastDrop.count||0);
+    $('#dashDrop .output').text(user.items.lastDrop.count||0);
 
     // FOR TESTING (this does NOT contain all code for most drop chances):
     var dropChance = 1/150+0.2  // assume new task
@@ -561,6 +578,8 @@ function displayData(data) {
     }
     else { // user is not on a quest
         $('#dashQuestProgress .output').text('n/a');
+        $('#questProgressSection .output').html('You are not on a '
+			+ '<a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>.');
     }
 
 
@@ -1757,7 +1776,7 @@ h2 {
     font-size: 0.75em;
     padding: 1px;
 }
-#dashboard #dash_dropsToday {
+#dashboard #dashDrop {
     display: none;
 }
 
@@ -1993,32 +2012,32 @@ h2 {
             <div class="stat output"></div>
             <div class="statLabel">Current Health</div></div>
         </li>
-        <li id="dash_dailiesIncomplete">
+        <li>
             <div id="dashIncompleteDailies" class="stats danger">
             <div class="stat output"></div>
             <div class="statLabel">Incomplete Dailies</div></div>
         </li>
-        <li id="dash_damageDailies">
+        <li>
             <div id="dashDailiesDamage" class="stats danger">
             <div class="stat output"></div>
             <div class="statLabel">Est. Damage</div></div>
         </li>
-        <li id="dash_damageDailies">
+        <li>
             <div id="dashBossDamage" class="stats danger">
             <div class="stat output"></div>
             <div class="statLabel">Est. Boss Damage</div></div>
         </li>
-        <li id="dash_questProgress">
+        <li>
             <div id="dashQuestProgress" class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Quest Progress</div></div>
         </li>
-        <li id="dash_dropsToday">
+        <li id="dashDrop">
             <div class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Drop Count</div></div>
         </li>
-        <li id="dash_unallocatedPoints" class="showOnlyIfDataExists">
+        <li id="dashUnallocated" class="showOnlyIfDataExists">
             <div class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Unallocated Points</div></div>
