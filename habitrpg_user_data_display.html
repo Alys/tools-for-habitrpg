@@ -389,16 +389,15 @@ function displayData(data) {
             + 'your Profile -&gt; Stats page</a> to allocate ' + them + '. '
             + '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
             + 'Learn more.</a>');
-/// XXX test this and the re-hide code below:
         $('#dashUnallocated .output').text(user.stats.points);
         $('#unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
                                                     .addClass('show');
         $('#dashUnallocated.showOnlyIfDataExists').removeClass('hide')
                                                   .addClass('show');
     }
-	else {
-		// XXX_SOON this should already be handled by the
-		// standard showOnlyIfDataExists code:
+    else {
+        // XXX_SOON this should already be handled by the
+        // standard showOnlyIfDataExists code:
         $('#unallocatedPoints.showOnlyIfDataExists').removeClass('show')
                                                     .addClass('hide');
         $('#dashUnallocated.showOnlyIfDataExists').removeClass('show')
@@ -579,7 +578,7 @@ function displayData(data) {
     else { // user is not on a quest
         $('#dashQuestProgress .output').text('n/a');
         $('#questProgressSection .output').html('You are not on a '
-			+ '<a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>.');
+            + '<a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>.');
     }
 
 
@@ -632,7 +631,7 @@ function displayData(data) {
         obj.text = escapeHtml(obj.text);
         numberDailys++;
         countHabitsDailysTodos++;
-        // obj.streak, obj.repeat..., obj.completed, obj.dateCompleted  XXX_SOON use them?
+        // obj.streak, obj.repeat..., obj.completed, obj.dateCompleted  XXX_LATER use them?
         // "streak":107,"checklist":[],"collapseChecklist":false,"repeat":{"su":true,"s":true,"f":true,"th":true,"w":true,"t":true,"m":true}
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
         if (! taskIsTagged(obj.tags)) { untaggedTasks['dailys'].push(obj); }
@@ -693,7 +692,7 @@ function displayData(data) {
         obj.text = escapeHtml(obj.text);
         numberTodos++;
         countHabitsDailysTodos++;
-        // obj.priority, obj.dateCompleted   XXX_SOON use them?
+        // obj.priority, obj.dateCompleted   XXX_LATER use them?
         if (obj.completed == true) {
             return true; // currently we don't display completed to-dos
         }
@@ -807,11 +806,11 @@ function displayData(data) {
     $('#taskOverviewSection').hide(); // table has now been laid out correctly
 
 
-// XXX_SOON add age column - hidden? https://datatables.net/examples/basic_init/hidden_columns.html
-// XXX_SOON cookies to save state https://datatables.net/examples/basic_init/state_save.html
-// XXX_SOON (too slow?)  show/hide notes: https://datatables.net/examples/server_side/row_details.html
-// XXX_SOON strikethrough for completed? Include dailies?
-// XXX_SOON totals for filtered data in footer? https://datatables.net/examples/advanced_init/footer_callback.html
+// XXX_LATER add age column - hidden? https://datatables.net/examples/basic_init/hidden_columns.html
+// XXX_LATER cookies to save state https://datatables.net/examples/basic_init/state_save.html
+// XXX_LATER (too slow?)  show/hide notes: https://datatables.net/examples/server_side/row_details.html
+// XXX_LATER strikethrough for completed? Include dailies?
+// XXX_LATER totals for filtered data in footer? https://datatables.net/examples/advanced_init/footer_callback.html
 
     //////////////////////////////////////////////////////////////////////
     ////   Task Overview ends here   /////////////////////////////////////
@@ -1741,14 +1740,13 @@ h2 {
 }
 
 
-#dashboard {
-    TSTdisplay: none; /* FOR TESTING WHILE UNDER DEVELOPMENT */
-}
 #dashboardInner {
     float: left;
 }
+#dashboard li.link {
+    cursor: pointer;
+}
 #dashboard li {
-    cursor: pointer; /* XXX make this happen only when the li is a "link" */
     text-align: center;
     width: 120px;
     background-color: #fffbd0;
@@ -1785,7 +1783,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.6.2)</a></h1>
+    <a class="versionToggle" href="">(v1.7)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 
@@ -1801,6 +1799,15 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
+        <dt>1.7 <span class="date">2014-04-17</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">A dashboard!</span> Created by @thepeopleseason (thank you!). Shows data related to dailies, quests, and other things. Hover over each dashboard box to see an explanation. Click (on most of them) to open the associated section on the page.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>1.6.2 <span class="date">2014-04-13</span></dt>
         <dd><ul>
             <li>Features:
@@ -1808,13 +1815,6 @@ h2 {
                     <li><span class="subheading">Drops Received Today</span> shows you your current drop-cap (thanks to Ryan for suggesting this).</li>
                 </ul>
             </li>
-            <!--
-            <li>Code:
-                <ul>
-                    <li>Changes to the dashboard code, from thepeopleseason.</li>
-                </ul>
-            </li>
-            -->
         </ul></dd>
 
         <dt>1.6.1 <span class="date">2014-04-13</span></dt>
@@ -2007,37 +2007,37 @@ h2 {
 
     <div id="dashboard" class="selfClear">
     <ul id="dashboardInner">
-        <li>
+        <li title="your health">
             <div id="dashCurrentHealth" class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Current Health</div></div>
         </li>
-        <li>
+        <li title="number of dailies you have not yet completed (click for more information)" class="link">
             <div id="dashIncompleteDailies" class="stats danger">
             <div class="stat output"></div>
             <div class="statLabel">Incomplete Dailies</div></div>
         </li>
-        <li>
+        <li title="health loss you will take overnight from your uncompleted dailies (click for more information)" class="link">
             <div id="dashDailiesDamage" class="stats danger">
             <div class="stat output"></div>
             <div class="statLabel">Est. Damage</div></div>
         </li>
-        <li>
+        <li title="health loss you and your party will take overnight from your quest boss due to your own uncompleted dailies (click for more information)" class="link">
             <div id="dashBossDamage" class="stats danger">
             <div class="stat output"></div>
             <div class="statLabel">Est. Boss Damage</div></div>
         </li>
-        <li>
+        <li title="progress you have made so far today on your quest (click for more information)" class="link">
             <div id="dashQuestProgress" class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Quest Progress</div></div>
         </li>
-        <li id="dashDrop">
+        <li title="drops you have received so far today (click for more information)" id="dashDrop" class="link">
             <div class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Drop Count</div></div>
         </li>
-        <li id="dashUnallocated" class="showOnlyIfDataExists">
+        <li title="points you have taken from leveling up - go to your Profile -> Stats page to allocate them" id="dashUnallocated" class="showOnlyIfDataExists">
             <div class="stats">
             <div class="stat output"></div>
             <div class="statLabel">Unallocated Points</div></div>
@@ -2209,7 +2209,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
    </ul>
 <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
-   <h2>Possible Future Features</h2><!-- XXX_SOON look into this -->
+   <h2>Possible Future Features</h2><!-- XXX_LATER look into this -->
    <ul>
         <li><span class="subheading">Recommended Equipment for Maximising Stats</span>: Some kind of tool (possibly similar to the wiki's <a href="http://habitrpg.wikia.com/wiki/Equipment_Table">Equipment Table</a>) that helps you choose the best items from the gear you own for maximising specific stats.</li>
         <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
@@ -2221,7 +2221,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
    </ul>
 
-   <h2>Suspected Bugs</h2><!-- XXX_SOON look into this -->
+   <h2>Suspected Bugs</h2><!-- XXX_LATER look into this -->
    <p>This page will not work correctly on old browsers because it uses modern website features and relies on compliance to standards (both can be lacking in old browsers). <a href="http://browsehappy.com/">Updating your browser is important for general safety on the internet!</a> If you have upgraded your browser to the latest version and are still having problems, please tell me! Contact details are below.</p>
    <p>Regardless of what bugs there might be, this page cannot damage your account. It does not contain any code that could result in any changes being made on HabitRPG.</p>
 
