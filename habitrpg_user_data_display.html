@@ -42,6 +42,9 @@ Contributors:
     <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
 
 
+<!-- TST
+    <script src="/jquery.js"></script>
+-->
     <script src="//code.jquery.com/jquery-latest.min.js"></script>
     <link href="js/DataTables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
@@ -120,6 +123,10 @@ $(document).ready(function() {
         /* The user manually submitted the API connection form. */
         userId   = $('#userId').val();
         apiToken = $('#apiToken').val();
+        fetchData();
+    });
+    $('#refetch').click(function(event){
+        /* The user clicked on the Re-Fetch My Data button. */
         fetchData();
     });
 
@@ -267,7 +274,7 @@ $(document).ready(function() {
 function toggleApiDetailsFormLinkText() {
     // change text for the hide/show link (for the intro, API form, etc)
     // based on the form's visibility
-    var linkText = 'documentation and Fetch My Data form';
+    var linkText = 'documentation';
     if ($('#userApiDetailsForm').is(':visible')) {
         $('#versionChanges').hide();
         $('.tocSection'    ).hide();
@@ -709,7 +716,7 @@ function displayData(data) {
 
 
     //////////////////////////////////////////////////////////////////////
-    ////   Task Overview starts here   ///////////////////////////////////
+    ////   Task Overview             /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
 
     $('#taskOverviewSection').show(); // need so table is laid out correctly
@@ -812,10 +819,6 @@ function displayData(data) {
 // XXX_LATER (too slow?)  show/hide notes: https://datatables.net/examples/server_side/row_details.html
 // XXX_LATER strikethrough for completed? Include dailies?
 // XXX_LATER totals for filtered data in footer? https://datatables.net/examples/advanced_init/footer_callback.html
-
-    //////////////////////////////////////////////////////////////////////
-    ////   Task Overview ends here   /////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////
 
 
     //////////////////////////////////////////////////////////////////////
@@ -1540,7 +1543,7 @@ h1 .versionToggle {
     text-align: right;
 }
 #explanationAndClearLinks  a {
-    padding-left: 20px;
+    padding-left: 10px;
 }
 #end .explanationToggle {
     padding: 20px 0;
@@ -1794,8 +1797,8 @@ h2 {
 <div id="emailDisplay" class="showOnlyIfHaveFetchedData"></div>
 
 <div id="explanationAndClearLinks" class="showOnlyIfHaveFetchedData">
-    <a class="explanationToggle" href="">show documentation and the
-                                        "Fetch My Data" form</a>
+    <input id="refetch" type="submit" value="Re-Fetch Data">
+    <a class="explanationToggle" href="">show documentation</a>
     <a id="clearData" href="">clear my data</a>
 </div>
 <hr class="clear" />
@@ -1804,6 +1807,15 @@ h2 {
 <div id="versionChanges" class="hide"><!-- VERSION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>1.7.2 <span class="date">2014-04-19</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Re-Fetch My Data button</span> appears in the header after you have fetched your data once. Clicking it will refresh your data with the latest from HabitRPG's server (it has the same effect as resubmitting the API details form).</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>1.7.1 <span class="date">2014-04-19</span></dt>
         <dd><ul>
@@ -1822,7 +1834,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.6.2 <span class="date">2014-04-13</span></dt>
         <dd><ul>
             <li>Features:
@@ -2170,7 +2181,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
 </div>
 
 <iframe src="null.htm" id="formPasswdSaveFix" name="formPasswdSaveFix" style="display:none"></iframe><!-- DAMN YOU CHROME!! DAMN YOU!!!! http://stackoverflow.com/a/9116737 -->
-<form  id="userApiDetailsForm" method="POST" action="" class="showOnlyIfHave_Not_FetchedData" target="formPasswdSaveFix">
+<form id="userApiDetailsForm" method="POST" action="" class="showOnlyIfHave_Not_FetchedData" target="formPasswdSaveFix">
     <fieldset>
         <legend><span class="highlight">Enter your HabitRPG API details</span>
         (from the <a href="https://habitrpg.com/#/options/settings/api">Settings
@@ -2248,8 +2259,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
 
 <div id="end">
     <a class="explanationToggle showOnlyIfHave_Not_FetchedData
-              separator closer hide" href="">hide
-                    documentation and Fetch My Data form</a>
+              separator closer hide" href="">hide documentation</a>
 </div>
 
 </div></body>
