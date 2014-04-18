@@ -367,6 +367,7 @@ function displayData(data) {
 
     // get some basic details about the user:
     $('#userNameDisplay').text(user.profile.name); // user's name in header
+    $('#emailDisplay').text(user.auth.local.email); //email in header
     var sleeping = user.preferences.sleep; // true if resting in the inn
 
     var quest;
@@ -1531,6 +1532,11 @@ h1 .versionToggle {
     font-size: 2em;
     margin-bottom: 10px;
 }
+#emailDisplay {
+    text-align: right;
+    font-size: 1em;
+    margin-bottom: 10px;
+}
 #explanationAndClearLinks {
     text-align: right;
 }
@@ -1786,6 +1792,7 @@ h2 {
     <a class="versionToggle" href="">(v1.7)</a></h1>
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
+<div id="emailDisplay" class="showOnlyIfHaveFetchedData"></div>
 
 <div id="explanationAndClearLinks" class="showOnlyIfHaveFetchedData">
     <a class="explanationToggle" href="">show documentation and the
