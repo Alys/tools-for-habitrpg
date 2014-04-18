@@ -130,7 +130,19 @@ $(document).ready(function() {
         fetchData();
     });
 
-    // After data fetched, let the user hide/show the explanations and form:
+    // After data fetched, let the user show/hide their email address:
+    $('#emailDisplayToggle').click(function(event){
+        event.preventDefault();
+        $('#emailDisplay').toggleClass('show').toggleClass('hide');
+        var linkText = 'email address';
+        if ($('#emailDisplay').is(':visible')) {
+            $('#emailDisplayToggle').text('hide ' + linkText);
+        } else {
+            $('#emailDisplayToggle').text('show ' + linkText);
+        }
+    });
+
+    // After data fetched, let the user show/hide the explanations and form:
     $('.explanationToggle').click(function(event){
         event.preventDefault();
         $('.separator'         ).toggleClass('show').toggleClass('hide');
@@ -140,11 +152,12 @@ $(document).ready(function() {
         toggleApiDetailsFormLinkText();
     });
 
-    // After data fetched, let the user clear the fetched data:
-    $('#clearData').click(function(){
-        window.scrollTo(0, 0);
-        window.location.reload(true);
-    });
+    // // After data fetched, let the user clear the fetched data:
+    // Feature removed to regain space in header.
+    // $('#clearData').click(function(){
+        // window.scrollTo(0, 0);
+        // window.location.reload(true);
+    // });
 
 
     // Version Changes hide/show:
@@ -1533,7 +1546,7 @@ h1 .versionToggle {
     text-align: right;
     font-weight: bold;
     font-size: 2em;
-    /* margin-bottom: 10px; */
+    margin-bottom: 10px;
 }
 #emailDisplay {
     text-align: right;
@@ -1791,15 +1804,16 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.7.1)</a></h1><!-- VERSION -->
+    <a class="versionToggle" href="">(v1.7.2)</a></h1><!-- VERSION -->
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
-<div id="emailDisplay" class="showOnlyIfHaveFetchedData"></div>
+<div id="emailDisplay" class="hide"></div>
 
 <div id="explanationAndClearLinks" class="showOnlyIfHaveFetchedData">
     <input id="refetch" type="submit" value="Re-Fetch Data">
+    <a id="emailDisplayToggle" href="">show email address</a>
     <a class="explanationToggle" href="">show documentation</a>
-    <a id="clearData" href="">clear my data</a>
+    <!-- <a id="clearData" href="">clear my data</a> -->
 </div>
 <hr class="clear" />
 
@@ -1813,6 +1827,8 @@ h2 {
             <li>Features:
                 <ul>
                     <li><span class="subheading">Re-Fetch My Data button</span> appears in the header after you have fetched your data once. Clicking it will refresh your data with the latest from HabitRPG's server (it has the same effect as resubmitting the API details form).</li>
+                    <li><span class="subheading">Your email address</span> is in the header but hidden by default to save space. Click on the "show email address" link in the header to show it.</li>
+                    <li><span class="subheading">Clear my data</span> link has been removed from the header to save space and because I don't think it was very useful (tell me if you disagree!). You can still clear your data by reloading the page (and that's documented in the "Privacy and security notes" under the API Details form).</li>
                 </ul>
             </li>
         </ul></dd>
@@ -2213,6 +2229,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
         does not make any other kind of request. Your account will not be
         changed by this.</li>
         <li>You cannot view anyone else's data by using this page.<!-- XXX_LATER:  add this if more party code is put in (and improve wording): "except the most basic details (e.g., name) that you can already see on the party page" --></li>
+        <li>To clear your data, reload the page.</li>
         </ul>
     </fieldset>
 </form>
