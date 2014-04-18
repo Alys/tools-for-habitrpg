@@ -367,7 +367,7 @@ function displayData(data) {
 
     // get some basic details about the user:
     $('#userNameDisplay').text(user.profile.name); // user's name in header
-    $('#emailDisplay').text(user.auth.local.email); //email in header
+    $('#emailDisplay').text(user.auth.local.email); // email in header
     var sleeping = user.preferences.sleep; // true if resting in the inn
 
     var quest;
@@ -1530,11 +1530,10 @@ h1 .versionToggle {
     text-align: right;
     font-weight: bold;
     font-size: 2em;
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
 }
 #emailDisplay {
     text-align: right;
-    font-size: 1em;
     margin-bottom: 10px;
 }
 #explanationAndClearLinks {
@@ -1789,7 +1788,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.7)</a></h1>
+    <a class="versionToggle" href="">(v1.7.1)</a></h1><!-- VERSION -->
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 <div id="emailDisplay" class="showOnlyIfHaveFetchedData"></div>
@@ -1806,7 +1805,16 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
-        <dt>1.7 <span class="date">2014-04-17</span></dt>
+        <dt>1.7.1 <span class="date">2014-04-19</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Your email address</span> is now displayed in the header, thanks to @thepeopleseason.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>1.7 <span class="date">2014-04-18</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
