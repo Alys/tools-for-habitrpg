@@ -68,7 +68,6 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
-/* TST - FOR TESTING:
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
@@ -77,6 +76,7 @@ apiToken          = 'null';
 userId            = 'test';
 userId            = 'work';
 userId            = 'home';
+/* TST - FOR TESTING:
 */
 
 function d(msg) { console.log(msg) } /* laziness FTW! */
@@ -572,11 +572,8 @@ function displayData(data) {
                 if (uniqueItemsCount > 1) { // we have stuff already
                     stuff += ", ";
                 }
+                itemName = pluralise(itemName, value);
                 stuff += value + " " + itemName;
-                if (value != 1) {
-                    // pluralise itemName (possibly badly - XXX_LATER fix)
-                    stuff += "s";
-                }
             });
             var replaceStr = (uniqueItemsCount > 2) ? ", and" : " and";
             stuff = stuff.replace(/(.+),/, "$1" + replaceStr);
@@ -618,10 +615,6 @@ function displayData(data) {
     ////   for Task Overview and other purposes     //////////////////////
     //////////////////////////////////////////////////////////////////////
     var allTasksArray = [];
-    var numberHabits            = 0;
-    var numberDailys            = 0;
-    var numberTodos             = 0;
-    var numberRewards           = 0;
     var countHabitsDailysTodos  = 0;
     var untaggedTasks = {'habits':[], 'dailys':[], 'todos':[], 'rewards':[]};
 
@@ -629,7 +622,6 @@ function displayData(data) {
     var habitHistory            = '';
     $.each(user.habits, function(index, obj){
         obj.text = escapeHtml(obj.text);
-        numberHabits++;
         countHabitsDailysTodos++;
         allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
         if (! taskIsTagged(obj.tags)) { untaggedTasks['habits'].push(obj); }
@@ -650,7 +642,6 @@ function displayData(data) {
     var stealth = user.stats.buffs.stealth; // user avoids damage from dailies
     $.each(user.dailys, function(index, obj){
         obj.text = escapeHtml(obj.text);
-        numberDailys++;
         countHabitsDailysTodos++;
         // obj.streak, obj.repeat..., obj.completed, obj.dateCompleted  XXX_LATER use them?
         // "streak":107,"checklist":[],"collapseChecklist":false,"repeat":{"su":true,"s":true,"f":true,"th":true,"w":true,"t":true,"m":true}
@@ -711,7 +702,6 @@ function displayData(data) {
     ////// Todos:
     $.each(user.todos, function(index, obj){
         obj.text = escapeHtml(obj.text);
-        numberTodos++;
         countHabitsDailysTodos++;
         // obj.priority, obj.dateCompleted   XXX_LATER use them?
         if (obj.completed == true) {
@@ -731,13 +721,12 @@ function displayData(data) {
     //////////////////////////////////////////////////////////////////////
     ////   Task Overview             /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-
     $('#taskOverviewSection').show(); // need so table is laid out correctly
     // https://datatables.net/usage/columns
     $('#taskOverviewTable').dataTable({
         'aaData': allTasksArray,
         'aoColumns': [
-    { 'mData' : 'order', // needed to ensure correst starting sort
+    { 'mData' : 'order', // needed to ensure correct starting sort
       'sTitle': '#',    'bVisible': false,
     },
     { 'mData' : 'type',       'sClass': 'center',
@@ -838,8 +827,8 @@ function displayData(data) {
     ////   Untagged Tasks            /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
     var untaggedHtml = formatUntaggedTasks('Habits',  untaggedTasks['habits'])
-                     + formatUntaggedTasks('Dailys',  untaggedTasks['dailys'])
-                     + formatUntaggedTasks('Todos',   untaggedTasks['todos'])
+                     + formatUntaggedTasks('Dailies', untaggedTasks['dailys'])
+                     + formatUntaggedTasks('To-Dos',   untaggedTasks['todos'])
                      + formatUntaggedTasks('Rewards', untaggedTasks['rewards']);
     if (untaggedHtml) {
         $('#untaggedTasksSection .output').html(untaggedHtml);
@@ -981,6 +970,17 @@ function displayData(data) {
                 (quest && quest.content.boss) ? bossDamage : 'n/a' );
 }
 
+function pluralise(word, number) {
+    if (number != 1) {
+        if (word == 'has') {
+            word = 'have';
+        }
+        else {
+            word += 's';
+        }
+    }
+    return word;
+}
 
 function formatUntaggedTasks(title, tasks) {
     var html = '';
@@ -1300,7 +1300,6 @@ function describeChecklist(task) {
     return {
         'exists': true,
         'proportionDone': (countDone / task.checklist.length),
-        // 'numberOfItems': task.checklist.length,
         };
 }
 
@@ -1314,7 +1313,7 @@ function createTaskTableCellObj(obj, orderNumber) {
 
     var shortValue = Math.round(obj.value * 100) / 100;
 
-    return {'type':      obj.type,
+    return {'type':      ((obj.type == 'todo') ? 'to-do' : obj.type),
             'attribute': obj.attribute.toUpperCase(),
             'text':      {'full':  obj.text,
                           'short': obj.text.replace(/(^.{80}).+/, "$1 ..."),
