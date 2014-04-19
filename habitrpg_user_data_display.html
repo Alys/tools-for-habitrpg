@@ -68,6 +68,7 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
+/* TST - FOR TESTING:
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
@@ -76,7 +77,6 @@ apiToken          = 'null';
 userId            = 'test';
 userId            = 'work';
 userId            = 'home';
-/* TST - FOR TESTING:
 */
 
 function d(msg) { console.log(msg) } /* laziness FTW! */
@@ -401,13 +401,15 @@ function displayData(data) {
     ////   Unallocated Points        /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
     if (user.stats.points > 0 && user.stats.lvl >= 10) {
-        var points = (user.stats.points == 1) ? "point" : "points";
-        var them   = (user.stats.points == 1) ? "it"    : "them";
         $('#unallocatedPoints .output').html('<span class="highlight">You have '
             + user.stats.points
-            + ' unallocated ' + points + '.</span>'
+            + ' unallocated '
+            + pluralise('point', user.stats.points)
+            + '.</span>'
             + ' Go to <a href="https://habitrpg.com/#/options/profile/stats">'
-            + 'your Profile -&gt; Stats page</a> to allocate ' + them + '. '
+            + 'your Profile -&gt; Stats page</a> to allocate '
+            + pluralise('it', user.stats.points)
+            + '. '
             + '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
             + 'Learn more.</a>');
         $('#dashUnallocated .output').text(user.stats.points);
@@ -843,11 +845,15 @@ function displayData(data) {
     var uncomplHtml = '';
     $('#dashIncompleteDailies .output').text(dailiesIncomplete.length);
     if (dailiesIncomplete.length > 0) {
-        uncomplHtml += '<p>';
-        uncomplHtml += (dailiesIncomplete.length > 1)
-                     ? 'These dailies are due today and have'
-                     : 'This daily is due today and has';
-        uncomplHtml += ' not been completed:</p><ul><li>'
+        uncomplHtml += '<p>'
+                     + pluralise('This', dailiesIncomplete.length)
+                     + ' '
+                     + pluralise('daily', dailiesIncomplete.length)
+                     + ' '
+                     + pluralise('is', dailiesIncomplete.length)
+                     + ' due today and '
+                     + pluralise('has', dailiesIncomplete.length)
+                     + ' not been completed:</p><ul><li>'
                      + dailiesIncomplete.join('</li><li>')
                      + '</li></ul>';
         $('#dashIncompleteDailies').removeClass('safe').addClass('danger');
@@ -856,24 +862,17 @@ function displayData(data) {
         $('#dashIncompleteDailies').removeClass('danger').addClass('safe');
     }
     if (dailiesIncompleteGrey.length > 0) {
-        var wordThis  = 'This';
-        var wordDaily = 'daily';
-        var wordIs    = 'is';
-        var wordIt    = 'it';
-        if (dailiesIncompleteGrey.length > 1) {
-            wordThis  = 'These';
-            wordDaily = 'dailies';
-            wordIs    = 'are';
-            wordIt    = 'them';
-        }
-        uncomplHtml += '<p>' + wordThis
+        uncomplHtml += '<p>'
+                     + pluralise('This', dailiesIncompleteGrey.length)
                      + ' <a href="http://habitrpg.wikia.com/wiki/Dailies#'
                      + 'Grey_Dailies">grey '
-                     + wordDaily
-                     + '</a> ' + wordIs
+                     + pluralise('daily', dailiesIncompleteGrey.length)
+                     + '</a> '
+                     + pluralise('is', dailiesIncompleteGrey.length)
                      + ' <span class="highlight">not</span> due today but'
                      + ' you can still complete '
-                     + wordIt + ' for extra rewards:</p><ul><li>'
+                     + pluralise('it', dailiesIncompleteGrey.length)
+                     + ' for extra rewards:</p><ul><li>'
                      + dailiesIncompleteGrey.join('</li><li>')
                      + '</li></ul>';
     }
@@ -971,13 +970,21 @@ function displayData(data) {
 }
 
 function pluralise(word, number) {
+    var lcWord = word.toLowerCase();
+    var needUpperCase = (lcWord == word) ? false : true; 
     if (number != 1) {
-        if (word == 'has') {
-            word = 'have';
-        }
-        else {
-            word += 's';
-        }
+        var pluralWords = {
+            'has':   'have',
+            'it':    'them',
+            'this':  'these',
+            'is':    'are',
+            'daily': 'dailies',
+        };
+        if   (pluralWords[lcWord]) { word = pluralWords[lcWord]; }
+        else                       { word += 's';    }
+    }
+    if (needUpperCase) { // must improve this if ever need ALL upper case
+        word = word.charAt(0).toUpperCase() + word.slice(1);
     }
     return word;
 }
