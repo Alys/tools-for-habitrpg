@@ -60,6 +60,7 @@ var user;    // hold user's data
 var dataFetchStatus = 'not attempted'; // also "succeeded" and "failed"
 var knownTags = [];
 var collectionDrops = false; // control Drops + Quest Progress opening
+var count_createTaskTableCellObj = 0; // starting row order in Task Overview
 
 var serverName        = 'HabitRPG'; // used in "loading" message
 var serverUrl         = 'https://habitrpg.com:443/api/v2';
@@ -158,7 +159,6 @@ $(document).ready(function() {
         // window.scrollTo(0, 0);
         // window.location.reload(true);
     // });
-
 
     // Version Changes hide/show:
     $('.versionToggle').click(function(event){
@@ -396,12 +396,12 @@ function displayData(data) {
         quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
     }
 
-
     //////////////////////////////////////////////////////////////////////
     ////   Unallocated Points        /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
     if (user.stats.points > 0 && user.stats.lvl >= 10) {
-        $('#unallocatedPoints .output').html('<span class="highlight">You have '
+        $('#unallocatedPoints .output').html('<span class="highlight">'
+			+ 'You have '
             + user.stats.points
             + ' unallocated '
             + pluralise('point', user.stats.points)
@@ -617,15 +617,68 @@ function displayData(data) {
     ////   for Task Overview and other purposes     //////////////////////
     //////////////////////////////////////////////////////////////////////
     var allTasksArray = [];
-    var countHabitsDailysTodos  = 0;
     var untaggedTasks = {'habits':[], 'dailys':[], 'todos':[], 'rewards':[]};
+    var countTasks = {
+        'habits':          {'total': 0,
+                            'con': 0,
+                            'int': 0,
+                            'per': 0,
+                            'str': 0,
+                           },
+        'dailies':         {'total': 0,
+                            'con': 0,
+                            'int': 0,
+                            'per': 0,
+                            'str': 0,
+                           },
+        'todosIncomplete': {'total': 0,
+                            'con': 0,
+                            'int': 0,
+                            'per': 0,
+                            'str': 0,
+                           },
+        'todosComplete':   {'total': 0,
+                            'con': 0,
+                            'int': 0,
+                            'per': 0,
+                            'str': 0,
+                           },
+        'todosAll':        {'total': 0,
+                            'con': 0,
+                            'int': 0,
+                            'per': 0,
+                            'str': 0,
+                           },
+        'rewards':         {'total': 0},
+        'statsTotals':     {'total': 'n/a',
+                            'con': 0,
+                            'int': 0,
+                            'per': 0,
+                            'str': 0,
+                           },
+    };
+    var exampleTaskType  = '';    // Used to develop...
+    var exampleAttribute = '';    // ... a useful customised example...
+    var exampleFound     = false; // ... for the Task Statistics section.
 
     ////// Habits:
-    var habitHistory            = '';
+    var habitHistory = '';
     $.each(user.habits, function(index, obj){
         obj.text = escapeHtml(obj.text);
-        countHabitsDailysTodos++;
-        allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
+        countTasks['habits']['total']++;
+        countTasks['habits'][obj.attribute]++;
+        countTasks['statsTotals'][obj.attribute]++;
+        if (! exampleFound) {
+            exampleTaskType  = 'habits';
+            exampleAttribute = obj.attribute;
+            if (obj.attribute != 'str') {
+                exampleFound = true; // We won't look for a better example
+                // later; we are happy with this one. We prefer to not use
+                // strength because a less-common attribute will probably
+                // provide a clearer example.
+            }
+        }
+        allTasksArray.push(createTaskTableCellObj(obj));
         if (! taskIsTagged(obj.tags)) { untaggedTasks['habits'].push(obj); }
         habitHistory += collateHistoryForOneHabit(obj);
     });
@@ -644,10 +697,24 @@ function displayData(data) {
     var stealth = user.stats.buffs.stealth; // user avoids damage from dailies
     $.each(user.dailys, function(index, obj){
         obj.text = escapeHtml(obj.text);
-        countHabitsDailysTodos++;
+        countTasks['dailies']['total']++;
+        countTasks['dailies'][obj.attribute]++;
+        countTasks['statsTotals'][obj.attribute]++;
+        if (! exampleFound) {
+            if (obj.attribute != 'str') {
+                exampleTaskType  = 'dailies';
+                exampleAttribute = obj.attribute;
+                exampleFound     = true;
+            }
+            else {
+                exampleTaskType  = exampleTaskType  || 'dailies';
+                exampleAttribute = exampleAttribute || obj.attribute;
+            }
+        }
+
         // obj.streak, obj.repeat..., obj.completed, obj.dateCompleted  XXX_LATER use them?
         // "streak":107,"checklist":[],"collapseChecklist":false,"repeat":{"su":true,"s":true,"f":true,"th":true,"w":true,"t":true,"m":true}
-        allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
+        allTasksArray.push(createTaskTableCellObj(obj));
         if (! taskIsTagged(obj.tags)) { untaggedTasks['dailys'].push(obj); }
 
         if (! sleeping) {
@@ -704,12 +771,34 @@ function displayData(data) {
     ////// Todos:
     $.each(user.todos, function(index, obj){
         obj.text = escapeHtml(obj.text);
-        countHabitsDailysTodos++;
         // obj.priority, obj.dateCompleted   XXX_LATER use them?
         if (obj.completed == true) {
+            countTasks['todosComplete']['total']++;
+            countTasks['todosComplete'][obj.attribute]++;
+            countTasks['statsTotals'][obj.attribute]++;
+            countTasks['todosAll']['total']++;
+            countTasks['todosAll'][obj.attribute]++;
             return true; // currently we don't display completed to-dos
         }
-        allTasksArray.push(createTaskTableCellObj(obj, countHabitsDailysTodos));
+        else {
+            countTasks['todosIncomplete']['total']++;
+            countTasks['todosIncomplete'][obj.attribute]++;
+            countTasks['statsTotals'][obj.attribute]++;
+            countTasks['todosAll']['total']++;
+            countTasks['todosAll'][obj.attribute]++;
+            if (! exampleFound) {
+                if (obj.attribute != 'str') {
+                    exampleTaskType  = 'todosIncomplete';
+                    exampleAttribute = obj.attribute;
+                    exampleFound     = true;
+                }
+                else {
+                    exampleTaskType  = exampleTaskType  || 'todosIncomplete';
+                    exampleAttribute = exampleAttribute || obj.attribute;
+                }
+            }
+        }
+        allTasksArray.push(createTaskTableCellObj(obj));
         if (! taskIsTagged(obj.tags)) { untaggedTasks['todos'].push(obj); }
     });
 
@@ -717,7 +806,104 @@ function displayData(data) {
     $.each(user.rewards, function(index, obj){
         obj.text = escapeHtml(obj.text);
         if (! taskIsTagged(obj.tags)) { untaggedTasks['rewards'].push(obj); }
+        countTasks['rewards']['total']++;
     });
+
+    //////////////////////////////////////////////////////////////////////
+    ////   Tasks Statistics          /////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    $('#taskStatisticsSection').show(); // TST
+    var taskStatisticsHtml = '';
+    taskStatisticsHtml += '<p>This table shows the number of tasks you have'
+        + ' for each kind of task (habits, dailies, to-dos)'
+        + ' and the number of tasks assigned to each'
+        + ' <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
+        + 'attribute</a>.';
+    if (exampleTaskType && exampleAttribute) {
+        taskStatisticsHtml += ' For example, you have '
+                            + countTasks[exampleTaskType]['total']
+                            + ' '
+                            + ((exampleTaskType == 'todosIncomplete')
+                                ? 'incomplete to-dos' : exampleTaskType);
+        if (countTasks[exampleTaskType]['total']
+                == countTasks[exampleTaskType][exampleAttribute]) {
+            taskStatisticsHtml += ' and all have'
+        }
+        else {
+            taskStatisticsHtml += ' of which '
+                    + countTasks[exampleTaskType][exampleAttribute]
+                    + ' '
+                    + pluralise('has',
+                        countTasks[exampleTaskType][exampleAttribute])
+        }
+        taskStatisticsHtml += ' been assigned to '
+                            + exampleAttribute.toUpperCase()
+                            + '.'
+    }
+    taskStatisticsHtml += '</p>';
+    taskStatisticsHtml += '<table>'
+                        + '<tr>'
+                        + '<th>Attribute</th>'
+                        + '<th>Habits</th>'
+                        + '<th>Dailies</th>'
+                        + '<th>To-Dos - Incomplete</th>'
+                        + '<th>To-Dos - Complete *</th>'
+                        + '<th>To-Dos - All</th>'
+                        + '<th>Total Tasks for each Attribute</th>'
+                        + '</tr>';
+    $.each(['con','int','per','str','total'], function(index, attr){
+        taskStatisticsHtml += '<tr'
+                            + ((attr == 'total') ? ' class="total"' : '')
+                            + '>'
+                            + '<td>'
+                            + ((attr.length==3) ? attr.toUpperCase() : attr)
+                            + '</td>'
+                            ;
+        $.each(['habits','dailies','todosIncomplete','todosComplete',
+                'todosAll','statsTotals'], function(index, type){
+            taskStatisticsHtml += '<td>' + countTasks[type][attr] + '</td>';
+        });
+        taskStatisticsHtml += '</tr>';
+    });
+
+    taskStatisticsHtml += '</table>';
+    taskStatisticsHtml += '<p class="lowlight"><strong>*</strong> Your completed to-dos are automatically deleted after three days to improve HabitRPG\'s speed. You can export your current to-dos and at least some of your old to-dos using the <a href="http://habitrpg.wikia.com/wiki/Data_Export">"User Data" export option</a>.</p>';
+    taskStatisticsHtml += '<p style="margin-top:1.5em">You have '
+                        + '<span class="highlight"> '
+                        + countTasks['rewards']['total']
+                        + ' '
+                        + pluralise('reward', countTasks['rewards']['total'])
+                        + '</span>.</p>';
+    ////
+    ////
+    ////   Tasks Statistics: Training Stats    ///////////////////////////
+    var trainingHtml = '';
+    var trainingTotal = 0; // just to work out if we should show this section
+    $.each(user.stats.training, function(key, value){
+        value = Math.round(value * 10) / 10;
+        trainingHtml  += '<tr><td>'
+                       + key.toUpperCase() + '</td><td>'
+                       + value + '</td></tr>';
+        trainingTotal += value;
+    });
+    var sectionTitle = 'Task Statistics';
+    if (trainingTotal) { // don't show Training Stats if all are zero
+        sectionTitle += ' and Training Stats';
+        taskStatisticsHtml += '<h3>Training Stats</h3>';
+        taskStatisticsHtml += ''
+                            + '<p>'
+                            + 'When you use task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a>, you gain and lose points of "training" for the <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">attributes</a> you\'ve assigned to your tasks. When you level up, the attribute with the most training gets a point assigned, and all training resets to 0 for the next level. '
+                            + 'Your current training points are:'
+                            + '</p>'
+                            + '<table>'
+                            + trainingHtml
+                            + '</table>'
+                            // + '<p><a href="https://habitrpg.com/#/options/profile/stats">HabitRPG Stats page</a> shows you your other stats.</p>' // XXX use?
+                            ;
+    }
+    $('#taskStatistics a'        ).text(sectionTitle);
+    $('#taskStatisticsSection h2').text(sectionTitle);
+    $('#taskStatisticsSection .output').html(taskStatisticsHtml);
 
 
     //////////////////////////////////////////////////////////////////////
@@ -830,7 +1016,7 @@ function displayData(data) {
     //////////////////////////////////////////////////////////////////////
     var untaggedHtml = formatUntaggedTasks('Habits',  untaggedTasks['habits'])
                      + formatUntaggedTasks('Dailies', untaggedTasks['dailys'])
-                     + formatUntaggedTasks('To-Dos',   untaggedTasks['todos'])
+                     + formatUntaggedTasks('To-Dos',  untaggedTasks['todos'])
                      + formatUntaggedTasks('Rewards', untaggedTasks['rewards']);
     if (untaggedHtml) {
         $('#untaggedTasksSection .output').html(untaggedHtml);
@@ -1311,7 +1497,8 @@ function describeChecklist(task) {
 }
 
 
-function createTaskTableCellObj(obj, orderNumber) {
+function createTaskTableCellObj(obj) {
+    count_createTaskTableCellObj++;
     var date = new Date(obj.dateCreated); // ASSUME 'date' is a real date!
     var formattedDate = myDateConverter(date);
     var shortDate = formattedDate.replace(/^20/, "")  // remove century
@@ -1331,7 +1518,7 @@ function createTaskTableCellObj(obj, orderNumber) {
             'creation':  {'dateAndTime': formattedDate,
                           'shortDate': shortDate,
                          },
-            'order':     orderNumber,
+            'order':     count_createTaskTableCellObj,
         };
 }
 
@@ -1683,6 +1870,26 @@ h2 {
     max-width: 60px !important;
 }
 
+#taskStatisticsSection h3 {
+    margin-top: 2em;
+}
+#taskStatisticsSection table {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+#taskStatisticsSection table tr th,
+#taskStatisticsSection table tr td {
+    padding: 3px 7px;
+    border: 1px solid black;
+    text-align: center;
+}
+#taskStatisticsSection table tr.total td {
+    font-weight: bold;
+    font-size: 1.1em;
+    border-top:    2px solid black;
+    border-bottom: 2px solid black;
+}
+
 .coloured {
     display: inline-block;
     width: 5.5em;
@@ -1810,7 +2017,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.7.2)</a></h1><!-- VERSION -->
+    <a class="versionToggle" href="">(v1.8)</a></h1><!-- VERSION -->
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 <div id="emailDisplay" class="hide"></div>
@@ -1823,10 +2030,19 @@ h2 {
 </div>
 <hr class="clear" />
 
-
 <div id="versionChanges" class="hide"><!-- VERSION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>1.8 <span class="date">2014-04-20</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Task Statistics</span> XXX write this [includes Training Stats if using autoallocation]</li>
+                    <li><span class="subheading">Re-Fetch My Data button</span> appears in the header after you have fetched your data once. Clicking it will refresh your data with the latest from HabitRPG's server (it has the same effect as resubmitting the API details form).</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>1.7.2 <span class="date">2014-04-19</span></dt>
         <dd><ul>
@@ -1838,7 +2054,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.7.1 <span class="date">2014-04-19</span></dt>
         <dd><ul>
             <li>Features:
@@ -1864,7 +2079,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.6.1 <span class="date">2014-04-13</span></dt>
         <dd><ul>
             <li>Features (minor):
@@ -2099,10 +2313,11 @@ h2 {
              only if you are on a quest).
         -->
         <li>Tasks:<ul>
-            <li id="habitHistory"><a href="">Habit History</a></li>
             <li id="taskOverview"><a href="">Task Overview</a></li>
-            <li id="dailiesIncomplete" class="showOnlyIfDataExists"><a href="">Dailies Incomplete</a></li>
+            <li id="taskStatistics"><a href="">Task Statistics</a></li>
             <li id="untaggedTasks" class="showOnlyIfDataExists"><a href="">Tasks Untagged</a></li>
+            <li id="habitHistory"><a href="">Habit History</a></li>
+            <li id="dailiesIncomplete" class="showOnlyIfDataExists"><a href="">Dailies Incomplete</a></li>
         </ul></li>
         <li>Other:<ul>
             <li id="damageDailies"><a href="">Damage from Dailies</a></li>
@@ -2135,6 +2350,11 @@ h2 {
         <div class="taskOverviewExplanationToggle closer"><a href="">hide explanation</a></div>
         </div>
         <table id="taskOverviewTable" class="output"></table>
+    </div>
+
+    <div class="tocSection" id="taskStatisticsSection">
+        <h2>Task Statistics</h2>
+        <div class="output selfClear"></div>
     </div>
 
     <div class="tocSection longContent" id="habitHistorySection">
@@ -2258,7 +2478,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
    </ul>
 <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
-   <h2>Possible Future Features</h2><!-- XXX_LATER look into this -->
+   <h2>Possible Future Features</h2><!-- XXX_LATER look into this  --- XXX remove stats etc, mark Equip as up next -->
    <ul>
         <li><span class="subheading">Recommended Equipment for Maximising Stats</span>: Some kind of tool (possibly similar to the wiki's <a href="http://habitrpg.wikia.com/wiki/Equipment_Table">Equipment Table</a>) that helps you choose the best items from the gear you own for maximising specific stats.</li>
         <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
