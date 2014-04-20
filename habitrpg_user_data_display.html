@@ -87,9 +87,9 @@ serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
 apiToken          = 'null';
+userId            = 'test';
 userId            = 'work';
 userId            = 'home';
-userId            = 'test';
 */
 
 function d(msg) { console.log(msg) } /* laziness FTW! */
@@ -1096,6 +1096,16 @@ function displayData(data) {
     //////////////////////////////////////////////////////////////////////
     var damageDailiesHtml = '';
     var currentHealth = Math.round(user.stats.hp * 10) / 10;
+    // If the user's health is so low that it rounds to 0, then show
+    // them a more-precise (hopefully non-zero) number, because 0
+    // makes them wonder why they aren't dead:
+    if (currentHealth == 0) {
+        currentHealth = Math.round(user.stats.hp * 1000) / 1000;
+        if (currentHealth == 0) {
+            currentHealth = Math.round(user.stats.hp * 100000) / 100000;
+        }
+    }
+
     $('#dashCurrentHealth .output').text(currentHealth);
     if (sleeping) {
         damageDailiesHtml = '<p>You are'
@@ -1427,7 +1437,7 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
     var userKlass = user.stats.class;
     $.each(ownedEquipment, function(index,key){
         var obj = $.extend({}, content.gear.flat[key]);
-        if (obj.con + obj.int + obj.per + obj.str) { // only stats-giving gear
+        if (obj.con || obj.int || obj.per || obj.str) { // stats-giving gear
             // adjust some equipment types:
             if (obj.type == 'head') {
                 obj.type = 'headwear'; // weapon, headWEAR - looks better
@@ -1465,6 +1475,16 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
                           + obj.type + '-hand)</span>';
                 // e.g., 'Kukri (shield-hand)' and 'Kukri (weapon-hand)'
             }
+
+            // create a field that lists in one string the attributes
+            // given by this item
+            var attrs = [];
+            $.each(['con','int','per','str'], function(index, attr){
+                if (obj[attr]) {
+                    attrs.push(attr);
+                }
+            });
+            obj.attributesString = attrs.join(' / ');
 
             allItems.push(obj); // doesn't include non-stats gear
 
@@ -1537,6 +1557,9 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
     { 'mData' : 'str',        'sClass': 'center',
       'sTitle': 'STR',        'asSorting': ['desc','asc'],
     },
+    { 'mData' : 'attributesString',    'bVisible': false,
+      'sTitle': 'attributes', 'sClass': 'center',
+    },
         ],
         'sDom': 'W<"clear"><"top"if>rt<"bottom"><"clear">',
         'bAutoWidth': false,
@@ -1546,6 +1569,7 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
         "bDestroy": true, // allows table to recreate if Fetch Data is repeated
         'oColumnFilterWidgets': {
             'aiExclude': [ 1,3,4,5,6 ],
+            "sSeparator": "\\s*/+\\s*",
         }
     });
 
@@ -2767,13 +2791,9 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <!-- div class="equipmentRecommendationsExplanationToggle"><a href="">show explanation</a></div -->
         <div> <!-- class="longExplanation" -->
         <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p>
-
         <p>The table below shows you the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p>
-
-        <p>You can sort the table by clicking on a column heading, or filter it using the "type" and "class" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page, which uses the same technology).</p>
-
-        <p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting.</p>
-
+        <p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "attributes" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page, which uses the same technology).</p>
+        <p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the attribute you care most about, then highlight the top one or more items, and then if you care about another attribute too, re-sort by it and select more items.</p>
         <p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p>
 
         <!-- div class="equipmentRecommendationsExplanationToggle closer"><a href="">hide explanation</a></div -->
