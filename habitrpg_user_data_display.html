@@ -55,13 +55,25 @@ Contributors:
 
 
     <script type="text/javascript">
+
+//////////////////////////////////////////////////////////////////////
+////   Global Variable                               /////////////////
+////   I don't like them but they seem useful. :(    /////////////////
+//////////////////////////////////////////////////////////////////////
 var content; // hold site-wide content (gear names and stats, quests, etc)
 var user;    // hold user's data
 var dataFetchStatus = 'not attempted'; // also "succeeded" and "failed"
 var knownTags = [];
 var collectionDrops = false; // control Drops + Quest Progress opening
-var count_createTaskTableCellObj = 0; // starting row order in Task Overview
+var count_createTaskTableCellObj = 0; // default row order in Task Overview
+var twoHandedWeaponSelected = false; // for Equipment Recommendations
+var oneHandedWeaponSelected = false; // for Equipment Recommendations
+var shieldSelected          = false; // for Equipment Recommendations
 
+
+//////////////////////////////////////////////////////////////////////
+////   Connection Variables      /////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 var serverName        = 'HabitRPG'; // used in "loading" message
 var serverUrl         = 'https://habitrpg.com:443/api/v2';
 var serverPathContent = '/content';
@@ -75,9 +87,9 @@ serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
 apiToken          = 'null';
-userId            = 'test';
 userId            = 'work';
 userId            = 'home';
+userId            = 'test';
 */
 
 function d(msg) { console.log(msg) } /* laziness FTW! */
@@ -401,7 +413,7 @@ function displayData(data) {
     //////////////////////////////////////////////////////////////////////
     if (user.stats.points > 0 && user.stats.lvl >= 10) {
         $('#unallocatedPoints .output').html('<span class="highlight">'
-			+ 'You have '
+            + 'You have '
             + user.stats.points
             + ' unallocated '
             + pluralise('point', user.stats.points)
@@ -430,12 +442,17 @@ function displayData(data) {
 
     //////////////////////////////////////////////////////////////////////
     ////   Missing Equipment         /////////////////////////////////////
+    ////   + Recommended Equipment   /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    var missing = [];
+    var missing        = [];
+    var ownedEquipment = [];
     $.each(user.items.gear.owned, function(key, value){
         if (value === false) {
             missing.push( prettyPrintKey(key, 'gear',
                             {'includeStats':true, 'includeGold':true, }) );
+        }
+        else {
+            ownedEquipment.push(key);
         }
     });
     if (missing.length > 0) {
@@ -468,7 +485,13 @@ function displayData(data) {
                                                    .addClass('show');
     }
 
+    $('#equipmentRecommendationsSection .output').html(
+            createEquipmentRecommendationsSection(ownedEquipment) );
 
+
+    //////////////////////////////////////////////////////////////////////
+    ////   Current Appearance and Gear    ////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
     $('#currentGearSection .output').html(
             createCurrentGearSection() );
 
@@ -812,7 +835,6 @@ function displayData(data) {
     //////////////////////////////////////////////////////////////////////
     ////   Tasks Statistics          /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    $('#taskStatisticsSection').show(); // TST
     var taskStatisticsHtml = '';
     taskStatisticsHtml += '<p>This table shows the number of tasks you have'
         + ' for each kind of task (habits, dailies, to-dos)'
@@ -898,7 +920,7 @@ function displayData(data) {
                             + '<table>'
                             + trainingHtml
                             + '</table>'
-                            // + '<p><a href="https://habitrpg.com/#/options/profile/stats">HabitRPG Stats page</a> shows you your other stats.</p>' // XXX use?
+                            // + '<p><a href="https://habitrpg.com/#/options/profile/stats">HabitRPG Stats page</a> shows you your other stats.</p>' // XXX_SOON use?
                             ;
     }
     $('#taskStatistics a'        ).text(sectionTitle);
@@ -1157,7 +1179,7 @@ function displayData(data) {
 
 function pluralise(word, number) {
     var lcWord = word.toLowerCase();
-    var needUpperCase = (lcWord == word) ? false : true; 
+    var needUpperCase = (lcWord == word) ? false : true;
     if (number != 1) {
         var pluralWords = {
             'has':   'have',
@@ -1255,7 +1277,6 @@ function collateHistoryForOneHabit (obj){
     }
     return '<li class="' + noHistoryClass + '">' + habitText + '</li>';
 }
-
 
 function createCurrentGearSection() {
     var pastels = ['pblue','pgreen','porange','ppink','ppurple','pyellow'];
@@ -1372,13 +1393,322 @@ function createCurrentGearSection() {
     return currentGearEtcHtml;
 }
 
+function createEquipmentRecommendationsSection(ownedEquipment) {
+    var topEquipment = {
+        'armor':           { 'con': {'stat':0, 'key':'', 'obj':{}},
+                             'int': {'stat':0, 'key':'', 'obj':{}},
+                             'per': {'stat':0, 'key':'', 'obj':{}},
+                             'str': {'stat':0, 'key':'', 'obj':{}},
+                           },
+        'headwear':        { 'con': {'stat':0, 'key':'', 'obj':{}},
+                             'int': {'stat':0, 'key':'', 'obj':{}},
+                             'per': {'stat':0, 'key':'', 'obj':{}},
+                             'str': {'stat':0, 'key':'', 'obj':{}},
+                           },
+        'shield':          { 'con': {'stat':0, 'key':'', 'obj':{}},
+                             'int': {'stat':0, 'key':'', 'obj':{}},
+                             'per': {'stat':0, 'key':'', 'obj':{}},
+                             'str': {'stat':0, 'key':'', 'obj':{}},
+                           },
+        'weapon':          { 'con': {'stat':0, 'key':'', 'obj':{}},
+                             'int': {'stat':0, 'key':'', 'obj':{}},
+                             'per': {'stat':0, 'key':'', 'obj':{}},
+                             'str': {'stat':0, 'key':'', 'obj':{}},
+                           },
+        'weaponTwoHanded': { 'con': {'stat':0, 'key':'', 'obj':{}},
+                             'int': {'stat':0, 'key':'', 'obj':{}},
+                             'per': {'stat':0, 'key':'', 'obj':{}},
+                             'str': {'stat':0, 'key':'', 'obj':{}},
+                           },
+    };
+
+    var potentialItems = {};
+    var allItems = []; // currently just for testing
+    var userKlass = user.stats.class;
+    $.each(ownedEquipment, function(index,key){
+        var obj = $.extend({}, content.gear.flat[key]);
+        if (obj.con + obj.int + obj.per + obj.str) { // only stats-giving gear
+            // adjust some equipment types:
+            if (obj.type == 'head') {
+                obj.type = 'headwear'; // weapon, headWEAR - looks better
+            }
+            if (obj.type == 'weapon' && obj.twoHanded) {
+                obj.type = 'weaponTwoHanded';
+            }
+
+            // adjust equipment class && add class bonus:
+            if (obj.klass == 'special') { // find real class for item
+                obj.klass = obj.specialClass || 'none';
+            }
+            if (obj.klass == userKlass) { // apply class bonus
+                obj['con'] *= 1.5;
+                obj['int'] *= 1.5;
+                obj['per'] *= 1.5;
+                obj['str'] *= 1.5;
+            }
+            if (obj.klass == 'wizard') {
+                obj.klass = 'mage';
+            }
+
+            // adjust equipment names
+            if (obj.type == 'weaponTwoHanded') {
+                obj.text += ' <span class="lowlight">(two-handed)</span>';
+            }
+            if (obj.text == 'Black Leather' || obj.text == 'Oiled Leather') {
+                obj.text += ' '  // add type of gear to the name:
+                          + obj.type.charAt(0).toUpperCase()
+                          + obj.type.slice(1);
+            }
+            if (obj.klass == 'rogue' &&
+                    (obj.type == 'weapon' || obj.type == 'shield')) {
+                obj.text += ' <span class="lowlight">('
+                          + obj.type + '-hand)</span>';
+                // e.g., 'Kukri (shield-hand)' and 'Kukri (weapon-hand)'
+            }
+
+            allItems.push(obj); // doesn't include non-stats gear
+
+            // use item's stats to work out if it's the best we've found
+            // so far for this type, and if so, record its data (overwriting
+            // previously-found, less-good items):
+            $.each(['con','int','per','str'], function(index, attr){
+                // NB: the change above from 'weapon' to 'weaponTwoHanded'
+                // lets us capture the best gear for both one-hand and
+                // two-hand weapons:
+                if (obj[attr] > topEquipment[obj.type][attr]['stat']) {
+                    bestSoFar = true;
+                    topEquipment[obj.type][attr]['stat'] = obj[attr];
+                    topEquipment[obj.type][attr]['key']  = key;
+                    topEquipment[obj.type][attr]['obj']  = obj;
+                }
+            });
+        }
+    });
+
+    // put the best items into an array that DataTables can use:
+    var aaData = [];
+    var found  = {}; // prevent duplicates
+    $.each(topEquipment, function(index, typeObj){
+        $.each(typeObj, function(index,attrObj){
+            if (attrObj['key']) {
+                if (! found[attrObj['key']]) {
+                    found[attrObj['key']] = true;
+                    aaData.push(attrObj['obj']);
+                }
+            }
+        });
+    });
+
+    // aaData = allItems; // FOR TESTING - TST
+    $('#equipmentRecommendationsSection').show();
+    $('#equipmentRecommendationsTable').dataTable({
+        'fnRowCallback':
+            function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+                // give each row a class based on the type of gear:
+                $(nRow).addClass(aData['type']);
+                // add 'data' to each row for later calculations:
+                $(nRow).data('name',      aData['text']);
+                $(nRow).data('con',       aData['con']);
+                $(nRow).data('int',       aData['int']);
+                $(nRow).data('per',       aData['per']);
+                $(nRow).data('str',       aData['str']);
+                return nRow;
+            },
+        'aaData': aaData,
+        'aoColumns': [
+    { 'mData' : 'type',       'sClass': 'center',
+      'sTitle': 'type',
+    },
+    { 'mData' : 'text',       'sClass': 'center',
+      'sTitle': 'name',
+    },
+    { 'mData' : 'klass',      'sClass': 'center',
+      'sTitle': 'class',
+    },
+    { 'mData' : 'con',        'sClass': 'center',
+      'sTitle': 'CON',        'asSorting': ['desc','asc'],
+    },
+    { 'mData' : 'int',        'sClass': 'center',
+      'sTitle': 'INT',        'asSorting': ['desc','asc'],
+    },
+    { 'mData' : 'per',        'sClass': 'center',
+      'sTitle': 'PER',        'asSorting': ['desc','asc'],
+    },
+    { 'mData' : 'str',        'sClass': 'center',
+      'sTitle': 'STR',        'asSorting': ['desc','asc'],
+    },
+        ],
+        'sDom': 'W<"clear"><"top"if>rt<"bottom"><"clear">',
+        'bAutoWidth': false,
+        'bPaginate': false,
+        'bDeferRender': true,
+        "sScrollX": "100%",
+        "bDestroy": true, // allows table to recreate if Fetch Data is repeated
+        'oColumnFilterWidgets': {
+            'aiExclude': [ 1,3,4,5,6 ],
+        }
+    });
+
+    $('#equipmentRecommendationsTable tr').click( function() {
+        var type = $(this).children(":first").text(); // armor, shield, etc
+
+
+        if (! $(this).hasClass('rowHighlight')) {
+            // The user has clicked on a row that is not yet highlighted
+            // (i.e., the user wants that row to be highlighted).
+            // We add the highlight class to that row and remove it from
+            // any other rows for the same type of equipment.
+            // We add the lowlight class to all other rows for the same
+            // type of equipment (but not the row that the user clicked on).
+            $(this).siblings('.' + type).removeClass('rowHighlight')
+                                           .addClass('rowLowlight');
+            $(this).removeClass('rowLowlight')
+                      .addClass('rowHighlight');
+            if (type == 'weaponTwoHanded') {
+                // The user has selected a two-handed weapon, so
+                // all shields and one-handed weapons are treated in
+                // the same way as non-selected two-handed weapons:
+                $(this).siblings('.shield').removeClass('rowHighlight')
+                                              .addClass('rowLowlight');
+                $(this).siblings('.weapon').removeClass('rowHighlight')
+                                              .addClass('rowLowlight');
+                twoHandedWeaponSelected = true;
+                oneHandedWeaponSelected = false;
+                shieldSelected          = false;
+            }
+            else if (type == 'weapon') {
+                // The user has selected a one-handed weapon, so
+                // all two-handed weapons are treated in the same way
+                // as non-selected one-handed weapons:
+                $(this).siblings('.weaponTwoHanded')
+                                        .removeClass('rowHighlight')
+                                           .addClass('rowLowlight');
+                if (twoHandedWeaponSelected) {
+                    // The user had previously selected a two-handed
+                    // weapon, so shields would have been greyed out
+                    // because of that, so now we must mark shields as
+                    // able to be selected:
+                    $(this).siblings('.shield').removeClass('rowLowlight');
+                    twoHandedWeaponSelected = false;
+                }
+                oneHandedWeaponSelected = true;
+            }
+            else if (type == 'shield') {
+                // The user has selected a shield, so
+                // all two-handed weapons are treated in the same way
+                // as non-selected shields:
+                // two-handed weapons as not able to be selected:
+                $(this).siblings('.weaponTwoHanded')
+                                           .removeClass('rowHighlight')
+                                              .addClass('rowLowlight');
+                if (twoHandedWeaponSelected) {
+                    // The user had previously selected a two-handed
+                    // weapon, so weaponds would have been greyed out
+                    // because of that, so now we must mark weaponds as
+                    // able to be selected:
+                    $(this).siblings('.weapon').removeClass('rowLowlight');
+                    twoHandedWeaponSelected = false;
+                }
+                shieldSelected = true;
+            }
+        }
+        else {
+            // The user has clicked on a row that was previously highlighted
+            // (i.e., that the user had previously clicked on) - so the user
+            // wants this row to no longer be highlighted.
+            // We remove the highlight class from the row.
+            // We also remove the lowlight class from rows for the same
+            // equipment type.
+            $(this).siblings('.' + type).removeClass('rowHighlight')
+                                        .removeClass('rowLowlight');
+            $(this).removeClass('rowHighlight')
+                   .removeClass('rowLowlight');
+            if (type == 'weaponTwoHanded') {
+                // The user has un-selected a two-handed weapon, so
+                // all shields and one-handed weapons (which were
+                // previously marked as unable to be selected) must
+                // have their lowlighting removed:
+                $(this).siblings('.shield').removeClass('rowLowlight');
+                $(this).siblings('.weapon').removeClass('rowLowlight');
+                twoHandedWeaponSelected = false;
+            }
+
+            else if (type == 'weapon') {
+                // The user has un-selected a one-handed weapon,
+                // so all two-handed weapons have their lowlighting removed
+                // UNLESS a shield is still selected:
+                if (! shieldSelected) {
+                    $(this).siblings('.weaponTwoHanded')
+                                            .removeClass('rowLowlight');
+                }
+                oneHandedWeaponSelected = false;
+            }
+
+            else if (type == 'shield') {
+                // The user has un-selected a shield,
+                // so all two-handed weapons have their lowlighting removed:
+                // UNLESS a one-handed weapon is still selected:
+                if (! oneHandedWeaponSelected) {
+                    $(this).siblings('.weaponTwoHanded')
+                                            .removeClass('rowLowlight');
+                }
+                shieldSelected = false;
+            }
+        }
+        sumEquipmentRecommendations();
+    });
+    $('#equipmentRecommendationsSection').hide();
+}
+
+function sumEquipmentRecommendations() {
+    var countCon = 0;
+    var countInt = 0;
+    var countPer = 0;
+    var countStr = 0;
+    var list     = '';
+    $('#equipmentRecommendationsTable tr.rowHighlight').each(
+        function(index,value){
+            list     += '<li>' + $(this).data('name') + '</li>';
+            countCon += $(this).data('con');
+            countInt += $(this).data('int');
+            countPer += $(this).data('per');
+            countStr += $(this).data('str');
+    });
+    $('#equipmentRecommendationsSection #equipmentChosen').html(
+        '<p><input id="equipmentChosenClear" type="submit"'
+        + ' value="Clear All Selections"></p>'
+        + '<p>The equipment you have selected'
+        + '<br />'
+        + 'and the total stats they give are:</p>'
+        + '<ul>'
+        + '<li class="highlight">'
+        + countCon + ' <span class="attributeName">con</span> '
+        + countInt + ' <span class="attributeName">int</span> '
+        + countPer + ' <span class="attributeName">per</span> '
+        + countStr + ' <span class="attributeName">str</span>'
+        + '</li>'
+        + list
+        + '</ul>'
+    );
+
+    $('#equipmentChosenClear').click( function() {
+        event.preventDefault();
+        $('#equipmentRecommendationsTable tr').each(
+            function(index,value){
+                $(value).removeClass('rowHighlight')
+                        .removeClass('rowLowlight')
+            }
+        )
+        $('#equipmentRecommendationsSection #equipmentChosen').html('');
+    });
+}
 
 function prettyPrintKey(key, itemType, options) {
     // Takes a "key" (e.g., weapon_warrior_0) from HabitRPG's "content" data
     // and returns the name of the item (and sometimes other info).
     // If the name can't be found, it treats the key as the name.
     var name  = key;
-    var extra = '';  // e.g., for gear: klass and type (weapon/armour/etc)
+    var extra = '';  // e.g., for gear: klass and type (weapon/armor/etc)
     if (itemType == 'gear') {
         var obj = content.gear.flat[key];
         name = obj.text
@@ -1945,6 +2275,59 @@ h2 {
 #missingEquipmentSection .gearList .item .extra {
 }
 
+#equipmentRecommendationsTable tr td {
+    border-bottom: 1px solid lightgrey;
+}
+#equipmentRecommendationsTable tr.even,
+#equipmentRecommendationsTable tr.even .sorting_1,
+#equipmentRecommendationsTable tr.odd,
+#equipmentRecommendationsTable tr.odd  .sorting_1 {
+    background-color: rgb(242, 242, 230); /* yellowish */
+    color: black;
+    font-style: normal;
+    font-weight: normal;
+}
+#equipmentRecommendationsTable .rowLowlight,
+#equipmentRecommendationsTable .rowLowlight .sorting_1 {
+    background-color: #E8E8E8 !important; /* pale grey */
+    color: #C0C0C0 !important; /* darker grey */
+    font-style: italic !important;
+    font-weight: normal !important;
+}
+#equipmentRecommendationsTable .rowHighlight,
+#equipmentRecommendationsTable .rowHighlight .sorting_1 {
+    background-color: rgb(173, 208, 215) !important; /* bluish */
+    color: black !important;
+    font-style: normal !important;
+    font-weight: bold !important;
+}
+
+#equipmentRecommendationsSection #equipmentChosen {
+    margin-top: 1.5em;
+}
+#equipmentRecommendationsSection #equipmentChosen p,
+#equipmentRecommendationsSection #equipmentChosen ul {
+    width: auto;
+    float: left;
+    margin-right: 2em;
+}
+#equipmentRecommendationsSection #equipmentChosen ul {
+    list-style-type: none;
+    font-size:  1.2em;
+    margin: 0;
+    padding: 0;
+}
+#equipmentRecommendationsSection #equipmentChosen ul li {
+    padding-bottom: 3px;
+}
+#equipmentRecommendationsSection #equipmentChosen ul li.highlight {
+    padding-bottom:  9px;
+}
+#equipmentRecommendationsSection #equipmentChosen .attributeName {
+    font-variant: small-caps;
+    padding-right: 10px;
+}
+
 #currentGearSection .subsection {
     float: left;
     margin-right: 2em;
@@ -2017,7 +2400,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.8)</a></h1><!-- VERSION -->
+    <a class="versionToggle" href="">(v1.8 beta)</a></h1><!-- VERSION -->
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 <div id="emailDisplay" class="hide"></div>
@@ -2034,12 +2417,13 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
-        <dt>1.8 <span class="date">2014-04-20</span></dt>
+        <dt>1.8 beta <span class="date">2014-04-20</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Task Statistics</span> XXX write this [includes Training Stats if using autoallocation]</li>
-                    <li><span class="subheading">Re-Fetch My Data button</span> appears in the header after you have fetched your data once. Clicking it will refresh your data with the latest from HabitRPG's server (it has the same effect as resubmitting the API details form).</li>
+                    <!-- li><span class="subheading">Task Statistics</span> XXX_SOON write this [includes Training Stats if using autoallocation]</li -->
+                    <li><span class="subheading">Equipment Recommendations</span>: a table showing your best equipment to help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</p>
+                    </li>
                 </ul>
             </li>
         </ul></dd>
@@ -2261,7 +2645,7 @@ h2 {
 </div>
 
 <div id="loading">
-    <p>Please wait. Your data is being fetched from
+    <p>Please wait. Fetching data from
     <span id="serverName">HabitRPG</span>...</p>
 </div>
 
@@ -2313,11 +2697,12 @@ h2 {
              only if you are on a quest).
         -->
         <li>Tasks:<ul>
-            <li id="taskOverview"><a href="">Task Overview</a></li>
-            <li id="taskStatistics"><a href="">Task Statistics</a></li>
-            <li id="untaggedTasks" class="showOnlyIfDataExists"><a href="">Tasks Untagged</a></li>
+
             <li id="habitHistory"><a href="">Habit History</a></li>
+            <!-- li id="taskStatistics"><a href="">Task Statistics</a></li -->
+            <li id="taskOverview"><a href="">Task Overview</a></li>
             <li id="dailiesIncomplete" class="showOnlyIfDataExists"><a href="">Dailies Incomplete</a></li>
+            <li id="untaggedTasks" class="showOnlyIfDataExists"><a href="">Tasks Untagged</a></li>
         </ul></li>
         <li>Other:<ul>
             <li id="damageDailies"><a href="">Damage from Dailies</a></li>
@@ -2325,6 +2710,7 @@ h2 {
             <li id="questProgress" class="showOnlyIfDataExists"><a href="">Quest Progress</a></li>
             <li id="missingEquipment" class="showOnlyIfDataExists"><a href="">Missing Equipment</a></li>
             <li id="currentGear"><a href="">Current Appearance and Gear</a></li>
+            <li id="equipmentRecommendations"><a href="">Equipment Recommendations</a></li>
         </ul></li>
     </ul>
     <hr />
@@ -2339,7 +2725,6 @@ h2 {
         <div class="taskOverviewExplanationToggle"><a href="">show explanation</a></div>
         <div class="longExplanation">
         <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, send screenshots <a href="mailto:lady_alys@oldgods.net">to Alys</a> and tell her what browser you are using (browser name AND version e.g., "Firefox 28.0") and what operating system (e.g., Windows XP).</p>
-
         <p>The table below shows your tasks (habits, dailies, and to-dos), with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</p>
         <ul>
         <li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in HabitRPG.</li>
@@ -2352,10 +2737,12 @@ h2 {
         <table id="taskOverviewTable" class="output"></table>
     </div>
 
+<!--
     <div class="tocSection" id="taskStatisticsSection">
         <h2>Task Statistics</h2>
         <div class="output selfClear"></div>
     </div>
+-->
 
     <div class="tocSection longContent" id="habitHistorySection">
         <h2>Habit History</h2>
@@ -2373,6 +2760,26 @@ Habits with no history are highlighted in bold, in case you would like to consid
     <div class="tocSection" id="currentGearSection">
         <h2>Current Appearance and Gear</h2>
         <div class="output gearList selfClear"></div>
+    </div>
+
+    <div class="tocSection" id="equipmentRecommendationsSection">
+        <h2>Equipment Recommendations</h2>
+        <!-- div class="equipmentRecommendationsExplanationToggle"><a href="">show explanation</a></div -->
+        <div> <!-- class="longExplanation" -->
+        <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p>
+
+        <p>The table below shows you the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p>
+
+        <p>You can sort the table by clicking on a column heading, or filter it using the "type" and "class" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page, which uses the same technology).</p>
+
+        <p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting.</p>
+
+        <p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p>
+
+        <!-- div class="equipmentRecommendationsExplanationToggle closer"><a href="">hide explanation</a></div -->
+        </div>
+        <table id="equipmentRecommendationsTable"></table>
+        <div id="equipmentChosen" class="selfClear"></div>
     </div>
 
     <div class="tocSection" id="dropsTodaySection">
@@ -2475,14 +2882,14 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
         <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
         <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
+        <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</p>
    </ul>
 <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
-   <h2>Possible Future Features</h2><!-- XXX_LATER look into this  --- XXX remove stats etc, mark Equip as up next -->
+   <h2>Possible Future Features</h2><!-- XXX_LATER look into this  --- XXX_SOON remove stats etc -->
    <ul>
-        <li><span class="subheading">Recommended Equipment for Maximising Stats</span>: Some kind of tool (possibly similar to the wiki's <a href="http://habitrpg.wikia.com/wiki/Equipment_Table">Equipment Table</a>) that helps you choose the best items from the gear you own for maximising specific stats.</li>
-        <li><span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
-        <li><span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li>
+        <li><em>Very soon now:</em> <span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
+        <li><em>Very soon now:</em> <span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li>
         <li><em>Maybe:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
         <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
         <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
