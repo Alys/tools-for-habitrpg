@@ -1431,6 +1431,7 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
                              'str': {'stat':0, 'key':'', 'obj':{}},
                            },
     };
+    var multiStatEquipment = []; // holds obj's
 
     var potentialItems = {};
     var allItems = []; // currently just for testing
@@ -1490,18 +1491,28 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
 
             // use item's stats to work out if it's the best we've found
             // so far for this type, and if so, record its data (overwriting
-            // previously-found, less-good items):
+            // previously-found, less-good items). Also check to see how many
+            // kinds of attributes it gives - if more than two, we want it
+            // regardless of whether any of the attributes are highest
+            // (gear that gives three or four attributes can be used for
+            // balanced stats).
+            var attributeCount = 0;
             $.each(['con','int','per','str'], function(index, attr){
                 // NB: the change above from 'weapon' to 'weaponTwoHanded'
                 // lets us capture the best gear for both one-hand and
                 // two-hand weapons:
                 if (obj[attr] > topEquipment[obj.type][attr]['stat']) {
-                    bestSoFar = true;
                     topEquipment[obj.type][attr]['stat'] = obj[attr];
                     topEquipment[obj.type][attr]['key']  = key;
                     topEquipment[obj.type][attr]['obj']  = obj;
                 }
+                if (obj[attr] > 0) {
+                    attributeCount++
+                }
             });
+            if (attributeCount > 2) {
+                multiStatEquipment.push(obj);
+            }
         }
     });
 
@@ -1517,6 +1528,12 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
                 }
             }
         });
+    });
+    $.each(multiStatEquipment, function(index, obj){
+        if (! found[obj['key']]) {
+            found[obj['key']] = true;
+            aaData.push(obj);
+        }
     });
 
     // aaData = allItems; // FOR TESTING - TST
