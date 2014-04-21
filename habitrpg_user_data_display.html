@@ -1436,49 +1436,57 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
     var potentialItems = {};
     var allItems = []; // currently just for testing
     var userKlass = user.stats.class;
+    var aaData = [];
     $.each(ownedEquipment, function(index,key){
         var obj = $.extend({}, content.gear.flat[key]);
-        if (obj.con || obj.int || obj.per || obj.str) { // stats-giving gear
-            // adjust some equipment types:
-            if (obj.type == 'head') {
-                obj.type = 'headwear'; // weapon, headWEAR - looks better
-            }
-            if (obj.type == 'weapon' && obj.twoHanded) {
-                obj.type = 'weaponTwoHanded';
-            }
+        // adjust some equipment types:
+        if (obj.type == 'head') {
+            obj.type = 'headwear'; // weapon, headWEAR - looks better
+        }
+        if (obj.type == 'weapon' && obj.twoHanded) {
+            obj.type = 'weaponTwoHanded';
+        }
 
-            // adjust equipment class && add class bonus:
-            if (obj.klass == 'special') { // find real class for item
-                obj.klass = obj.specialClass || 'none';
-            }
-            if (obj.klass == userKlass) { // apply class bonus
-                obj['con'] *= 1.5;
-                obj['int'] *= 1.5;
-                obj['per'] *= 1.5;
-                obj['str'] *= 1.5;
-            }
-            if (obj.klass == 'wizard') {
-                obj.klass = 'mage';
-            }
+        // adjust equipment class && add class bonus:
+        if (obj.klass == 'special') {
+            // use the real character class for this item:
+            obj.klass = obj.specialClass || 'none';
+        }
+        if (obj.klass == userKlass) { // apply class bonus:
+            obj['con'] *= 1.5;
+            obj['int'] *= 1.5;
+            obj['per'] *= 1.5;
+            obj['str'] *= 1.5;
+        }
+        if (obj.klass == 'wizard') {
+            obj.klass = 'mage';
+        }
 
-            // adjust equipment names
-            if (obj.type == 'weaponTwoHanded') {
-                obj.text += ' <span class="lowlight">(two-handed)</span>';
-            }
-            if (obj.text == 'Black Leather' || obj.text == 'Oiled Leather') {
-                obj.text += ' '  // add type of gear to the name:
-                          + obj.type.charAt(0).toUpperCase()
-                          + obj.type.slice(1);
-            }
-            if (obj.klass == 'rogue' &&
-                    (obj.type == 'weapon' || obj.type == 'shield')) {
-                obj.text += ' <span class="lowlight">('
-                          + obj.type + '-hand)</span>';
-                // e.g., 'Kukri (shield-hand)' and 'Kukri (weapon-hand)'
-            }
+        // adjust equipment names
+        if (obj.type == 'weaponTwoHanded') {
+            obj.text += ' <span class="lowlight">(two-handed)</span>';
+        }
+        if (obj.text == 'Black Leather' || obj.text == 'Oiled Leather') {
+            obj.text += ' '  // add type of gear to the name:
+                      + obj.type.charAt(0).toUpperCase()
+                      + obj.type.slice(1);
+        }
+        if (obj.klass == 'rogue' &&
+                (obj.type == 'weapon' || obj.type == 'shield')) {
+            obj.text += ' <span class="lowlight">('
+                      + obj.type + '-hand)</span>';
+            // e.g., 'Kukri (shield-hand)' and 'Kukri (weapon-hand)'
+        }
 
+        // categorise the item's quality according to the stats it gives
+        // ('best', 'middling', 'stats-free'):
+        if ((obj.con + obj.int + obj.per + obj.str) == 0) {
+            obj['quality'] = 'stats-free';
+            obj.attributesString = ''; // boosts no attributes
+        }
+        else {
             // create a field that lists in one string the attributes
-            // given by this item
+            // given by this item (for a filter drop-down menu):
             var attrs = [];
             $.each(['con','int','per','str'], function(index, attr){
                 if (obj[attr]) {
@@ -1487,18 +1495,16 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
             });
             obj.attributesString = attrs.join(' / ');
 
-            allItems.push(obj); // doesn't include non-stats gear
-
-            // use item's stats to work out if it's the best we've found
+            // Use item's stats to work out if it's the best we've found
             // so far for this type, and if so, record its data (overwriting
             // previously-found, less-good items). Also check to see how many
             // kinds of attributes it gives - if more than two, we want it
-            // regardless of whether any of the attributes are highest
+            // regardless of whether any of the attributes are best
             // (gear that gives three or four attributes can be used for
             // balanced stats).
             var attributeCount = 0;
             $.each(['con','int','per','str'], function(index, attr){
-                // NB: the change above from 'weapon' to 'weaponTwoHanded'
+                // NB: the adjustment above from 'weapon' to 'weaponTwoHanded'
                 // lets us capture the best gear for both one-hand and
                 // two-hand weapons:
                 if (obj[attr] > topEquipment[obj.type][attr]['stat']) {
@@ -1510,39 +1516,35 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
                     attributeCount++
                 }
             });
-            if (attributeCount > 2) {
-                multiStatEquipment.push(obj);
+            if (attributeCount > 2) { // boosts more than two attributes
+                obj['quality'] = 'best';
+            }
+            else {
+                obj['quality'] = 'middling'; // might be changed to 'best'
+                    // later when we have finished collating topEquipment
             }
         }
+        aaData.push(obj);
     });
 
-    // put the best items into an array that DataTables can use:
-    var aaData = [];
-    var found  = {}; // prevent duplicates
     $.each(topEquipment, function(index, typeObj){
         $.each(typeObj, function(index,attrObj){
             if (attrObj['key']) {
-                if (! found[attrObj['key']]) {
-                    found[attrObj['key']] = true;
-                    aaData.push(attrObj['obj']);
-                }
+                attrObj['obj']['quality'] = 'best';
+                // due to the magic of objects, this correctly adjusts
+                // the information in the aaData array
             }
         });
     });
-    $.each(multiStatEquipment, function(index, obj){
-        if (! found[obj['key']]) {
-            found[obj['key']] = true;
-            aaData.push(obj);
-        }
-    });
 
-    // aaData = allItems; // FOR TESTING - TST
     $('#equipmentRecommendationsSection').show();
     $('#equipmentRecommendationsTable').dataTable({
         'fnRowCallback':
             function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
                 // give each row a class based on the type of gear:
+                // and another based on the quality ('best', etc):
                 $(nRow).addClass(aData['type']);
+                $(nRow).addClass(aData['quality']);
                 // add 'data' to each row for later calculations:
                 $(nRow).data('name',      aData['text']);
                 $(nRow).data('con',       aData['con']);
@@ -1576,6 +1578,9 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
     },
     { 'mData' : 'attributesString',    'bVisible': false,
       'sTitle': 'attributes', 'sClass': 'center',
+    },
+    { 'mData' : 'quality',    'sClass': 'center',
+      'sTitle': 'quality',
     },
         ],
         'sDom': 'W<"clear"><"top"if>rt<"bottom"><"clear">',
@@ -1699,6 +1704,33 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
         sumEquipmentRecommendations();
     });
     $('#equipmentRecommendationsSection').hide();
+
+    $('#equipmentRecommendationsTable tr.stats-free')
+                            .addClass('equipmentRecommendationsHide');
+    $('#equipmentRecommendationsTable tr.middling')
+                            .addClass('equipmentRecommendationsHide');
+    $('#equipmentRecommendationsTable_wrapper select.widget-8')
+                            .addClass('equipmentRecommendationsHide');
+    $('#equipmentRecommendationsTable_info')
+                            .addClass('equipmentRecommendationsHide');
+
+    $('#showAllEquipment').click( function() {
+        event.preventDefault();
+        $('#equipmentRecommendationsTable tr.best td')
+                            .addClass('equipmentRecommendationsHighlight');
+
+        $('#equipmentRecommendationsTable tr.stats-free')
+                            .removeClass('equipmentRecommendationsHide');
+        $('#equipmentRecommendationsTable tr.middling')
+                            .removeClass('equipmentRecommendationsHide');
+        $('#equipmentRecommendationsTable_wrapper select.widget-8')
+                            .removeClass('equipmentRecommendationsHide');
+        $('#equipmentRecommendationsTable_info')
+                            .removeClass('equipmentRecommendationsHide');
+
+        $('#qualityFilter #onlyBestIsShowing').hide();
+        $('#qualityFilter #allEquipmentIsShowing').show();
+    });
 }
 
 function sumEquipmentRecommendations() {
@@ -1717,7 +1749,7 @@ function sumEquipmentRecommendations() {
     });
     $('#equipmentRecommendationsSection #equipmentChosen').html(
         '<p><input id="equipmentChosenClear" type="submit"'
-        + ' value="Clear All Selections"></p>'
+        + ' value="Clear All Selections" /></p>'
         + '<p>The equipment you have selected'
         + '<br />'
         + 'and the total stats they give are:</p>'
@@ -2316,31 +2348,67 @@ h2 {
 #missingEquipmentSection .gearList .item .extra {
 }
 
+#equipmentRecommendationsSection #qualityFilter {
+    text-align: center;
+    margin-top: 2em;
+    font-size: 1.2em;
+}
+#equipmentRecommendationsSection #allEquipmentIsShowing {
+    display: none;
+}
+#equipmentRecommendationsSection #onlyBestIsShowing {
+}
 #equipmentRecommendationsTable tr td {
     border-bottom: 1px solid lightgrey;
 }
 #equipmentRecommendationsTable tr.even,
 #equipmentRecommendationsTable tr.even .sorting_1,
+#equipmentRecommendationsTable tr.even .sorting_2,
+#equipmentRecommendationsTable tr.even .sorting_3,
+#equipmentRecommendationsTable tr.even .sorting_4,
+#equipmentRecommendationsTable tr.even .sorting_5,
+#equipmentRecommendationsTable tr.even .sorting_6,
 #equipmentRecommendationsTable tr.odd,
-#equipmentRecommendationsTable tr.odd  .sorting_1 {
+#equipmentRecommendationsTable tr.odd  .sorting_1,
+#equipmentRecommendationsTable tr.odd  .sorting_2,
+#equipmentRecommendationsTable tr.odd  .sorting_3,
+#equipmentRecommendationsTable tr.odd  .sorting_4,
+#equipmentRecommendationsTable tr.odd  .sorting_5,
+#equipmentRecommendationsTable tr.odd  .sorting_6 {
     background-color: rgb(242, 242, 230); /* yellowish */
     color: black;
     font-style: normal;
     font-weight: normal;
 }
 #equipmentRecommendationsTable .rowLowlight,
-#equipmentRecommendationsTable .rowLowlight .sorting_1 {
+#equipmentRecommendationsTable .rowLowlight .sorting_1,
+#equipmentRecommendationsTable .rowLowlight .sorting_2,
+#equipmentRecommendationsTable .rowLowlight .sorting_3,
+#equipmentRecommendationsTable .rowLowlight .sorting_4,
+#equipmentRecommendationsTable .rowLowlight .sorting_5,
+#equipmentRecommendationsTable .rowLowlight .sorting_6 {
     background-color: #E8E8E8 !important; /* pale grey */
     color: #C0C0C0 !important; /* darker grey */
     font-style: italic !important;
     font-weight: normal !important;
 }
 #equipmentRecommendationsTable .rowHighlight,
-#equipmentRecommendationsTable .rowHighlight .sorting_1 {
+#equipmentRecommendationsTable .rowHighlight .sorting_1,
+#equipmentRecommendationsTable .rowHighlight .sorting_2,
+#equipmentRecommendationsTable .rowHighlight .sorting_3,
+#equipmentRecommendationsTable .rowHighlight .sorting_4,
+#equipmentRecommendationsTable .rowHighlight .sorting_5,
+#equipmentRecommendationsTable .rowHighlight .sorting_6 {
     background-color: rgb(173, 208, 215) !important; /* bluish */
     color: black !important;
     font-style: normal !important;
     font-weight: bold !important;
+}
+.equipmentRecommendationsHighlight {
+    font-weight: bold !important;
+}
+.equipmentRecommendationsHide { /* initially show only the best gear */
+    display: none !important;
 }
 
 #equipmentRecommendationsSection #equipmentChosen {
@@ -2447,7 +2515,7 @@ h2 {
 <div id="emailDisplay" class="hide"></div>
 
 <div id="explanationAndClearLinks" class="showOnlyIfHaveFetchedData">
-    <input id="refetch" type="submit" value="Re-Fetch Data">
+    <input id="refetch" type="submit" value="Re-Fetch Data" />
     <a id="emailDisplayToggle" href="" title="view the email address that you used to sign up to HabitRPG">show email address</a>
     <a class="explanationToggle" href="">show documentation</a>
     <!-- <a id="clearData" href="">clear my data</a> -->
@@ -2807,13 +2875,22 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <h2>Equipment Recommendations</h2>
         <!-- div class="equipmentRecommendationsExplanationToggle"><a href="">show explanation</a></div -->
         <div> <!-- class="longExplanation" -->
-        <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p>
-        <p>The table below shows you the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p>
-        <p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "attributes" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page, which uses the same technology).</p>
-        <p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the attribute you care most about, then highlight the top one or more items, and then if you care about another attribute too, re-sort by it and select more items.</p>
-        <p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p>
+            <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p>
+            <p>By default, the table below shows you only the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p>
+            <p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "attributes" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page, which uses the same technology).</p>
+            <p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the attribute you care most about, then highlight the top one or more items, and then if you care about another attribute too, re-sort by it and select more items.</p>
+            <p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p>
 
-        <!-- div class="equipmentRecommendationsExplanationToggle closer"><a href="">hide explanation</a></div -->
+            <!-- div class="equipmentRecommendationsExplanationToggle closer"><a href="">hide explanation</a></div -->
+
+            <div id="qualityFilter">
+                <p id="onlyBestIsShowing">Only your best equipment is shown below. To maximise your attributes, choose from only these items.
+					<br />
+					<input id="showAllEquipment" type="submit" value="Show All of My Equipment" />
+                </p>
+                <p id="allEquipmentIsShowing">All of your equipment is shown below. Use the "quality" drop-down menu to show only the best.</p>
+            </div>
+
         </div>
         <table id="equipmentRecommendationsTable"></table>
         <div id="equipmentChosen" class="selfClear"></div>
@@ -2879,7 +2956,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <label for="apiToken"><span>API Token</span>
             <input type="password" name="apiToken" id="apiToken" />
         </label>
-        <input type="submit" value="Fetch My Data">
+        <input type="submit" value="Fetch My Data" />
         <p class="highlight">Privacy and security notes:</p>
         <ul>
         <li>Your API Token is a password - do not share it with anyone,
