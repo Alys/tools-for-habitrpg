@@ -673,7 +673,7 @@ function displayData(data) {
                             'str': 0,
                            },
         'rewards':         {'total': 0},
-        'statsTotals':     {'total': 'n/a',
+        'statsTotals':     {'total': 0,
                             'con': 0,
                             'int': 0,
                             'per': 0,
@@ -691,6 +691,7 @@ function displayData(data) {
         countTasks['habits']['total']++;
         countTasks['habits'][obj.attribute]++;
         countTasks['statsTotals'][obj.attribute]++;
+        countTasks['statsTotals']['total']++;
         if (! exampleFound) {
             exampleTaskType  = 'habits';
             exampleAttribute = obj.attribute;
@@ -723,6 +724,7 @@ function displayData(data) {
         countTasks['dailies']['total']++;
         countTasks['dailies'][obj.attribute]++;
         countTasks['statsTotals'][obj.attribute]++;
+        countTasks['statsTotals']['total']++;
         if (! exampleFound) {
             if (obj.attribute != 'str') {
                 exampleTaskType  = 'dailies';
@@ -799,6 +801,7 @@ function displayData(data) {
             countTasks['todosComplete']['total']++;
             countTasks['todosComplete'][obj.attribute]++;
             countTasks['statsTotals'][obj.attribute]++;
+            countTasks['statsTotals']['total']++;
             countTasks['todosAll']['total']++;
             countTasks['todosAll'][obj.attribute]++;
             return true; // currently we don't display completed to-dos
@@ -807,6 +810,7 @@ function displayData(data) {
             countTasks['todosIncomplete']['total']++;
             countTasks['todosIncomplete'][obj.attribute]++;
             countTasks['statsTotals'][obj.attribute]++;
+            countTasks['statsTotals']['total']++;
             countTasks['todosAll']['total']++;
             countTasks['todosAll'][obj.attribute]++;
             if (! exampleFound) {
@@ -862,23 +866,27 @@ function displayData(data) {
                             + exampleAttribute.toUpperCase()
                             + '.'
     }
-    taskStatisticsHtml += '</p>';
-    taskStatisticsHtml += '<table>'
-                        + '<tr>'
-                        + '<th>Attribute</th>'
-                        + '<th>Habits</th>'
-                        + '<th>Dailies</th>'
-                        + '<th>To-Dos - Incomplete</th>'
-                        + '<th>To-Dos - Complete *</th>'
-                        + '<th>To-Dos - All</th>'
-                        + '<th>Total Tasks for each Attribute</th>'
-                        + '</tr>';
+    taskStatisticsHtml += ' Note that attributes on tasks are only relevant '
+            + 'if you have task-based <a '
+            + 'href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">'
+            + 'auto-allocation</a> turned on.</p>'
+            + '<table>'
+            + '<tr>'
+            + '<th>Attribute</th>'
+            + '<th>Habits</th>'
+            + '<th>Dailies</th>'
+            + '<th>To-Dos - Incomplete</th>'
+            + '<th>To-Dos - Complete *</th>'
+            + '<th>To-Dos - All</th>'
+            + '<th>Total Tasks for each Attribute</th>'
+            + '</tr>';
     $.each(['con','int','per','str','total'], function(index, attr){
         taskStatisticsHtml += '<tr'
                             + ((attr == 'total') ? ' class="total"' : '')
                             + '>'
                             + '<td>'
-                            + ((attr.length==3) ? attr.toUpperCase() : attr)
+                            + ((attr.length==3) ? attr.toUpperCase()
+                                                : upperCaseFirst(attr))
                             + '</td>'
                             ;
         $.each(['habits','dailies','todosIncomplete','todosComplete',
@@ -889,44 +897,47 @@ function displayData(data) {
     });
 
     taskStatisticsHtml += '</table>';
-    taskStatisticsHtml += '<p class="lowlight"><strong>*</strong> Your completed to-dos are automatically deleted after three days to improve HabitRPG\'s speed. You can export your current to-dos and at least some of your old to-dos using the <a href="http://habitrpg.wikia.com/wiki/Data_Export">"User Data" export option</a>.</p>';
+    taskStatisticsHtml += '<p class="lowlight"><strong>*</strong> Your completed to-dos are automatically archived after three days to improve HabitRPG\'s speed and so are not included here. (However, at least some of your old to-dos can be exported using the <a href="http://habitrpg.wikia.com/wiki/Data_Export">"User Data" export option</a>.)</p>';
     taskStatisticsHtml += '<p style="margin-top:1.5em">You have '
                         + '<span class="highlight"> '
                         + countTasks['rewards']['total']
                         + ' '
                         + pluralise('reward', countTasks['rewards']['total'])
                         + '</span>.</p>';
-    ////
-    ////
-    ////   Tasks Statistics: Training Stats    ///////////////////////////
-    var trainingHtml = '';
-    var trainingTotal = 0; // just to work out if we should show this section
-    $.each(user.stats.training, function(key, value){
-        value = Math.round(value * 10) / 10;
-        trainingHtml  += '<tr><td>'
-                       + key.toUpperCase() + '</td><td>'
-                       + value + '</td></tr>';
-        trainingTotal += value;
-    });
     var sectionTitle = 'Task Statistics';
-    if (trainingTotal) { // don't show Training Stats if all are zero
-        sectionTitle += ' and Training Stats';
-        taskStatisticsHtml += '<h3>Training Stats</h3>';
-        taskStatisticsHtml += ''
-                            + '<p>'
-                            + 'When you use task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a>, you gain and lose points of "training" for the <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">attributes</a> you\'ve assigned to your tasks. When you level up, the attribute with the most training gets a point assigned, and all training resets to 0 for the next level. '
-                            + 'Your current training points are:'
-                            + '</p>'
-                            + '<table>'
-                            + trainingHtml
-                            + '</table>'
-                            // + '<p><a href="https://habitrpg.com/#/options/profile/stats">HabitRPG Stats page</a> shows you your other stats.</p>' // XXX_SOON use?
-                            ;
+    ////
+    ////
+    ////   Tasks Statistics: Training Points   ///////////////////////////
+    if (user.preferences.automaticAllocation &&
+        user.preferences.allocationMode == 'taskbased'
+       ) {
+        sectionTitle += ' and Training Points';
+        var trainingHtml = '';
+        $.each(user.stats.training, function(key, value){
+            value = Math.round(value * 10) / 10;
+            trainingHtml  += '<tr><td>'
+                           + key.toUpperCase() + '</td><td>'
+                           + value + '</td></tr>';
+        });
+        taskStatisticsHtml += '<h3>Training Points</h3>'
+            + '<p>When you use task-based <a '
+            + 'href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">'
+            + 'auto-allocation</a>, you gain and lose points of training '
+            + 'for the <a '
+            + 'href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
+            + 'attributes</a> you\'ve assigned to your tasks. When you '
+            + 'level up, the attribute with the most training gets a '
+            + 'point assigned, and all training resets to 0 for the '
+            + 'next level. '
+            + 'Your current training points are:'
+            + '</p>'
+            + '<table>'
+            + trainingHtml
+            + '</table>';
     }
     $('#taskStatistics a'        ).text(sectionTitle);
     $('#taskStatisticsSection h2').text(sectionTitle);
     $('#taskStatisticsSection .output').html(taskStatisticsHtml);
-
 
     //////////////////////////////////////////////////////////////////////
     ////   Task Overview             /////////////////////////////////////
@@ -1202,9 +1213,13 @@ function pluralise(word, number) {
         else                       { word += 's';    }
     }
     if (needUpperCase) { // must improve this if ever need ALL upper case
-        word = word.charAt(0).toUpperCase() + word.slice(1);
+        word = upperCaseFirst(word);
     }
     return word;
+}
+
+function upperCaseFirst(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 function formatUntaggedTasks(title, tasks) {
@@ -1404,13 +1419,13 @@ function createCurrentGearSection() {
 }
 
 function createEquipmentRecommendationsSection(ownedEquipment) {
-    var topEquipment = {
+    var topEquipment = { // XXX_LATER surely this can be improved
         'armor':           { 'con': {'stat':0, 'key':'', 'obj':{}},
                              'int': {'stat':0, 'key':'', 'obj':{}},
                              'per': {'stat':0, 'key':'', 'obj':{}},
                              'str': {'stat':0, 'key':'', 'obj':{}},
                            },
-        'headwear':        { 'con': {'stat':0, 'key':'', 'obj':{}},
+        'head':            { 'con': {'stat':0, 'key':'', 'obj':{}},
                              'int': {'stat':0, 'key':'', 'obj':{}},
                              'per': {'stat':0, 'key':'', 'obj':{}},
                              'str': {'stat':0, 'key':'', 'obj':{}},
@@ -1440,9 +1455,6 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
     $.each(ownedEquipment, function(index,key){
         var obj = $.extend({}, content.gear.flat[key]);
         // adjust some equipment types:
-        if (obj.type == 'head') {
-            obj.type = 'headwear'; // weapon, headWEAR - looks better
-        }
         if (obj.type == 'weapon' && obj.twoHanded) {
             obj.type = 'weaponTwoHanded';
         }
@@ -1468,8 +1480,7 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
         }
         if (obj.text == 'Black Leather' || obj.text == 'Oiled Leather') {
             obj.text += ' '  // add type of gear to the name:
-                      + obj.type.charAt(0).toUpperCase()
-                      + obj.type.slice(1);
+                      + upperCaseFirst(obj.type);
         }
         if (obj.klass == 'rogue' &&
                 (obj.type == 'weapon' || obj.type == 'shield')) {
@@ -1527,6 +1538,7 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
         aaData.push(obj);
     });
 
+    // mark all top equipment as being of the 'best' quality:
     $.each(topEquipment, function(index, typeObj){
         $.each(typeObj, function(index,attrObj){
             if (attrObj['key']) {
@@ -1545,18 +1557,30 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
                 // and another based on the quality ('best', etc):
                 $(nRow).addClass(aData['type']);
                 $(nRow).addClass(aData['quality']);
-                // add 'data' to each row for later calculations:
-                $(nRow).data('name',      aData['text']);
-                $(nRow).data('con',       aData['con']);
-                $(nRow).data('int',       aData['int']);
-                $(nRow).data('per',       aData['per']);
-                $(nRow).data('str',       aData['str']);
+                // add 'data' to each row for later calculations etc:
+                $(nRow).data('type', aData['type']);
+                $(nRow).data('name', aData['text']);
+                $(nRow).data('con',  aData['con']);
+                $(nRow).data('int',  aData['int']);
+                $(nRow).data('per',  aData['per']);
+                $(nRow).data('str',  aData['str']);
                 return nRow;
             },
         'aaData': aaData,
         'aoColumns': [
-    { 'mData' : 'type',       'sClass': 'center',
-      'sTitle': 'type',
+    { 'sTitle': 'type',       'sClass': 'center',
+      'mData': function ( source, type, val ) {
+        if (type === 'set') {
+          return; // http://datatables.net/ref#mData
+        }
+        // else if (type === 'display' || type === 'filter' || type === 'sort')
+        else {
+          return (source.type == 'weaponTwoHanded') ? 'weapon two-handed'
+               : (source.type == 'headAccessory'  ) ? 'head accessory'
+               :  source.type;
+        }
+        // return source.type;
+      }
     },
     { 'mData' : 'text',       'sClass': 'center',
       'sTitle': 'name',
@@ -1596,9 +1620,7 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
     });
 
     $('#equipmentRecommendationsTable tr').click( function() {
-        var type = $(this).children(":first").text(); // armor, shield, etc
-
-
+        var type = $(this).data('type'); // armor, shield, etc
         if (! $(this).hasClass('rowHighlight')) {
             // The user has clicked on a row that is not yet highlighted
             // (i.e., the user wants that row to be highlighted).
@@ -1734,18 +1756,18 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
 }
 
 function sumEquipmentRecommendations() {
-    var countCon = 0;
-    var countInt = 0;
-    var countPer = 0;
-    var countStr = 0;
-    var list     = '';
+    var countCon    = 0;
+    var countInt    = 0;
+    var countPer    = 0;
+    var countStr    = 0;
+    var list        = '';
     $('#equipmentRecommendationsTable tr.rowHighlight').each(
         function(index,value){
-            list     += '<li>' + $(this).data('name') + '</li>';
-            countCon += $(this).data('con');
-            countInt += $(this).data('int');
-            countPer += $(this).data('per');
-            countStr += $(this).data('str');
+            list        += '<li>' + $(this).data('name') + '</li>';
+            countCon    += $(this).data('con');
+            countInt    += $(this).data('int');
+            countPer    += $(this).data('per');
+            countStr    += $(this).data('str');
     });
     $('#equipmentRecommendationsSection #equipmentChosen').html(
         '<p><input id="equipmentChosenClear" type="submit"'
@@ -1758,7 +1780,9 @@ function sumEquipmentRecommendations() {
         + countCon + ' <span class="attributeName">con</span> '
         + countInt + ' <span class="attributeName">int</span> '
         + countPer + ' <span class="attributeName">per</span> '
-        + countStr + ' <span class="attributeName">str</span>'
+        + countStr + ' <span class="attributeName">str</span> '
+        + '<br /> &nbsp; '
+        + (countCon + countInt) + ' <span class="attributeName">con+int</span>'
         + '</li>'
         + list
         + '</ul>'
@@ -2509,7 +2533,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.8 beta)</a></h1><!-- VERSION -->
+    <a class="versionToggle" href="">(v1.8)</a></h1><!-- VERSION -->
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 <div id="emailDisplay" class="hide"></div>
@@ -2526,13 +2550,12 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
-        <dt>1.8 beta <span class="date">2014-04-20</span></dt>
+        <dt>1.8<span class="date">2014-04-23</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
-                    <!-- li><span class="subheading">Task Statistics</span> XXX_SOON write this [includes Training Stats if using autoallocation]</li -->
-                    <li><span class="subheading">Equipment Recommendations</span>: a table showing your best equipment to help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</p>
-                    </li>
+                    <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
+                    <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
                 </ul>
             </li>
         </ul></dd>
@@ -2807,11 +2830,11 @@ h2 {
         -->
         <li>Tasks:<ul>
 
-            <li id="habitHistory"><a href="">Habit History</a></li>
-            <!-- li id="taskStatistics"><a href="">Task Statistics</a></li -->
             <li id="taskOverview"><a href="">Task Overview</a></li>
-            <li id="dailiesIncomplete" class="showOnlyIfDataExists"><a href="">Dailies Incomplete</a></li>
+            <li id="taskStatistics"><a href="">Task Statistics</a></li>
             <li id="untaggedTasks" class="showOnlyIfDataExists"><a href="">Tasks Untagged</a></li>
+            <li id="habitHistory"><a href="">Habit History</a></li>
+            <li id="dailiesIncomplete" class="showOnlyIfDataExists"><a href="">Dailies Incomplete</a></li>
         </ul></li>
         <li>Other:<ul>
             <li id="damageDailies"><a href="">Damage from Dailies</a></li>
@@ -2846,12 +2869,10 @@ h2 {
         <table id="taskOverviewTable" class="output"></table>
     </div>
 
-<!--
     <div class="tocSection" id="taskStatisticsSection">
         <h2>Task Statistics</h2>
         <div class="output selfClear"></div>
     </div>
--->
 
     <div class="tocSection longContent" id="habitHistorySection">
         <h2>Habit History</h2>
@@ -2884,9 +2905,9 @@ Habits with no history are highlighted in bold, in case you would like to consid
             <!-- div class="equipmentRecommendationsExplanationToggle closer"><a href="">hide explanation</a></div -->
 
             <div id="qualityFilter">
-                <p id="onlyBestIsShowing">Only your best equipment is shown below. To maximise your attributes, choose from only these items.
-					<br />
-					<input id="showAllEquipment" type="submit" value="Show All of My Equipment" />
+                <p id="onlyBestIsShowing">Only your best equipment is shown below. To maximise your attributes, choose from only those items.
+                    <br />
+                    <input id="showAllEquipment" type="submit" value="Show All of My Equipment" />
                 </p>
                 <p id="allEquipmentIsShowing">All of your equipment is shown below. Use the "quality" drop-down menu to show only the best.</p>
             </div>
@@ -2987,24 +3008,24 @@ Habits with no history are highlighted in bold, in case you would like to consid
    <h2>What's On This Page?</h2>
    <ul>
         <li><span class="subheading">Unallocated Points</span>: If you have any <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">unallocated points</a>, you'll see how many and a link to the HabitRPG <a href="https://habitrpg.com/#/options/profile/stats">Profile -&gt; Stats page</a> so you can allocate them.</li>
-        <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
         <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</li>
-        <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
+        <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
         <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
+        <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
+        <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
         <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
         <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
         <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
         <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
         <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
-        <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</p>
+        <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
    </ul>
 <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
-   <h2>Possible Future Features</h2><!-- XXX_LATER look into this  --- XXX_SOON remove stats etc -->
+   <h2>Possible Future Features</h2><!-- XXX_LATER look into this -->
    <ul>
-        <li><em>Very soon now:</em> <span class="subheading">Task Counts</span>: Total number of each of your habits, dailies, to-dos, and rewards. Why? Just because. You can boast to your friends about how busy and successful you are. (You can get some of this data now by filtering in the Task Overview section.)</li>
-        <li><em>Very soon now:</em> <span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li>
-        <li><em>Maybe:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
+        <!-- li><em>Very soon now:</em> <span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li -->
+        <li><em>Probably:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
         <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
         <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
         <li><em>Maybe:</em> <span class="subheading">Missing Equipment for Orb of Rebirthers</span>: do something to make the feature more useful for them.</li>
