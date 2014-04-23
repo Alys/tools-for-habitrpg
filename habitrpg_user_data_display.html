@@ -1419,6 +1419,12 @@ function createCurrentGearSection() {
 }
 
 function createEquipmentRecommendationsSection(ownedEquipment) {
+    // set up initial quality "filter" (needs to be set here in case user
+    // has clicked Re-Fetch button):
+    $('#qualityFilter #onlyBestIsShowing').show();
+    $('#qualityFilter #allEquipmentIsShowing').hide();
+    $('#equipmentRecommendationsSection #equipmentChosen').html('');
+
     var topEquipment = { // XXX_LATER surely this can be improved
         'armor':           { 'con': {'stat':0, 'key':'', 'obj':{}},
                              'int': {'stat':0, 'key':'', 'obj':{}},
@@ -1549,7 +1555,7 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
         });
     });
 
-    $('#equipmentRecommendationsSection').show();
+    $('#equipmentRecommendationsSection').show(); // needed for table creation
     $('#equipmentRecommendationsTable').dataTable({
         'fnRowCallback':
             function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
@@ -1725,7 +1731,7 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
         }
         sumEquipmentRecommendations();
     });
-    $('#equipmentRecommendationsSection').hide();
+    $('#equipmentRecommendationsSection').hide(); // table has been created
 
     $('#equipmentRecommendationsTable tr.stats-free')
                             .addClass('equipmentRecommendationsHide');
