@@ -172,13 +172,6 @@ $(document).ready(function() {
         // window.location.reload(true);
     // });
 
-    // Version Changes hide/show:
-    $('.versionToggle').click(function(event){
-        event.preventDefault();
-        $('#versionChanges').toggle();
-        window.scrollTo(0, 0); // for closing with link under version history
-    });
-
     // Task Overview explanation hide/show:
     $('.taskOverviewExplanationToggle').click(function(event){
         event.preventDefault();
@@ -203,25 +196,30 @@ $(document).ready(function() {
         }
     });
 
-    // Table of Contents (TOC) hide/show:
-    $('#tableOfContents a').click(function(event){
-        event.preventDefault();
-        var sectionId = this.parentNode.id + 'Section';
-        var wantToShow = true;
-        if ($('#' + sectionId).is(':visible')) {
-            // The ToC item that the user clicked on is already open,
-            // so the user wants to close it.
-            wantToShow = false;
+    //////////////////////////////////////////////////////////////////////
+    ////   Generic Hide/Show Toggling     ////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    $('.showHideToggle').click(function(event){
+        var target = $(this).data("target");
+        var wantToShow = (! $('#' + target).is(':visible')
+                       || $(this).data("forceopen"));
+            // wantToShow is false if the target is already open
+            // (i.e., the user wants to close it)
+            // unless the toggle's attributes force it to always be
+            // opened (e.g., a link from the dashboard)
+        if ($(this).data("closemainsections")) {
+            $('.mainSection').hide();
+            $('#tocClose').hide();
         }
-        $('.tocSection').hide();
-        $('#tocClose').hide();
         if (wantToShow) {
-            $('#' + sectionId).toggle();
-            if ($('#' + sectionId).hasClass("longContent")) {
+            $('#' + target).show();
+            if ($('#' + target).hasClass("longContent")) {
                 $('#tocClose').show();
             }
-            if ($('#damageDailiesSection').is(':visible') &&
-                $('#dailiesIncomplete').is(':visible')) {
+            // XXX improve these special show toggles:
+            if ($('#damageDailiesSection'    ).is(':visible') &&
+                $('#dailiesIncompleteTocLink').is(':visible')
+               ) {
                 $('#dailiesIncompleteSection').show();
             }
             if ($('#dropsTodaySection').is(':visible')) {
@@ -240,51 +238,49 @@ $(document).ready(function() {
                     $('#questProgressSection').show();
                 }
             }
-            // if ($('#questProgressSection').is(':visible') && quest
-                // && quest.content.boss
-               // ) {    /////   Doesn't work - quest not defined yet, duh.
-                // // The user is on a boss quest and has viewed the
-                // // Quest Progress section, so also show them the
-                // // Daily Damage section (dailies cause bosses to do damage):
-                // $('#damageDailiesSection').show();
-            // }
+        }
+        else {
+            $('#' + target).hide();
+            if ($(this).data("scrolltotop")) {
+                window.scrollTo(0, 0);
+            }
         }
     });
     $('#tocClose').click(function(event){
         event.preventDefault();
-        $('.tocSection').hide();
+        $('.mainSection').hide();
         $('#tocClose'  ).hide();
         window.scrollTo(0, 0);
     });
 
     $('#dashIncompleteDailies').click(function() {
-        $('.tocSection').hide();
+        $('.mainSection').hide();
         $('#tocClose').hide();
         $('#dailiesIncompleteSection').show();
     });
     $('#dashDailiesDamage').click(function() {
-        $('.tocSection').hide();
+        $('.mainSection').hide();
         $('#tocClose').hide();
         $('#damageDailiesSection').show();
-        if ($('#dailiesIncomplete').is(':visible')) {
+        if ($('#dailiesIncompleteTocLink').is(':visible')) { // XXX test
             $('#dailiesIncompleteSection').show();
         }
     });
     $('#dashBossDamage').click(function() {
-        $('.tocSection').hide();
+        $('.mainSection').hide();
         $('#tocClose').hide();
         $('#damageDailiesSection').show();
-        if ($('#dailiesIncomplete').is(':visible')) {
+        if ($('#dailiesIncompleteTocLink').is(':visible')) { // XXX test
             $('#dailiesIncompleteSection').show();
         }
     });
     $('#dashQuestProgress').click(function() {
-        $('.tocSection').hide();
+        $('.mainSection').hide();
         $('#tocClose').hide();
         $('#questProgressSection').show();
     });
     $('#dashDrop').click(function() {
-        $('.tocSection').hide();
+        $('.mainSection').hide();
         $('#tocClose').hide();
         $('#dropsTodaySection').show();
         if (collectionDrops) {
@@ -302,7 +298,7 @@ function toggleApiDetailsFormLinkText() {
     var linkText = 'documentation';
     if ($('#userApiDetailsForm').is(':visible')) {
         $('#versionChanges').hide();
-        $('.tocSection'    ).hide();
+        $('.mainSection'    ).hide();
         $('#tocClose'      ).hide();
         $('.explanationToggle').text('hide ' + linkText);
     } else {
@@ -481,8 +477,8 @@ function displayData(data) {
                 + ' I have some interesting ideas to work on...</p>';
         }
         $('#missingEquipmentSection .output').html(missingHtml);
-        $('#missingEquipment.showOnlyIfDataExists').removeClass('hide')
-                                                   .addClass('show');
+        $('#missingEquipmentTocLink.showOnlyIfDataExists').removeClass('hide')
+                                                          .addClass('show');
     }
 
     $('#equipmentRecommendationsSection .output').html(
@@ -492,8 +488,7 @@ function displayData(data) {
     //////////////////////////////////////////////////////////////////////
     ////   Current Appearance and Gear    ////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    $('#currentGearSection .output').html(
-            createCurrentGearSection() );
+    $('#currentGearSection .output').html( createCurrentGearSection() );
 
 
     //////////////////////////////////////////////////////////////////////
@@ -615,8 +610,8 @@ function displayData(data) {
             $('#dashQuestProgress .output').text(total);
         }
         $('#questProgressSection .output').html(msg);
-        $('#questProgress.showOnlyIfDataExists').removeClass('hide')
-                                                .addClass('show');
+        $('#questProgressTocLink.showOnlyIfDataExists').removeClass('hide')
+                                                       .addClass('show');
     }
     else { // user is not on a quest
         $('#dashQuestProgress .output').text('n/a');
@@ -935,7 +930,7 @@ function displayData(data) {
             + trainingHtml
             + '</table>';
     }
-    $('#taskStatistics a'        ).text(sectionTitle);
+    $('#taskStatisticsTocLink'   ).text(sectionTitle);
     $('#taskStatisticsSection h2').text(sectionTitle);
     $('#taskStatisticsSection .output').html(taskStatisticsHtml);
 
@@ -1053,8 +1048,8 @@ function displayData(data) {
                      + formatUntaggedTasks('Rewards', untaggedTasks['rewards']);
     if (untaggedHtml) {
         $('#untaggedTasksSection .output').html(untaggedHtml);
-        $('#untaggedTasks.showOnlyIfDataExists').removeClass('hide')
-                                                .addClass('show');
+        $('#untaggedTasksTocLink.showOnlyIfDataExists').removeClass('hide')
+                                                       .addClass('show');
     }
 
 
@@ -1097,8 +1092,8 @@ function displayData(data) {
     }
     if (uncomplHtml) {
         $('#dailiesIncompleteSection .output').html(uncomplHtml);
-        $('#dailiesIncomplete.showOnlyIfDataExists').removeClass('hide')
-                                                    .addClass('show');
+        $('#dailiesIncompleteTocLink.showOnlyIfDataExists').removeClass('hide')
+                                                           .addClass('show');
     }
 
 
@@ -2139,6 +2134,10 @@ abbr.discrete {
     margin-top: -1em;
 }
 
+.showHideToggle {
+    text-decoration: underline;
+    color: purple; /* XXX improve */
+}
 
 h1 {
     float: left;
@@ -2252,7 +2251,7 @@ ul#tableOfContents > li {
 h2 {
     margin-top: 30px;
 }
-.tocSection {        /* each section of data is hidden by default */
+.mainSection {  /* each section of data is hidden by default */
     display: none;
 }
 .closer { /* as in "a thing that closes", not "nearer" */
@@ -2359,7 +2358,7 @@ h2 {
 }
 
 #damageDailiesSection li {
-    padding: 3px 0;
+    padding: 3px 0; /* XXX make generic */
 }
 
 .gearList .item .stats {
@@ -2539,7 +2538,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <a class="versionToggle" href="">(v1.8)</a></h1><!-- VERSION -->
+    <span class="showHideToggle versionToggle" data-target="versionChanges">(v1.8)</span></h1><!-- VERSION LINK -->
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 <div id="emailDisplay" class="hide"></div>
@@ -2552,9 +2551,23 @@ h2 {
 </div>
 <hr class="clear" />
 
-<div id="versionChanges" class="hide"><!-- VERSION -->
+<div id="versionChanges" class="hide"><!-- VERSION TOP -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>1.8.1<span class="date">2014-04-26</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>none</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>removed five hundred different kinds of hide/show toggling code and replaced them with one type [ONLY PARTIALLY DONE SO FAR]</li><!-- XXX complete -->
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>1.8<span class="date">2014-04-23</span></dt>
         <dd><ul>
@@ -2565,7 +2578,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.7.2 <span class="date">2014-04-19</span></dt>
         <dd><ul>
             <li>Features:
@@ -2584,7 +2596,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.7 <span class="date">2014-04-18</span></dt>
         <dd><ul>
             <li>Features:
@@ -2623,7 +2634,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.6 <span class="date">2014-04-10</span></dt>
         <dd><ul>
             <li>Features:
@@ -2632,7 +2642,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.5 <span class="date">2014-04-08</span></dt>
         <dd><ul>
             <li>Features:
@@ -2646,7 +2655,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.4.5 <span class="date">2014-04-06</span></dt>
         <dd><ul>
             <li>Features:
@@ -2774,7 +2782,7 @@ h2 {
             </li>
         </ul></dd>
     </dl>
-    <div class="versionToggle closer"><a href="">close version history</a> <span class="tip">(or click the version number again to close)</span></div>
+    <div class="showHideToggle versionToggle closer" data-target="versionChanges" data-scrolltotop="true">close version history <span class="tip">(or click the version number again to close)</span></div><!-- VERSION BOTTOM -->
     <hr class="separator" />
 </div>
 
@@ -2829,26 +2837,26 @@ h2 {
     </ul>
     </div>
 
+
     <ul id="tableOfContents" class="selfClear"><!-- TOC ToC toc -->
         <!-- Some of these items are hidden by default so that they can
              be shown only if relevant (e.g., you see Quest Progress
              only if you are on a quest).
         -->
         <li>Tasks:<ul>
-
-            <li id="taskOverview"><a href="">Task Overview</a></li>
-            <li id="taskStatistics"><a href="">Task Statistics</a></li>
-            <li id="untaggedTasks" class="showOnlyIfDataExists"><a href="">Tasks Untagged</a></li>
-            <li id="habitHistory"><a href="">Habit History</a></li>
-            <li id="dailiesIncomplete" class="showOnlyIfDataExists"><a href="">Dailies Incomplete</a></li>
+            <li class="showHideToggle" data-target="taskOverviewSection" data-closemainsections="true">Task Overview</a></li>
+            <li id="taskStatisticsTocLink" class="showHideToggle" data-target="taskStatisticsSection" data-closemainsections="true">Task Statistics</a></li>
+            <li id="untaggedTasksTocLink" class="showHideToggle showOnlyIfDataExists" data-target="untaggedTasksSection" data-closemainsections="true">Tasks Untagged</a></li>
+            <li class="showHideToggle" data-target="habitHistorySection" data-closemainsections="true">Habit History</a></li>
+            <li id="dailiesIncompleteTocLink" class="showHideToggle showOnlyIfDataExists" data-target="dailiesIncompleteSection" data-closemainsections="true">Dailies Incomplete</a></li>
         </ul></li>
         <li>Other:<ul>
-            <li id="damageDailies"><a href="">Damage from Dailies</a></li>
-            <li id="dropsToday"><a href="">Drops Received Today</a></li>
-            <li id="questProgress" class="showOnlyIfDataExists"><a href="">Quest Progress</a></li>
-            <li id="missingEquipment" class="showOnlyIfDataExists"><a href="">Missing Equipment</a></li>
-            <li id="currentGear"><a href="">Current Appearance and Gear</a></li>
-            <li id="equipmentRecommendations"><a href="">Equipment Recommendations</a></li>
+            <li class="showHideToggle" data-target="damageDailiesSection" data-closemainsections="true">Damage from Dailies</a></li>
+            <li class="showHideToggle" data-target="dropsTodaySection" data-closemainsections="true">Drops Received Today</a></li>
+            <li id="questProgressTocLink" class="showHideToggle showOnlyIfDataExists" data-target="questProgressSection" data-closemainsections="true">Quest Progress</a></li>
+            <li id="missingEquipmentTocLink" class="showHideToggle showOnlyIfDataExists" data-target="missingEquipmentSection" data-closemainsections="true">Missing Equipment</a></li>
+            <li class="showHideToggle" data-target="currentGearSection" data-closemainsections="true">Current Appearance and Gear</a></li>
+            <li class="showHideToggle" data-target="equipmentRecommendationsSection" data-closemainsections="true">Equipment Recommendations</a></li>
         </ul></li>
     </ul>
     <hr />
@@ -2858,7 +2866,7 @@ h2 {
         <p class="output"></p>
     </div>
 
-    <div class="tocSection longContent" id="taskOverviewSection">
+    <div class="mainSection longContent" id="taskOverviewSection">
         <h2>Task Overview</h2>
         <div class="taskOverviewExplanationToggle"><a href="">show explanation</a></div>
         <div class="longExplanation">
@@ -2875,12 +2883,12 @@ h2 {
         <table id="taskOverviewTable" class="output"></table>
     </div>
 
-    <div class="tocSection" id="taskStatisticsSection">
+    <div class="mainSection" id="taskStatisticsSection">
         <h2>Task Statistics</h2>
         <div class="output selfClear"></div>
     </div>
 
-    <div class="tocSection longContent" id="habitHistorySection">
+    <div class="mainSection longContent" id="habitHistorySection">
         <h2>Habit History</h2>
         <p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks.
 <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. -->
@@ -2889,16 +2897,16 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <ul class="output"></ul>
     </div>
 
-    <div class="tocSection" id="missingEquipmentSection">
+    <div class="mainSection" id="missingEquipmentSection">
         <div class="output gearList"></div>
     </div>
 
-    <div class="tocSection" id="currentGearSection">
+    <div class="mainSection" id="currentGearSection">
         <h2>Current Appearance and Gear</h2>
         <div class="output gearList selfClear"></div>
     </div>
 
-    <div class="tocSection" id="equipmentRecommendationsSection">
+    <div class="mainSection" id="equipmentRecommendationsSection">
         <h2>Equipment Recommendations</h2>
         <!-- div class="equipmentRecommendationsExplanationToggle"><a href="">show explanation</a></div -->
         <div> <!-- class="longExplanation" -->
@@ -2923,12 +2931,12 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <div id="equipmentChosen" class="selfClear"></div>
     </div>
 
-    <div class="tocSection" id="dropsTodaySection">
+    <div class="mainSection" id="dropsTodaySection">
         <h2>Drops Received Today</h2>
         <div class="output"></div>
     </div>
 
-    <div class="tocSection" id="questProgressSection">
+    <div class="mainSection" id="questProgressSection">
         <h2>Quest Progress</h2>
         <p class="output"></p>
         <!-- hopefully everything's clear enough that this won't be needed:
@@ -2940,7 +2948,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
         -->
     </div>
 
-    <div class="tocSection" id="damageDailiesSection">
+    <div class="mainSection" id="damageDailiesSection">
         <h2>Damage from Dailies</h2>
         <p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span class="damageDailiesExplanationToggle"><a href="">show explanation</a></span></p>
         <ul class="longExplanation">
@@ -2952,12 +2960,12 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <div class="output"></div>
     </div>
 
-    <div class="tocSection" id="dailiesIncompleteSection">
+    <div class="mainSection" id="dailiesIncompleteSection">
         <h2>Dailies Incomplete</h2>
         <div class="output"></div>
     </div>
 
-    <div class="tocSection longContent" id="untaggedTasksSection">
+    <div class="mainSection longContent" id="untaggedTasksSection">
         <h2>Tasks Untagged</h2>
         <div class="output"></div>
     </div>
