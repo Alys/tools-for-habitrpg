@@ -167,14 +167,13 @@ $(document).ready(function() {
             if (linktext) {
                 $(this).text('hide ' + linktext);
             }
-            // XXX improve these special show toggles:
             if ($('#damageDailiesSection'    ).is(':visible') &&
                 $('#dailiesIncompleteTocLink').is(':visible')
                ) {
                 $('#dailiesIncompleteSection').show();
             }
             if ($('#dropsTodaySection').is(':visible')) {
-                $('#dashDrop').show();
+                $('#dropsTodayDashboard').show();
                 // NOTE: We unhide the number of drops in the dashboard
                 // only after the user has opened the main drops section,
                 // because some users might prefer to not know (less
@@ -210,45 +209,6 @@ $(document).ready(function() {
         $('#mainSectionClose').hide();
         window.scrollTo(0, 0);
     });
-
-    $('#dashIncompleteDailies').click(function() {
-        $('.mainSection').hide();
-        $('#mainSectionClose').hide();
-        $('#dailiesIncompleteSection').show();
-    });
-    $('#dashDailiesDamage').click(function() {
-        $('.mainSection').hide();
-        $('#mainSectionClose').hide();
-        $('#damageDailiesSection').show();
-        if ($('#dailiesIncompleteTocLink').is(':visible')) { // XXX test
-            $('#dailiesIncompleteSection').show();
-        }
-    });
-    $('#dashBossDamage').click(function() {
-        $('.mainSection').hide();
-        $('#mainSectionClose').hide();
-        $('#damageDailiesSection').show();
-        if ($('#dailiesIncompleteTocLink').is(':visible')) { // XXX test
-            $('#dailiesIncompleteSection').show();
-        }
-    });
-    $('#dashQuestProgress').click(function() {
-        $('.mainSection').hide();
-        $('#mainSectionClose').hide();
-        $('#questProgressSection').show();
-    });
-    $('#dashDrop').click(function() {
-        $('.mainSection').hide();
-        $('#mainSectionClose').hide();
-        $('#dropsTodaySection').show();
-        if (collectionDrops) {
-            // The user is on a collection quest and has viewed the
-            // Drops Received Today section, so also show them the
-            // Quest Progress section (collection quests have drops):
-            $('#questProgressSection').show();
-        }
-    });
-
 });
 
 function toggleVisibilityForStuff() {
@@ -364,19 +324,12 @@ function displayData(data) {
             + '. '
             + '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
             + 'Learn more.</a>');
-        $('#dashUnallocated .output').text(user.stats.points);
+        $('#unallocatedPointsDashboard .output').text(user.stats.points);
         $('#unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
                                                     .addClass('show');
-        $('#dashUnallocated.showOnlyIfDataExists').removeClass('hide')
-                                                  .addClass('show');
-    }
-    else {
-        // XXX_SOON this should already be handled by the
-        // standard showOnlyIfDataExists code:
-        $('#unallocatedPoints.showOnlyIfDataExists').removeClass('show')
-                                                    .addClass('hide');
-        $('#dashUnallocated.showOnlyIfDataExists').removeClass('show')
-                                                  .addClass('hide');
+        $('#unallocatedPointsDashboard.showOnlyIfDataExists')
+                                                    .removeClass('hide')
+                                                    .addClass('show');
     }
 
 
@@ -471,7 +424,8 @@ function displayData(data) {
         + '</span>. '
         + msg
         + '</p>');
-    $('#dashDrop .output').text(user.items.lastDrop.count||0);
+    $('#dropsTodayDashboard .output').html((user.items.lastDrop.count || 0)
+                        + '<span class="dropCap"> / ' + dropCap + '</span>');
 
     // FOR TESTING (this does NOT contain all code for most drop chances):
     var dropChance = 1/150+0.2  // assume new task
@@ -510,7 +464,7 @@ function displayData(data) {
         //
         var msg = '';
         if (quest.content.boss) { // User is on a boss quest.
-            var qProgress = Math.floor(quest.progress.up * 100) / 100;
+            var qProgress = Math.floor(quest.progress.up * 10) / 10;
             // We round DOWN with floor because we must never let the user
             // think they have even slightly more progress than they really
             // have. Imagine if they missed ending a quest overnight by 0.1
@@ -522,7 +476,7 @@ function displayData(data) {
                 + ' points of damage to '
                 + quest.content.boss.name
                 + '.';
-            $('#dashQuestProgress .output').text(qProgress);
+            $('#questProgressDashboard .output').text(qProgress);
         }
         else if (quest.content.collect) { // User is on a collection quest.
             collectionDrops = true; // Quest Progress will open when Drops opens
@@ -551,14 +505,14 @@ function displayData(data) {
             msg += '</span> for the '
                  + quest.content.text
                  + ' quest.';
-            $('#dashQuestProgress .output').text(total);
+            $('#questProgressDashboard .output').text(total);
         }
         $('#questProgressSection .output').html(msg);
         $('#questProgressTocLink.showOnlyIfDataExists').removeClass('hide')
                                                        .addClass('show');
     }
     else { // user is not on a quest
-        $('#dashQuestProgress .output').text('n/a');
+        $('#questProgressDashboard .output').text('n/a');
         $('#questProgressSection .output').html('You are not on a '
             + '<a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>.');
     }
@@ -836,7 +790,7 @@ function displayData(data) {
     });
 
     taskStatisticsHtml += '</table>';
-    taskStatisticsHtml += '<p class="lowlight"><strong>*</strong> Your completed to-dos are automatically archived after three days to improve HabitRPG\'s speed and so are not included here. (However, at least some of your old to-dos can be exported using the <a href="http://habitrpg.wikia.com/wiki/Data_Export">"User Data" export option</a>.)</p>';
+    taskStatisticsHtml += '<p class="lowlight"><strong>*</strong> Your completed to-dos are automatically archived after three days to improve HabitRPG\'s speed and so most of them cannot be seen in HabitRPG. However, at least some of them can be exported using the <a href="http://habitrpg.wikia.com/wiki/Data_Export">"User Data" export option</a>. This total number of completed to-dos includes those archived ones.</p>';
     taskStatisticsHtml += '<p style="margin-top:1.5em">You have '
                         + '<span class="highlight"> '
                         + countTasks['rewards']['total']
@@ -1001,23 +955,33 @@ function displayData(data) {
     ////   Dailies Incomplete        /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
     var uncomplHtml = '';
-    $('#dashIncompleteDailies .output').text(dailiesIncomplete.length);
+    $('#dailiesIncompleteDashboard .output').text(dailiesIncomplete.length);
     if (dailiesIncomplete.length > 0) {
-        uncomplHtml += '<p>'
-                     + pluralise('This', dailiesIncomplete.length)
-                     + ' '
-                     + pluralise('daily', dailiesIncomplete.length)
-                     + ' '
-                     + pluralise('is', dailiesIncomplete.length)
-                     + ' due today and '
-                     + pluralise('has', dailiesIncomplete.length)
-                     + ' not been completed:</p><ul><li>'
-                     + dailiesIncomplete.join('</li><li>')
-                     + '</li></ul>';
-        $('#dashIncompleteDailies').removeClass('safe').addClass('danger');
+        uncomplHtml = '<p>'
+                    + pluralise('This', dailiesIncomplete.length)
+                    + ' '
+                    + pluralise('daily', dailiesIncomplete.length)
+                    + ' '
+                    + pluralise('is', dailiesIncomplete.length)
+                    + ' due today and '
+                    + pluralise('has', dailiesIncomplete.length)
+                    + ' not been completed:</p><ul><li>'
+                    + dailiesIncomplete.join('</li><li>')
+                    + '</li></ul>';
+        $('#dailiesIncompleteDashboard div').removeClass('safe')
+                                            .addClass('danger');
     }
     else {
-        $('#dashIncompleteDailies').removeClass('danger').addClass('safe');
+        $('#dailiesIncompleteDashboard div').removeClass('danger')
+                                            .addClass('safe');
+        $('#dailiesIncompleteSection .output').html(
+            '<p>You have completed all of the dailies due today.</p>');
+            // We don't add that message to uncomplHtml, because below
+            // here we use the presence of content in that variable to
+            // decide if it's worth showing the ToC link to this
+            // section (it isn't if there's no useful content).
+            // However the user can still get to this section through
+            // the dashboard, so we need a message to be displayed.
     }
     if (dailiesIncompleteGrey.length > 0) {
         uncomplHtml += '<p>'
@@ -1055,8 +1019,8 @@ function displayData(data) {
             currentHealth = Math.round(user.stats.hp * 100000) / 100000;
         }
     }
+    $('#currentHealthDashboard .output').text(currentHealth);
 
-    $('#dashCurrentHealth .output').text(currentHealth);
     if (sleeping) {
         damageDailiesHtml = '<p>You are'
             + ' <a href="http://habitrpg.wikia.com/wiki/Tavern">resting'
@@ -1121,19 +1085,23 @@ function displayData(data) {
     }
     $('#damageDailiesSection .output').html(damageDailiesHtml);
     if (dailysDamage == 0) {
-        $('#dashDailiesDamage').removeClass('danger').addClass('safe');
+        $('#damageDailiesDashboard div').removeClass('danger')
+                                        .addClass('safe');
     }
     else {
-        $('#dashDailiesDamage').removeClass('safe').addClass('danger');
+        $('#damageDailiesDashboard div').removeClass('safe')
+                                        .addClass('danger');
     }
-    $('#dashDailiesDamage .output').text(dailysDamage);
+    $('#damageDailiesDashboard .output').text(dailysDamage);
     if (quest && quest.content.boss && bossDamage > 0) {
-        $('#dashBossDamage').removeClass('safe').addClass('danger');
+        $('#bossDamageDashboard div').removeClass('safe')
+                                     .addClass('danger');
     }
     else {
-        $('#dashBossDamage').removeClass('danger').addClass('safe');
+        $('#bossDamageDashboard div').removeClass('danger')
+                                     .addClass('safe');
     }
-    $('#dashBossDamage .output').text(
+    $('#bossDamageDashboard .output').text(
                 (quest && quest.content.boss) ? bossDamage : 'n/a' );
 }
 
@@ -2078,7 +2046,7 @@ abbr.discrete {
 #mainSectionClose,
 .showHideToggle {
     text-decoration: underline;
-    color: purple; /* XXX improve */
+    color: purple;
 }
 
 h1 {
@@ -2434,12 +2402,8 @@ h2 {
     margin-top: 2em;
 }
 
-
 #dashboard ul {
     float: left;
-}
-#dashboard li.link {
-    cursor: pointer;
 }
 #dashboard li {
     text-align: center;
@@ -2451,8 +2415,22 @@ h2 {
     float: left;
     list-style-type: none;
 }
-#dashboard .stats {
+#dashboard li.showHideToggle {
+    cursor: pointer;
+    text-decoration: none;
+    color: black;
+}
+#dashboard li > div {
     box-shadow: 1px 1px 1px 1px #666666;
+}
+#dashboard .output {
+    font-size: 2.15em;
+    font-weight: bold;
+    padding: 2px;
+}
+#dashboard .label {
+    font-size: 0.75em;
+    padding: 1px;
 }
 #dashboard .danger {
     background-color: #ffcccc;
@@ -2460,17 +2438,8 @@ h2 {
 #dashboard .safe {
     background-color: #ccffcc;
 }
-#dashboard .stat {
-    font-size: 2.15em;
-    font-weight: bold;
-    padding: 2px;
-}
-#dashboard .statLabel {
-    font-size: 0.75em;
-    padding: 1px;
-}
-#dashboard #dashDrop {
-    display: none;
+#dashboard .dropCap {
+    font-size: 0.7em;
 }
 
     </style>
@@ -2498,12 +2467,18 @@ h2 {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>none</li>
+                    <li><span class="subheading">Drops Count</span> in the dashboard now also shows you your current drop-cap (thanks to Ryan for suggesting this).</li>
+                </ul>
+            </li>
+            <li>Documentation / Layout:
+                <ul>
+                    <li>In <span class="subheading">Task Statistics</span> section, fixed the incorrect information about archived to-dos (thanks to SabreCat for pointing out the error).</li>
                 </ul>
             </li>
             <li>Code:
                 <ul>
-                    <li>removed five hundred different kinds of hide/show toggling code and replaced them with one type [ONLY PARTIALLY DONE SO FAR]</li><!-- XXX complete -->
+                    <li>Removed a hundred different kinds of hide/show toggling code and replaced them with one type (nearly 100 lines of code deleted!)</li>
+                    <li>Fixed broken "Show All of My Equipment" button in the Equipment Recommendations section (thanks to SabreCat for the bug report).</li>
                 </ul>
             </li>
         </ul></dd>
@@ -2738,40 +2713,40 @@ h2 {
 
     <div id="dashboard" class="selfClear">
     <ul>
-        <li title="your health">
-            <div id="dashCurrentHealth" class="stats">
-            <div class="stat output"></div>
-            <div class="statLabel">Current Health</div></div>
+        <li id="currentHealthDashboard" title="your health">
+            <div>
+            <div class="output"></div>
+            <div class="label">Current Health</div></div>
         </li>
-        <li title="number of dailies you have not yet completed (click for more information)" class="link">
-            <div id="dashIncompleteDailies" class="stats danger">
-            <div class="stat output"></div>
-            <div class="statLabel">Incomplete Dailies</div></div>
+        <li id="dailiesIncompleteDashboard" title="number of dailies you have not yet completed (click for more information)" class="showHideToggle" data-target="dailiesIncompleteSection" data-closemainsections="true" data-forceopen="true">
+            <div class="danger">
+            <div class="output"></div>
+            <div class="label">Incomplete Dailies</div></div>
         </li>
-        <li title="health loss you will take overnight from your uncompleted dailies (click for more information)" class="link">
-            <div id="dashDailiesDamage" class="stats danger">
-            <div class="stat output"></div>
-            <div class="statLabel">Est. Damage</div></div>
+        <li id="damageDailiesDashboard" title="health loss you will take overnight from your uncompleted dailies (click for more information)" class="showHideToggle" data-target="damageDailiesSection" data-closemainsections="true" data-forceopen="true">
+            <div class="danger">
+            <div class="output"></div>
+            <div class="label">Est. Damage</div></div>
         </li>
-        <li title="health loss you and your party will take overnight from your quest boss due to your own uncompleted dailies (click for more information)" class="link">
-            <div id="dashBossDamage" class="stats danger">
-            <div class="stat output"></div>
-            <div class="statLabel">Est. Boss Damage</div></div>
+        <li id="bossDamageDashboard" title="health loss you and your party will take overnight from your quest boss due to your own uncompleted dailies (click for more information)" class="showHideToggle" data-target="damageDailiesSection" data-closemainsections="true" data-forceopen="true">
+            <div class="danger">
+            <div class="output"></div>
+            <div class="label">Est. Boss Damage</div></div>
         </li>
-        <li title="progress you have made so far today on your quest (click for more information)" class="link">
-            <div id="dashQuestProgress" class="stats">
-            <div class="stat output"></div>
-            <div class="statLabel">Quest Progress</div></div>
+        <li id="questProgressDashboard" title="progress you have made so far today on your quest (click for more information)" class="showHideToggle" data-target="questProgressSection" data-closemainsections="true" data-forceopen="true">
+            <div>
+            <div class="output"></div>
+            <div class="label">Quest Progress</div></div>
         </li>
-        <li title="drops you have received so far today (click for more information)" id="dashDrop" class="link">
-            <div class="stats">
-            <div class="stat output"></div>
-            <div class="statLabel">Drop Count</div></div>
+        <li id="dropsTodayDashboard" title="drops you have received so far today (click for more information)" class="showHideToggle hide" data-target="dropsTodaySection" data-closemainsections="true" data-forceopen="true">
+            <div>
+            <div class="output"></div>
+            <div class="label">Drop Count / Cap</div></div>
         </li>
-        <li title="points you have taken from leveling up - go to your Profile -> Stats page to allocate them" id="dashUnallocated" class="showOnlyIfDataExists">
-            <div class="stats">
-            <div class="stat output"></div>
-            <div class="statLabel">Unallocated Points</div></div>
+        <li id="unallocatedPointsDashboard" title="points you have taken from leveling up - go to your Profile -> Stats page to allocate them" class="showOnlyIfDataExists">
+            <div>
+            <div class="output"></div>
+            <div class="label">Unallocated Points</div></div>
         </li>
     </ul>
     </div>
@@ -2914,7 +2889,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
 <div id="documentationAndForm" class="showOnlyIfHave_Not_FetchedData">
    <p>This page shows you certain information from your <a href="https://habitrpg.com/">HabitRPG</a> account. You can read the full list below, or just enter your details and try it out.</p>
 
-    <iframe src="null.htm" id="formPasswdSaveFix" name="formPasswdSaveFix" style="display:none"></iframe><!-- DAMN YOU CHROME!! DAMN YOU!!!! http://stackoverflow.com/a/9116737 --><!-- XXX test this -->
+    <iframe src="null.htm" id="formPasswdSaveFix" name="formPasswdSaveFix" style="display:none"></iframe><!-- DAMN YOU CHROME!! DAMN YOU!!!! http://stackoverflow.com/a/9116737 -->
     <form id="userApiDetailsForm" method="POST" action="" target="formPasswdSaveFix">
         <fieldset>
             <legend><span class="highlight">Enter your HabitRPG API details</span>
