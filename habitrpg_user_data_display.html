@@ -143,59 +143,6 @@ $(document).ready(function() {
         fetchData();
     });
 
-    // After data fetched, let the user show/hide their email address:
-    $('#emailDisplayToggle').click(function(event){
-        event.preventDefault();
-        $('#emailDisplay').toggleClass('show').toggleClass('hide');
-        var linkText = 'email address';
-        if ($('#emailDisplay').is(':visible')) {
-            $('#emailDisplayToggle').text('hide ' + linkText);
-        } else {
-            $('#emailDisplayToggle').text('show ' + linkText);
-        }
-    });
-
-    // After data fetched, let the user show/hide the explanations and form:
-    $('.explanationToggle').click(function(event){
-        event.preventDefault();
-        $('.separator'         ).toggleClass('show').toggleClass('hide');
-        $('#introduction'      ).toggleClass('show').toggleClass('hide');
-        $('#userApiDetailsForm').toggleClass('show').toggleClass('hide');
-        $('#outroduction'      ).toggleClass('show').toggleClass('hide');
-        toggleApiDetailsFormLinkText();
-    });
-
-    // // After data fetched, let the user clear the fetched data:
-    // Feature removed to regain space in header.
-    // $('#clearData').click(function(){
-        // window.scrollTo(0, 0);
-        // window.location.reload(true);
-    // });
-
-    // Task Overview explanation hide/show:
-    $('.taskOverviewExplanationToggle').click(function(event){
-        event.preventDefault();
-        $('#taskOverviewSection .longExplanation').toggle();
-        var linkText = 'explanation';
-        if ($('#taskOverviewSection .longExplanation').is(':visible')) {
-            $('.taskOverviewExplanationToggle a').text('hide ' + linkText);
-        } else {
-            $('.taskOverviewExplanationToggle a').text('show ' + linkText);
-        }
-    });
-
-    // Damage from Dailies explanation hide/show:
-    $('.damageDailiesExplanationToggle').click(function(event){
-        event.preventDefault();
-        $('#damageDailiesSection .longExplanation').toggle();
-        var linkText = 'explanation';
-        if ($('#damageDailiesSection .longExplanation').is(':visible')) {
-            $('.damageDailiesExplanationToggle a').text('hide ' + linkText);
-        } else {
-            $('.damageDailiesExplanationToggle a').text('show ' + linkText);
-        }
-    });
-
     //////////////////////////////////////////////////////////////////////
     ////   Generic Hide/Show Toggling     ////////////////////////////////
     //////////////////////////////////////////////////////////////////////
@@ -207,14 +154,18 @@ $(document).ready(function() {
             // (i.e., the user wants to close it)
             // unless the toggle's attributes force it to always be
             // opened (e.g., a link from the dashboard)
+        var linktext = $(this).data("linktext") || false;
         if ($(this).data("closemainsections")) {
-            $('.mainSection').hide();
-            $('#tocClose').hide();
+            $('.mainSection'     ).hide();
+            $('#mainSectionClose').hide();
         }
         if (wantToShow) {
             $('#' + target).show();
             if ($('#' + target).hasClass("longContent")) {
-                $('#tocClose').show();
+                $('#mainSectionClose').show();
+            }
+            if (linktext) {
+                $(this).text('hide ' + linktext);
             }
             // XXX improve these special show toggles:
             if ($('#damageDailiesSection'    ).is(':visible') &&
@@ -241,26 +192,33 @@ $(document).ready(function() {
         }
         else {
             $('#' + target).hide();
+            if (linktext) {
+                $(this).text('show ' + linktext);
+            }
             if ($(this).data("scrolltotop")) {
                 window.scrollTo(0, 0);
             }
         }
+        var toggleTarget = $(this).data("resettoggletext") || false;
+        if (toggleTarget) {
+            $('#' + toggleTarget).text('show '
+                        + $('#' + toggleTarget).data("linktext"));
+        }
     });
-    $('#tocClose').click(function(event){
-        event.preventDefault();
-        $('.mainSection').hide();
-        $('#tocClose'  ).hide();
+    $('#mainSectionClose').click(function(){
+        $('.mainSection'     ).hide();
+        $('#mainSectionClose').hide();
         window.scrollTo(0, 0);
     });
 
     $('#dashIncompleteDailies').click(function() {
         $('.mainSection').hide();
-        $('#tocClose').hide();
+        $('#mainSectionClose').hide();
         $('#dailiesIncompleteSection').show();
     });
     $('#dashDailiesDamage').click(function() {
         $('.mainSection').hide();
-        $('#tocClose').hide();
+        $('#mainSectionClose').hide();
         $('#damageDailiesSection').show();
         if ($('#dailiesIncompleteTocLink').is(':visible')) { // XXX test
             $('#dailiesIncompleteSection').show();
@@ -268,7 +226,7 @@ $(document).ready(function() {
     });
     $('#dashBossDamage').click(function() {
         $('.mainSection').hide();
-        $('#tocClose').hide();
+        $('#mainSectionClose').hide();
         $('#damageDailiesSection').show();
         if ($('#dailiesIncompleteTocLink').is(':visible')) { // XXX test
             $('#dailiesIncompleteSection').show();
@@ -276,12 +234,12 @@ $(document).ready(function() {
     });
     $('#dashQuestProgress').click(function() {
         $('.mainSection').hide();
-        $('#tocClose').hide();
+        $('#mainSectionClose').hide();
         $('#questProgressSection').show();
     });
     $('#dashDrop').click(function() {
         $('.mainSection').hide();
-        $('#tocClose').hide();
+        $('#mainSectionClose').hide();
         $('#dropsTodaySection').show();
         if (collectionDrops) {
             // The user is on a collection quest and has viewed the
@@ -290,21 +248,8 @@ $(document).ready(function() {
             $('#questProgressSection').show();
         }
     });
-});
 
-function toggleApiDetailsFormLinkText() {
-    // change text for the hide/show link (for the intro, API form, etc)
-    // based on the form's visibility
-    var linkText = 'documentation';
-    if ($('#userApiDetailsForm').is(':visible')) {
-        $('#versionChanges').hide();
-        $('.mainSection'    ).hide();
-        $('#tocClose'      ).hide();
-        $('.explanationToggle').text('hide ' + linkText);
-    } else {
-        $('.explanationToggle').text('show ' + linkText);
-    }
-}
+});
 
 function toggleVisibilityForStuff() {
     $("#loading").hide();
@@ -331,9 +276,8 @@ function toggleVisibilityForStuff() {
     else {
         $("#errors").hide();
     }
-
-    toggleApiDetailsFormLinkText();
 }
+
 
 function fetchData() {
     dataFetchStatus = 'not attempted'; // but is about to be...
@@ -1737,7 +1681,7 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
     $('#equipmentRecommendationsTable_info')
                             .addClass('equipmentRecommendationsHide');
 
-    $('#showAllEquipment').click( function() {
+    $('#showAllEquipment').click( function(event) {
         event.preventDefault();
         $('#equipmentRecommendationsTable tr.best td')
                             .addClass('equipmentRecommendationsHighlight');
@@ -1789,7 +1733,7 @@ function sumEquipmentRecommendations() {
         + '</ul>'
     );
 
-    $('#equipmentChosenClear').click( function() {
+    $('#equipmentChosenClear').click( function(event) {
         event.preventDefault();
         $('#equipmentRecommendationsTable tr').each(
             function(index,value){
@@ -2086,9 +2030,6 @@ body {
 hr {
     width: 95%;
 }
-hr.separator {
-    margin-bottom: 30px;
-}
 abbr {
     border-bottom: 1px dashed black;
 }
@@ -2134,6 +2075,7 @@ abbr.discrete {
     margin-top: -1em;
 }
 
+#mainSectionClose,
 .showHideToggle {
     text-decoration: underline;
     color: purple; /* XXX improve */
@@ -2180,11 +2122,8 @@ h1 .versionToggle {
 #explanationAndClearLinks {
     text-align: right;
 }
-#explanationAndClearLinks  a {
+#explanationAndClearLinks span {
     padding-left: 10px;
-}
-#end .explanationToggle {
-    padding: 20px 0;
 }
 
 #userApiDetailsForm {
@@ -2219,14 +2158,16 @@ h1 .versionToggle {
     margin-bottom: 7px;
 }
 
-#outroduction {
+#documentationAndForm > div {
     max-width: 700px;
 }
-#outroduction h2 {
-    font-weight: bold;
+#documentationAndForm #documentationAndFormClose {
+    max-width: 100%;
+}
+#documentationAndForm div h2 {
     font-size: 1.3em;
 }
-#outroduction li {
+#documentationAndForm li {
     margin-bottom: 10px;
 }
 
@@ -2255,7 +2196,6 @@ h2 {
     display: none;
 }
 .closer { /* as in "a thing that closes", not "nearer" */
-    font-size: 0.9em;
     margin-top: 30px;
     padding-top: 15px;
     padding-bottom: 15px;
@@ -2274,7 +2214,7 @@ h2 {
 #taskOverviewSection > ul > li {
     padding: 3px 0;
 }
-.taskOverviewExplanationToggle {
+#taskOverviewSection .showHideToggle {
     margin-bottom: 1em;
 }
 #taskOverviewTable {
@@ -2358,7 +2298,7 @@ h2 {
 }
 
 #damageDailiesSection li {
-    padding: 3px 0; /* XXX make generic */
+    padding: 3px 0;
 }
 
 .gearList .item .stats {
@@ -2495,7 +2435,7 @@ h2 {
 }
 
 
-#dashboardInner {
+#dashboard ul {
     float: left;
 }
 #dashboard li.link {
@@ -2538,16 +2478,15 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle versionToggle" data-target="versionChanges">(v1.8)</span></h1><!-- VERSION LINK -->
+    <span class="showHideToggle versionToggle" data-target="versionChanges">(v1.8)</span></h1><!-- VERSION TOGGLE -->
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 <div id="emailDisplay" class="hide"></div>
 
 <div id="explanationAndClearLinks" class="showOnlyIfHaveFetchedData">
     <input id="refetch" type="submit" value="Re-Fetch Data" />
-    <a id="emailDisplayToggle" href="" title="view the email address that you used to sign up to HabitRPG">show email address</a>
-    <a class="explanationToggle" href="">show documentation</a>
-    <!-- <a id="clearData" href="">clear my data</a> -->
+    <span class="showHideToggle" data-target="emailDisplay" data-linktext="email address" title="view the email address that you used to sign up to HabitRPG">show email address</span>
+    <span id="documentationAndFormToggle" class="showHideToggle" data-target="documentationAndForm" data-linktext="documentation" data-closemainsections="true">show documentation</span>
 </div>
 <hr class="clear" />
 
@@ -2783,7 +2722,7 @@ h2 {
         </ul></dd>
     </dl>
     <div class="showHideToggle versionToggle closer" data-target="versionChanges" data-scrolltotop="true">close version history <span class="tip">(or click the version number again to close)</span></div><!-- VERSION BOTTOM -->
-    <hr class="separator" />
+    <hr />
 </div>
 
 
@@ -2798,7 +2737,7 @@ h2 {
 <div id="main" class="showOnlyIfHaveFetchedData">
 
     <div id="dashboard" class="selfClear">
-    <ul id="dashboardInner">
+    <ul>
         <li title="your health">
             <div id="dashCurrentHealth" class="stats">
             <div class="stat output"></div>
@@ -2866,19 +2805,19 @@ h2 {
         <p class="output"></p>
     </div>
 
-    <div class="mainSection longContent" id="taskOverviewSection">
+    <div id="taskOverviewSection" class="mainSection longContent">
         <h2>Task Overview</h2>
-        <div class="taskOverviewExplanationToggle"><a href="">show explanation</a></div>
-        <div class="longExplanation">
-        <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, send screenshots <a href="mailto:lady_alys@oldgods.net">to Alys</a> and tell her what browser you are using (browser name AND version e.g., "Firefox 28.0") and what operating system (e.g., Windows XP).</p>
-        <p>The table below shows your tasks (habits, dailies, and to-dos), with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</p>
-        <ul>
-        <li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in HabitRPG.</li>
-        <li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attribute", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you'll see after you've chosen a filter to remove that filter.</li>
-        <li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li>
-        <li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://www.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li>
-        </ul>
-        <div class="taskOverviewExplanationToggle closer"><a href="">hide explanation</a></div>
+        <div id="taskOverviewExplanationToggle" class="showHideToggle" data-target="taskOverviewExplanation" data-linktext="explanation">show explanation</div>
+        <div id="taskOverviewExplanation" class="hide">
+            <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, send screenshots <a href="mailto:lady_alys@oldgods.net">to Alys</a> and tell her what browser you are using (browser name AND version e.g., "Firefox 28.0") and what operating system (e.g., Windows XP).</p>
+            <p>The table below shows your tasks (habits, dailies, and to-dos), with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</p>
+            <ul>
+            <li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in HabitRPG.</li>
+            <li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attribute", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you'll see after you've chosen a filter to remove that filter.</li>
+            <li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li>
+            <li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://www.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li>
+            </ul>
+            <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>
         </div>
         <table id="taskOverviewTable" class="output"></table>
     </div>
@@ -2908,15 +2847,12 @@ Habits with no history are highlighted in bold, in case you would like to consid
 
     <div class="mainSection" id="equipmentRecommendationsSection">
         <h2>Equipment Recommendations</h2>
-        <!-- div class="equipmentRecommendationsExplanationToggle"><a href="">show explanation</a></div -->
-        <div> <!-- class="longExplanation" -->
+        <div>
             <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p>
             <p>By default, the table below shows you only the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p>
             <p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "attributes" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page, which uses the same technology).</p>
             <p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the attribute you care most about, then highlight the top one or more items, and then if you care about another attribute too, re-sort by it and select more items.</p>
             <p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p>
-
-            <!-- div class="equipmentRecommendationsExplanationToggle closer"><a href="">hide explanation</a></div -->
 
             <div id="qualityFilter">
                 <p id="onlyBestIsShowing">Only your best equipment is shown below. To maximise your attributes, choose from only those items.
@@ -2950,12 +2886,12 @@ Habits with no history are highlighted in bold, in case you would like to consid
 
     <div class="mainSection" id="damageDailiesSection">
         <h2>Damage from Dailies</h2>
-        <p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span class="damageDailiesExplanationToggle"><a href="">show explanation</a></span></p>
-        <ul class="longExplanation">
-        <li>These estimates have been accurate during testing but your usage of HabitRPG might involve factors that were not considered, and so this information can't be guaranteed to be correct.</li>
-        <li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you won't die.</li>
-        <li>If you have not logged in to HabitRPG for more than a day, the damage that you (and your fellow quest participants) will take will be <span class="highlight">much greater</span> than shown here.</li>
-        <li class="damageDailiesExplanationToggle lowlight" style="list-style-type: none; padding: 8px 0 20px 0"><a href="">hide explanation</a></li>
+        <p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span id="damageDailiesExplanationToggle" class="showHideToggle" data-target="damageDailiesExplanation" data-linktext="explanation">show explanation</span></p>
+        <ul id="damageDailiesExplanation" class="hide">
+            <li>These estimates have been accurate during testing but your usage of HabitRPG might involve factors that were not considered, and so this information can't be guaranteed to be correct.</li>
+            <li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you won't die.</li>
+            <li>If you have not logged in to HabitRPG for more than a day, the damage that you (and your fellow quest participants) will take will be <span class="highlight">much greater</span> than shown here.</li>
+            <li class="showHideToggle lowlight" data-target="damageDailiesExplanation" data-resettoggletext="damageDailiesExplanationToggle" style="list-style-type: none; padding: 8px 0 20px 0">hide explanation</li>
         </ul>
         <div class="output"></div>
     </div>
@@ -2969,97 +2905,95 @@ Habits with no history are highlighted in bold, in case you would like to consid
         <h2>Tasks Untagged</h2>
         <div class="output"></div>
     </div>
-
-    <div id="tocClose" class="closer hide"><a href="">close / back to top</a></div>
 </div>
 
 
-<div id="introduction" class="showOnlyIfHave_Not_FetchedData">
+<div id="mainSectionClose" class="closer hide">close / back to top</div>
+
+
+<div id="documentationAndForm" class="showOnlyIfHave_Not_FetchedData">
    <p>This page shows you certain information from your <a href="https://habitrpg.com/">HabitRPG</a> account. You can read the full list below, or just enter your details and try it out.</p>
+
+    <iframe src="null.htm" id="formPasswdSaveFix" name="formPasswdSaveFix" style="display:none"></iframe><!-- DAMN YOU CHROME!! DAMN YOU!!!! http://stackoverflow.com/a/9116737 --><!-- XXX test this -->
+    <form id="userApiDetailsForm" method="POST" action="" target="formPasswdSaveFix">
+        <fieldset>
+            <legend><span class="highlight">Enter your HabitRPG API details</span>
+            (from the <a href="https://habitrpg.com/#/options/settings/api">Settings
+             -&gt; API page</a>)
+            </legend>
+            <label for="userId"><span>User ID</span>
+                <input type="text" name="userId" id="userId" />
+            </label>
+            <label for="apiToken"><span>API Token</span>
+                <input type="password" name="apiToken" id="apiToken" />
+            </label>
+            <input type="submit" value="Fetch My Data" />
+            <p class="highlight">Privacy and security notes:</p>
+            <ul>
+            <li>Your API Token is a password - do not share it with anyone,
+            not even the maintainer of this page if you are seeking help.</li>
+            <li>When you enter your User ID and API Token here and click
+            "Fetch My Data", your ID and Token are sent to HabitRPG's servers.
+            They are not sent anywhere else.
+            To confirm that, you can ask someone who knows the JavaScript
+            programming language to examine the source of this page.</li>
+            <li>This page does not save your User ID and API Token to any
+            location, but your browser might, if it has been configured to
+            save form and password information. If you are using this page
+            on a shared computer, you should clear any data that the browser
+            has saved.</li>
+            <li>You cannot damage your HabitRPG account in any way by using
+            this page. It fetches data from HabitRPG's servers but it
+            does not make any other kind of request. Your account will not be
+            changed by this.</li>
+            <li>You cannot view anyone else's data by using this page.<!-- XXX_LATER:  add this if more party code is put in (and improve wording): "except the most basic details (e.g., name) that you can already see on the party page" --></li>
+            <li>To clear your data, reload the page.</li>
+            </ul>
+        </fieldset>
+    </form>
+
+
+    <div>
+       <h2>What's On This Page?</h2>
+       <ul>
+            <li><span class="subheading">Unallocated Points</span>: If you have any <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">unallocated points</a>, you'll see how many and a link to the HabitRPG <a href="https://habitrpg.com/#/options/profile/stats">Profile -&gt; Stats page</a> so you can allocate them.</li>
+            <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</li>
+            <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
+            <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
+            <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
+            <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
+            <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
+            <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
+            <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
+            <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
+            <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
+            <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
+       </ul>
+        <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
+
+       <h2>Possible Future Features</h2><!-- XXX_LATER look into this -->
+       <ul>
+            <!-- li><em>Very soon now:</em> <span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li -->
+            <li><em>Probably:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
+            <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
+            <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
+            <li><em>Maybe:</em> <span class="subheading">Missing Equipment for Orb of Rebirthers</span>: do something to make the feature more useful for them.</li>
+            <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
+       </ul>
+
+       <h2>Suspected Bugs</h2><!-- XXX_LATER look into this -->
+       <p>This page will not work correctly on old browsers because it uses modern website features and relies on compliance to standards (both can be lacking in old browsers). <a href="http://browsehappy.com/">Updating your browser is important for general safety on the internet!</a> If you have upgraded your browser to the latest version and are still having problems, please tell me! Contact details are below.</p>
+       <p>Regardless of what bugs there might be, this page cannot damage your account. It does not contain any code that could result in any changes being made on HabitRPG.</p>
+
+       <h2>Help and Contact Details</h2>
+       <p>This page has been created by <a href="http://habitrpg.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
+
+        <p>If you have general questions about HabitRPG, post them to <a href="https://habitrpg.com/#/options/groups/tavern">Tavern Talk</a> or <a href="http://habitrpg.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
+    </div>
+
+    <div id="documentationAndFormClose" class="showHideToggle closer showOnlyIfHaveFetchedData" data-target="documentationAndForm" data-resettoggletext="documentationAndFormToggle">hide documentation</div>
 </div>
 
-<iframe src="null.htm" id="formPasswdSaveFix" name="formPasswdSaveFix" style="display:none"></iframe><!-- DAMN YOU CHROME!! DAMN YOU!!!! http://stackoverflow.com/a/9116737 -->
-<form id="userApiDetailsForm" method="POST" action="" class="showOnlyIfHave_Not_FetchedData" target="formPasswdSaveFix">
-    <fieldset>
-        <legend><span class="highlight">Enter your HabitRPG API details</span>
-        (from the <a href="https://habitrpg.com/#/options/settings/api">Settings
-         -&gt; API page</a>)
-        </legend>
-        <label for="userId"><span>User ID</span>
-            <input type="text" name="userId" id="userId" />
-        </label>
-        <label for="apiToken"><span>API Token</span>
-            <input type="password" name="apiToken" id="apiToken" />
-        </label>
-        <input type="submit" value="Fetch My Data" />
-        <p class="highlight">Privacy and security notes:</p>
-        <ul>
-        <li>Your API Token is a password - do not share it with anyone,
-        not even the maintainer of this page if you are seeking help.</li>
-        <li>When you enter your User ID and API Token here and click
-        "Fetch My Data", your ID and Token are sent to HabitRPG's servers.
-        They are not sent anywhere else.
-        To confirm that, you can ask someone who knows the JavaScript
-        programming language to examine the source of this page.</li>
-        <li>This page does not save your User ID and API Token to any
-        location, but your browser might, if it has been configured to
-        save form and password information. If you are using this page
-        on a shared computer, you should clear any data that the browser
-        has saved.</li>
-        <li>You cannot damage your HabitRPG account in any way by using
-        this page. It fetches data from HabitRPG's servers but it
-        does not make any other kind of request. Your account will not be
-        changed by this.</li>
-        <li>You cannot view anyone else's data by using this page.<!-- XXX_LATER:  add this if more party code is put in (and improve wording): "except the most basic details (e.g., name) that you can already see on the party page" --></li>
-        <li>To clear your data, reload the page.</li>
-        </ul>
-    </fieldset>
-</form>
-
-
-
-<div id="outroduction" class="showOnlyIfHave_Not_FetchedData">
-   <h2>What's On This Page?</h2>
-   <ul>
-        <li><span class="subheading">Unallocated Points</span>: If you have any <a href="http://habitrpg.wikia.com/wiki/Character_Attributes">unallocated points</a>, you'll see how many and a link to the HabitRPG <a href="https://habitrpg.com/#/options/profile/stats">Profile -&gt; Stats page</a> so you can allocate them.</li>
-        <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</li>
-        <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
-        <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
-        <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
-        <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
-        <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
-        <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
-        <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
-        <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
-        <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
-        <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
-   </ul>
-<p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
-
-   <h2>Possible Future Features</h2><!-- XXX_LATER look into this -->
-   <ul>
-        <!-- li><em>Very soon now:</em> <span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li -->
-        <li><em>Probably:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
-        <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
-        <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
-        <li><em>Maybe:</em> <span class="subheading">Missing Equipment for Orb of Rebirthers</span>: do something to make the feature more useful for them.</li>
-        <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
-   </ul>
-
-   <h2>Suspected Bugs</h2><!-- XXX_LATER look into this -->
-   <p>This page will not work correctly on old browsers because it uses modern website features and relies on compliance to standards (both can be lacking in old browsers). <a href="http://browsehappy.com/">Updating your browser is important for general safety on the internet!</a> If you have upgraded your browser to the latest version and are still having problems, please tell me! Contact details are below.</p>
-   <p>Regardless of what bugs there might be, this page cannot damage your account. It does not contain any code that could result in any changes being made on HabitRPG.</p>
-
-   <h2>Help and Contact Details</h2>
-   <p>This page has been created by <a href="http://habitrpg.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
-
-    <p>If you have general questions about HabitRPG, post them to <a href="https://habitrpg.com/#/options/groups/tavern">Tavern Talk</a> or <a href="http://habitrpg.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
-</div>
-
-<div id="end">
-    <a class="explanationToggle showOnlyIfHave_Not_FetchedData
-              separator closer hide" href="">hide documentation</a>
-</div>
 
 </div></body>
 </html>
