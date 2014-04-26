@@ -670,7 +670,6 @@ function displayData(data) {
                     stealth--;
                 }
                 else {
-                    dailiesIncomplete.push(obj.text);
                     var currVal = obj.value; // task value
                     if (currVal < valueMin) { currVal = valueMin; } // capped
                     if (currVal > valueMax) { currVal = valueMax; } // capped
@@ -689,6 +688,7 @@ function displayData(data) {
                     // priority is easy (1), medium (1.5), hard (2)
                     hpMod = Math.round(hpMod * 10) / 10; // HabitRPG uses round
                     dailysDamage += hpMod; // note this is NOT a negative number
+                    dailiesIncomplete.push(obj);
                 }
             }
             else if (! obj.completed && ! obj.repeat[today]) {
@@ -979,10 +979,11 @@ function displayData(data) {
     //////////////////////////////////////////////////////////////////////
     ////   Dailies Incomplete        /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    var uncomplHtml = '';
     $('#dailiesIncompleteDashboard .output').text(dailiesIncomplete.length);
     if (dailiesIncomplete.length > 0) {
-        uncomplHtml = '<p>'
+        $('#dailiesIncompleteDashboard div').removeClass('safe')
+                                            .addClass('danger');
+        var uncomplHtml = '<p>'
                     + pluralise('This', dailiesIncomplete.length)
                     + ' '
                     + pluralise('daily', dailiesIncomplete.length)
@@ -990,44 +991,48 @@ function displayData(data) {
                     + pluralise('is', dailiesIncomplete.length)
                     + ' due today and '
                     + pluralise('has', dailiesIncomplete.length)
-                    + ' not been completed:</p><ul><li>'
-                    + dailiesIncomplete.join('</li><li>')
-                    + '</li></ul>';
-        $('#dailiesIncompleteDashboard div').removeClass('safe')
-                                            .addClass('danger');
+                    + ' not been completed:</p><ul>';
+        $.each(dailiesIncomplete, function(index, obj){
+            uncomplHtml += '<li>'
+                         + obj.text
+                         + '</li>';
+        });
+        uncomplHtml += '</ul>';
+        $('#dailiesIncompleteSection #nongreyDailies.output').html(
+                                                        uncomplHtml);
     }
     else {
         $('#dailiesIncompleteDashboard div').removeClass('danger')
                                             .addClass('safe');
-        $('#dailiesIncompleteSection .output').html(
+        $('#dailiesIncompleteSection #nongreyDailies.output').html(
             '<p>You have completed all of the dailies due today.</p>');
-            // We don't add that message to uncomplHtml, because below
-            // here we use the presence of content in that variable to
-            // decide if it's worth showing the ToC link to this
-            // section (it isn't if there's no useful content).
-            // However the user can still get to this section through
-            // the dashboard, so we need a message to be displayed.
     }
     if (dailiesIncompleteGrey.length > 0) {
-        uncomplHtml += '<p>'
-                     + pluralise('This', dailiesIncompleteGrey.length)
-                     + ' <a href="http://habitrpg.wikia.com/wiki/Dailies#'
-                     + 'Grey_Dailies">grey '
-                     + pluralise('daily', dailiesIncompleteGrey.length)
-                     + '</a> '
-                     + pluralise('is', dailiesIncompleteGrey.length)
-                     + ' <span class="highlight">not</span> due today but'
-                     + ' you can still complete '
-                     + pluralise('it', dailiesIncompleteGrey.length)
-                     + ' for extra rewards:</p><ul><li>'
-                     + dailiesIncompleteGrey.join('</li><li>')
-                     + '</li></ul>';
+        $('#dailiesIncompleteSection #greyDailies.output').html(
+                 '<p>'
+                 + pluralise('This', dailiesIncompleteGrey.length)
+                 + ' <a href="http://habitrpg.wikia.com/wiki/Dailies#'
+                 + 'Grey_Dailies">grey '
+                 + pluralise('daily', dailiesIncompleteGrey.length)
+                 + '</a> '
+                 + pluralise('is', dailiesIncompleteGrey.length)
+                 + ' <span class="highlight">not</span> due today but'
+                 + ' you can still complete '
+                 + pluralise('it', dailiesIncompleteGrey.length)
+                 + ' for extra rewards:</p>'
+                 + '<ul><li>'
+                 + dailiesIncompleteGrey.join('</li><li>')
+                 + '</li></ul>'
+                );
     }
-    if (uncomplHtml) {
-        $('#dailiesIncompleteSection .output').html(uncomplHtml);
+    else {
+        $('#dailiesIncompleteSection #greyDailies.output').html('');
+    }
+    if ((dailiesIncomplete.length + dailiesIncompleteGrey.length) > 0) {
         $('#dailiesIncompleteTocLink.showOnlyIfDataExists').removeClass('hide')
                                                            .addClass('show');
     }
+    // $('#dailiesIncompleteSection').show(); // TST
 
 
     //////////////////////////////////////////////////////////////////////
@@ -2917,7 +2922,9 @@ Habits with no history are highlighted in bold, in case you would like to consid
 
     <div class="mainSection" id="dailiesIncompleteSection">
         <h2>Dailies Incomplete</h2>
-        <div class="output"></div>
+        <div id="nongreyDailies" class="output"></div>
+        <table id="dailiesIncompleteTable"></table>
+        <div id="greyDailies" class="output"></div>
     </div>
 
     <div class="mainSection longContent" id="untaggedTasksSection">
