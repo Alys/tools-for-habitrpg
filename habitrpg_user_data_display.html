@@ -2164,16 +2164,15 @@ h1 .versionToggle {
     margin-bottom: 10px;
 }
 
-ul#tableOfContents,
-ul#tableOfContents ul {
+ul#tableOfContents {
     list-style-type: none;
-    margin-right: 20px;
 }
 ul#tableOfContents ul {
+    list-style-type: none;
     margin-left: 1em;
     padding: 0;
 }
-#tableOfContents li {
+ul#tableOfContents li {
     font-size: 1.1em;
     padding: 2px 0;
 }
@@ -2806,11 +2805,13 @@ h2 {
             <li class="showHideToggle" data-target="habitHistorySection" data-closemainsections="true">Habit History</a></li>
             <li id="dailiesIncompleteTocLink" class="showHideToggle showOnlyIfDataExists" data-target="dailiesIncompleteSection" data-closemainsections="true">Dailies Incomplete</a></li>
         </ul></li>
-        <li>Other:<ul>
-            <li id="unallocatedPointsTocLink" class="showHideToggle showOnlyIfDataExists" data-target="unallocatedPointsSection" data-closemainsections="true">Unallocated Points</a></li>
-            <li class="showHideToggle" data-target="damageDailiesSection" data-closemainsections="true">Damage from Dailies</a></li>
+        <li>Drops, Quests, Damage:<ul>
             <li class="showHideToggle" data-target="dropsTodaySection" data-closemainsections="true">Drops Received Today</a></li>
             <li id="questProgressTocLink" class="showHideToggle showOnlyIfDataExists" data-target="questProgressSection" data-closemainsections="true">Quest Progress</a></li>
+            <li class="showHideToggle" data-target="damageDailiesSection" data-closemainsections="true">Damage from Dailies</a></li>
+        </ul></li>
+        <li>Other:<ul>
+            <li id="unallocatedPointsTocLink" class="showHideToggle showOnlyIfDataExists" data-target="unallocatedPointsSection" data-closemainsections="true">Unallocated Points</a></li>
             <li id="missingEquipmentTocLink" class="showHideToggle showOnlyIfDataExists" data-target="missingEquipmentSection" data-closemainsections="true">Missing Equipment</a></li>
             <li class="showHideToggle" data-target="currentGearSection" data-closemainsections="true">Current Appearance and Gear</a></li>
             <li class="showHideToggle" data-target="equipmentRecommendationsSection" data-closemainsections="true">Equipment Recommendations</a></li>
