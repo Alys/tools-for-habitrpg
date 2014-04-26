@@ -242,6 +242,17 @@ function toggleVisibilityForStuff() {
 function fetchData() {
     dataFetchStatus = 'not attempted'; // but is about to be...
     toggleVisibilityForStuff();
+
+    if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' || // AliceHarris
+        userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
+    ) {
+        $('#specialMessage').html('Hello Ryan. You are looking positively'
+                                + ' fetching today.');
+    }
+    else {
+        $('#specialMessage').html('');
+    }
+
     $("#loading").show();
     // first fetch the site-wide content (gear names and stats, etc):
     $.when($.ajax({
@@ -311,8 +322,9 @@ function displayData(data) {
     //////////////////////////////////////////////////////////////////////
     ////   Unallocated Points        /////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+    var unallocHtml = '';
     if (user.stats.points > 0 && user.stats.lvl >= 10) {
-        $('#unallocatedPoints .output').html('<span class="highlight">'
+        unallocHtml = '<span class="highlight">'
             + 'You have '
             + user.stats.points
             + ' unallocated '
@@ -323,13 +335,26 @@ function displayData(data) {
             + pluralise('it', user.stats.points)
             + '. '
             + '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">'
-            + 'Learn more.</a>');
-        $('#unallocatedPointsDashboard .output').text(user.stats.points);
-        $('#unallocatedPoints.showOnlyIfDataExists').removeClass('hide')
-                                                    .addClass('show');
+            + 'Learn more.</a>';
+    }
+    $('#unallocatedPointsSection .output').html(unallocHtml);
+    $('#unallocatedPointsDashboard .output').text(user.stats.points);
+    if (unallocHtml) {
+        $('#unallocatedPointsTocLink.showOnlyIfDataExists')
+                                                .removeClass('hide')
+                                                .addClass('show');
         $('#unallocatedPointsDashboard.showOnlyIfDataExists')
-                                                    .removeClass('hide')
-                                                    .addClass('show');
+                                                .removeClass('hide')
+                                                .addClass('show');
+    }
+    else {
+        $('#unallocatedPointsTocLink.showOnlyIfDataExists')
+                                                .removeClass('show')
+                                                .addClass('hide');
+        $('#unallocatedPointsDashboard.showOnlyIfDataExists')
+                                                .removeClass('show')
+                                                .addClass('hide');
+        $('#unallocatedPointsSection').hide();
     }
 
 
@@ -2447,7 +2472,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle versionToggle" data-target="versionChanges">(v1.8.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle versionToggle" data-target="versionChanges">(v1.8.2)</span></h1><!-- VERSION TOGGLE -->
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 <div id="emailDisplay" class="hide"></div>
@@ -2463,7 +2488,24 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
-        <dt>1.8.1<span class="date">2014-04-26</span></dt>
+        <dt>1.8.2<span class="date">2014-04-26</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <!--
+                    <li><span class="subheading">Drops Count</span> in the dashboard now also shows you your current drop-cap (thanks to Ryan for suggesting this).</li>
+                    -->
+                </ul>
+            </li>
+            <li>Documentation / Layout:
+                <ul>
+                    <li>The explanation for Equipment Recommendations is now hidden by default.</li>
+                    <li>The Unallocated Points section is no longer shown by default (some people don't use points, and for those that do, it's always visible in the dashboard).</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>1.8.1<span class="date">2014-04-25</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -2477,12 +2519,11 @@ h2 {
             </li>
             <li>Code:
                 <ul>
-                    <li>Removed a hundred different kinds of hide/show toggling code and replaced them with one type (nearly 100 lines of code deleted!)</li>
+                    <li>Removed a few different kinds of hide/show toggling code and replaced them with one type (nearly 100 lines of code deleted!)</li>
                     <li>Fixed broken "Show All of My Equipment" button in the Equipment Recommendations section (thanks to SabreCat for the bug report).</li>
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.8<span class="date">2014-04-23</span></dt>
         <dd><ul>
             <li>Features:
@@ -2707,6 +2748,7 @@ h2 {
 <div id="loading">
     <p>Please wait. Fetching data from
     <span id="serverName">HabitRPG</span>...</p>
+    <p id="specialMessage" style="font-style: italic;"></p>
 </div>
 
 <div id="main" class="showOnlyIfHaveFetchedData">
@@ -2743,7 +2785,7 @@ h2 {
             <div class="output"></div>
             <div class="label">Drop Count / Cap</div></div>
         </li>
-        <li id="unallocatedPointsDashboard" title="points you have taken from leveling up - go to your Profile -> Stats page to allocate them" class="showOnlyIfDataExists">
+        <li id="unallocatedPointsDashboard" title="points you have taken from leveling up - go to your Profile -> Stats page to allocate them" class="showHideToggle showOnlyIfDataExists" data-target="unallocatedPointsSection" data-closemainsections="true" data-forceopen="true">
             <div>
             <div class="output"></div>
             <div class="label">Unallocated Points</div></div>
@@ -2765,6 +2807,7 @@ h2 {
             <li id="dailiesIncompleteTocLink" class="showHideToggle showOnlyIfDataExists" data-target="dailiesIncompleteSection" data-closemainsections="true">Dailies Incomplete</a></li>
         </ul></li>
         <li>Other:<ul>
+            <li id="unallocatedPointsTocLink" class="showHideToggle showOnlyIfDataExists" data-target="unallocatedPointsSection" data-closemainsections="true">Unallocated Points</a></li>
             <li class="showHideToggle" data-target="damageDailiesSection" data-closemainsections="true">Damage from Dailies</a></li>
             <li class="showHideToggle" data-target="dropsTodaySection" data-closemainsections="true">Drops Received Today</a></li>
             <li id="questProgressTocLink" class="showHideToggle showOnlyIfDataExists" data-target="questProgressSection" data-closemainsections="true">Quest Progress</a></li>
@@ -2775,8 +2818,8 @@ h2 {
     </ul>
     <hr />
 
-    <div id="unallocatedPoints" class="showOnlyIfDataExists urgent">
-        <!-- section is shown automatically if there are points -->
+    <div id="unallocatedPointsSection" class="mainSection">
+        <h2>Unallocated Points</h2>
         <p class="output"></p>
     </div>
 
@@ -2822,21 +2865,21 @@ Habits with no history are highlighted in bold, in case you would like to consid
 
     <div class="mainSection" id="equipmentRecommendationsSection">
         <h2>Equipment Recommendations</h2>
-        <div>
+        <div id="equipmentRecommendationsExplanationToggle" class="showHideToggle" data-target="equipmentRecommendationsExplanation" data-linktext="explanation">show explanation</div>
+        <div id="equipmentRecommendationsExplanation" class="hide">
             <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p>
             <p>By default, the table below shows you only the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p>
             <p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "attributes" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page, which uses the same technology).</p>
             <p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the attribute you care most about, then highlight the top one or more items, and then if you care about another attribute too, re-sort by it and select more items.</p>
             <p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p>
-
-            <div id="qualityFilter">
-                <p id="onlyBestIsShowing">Only your best equipment is shown below. To maximise your attributes, choose from only those items.
-                    <br />
-                    <input id="showAllEquipment" type="submit" value="Show All of My Equipment" />
-                </p>
-                <p id="allEquipmentIsShowing">All of your equipment is shown below. Use the "quality" drop-down menu to show only the best.</p>
-            </div>
-
+            <div class="showHideToggle closer" data-target="equipmentRecommendationsExplanation" data-resettoggletext="equipmentRecommendationsExplanationToggle">hide explanation</div>
+        </div>
+        <div id="qualityFilter">
+            <p id="onlyBestIsShowing">Only your best equipment is shown below. To maximise your attributes, choose from only those items.
+            <br />
+            <input id="showAllEquipment" type="submit" value="Show All of My Equipment" />
+            </p>
+            <p id="allEquipmentIsShowing">All of your equipment is shown below. Use the "quality" drop-down menu to show only the best.</p>
         </div>
         <table id="equipmentRecommendationsTable"></table>
         <div id="equipmentChosen" class="selfClear"></div>
