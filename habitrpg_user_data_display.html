@@ -50,7 +50,6 @@ Contributors:
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
-    <!-- These are a widely used and trusted third-party libraries that contain no code directly related to HabitRPG. They do not contain anything that could cause damage to your HabitRPG account. -->
 
 
 
@@ -653,6 +652,7 @@ function displayData(data) {
         countTasks['dailies'][obj.attribute]++;
         countTasks['statsTotals'][obj.attribute]++;
         countTasks['statsTotals']['total']++;
+        obj.orderDailies = countTasks['dailies']['total'];
         if (! exampleFound) {
             if (obj.attribute != 'str') {
                 exampleTaskType  = 'dailies';
@@ -1037,7 +1037,7 @@ function displayData(data) {
         $('#dailiesIncompleteTable table').dataTable({
             'aaData': dailiesIncomplete,
             'aoColumns': [
-        { 'mData' : 'order',          'sClass': 'center',
+        { 'mData' : 'orderDailies',   'sClass': 'center',
           'sTitle': 'order in HabitRPG',
         },
         { 'mData' : 'text',           'sClass': 'center',
