@@ -65,7 +65,7 @@ var user;    // hold user's data
 var dataFetchStatus = 'not attempted'; // also "succeeded" and "failed"
 var knownTags = [];
 var collectionDrops = false; // control Drops + Quest Progress opening
-var count_createTaskTableCellObj = 0; // default row order in Task Overview
+var taskOrder               = 0; // default order of tasks in HabitRPG
 var twoHandedWeaponSelected = false; // for Equipment Recommendations
 var oneHandedWeaponSelected = false; // for Equipment Recommendations
 var shieldSelected          = false; // for Equipment Recommendations
@@ -103,7 +103,8 @@ var entityMap = {
     "/": '&#x2F;'
 };
 function escapeHtml(string) {
-    return String(string).replace(/[&<>"'\/]/g, function (s) {
+    var newString = String(string).replace(/\&nbsp;/g, ' ');
+    return newString.replace(/[&<>"'\/]/g, function (s) {
         return entityMap[s];
     });
 }
@@ -605,7 +606,7 @@ function displayData(data) {
     ////// Habits:
     var habitHistory = '';
     $.each(user.habits, function(index, obj){
-        obj.text = escapeHtml(obj.text);
+        modifyTaskProperties(obj);
         countTasks['habits']['total']++;
         countTasks['habits'][obj.attribute]++;
         countTasks['statsTotals'][obj.attribute]++;
@@ -628,6 +629,7 @@ function displayData(data) {
 
     ////// Dailies:
     var dailiesIncomplete       = [];
+    var dailiesIncompleteOrder  = 0;
     var dailiesIncompleteGrey   = [];
     var dailysDamage = 0;
     var bossDamage   = 0;
@@ -638,7 +640,7 @@ function displayData(data) {
     if (conBonus < 0.1) { conBonus = 0.1; }
     var stealth = user.stats.buffs.stealth; // user avoids damage from dailies
     $.each(user.dailys, function(index, obj){
-        obj.text = escapeHtml(obj.text);
+        modifyTaskProperties(obj);
         countTasks['dailies']['total']++;
         countTasks['dailies'][obj.attribute]++;
         countTasks['statsTotals'][obj.attribute]++;
@@ -668,8 +670,12 @@ function displayData(data) {
                 if (stealth > 0) {
                     // user evades this daily
                     stealth--;
+                    obj['stealthed'] = true; // for dailiesIncomplete table
+                    obj['damageToUser']  = 0;
+                    obj['damageToParty'] = 0;
                 }
                 else {
+                    obj['stealthed'] = false;
                     var currVal = obj.value; // task value
                     if (currVal < valueMin) { currVal = valueMin; } // capped
                     if (currVal > valueMax) { currVal = valueMax; } // capped
@@ -688,8 +694,18 @@ function displayData(data) {
                     // priority is easy (1), medium (1.5), hard (2)
                     hpMod = Math.round(hpMod * 10) / 10; // HabitRPG uses round
                     dailysDamage += hpMod; // note this is NOT a negative number
-                    dailiesIncomplete.push(obj);
+                    // record values for displaying in dailiesIncomplete table:
+                    obj['damageToUser'] = Math.round(delta * 10) / 10;
+                    if (quest && quest.content.boss) {
+                        obj['damageToParty'] = Math.round(
+                                delta * quest.content.boss.str * 10) / 10;
+                    }
+                    else {
+                        obj['damageToParty'] = 0;
+                    }
                 }
+                obj['order'] = ++dailiesIncompleteOrder;
+                dailiesIncomplete.push(obj);
             }
             else if (! obj.completed && ! obj.repeat[today]) {
                 // this Daily has not been completed and is NOT due today,
@@ -713,7 +729,7 @@ function displayData(data) {
 
     ////// Todos:
     $.each(user.todos, function(index, obj){
-        obj.text = escapeHtml(obj.text);
+        modifyTaskProperties(obj);
         // obj.priority, obj.dateCompleted   XXX_LATER use them?
         if (obj.completed == true) {
             countTasks['todosComplete']['total']++;
@@ -749,7 +765,7 @@ function displayData(data) {
 
     ////// Rewards:
     $.each(user.rewards, function(index, obj){
-        obj.text = escapeHtml(obj.text);
+        modifyTaskProperties(obj);
         if (! taskIsTagged(obj.tags)) { untaggedTasks['rewards'].push(obj); }
         countTasks['rewards']['total']++;
     });
@@ -883,9 +899,7 @@ function displayData(data) {
           return; // http://datatables.net/ref#mData
         }
         else if (type === 'display') {
-          return '<span class="coloured ' + source.colour.id + '">'
-               + source.value + '<br />' + source.colour.nameNoSpace
-               + '</span>';
+          return source.valueColourHtml;
         }
         else if (type === 'filter') {
           return source.colour.name;
@@ -983,25 +997,81 @@ function displayData(data) {
     if (dailiesIncomplete.length > 0) {
         $('#dailiesIncompleteDashboard div').removeClass('safe')
                                             .addClass('danger');
-        var uncomplHtml = '<p>'
-                    + pluralise('This', dailiesIncomplete.length)
-                    + ' '
-                    + pluralise('daily', dailiesIncomplete.length)
-                    + ' '
-                    + pluralise('is', dailiesIncomplete.length)
-                    + ' due today and '
-                    + pluralise('has', dailiesIncomplete.length)
-                    + ' not been completed:</p><ul>';
-        $.each(dailiesIncomplete, function(index, obj){
-            uncomplHtml += '<li>'
-                         + obj.text
-                         + '</li>';
+        var message = '<p>'
+                + 'The table below shows the dailies that are'
+                + ' due today and have not yet been completed.'
+                + ' It tells you the estimated damage you will take '
+                + ' from each daily';
+        if (quest && quest.content.boss) {
+            message += ' and how much damage each daily will allow the'
+                + ' <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>'
+                + ' <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>'
+                + ' to your party members <span class="highlight">'
+                + ' and you</span>'
+        }
+        message += '. Click on any column header to sort by that column;'
+                 + ' for example; sort by "damage to you" to find the most'
+                 + ' damaging dailies to action first if you won\'t have'
+                 + ' time to do them all.'
+                 + ' The damage estimates take into account damage reduction'
+                 + ' from partially-completed '
+                 + '<a href="http://habitrpg.wikia.com/wiki/Checklist#Dailies">'
+                 + 'checklists</a>, so you might find it is better to do'
+                 + ' a blue daily instead of a mostly-completed red daily.'
+                 + '</p>'
+        $('#dailiesIncompleteSection #nongreyDailies.output').html(message);
+
+        $('#dailiesIncompleteTable').html('<table></table>');
+        $('#dailiesIncompleteSection').show(); // for correct table creation
+        $('#dailiesIncompleteTable table').dataTable({
+            'aaData': dailiesIncomplete,
+            'aoColumns': [
+        { 'mData' : 'order',          'sClass': 'center',
+          'sTitle': 'order in HabitRPG',
+        },
+        { 'mData' : 'text',           'sClass': 'center',
+          'sTitle': 'task',
+        },
+        { 'sTitle': 'value', 'sClass': 'center', 'asSorting': ['desc','asc'],
+          'mData': function ( source, type, val ) {
+            if (type === 'set') {
+              return; // http://datatables.net/ref#mData
+            }
+            else if (type === 'display') {
+              return source.valueColourHtml;
+            }
+            else if (type === 'filter') {
+              return source.colour.name;
+            }
+            // 'sort', 'type' and undefined all just use the integer
+            return source.value;
+          }
+        },
+        { 'mData' : 'damageToUser',    'sClass': 'center',
+          'sTitle': 'damage to you',   'asSorting': ['desc','asc'],
+        },
+        { 'mData' : 'damageToParty',   'sClass': 'center',
+          'sTitle': 'damage to party', 'asSorting': ['desc','asc'],
+          'bVisible': ((quest && quest.content.boss) ? true : false),
+        },
+        { 'sTitle': 'stealthed',       'sClass': 'center',
+          'mData': function ( source, type, val ) {
+              return (source.stealthed) ? 'yes' : 'no';
+          },
+          'bVisible': user.stats.buffs.stealth,
+        },
+            ],
+            'sDom': '<"clear"><"top"if>rt<"bottom"><"clear">',
+            'bAutoWidth': false,
+            'bPaginate': false,
+            'bDeferRender': true,
+            "sScrollX": "100%",
+            "bDestroy": true,
         });
-        uncomplHtml += '</ul>';
-        $('#dailiesIncompleteSection #nongreyDailies.output').html(
-                                                        uncomplHtml);
+        $('#dailiesIncompleteSection').hide();
     }
     else {
+        $('#dailiesIncompleteTable').html('');
         $('#dailiesIncompleteDashboard div').removeClass('danger')
                                             .addClass('safe');
         $('#dailiesIncompleteSection #nongreyDailies.output').html(
@@ -1032,7 +1102,6 @@ function displayData(data) {
         $('#dailiesIncompleteTocLink.showOnlyIfDataExists').removeClass('hide')
                                                            .addClass('show');
     }
-    // $('#dailiesIncompleteSection').show(); // TST
 
 
     //////////////////////////////////////////////////////////////////////
@@ -1866,30 +1935,39 @@ function describeChecklist(task) {
         };
 }
 
-
 function createTaskTableCellObj(obj) {
-    count_createTaskTableCellObj++;
     var date = new Date(obj.dateCreated); // ASSUME 'date' is a real date!
     var formattedDate = myDateConverter(date);
     var shortDate = formattedDate.replace(/^20/, "")  // remove century
                                  .replace(/ .*/, ""); // remove time
     // formattedDate = formattedDate.replace(/ /, "<br />");
 
-    var shortValue = Math.round(obj.value * 100) / 100;
-
     return {'type':      ((obj.type == 'todo') ? 'to-do' : obj.type),
             'attribute': obj.attribute.toUpperCase(),
             'text':      {'full':  obj.text,
                           'short': obj.text.replace(/(^.{80}).+/, "$1 ..."),
                          },
-            'colour':    chooseColour(obj.value),
-            'value':     shortValue,
-            'magnitude': Math.abs(shortValue),
+            'colour':    obj.colour,
+            'value':     obj.valueRounded,
+            'magnitude': Math.abs(obj.valueRounded),
             'creation':  {'dateAndTime': formattedDate,
                           'shortDate': shortDate,
                          },
-            'order':     count_createTaskTableCellObj,
+            'order':     obj.order,
+            'valueColourHtml': obj.valueColourHtml,
         };
+}
+
+function modifyTaskProperties(obj, order) {
+    obj.text = escapeHtml(obj.text);
+    obj.valueRounded = Math.round(obj.value * 100) / 100;
+    obj.order = ++taskOrder;
+    obj.colour = chooseColour(obj.value);
+    obj.valueColourHtml = '<span class="coloured '
+            + obj.colour.id + '">'
+            + obj.valueRounded + '<br />'
+            + obj.colour.nameNoSpace
+            + '</span>';
 }
 
 function chooseColour(value) {
@@ -2427,9 +2505,10 @@ h2 {
 #dailiesIncompleteSection ul li {
     padding: 3px 0;
 }
-#dailiesIncompleteSection p:nth-of-type(2) {
-    margin-top: 2em;
+#dailiesIncompleteSection #greyDailies {
+    margin-top: 3em;
 }
+
 
 #dashboard ul {
     float: left;
@@ -2496,9 +2575,7 @@ h2 {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <!--
-                    <li><span class="subheading">Drops Count</span> in the dashboard now also shows you your current drop-cap (thanks to Ryan for suggesting this).</li>
-                    -->
+                    <li>The <span class="subheading">Dailies Incomplete</span> section now shows the estimated damage each daily will do to you, and to your party members if you are on a <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>.</li>
                 </ul>
             </li>
             <li>Documentation / Layout:
@@ -2923,7 +3000,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
     <div class="mainSection" id="dailiesIncompleteSection">
         <h2>Dailies Incomplete</h2>
         <div id="nongreyDailies" class="output"></div>
-        <table id="dailiesIncompleteTable"></table>
+        <div id="dailiesIncompleteTable"></div>
         <div id="greyDailies" class="output"></div>
     </div>
 
@@ -2987,7 +3064,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
             <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
             <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
             <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
-            <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
+            <li><span class="subheading">Dailies Incomplete</span>: A lists of dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
             <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
             <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
             <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
