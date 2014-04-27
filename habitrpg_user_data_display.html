@@ -704,7 +704,7 @@ function displayData(data) {
                     hpMod = Math.round(hpMod * 10) / 10; // HabitRPG uses round
                     dailysDamage += hpMod; // note this is NOT a negative number
                     // record values for displaying in dailiesIncomplete table:
-                    obj['damageToUser'] = Math.round(delta * 10) / 10;
+                    obj['damageToUser'] = hpMod;
                     if (quest && quest.content.boss) {
                         obj['damageToParty'] = Math.round(
                                 delta * quest.content.boss.str * 10) / 10;
