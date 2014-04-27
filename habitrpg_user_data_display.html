@@ -63,6 +63,7 @@ Contributors:
 var content; // hold site-wide content (gear names and stats, quests, etc)
 var user;    // hold user's data
 var dataFetchStatus = 'not attempted'; // also "succeeded" and "failed"
+
 var knownTags = [];
 var collectionDrops = false; // control Drops + Quest Progress opening
 var taskOrder               = 0; // default order of tasks in HabitRPG
@@ -240,15 +241,20 @@ function toggleVisibilityForStuff() {
 }
 
 
+function reinitialise_global_variables() { // needed when user re-fetches data
+    knownTags = [];
+    collectionDrops = false;
+    taskOrder = 0;
+}
 function fetchData() {
     dataFetchStatus = 'not attempted'; // but is about to be...
+    reinitialise_global_variables();
     toggleVisibilityForStuff();
 
     if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' || // AliceHarris
         userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
     ) {
-        $('#specialMessage').html('Hello Ryan. You are looking positively'
-                                + ' fetching today.');
+        $('#specialMessage').html('"And now, once again, I bid my hideous progeny go forth and prosper."');
     }
     else {
         $('#specialMessage').html('');
@@ -260,6 +266,7 @@ function fetchData() {
         url: serverUrl + serverPathContent,
         type: 'GET',
         dataType: 'json',
+        cache: false,
         })).then(
     saveContentAndFetchUserData,
     fetchFailure
@@ -272,6 +279,7 @@ function saveContentAndFetchUserData(data) {
         url: serverUrl + serverPathUser,
         type: 'GET',
         dataType: 'json',
+        cache: false,
         beforeSend: function(xhr){
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
@@ -662,10 +670,11 @@ function displayData(data) {
         allTasksArray.push(createTaskTableCellObj(obj));
         if (! taskIsTagged(obj.tags)) { untaggedTasks['dailys'].push(obj); }
 
-        if (! sleeping) {
-            // calculate cron damage if daily not actioned:
-            if (! obj.completed && obj.repeat[today]) {
-                // this Daily has not been completed but is due today, so
+        if (! sleeping && ! obj.completed) {
+            // not in Tavern and daily has not been actioned,
+            // so calculate cron damage:
+            if (obj.repeat[today]) {
+                // This Daily has not been completed but is due today, so
                 // record its text and calculate HP damage:
                 if (stealth > 0) {
                     // user evades this daily
@@ -706,10 +715,13 @@ function displayData(data) {
                 }
                 dailiesIncomplete.push(obj);
             }
-            else if (! obj.completed && ! obj.repeat[today]) {
-                // this Daily has not been completed and is NOT due today,
+            else {
+                // This Daily has not been completed and is NOT due today,
                 // but we record its text in case the user cares:
                 dailiesIncompleteGrey.push(obj.text);
+                // Also, we decrement stealth because HabitRPG's code
+                // uses up stealth on grey dailies as well as due dailies:
+                stealth--;
             }
         }
     });
