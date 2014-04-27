@@ -704,7 +704,6 @@ function displayData(data) {
                         obj['damageToParty'] = 0;
                     }
                 }
-                obj['order'] = ++dailiesIncompleteOrder;
                 dailiesIncomplete.push(obj);
             }
             else if (! obj.completed && ! obj.repeat[today]) {
@@ -1935,7 +1934,7 @@ function describeChecklist(task) {
         };
 }
 
-function createTaskTableCellObj(obj) {
+function createTaskTableCellObj(obj) { // XXX_LATER remove this; use obj itself
     var date = new Date(obj.dateCreated); // ASSUME 'date' is a real date!
     var formattedDate = myDateConverter(date);
     var shortDate = formattedDate.replace(/^20/, "")  // remove century
@@ -1953,12 +1952,12 @@ function createTaskTableCellObj(obj) {
             'creation':  {'dateAndTime': formattedDate,
                           'shortDate': shortDate,
                          },
-            'order':     obj.order,
+            'order': obj.order,
             'valueColourHtml': obj.valueColourHtml,
         };
 }
 
-function modifyTaskProperties(obj, order) {
+function modifyTaskProperties(obj) {
     obj.text = escapeHtml(obj.text);
     obj.valueRounded = Math.round(obj.value * 100) / 100;
     obj.order = ++taskOrder;
