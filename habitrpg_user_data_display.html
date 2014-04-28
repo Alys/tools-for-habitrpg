@@ -42,14 +42,12 @@ Contributors:
     <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
 
 
-<!-- TST
-    <script src="/jquery.js"></script>
--->
     <script src="//code.jquery.com/jquery-latest.min.js"></script>
     <link href="js/DataTables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
+    <script src="js/emoji-images/emoji-images.js"></script>
 
 
 
@@ -1971,6 +1969,7 @@ function createTaskTableCellObj(obj) { // XXX_LATER remove this; use obj itself
 
 function modifyTaskProperties(obj) {
     obj.text = escapeHtml(obj.text);
+    obj.text = emoji(obj.text, '/js/emoji-images/pngs', 25);
     obj.valueRounded = Math.round(obj.value * 100) / 100;
     obj.order = ++taskOrder;
     obj.colour = chooseColour(obj.value);
@@ -2160,6 +2159,10 @@ abbr.discrete {
     /* used to add blank lines that we want when copying text to clipboard,
        but we don't want to see extra whitespace on the screen */
     margin-top: -1em;
+}
+
+img.emoji {
+    margin-bottom: -0.25em;
 }
 
 #mainSectionClose,
@@ -2581,19 +2584,21 @@ h2 {
 <div id="versionChanges" class="hide"><!-- VERSION TOP -->
     <h2>Version History</h2>
     <dl>
-
         <dt>1.8.3<span class="date">2014-04-28</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
-                    <!--
-                    <li>.<span class="subheading">.</span>.</li>
-                    -->
+                    <li><span class="subheading">Emoji!</span> You should now find that <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> are represented properly. (<a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> is stil not supported.)</li>
                 </ul>
             </li>
             <li>Documentation / Layout:
                 <ul>
                     <li>"Suspected Bugs" changed to "Known Bugs" because I've found one: Internet Explorer does not correctly handle refetching data; instead you need to reload the page. Chrome, Firefox, and Safari (and probably others) do not have this issue.</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>Emoji support turned out to be really easy. I should have done it weeks ago! I'm using <a href="https://github.com/HenrikJoreteg/emoji-images">HenrikJoreteg's emoji-images library</a> which gives you a quick and easy function to emojify any string.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -3102,9 +3107,7 @@ Habits with no history are highlighted in bold, in case you would like to consid
 
        <h2>Possible Future Features</h2><!-- XXX_LATER look into this -->
        <ul>
-            <!-- li><em>Very soon now:</em> <span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)</li -->
             <li><em>Probably:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
-            <li><em>Maybe:</em> <span class="subheading">Support for Emoji</span>: Currently, your tasks on this page look ugly if you use <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> - I apologise. I use many of them, so I know it's a bit nasty to read them here. However whether and when I implement this depends on how easy it is.</li>
             <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
             <li><em>Maybe:</em> <span class="subheading">Missing Equipment for Orb of Rebirthers</span>: do something to make the feature more useful for them.</li>
             <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
