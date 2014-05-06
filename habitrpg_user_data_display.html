@@ -30,7 +30,7 @@ Contributors:
 /////
 ///// Do not add ANY features to this page which can modify a user's
 ///// account (at least not without making large changes to
-///// "Privacy and security notes" and "Suspected Bugs", both of
+///// "Privacy and security notes" and "Known Bugs", both of
 ///// which currently promise users that their accounts will not
 ///// be changed by this page).
 /////
@@ -54,7 +54,7 @@ Contributors:
     <script type="text/javascript">
 
 //////////////////////////////////////////////////////////////////////
-////   Global Variable                               /////////////////
+////   Global Variables                              /////////////////
 ////   I don't like them but they seem useful. :(    /////////////////
 //////////////////////////////////////////////////////////////////////
 var content; // hold site-wide content (gear names and stats, quests, etc)
@@ -251,7 +251,7 @@ function fetchData() {
     if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' || // AliceHarris
         userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
     ) {
-        $('#specialMessage').html('"And now, once again, I bid my hideous progeny go forth and prosper."');
+        $('#specialMessage').html('"The ninety and nine are with dreams, content but the hope of the world made new, is the hundredth man who is grimly bent on making those dreams come true."');
     }
     else {
         $('#specialMessage').html('');
@@ -293,7 +293,7 @@ function fetchFailure() {
             + "<br />"
             + "<br />"
             + " If problems persist see"
-            + " <strong>Suspected Bugs</strong> and"
+            + " <strong>Known Bugs</strong> and"
             + " <strong>Contact Details</strong> at the bottom"
             + " of this page."
             + " It might help to upgrade your browser to its"
@@ -1440,32 +1440,18 @@ function createEquipmentRecommendationsSection(ownedEquipment) {
     $('#qualityFilter #allEquipmentIsShowing').hide();
     $('#equipmentRecommendationsSection #equipmentChosen').html('');
 
-    var topEquipment = { // XXX_LATER surely this can be improved
-        'armor':           { 'con': {'stat':0, 'key':'', 'obj':{}},
-                             'int': {'stat':0, 'key':'', 'obj':{}},
-                             'per': {'stat':0, 'key':'', 'obj':{}},
-                             'str': {'stat':0, 'key':'', 'obj':{}},
-                           },
-        'head':            { 'con': {'stat':0, 'key':'', 'obj':{}},
-                             'int': {'stat':0, 'key':'', 'obj':{}},
-                             'per': {'stat':0, 'key':'', 'obj':{}},
-                             'str': {'stat':0, 'key':'', 'obj':{}},
-                           },
-        'shield':          { 'con': {'stat':0, 'key':'', 'obj':{}},
-                             'int': {'stat':0, 'key':'', 'obj':{}},
-                             'per': {'stat':0, 'key':'', 'obj':{}},
-                             'str': {'stat':0, 'key':'', 'obj':{}},
-                           },
-        'weapon':          { 'con': {'stat':0, 'key':'', 'obj':{}},
-                             'int': {'stat':0, 'key':'', 'obj':{}},
-                             'per': {'stat':0, 'key':'', 'obj':{}},
-                             'str': {'stat':0, 'key':'', 'obj':{}},
-                           },
-        'weaponTwoHanded': { 'con': {'stat':0, 'key':'', 'obj':{}},
-                             'int': {'stat':0, 'key':'', 'obj':{}},
-                             'per': {'stat':0, 'key':'', 'obj':{}},
-                             'str': {'stat':0, 'key':'', 'obj':{}},
-                           },
+	var template1 = {'stat':0, 'key':'', 'obj':{}};
+	var template2 = { 'con': template1, // NB: the extend() 'deep copy'
+                      'int': template1, //     below will expand these
+                      'per': template1, //     out so they are no longer
+                      'str': template1, //     references to one object.
+                    };
+    var topEquipment = {
+        'armor':           $.extend(true, {}, template2),
+        'head':            $.extend(true, {}, template2),
+        'shield':          $.extend(true, {}, template2),
+        'weapon':          $.extend(true, {}, template2),
+        'weaponTwoHanded': $.extend(true, {}, template2),
     };
     var multiStatEquipment = []; // holds obj's
 
@@ -1969,7 +1955,7 @@ function createTaskTableCellObj(obj) { // XXX_LATER remove this; use obj itself
 
 function modifyTaskProperties(obj) {
     obj.text = escapeHtml(obj.text);
-    obj.text = emoji(obj.text, '/js/emoji-images/pngs', 25);
+    obj.text = emoji(obj.text, 'js/emoji-images/pngs', 25);
     obj.valueRounded = Math.round(obj.value * 100) / 100;
     obj.order = ++taskOrder;
     obj.colour = chooseColour(obj.value);
@@ -2569,7 +2555,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle versionToggle" data-target="versionChanges">(v1.8.3)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle versionToggle" data-target="versionChanges">(v1.8.4)</span></h1><!-- VERSION TOGGLE -->
 
 <div id="userNameDisplay" class="showOnlyIfHaveFetchedData"></div>
 <div id="emailDisplay" class="hide"></div>
@@ -2584,6 +2570,22 @@ h2 {
 <div id="versionChanges" class="hide"><!-- VERSION TOP -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>1.8.4<span class="date">2014-05-06</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Dailies Incomplete</span> now displays the streak count for each daily, thanks to thepeopleseason for the idea and the code</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>The emoji JavaScript library has been added to js-for-habitrpg_user_data_display.tar.gz, thanks again to thepeopleseason.</li>
+                    <li>The Equipment Recommendations' "topEquipment" code has been improved and hopefully doesn't have surprising new bugs.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>1.8.3<span class="date">2014-04-28</span></dt>
         <dd><ul>
             <li>Features:
@@ -2602,7 +2604,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.8.2<span class="date">2014-04-26</span></dt>
         <dd><ul>
             <li>Features:
