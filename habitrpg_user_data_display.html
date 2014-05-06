@@ -23,7 +23,7 @@ Contributors:
 -->
 
 
-<!-- 
+<!--
 /////
 /////
 ///// IMPORTANT NOTE TO PROGRAMMERS EDITING THIS PAGE:
@@ -711,6 +711,7 @@ function displayData(data) {
                         obj['damageToParty'] = 0;
                     }
                 }
+                obj['streak'] = obj.streak;
                 dailiesIncomplete.push(obj);
             }
             else {
@@ -1040,6 +1041,9 @@ function displayData(data) {
         },
         { 'mData' : 'text',           'sClass': 'center',
           'sTitle': 'task',
+        },
+        { 'mData' : 'streak',         'sClass': 'center',
+          'sTitle': 'current streak',
         },
         { 'sTitle': 'value', 'sClass': 'center', 'asSorting': ['desc','asc'],
           'mData': function ( source, type, val ) {
