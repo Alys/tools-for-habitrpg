@@ -1366,9 +1366,6 @@ function collateAndDisplayTaskData() {
             { 'mData' : 'orderDailies',   'sClass': 'center',
               'sTitle': 'order in HabitRPG',
             },
-            { 'mData' : 'text',           'sClass': 'center',
-              'sTitle': 'task',
-            },
             { 'mData' : 'streak',         'sClass': 'center',
               'sTitle': 'current streak',
             },
@@ -1399,6 +1396,9 @@ function collateAndDisplayTaskData() {
                   return (source.stealthed) ? 'yes' : 'no';
               },
               'bVisible': user.stats.buffs.stealth,
+            },
+            { 'mData' : 'text',
+              'sTitle': 'task',
             },
                 ],
                 'sDom': '<"clear"><"top"if>rt<"bottom"><"clear">',
@@ -2879,7 +2879,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.0)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -2906,12 +2906,31 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>2.1<span class="date">2014-05-13</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Dailies Incomplete</span> table is now neater and consistent in layout with the other tables.</li>
+                    <li><span class="subheading">
+</span>
+</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>
+                    </li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>2.0<span class="date">2014-05-13</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
                     <li><span class="subheading">Stats and Streaks Backup</span> gives you a plain-text view of information that you might need to restore your stats if you die through no fault of your own. Be sure to read the "IMPORTANT" warning in that section!</li>
                     <li><span class="subheading">Dashboard tiles</span> no longer appear if they're not relevant.</li>
+                    <li>When you re-fetch your data, the section you had open previously will remain open.</li>
                 </ul>
             </li>
             <li>Code:
@@ -2920,7 +2939,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>1.8.4<span class="date">2014-05-06</span></dt>
         <dd><ul>
             <li>Features:
