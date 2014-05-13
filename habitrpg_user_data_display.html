@@ -99,6 +99,7 @@ var sectionOpen = ''; // holds the ID attribute of a section of the page;
 var hideDropsInDashboard = true; // changes to false as soon as the user
                                  // looks at the drops section, then remains
                                  // false through all future re-fetches
+var tellMe = '<a href="mailto:lady_alys@oldgods.net">tell me</a>';
 
 
 
@@ -295,7 +296,7 @@ function formatAndDisplayDASHBOARD() {
     // add the unique identifier for the new section to this array (the array
     // elements are in the order that the dashboard tiles appear on the page):
     var keys = ['currentHealth', 'dailiesIncomplete', 'damageToUser',
-                'damageToParty', 'questProgress', 'dropsToday',
+                'damageToParty', 'questProgress', 'todosDated', 'dropsToday',
                 'unallocatedPoints', 'sleeping'];
     var html = '<ul>';
     for (var i=0,ic=keys.length; i<ic; i++) {
@@ -334,7 +335,7 @@ function formatAndDisplayTOC() {
     var keys = [
             'HEADING Tasks',
                 'taskOverview', 'taskStatistics', 'untaggedTasks',
-                'habitHistory', 'dailiesIncomplete',
+                'habitHistory', 'dailiesIncomplete', 'todosDated',
             'HEADING Drops, Quests, Damage', 'dropsToday',
                 'questProgress', 'damageDailies', 'statsAndStreaks',
             'HEADING Other',
@@ -372,8 +373,8 @@ function formatAndDisplayMAIN() {
     // if they were all visible at once):
     var keys = ['taskOverview', 'taskStatistics', 'untaggedTasks',
                 'habitHistory', 'dropsToday', 'questProgress',
-                'damageDailies', 'dailiesIncomplete', 'statsAndStreaks',
-                'unallocatedPoints',
+                'damageDailies', 'dailiesIncomplete', 'todosDated',
+                'statsAndStreaks', 'unallocatedPoints',
                 'missingEquipment', 'currentGear', 'equipmentRecommendations'];
     var html = '';
     var functions = []; // functions to run after HTML code has been loaded
@@ -591,6 +592,7 @@ function collateAndDisplayTaskData() {
     habitHistory();
     damageFromDailies();
     dailiesIncomplete();
+    todosDated();
     statsAndStreaks();
 
     function collateHabitsData() {
@@ -827,10 +829,8 @@ function collateAndDisplayTaskData() {
 
     function createTaskTableCellObj(obj) { // XXX_LATER remove; use obj itself
         var date = new Date(obj.dateCreated); // ASSUME 'date' is a real date!
-        var formattedDate = myDateConverter(date);
-        var shortDate = formattedDate.replace(/^20/, "")  // remove century
-                                     .replace(/ .*/, ""); // remove time
-        // formattedDate = formattedDate.replace(/ /, "<br />");
+        var formattedDate = myDateConverter(date, 'long');
+        var shortDate     = myDateConverter(date, 'short');
         return {'type':      ((obj.type == 'todo') ? 'to-do' : obj.type),
                 'attribute': obj.attribute.toUpperCase(),
                 'text': {'full':  obj.text,
@@ -848,7 +848,7 @@ function collateAndDisplayTaskData() {
     }
 
 
-    function myDateConverter (date) {
+    function myDateConverter(date, style) {
         var y = date.getFullYear();
         var m = date.getMonth() + 1;
         var d = date.getDate();
@@ -857,12 +857,16 @@ function collateAndDisplayTaskData() {
         var S = date.getSeconds();
         var dateStr = y +
                '-' + (m<=9 ? '0'+m : m) +
-               '-' + (d<=9 ? '0'+d : d) +
-               ' ' + (H<=9 ? '0'+H : H) +
-               ':' + (M<=9 ? '0'+M : M) +
-               ':' + (S<=9 ? '0'+S : S);
+               '-' + (d<=9 ? '0'+d : d);
+        if (style === 'short') {
+            dateStr = dateStr.replace(/^20/, ""); // remove century
+        }
+        if (style === 'long') {
+            dateStr += ' ' + (H<=9 ? '0'+H : H) +
+                       ':' + (M<=9 ? '0'+M : M) +
+                       ':' + (S<=9 ? '0'+S : S);
+        }
         return dateStr;
-        // + " (" + date.toLocaleString() + ")" + " (" + value + ")";
     };
 
 
@@ -876,7 +880,7 @@ function collateAndDisplayTaskData() {
                    'html':
 '<div id="taskOverviewExplanationToggle" class="showHideToggle" data-target="taskOverviewExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="taskOverviewExplanation" class="hide">' +
-'   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, send screenshots <a href="mailto:lady_alys@oldgods.net">to Alys</a> and tell her what browser you are using (browser name AND version e.g., "Firefox 28.0") and what operating system (e.g., Windows XP).</p><p>The table below shows your tasks (habits, dailies, and to-dos), with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in HabitRPG.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul>' +
+'   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (habits, dailies, and to-dos), with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in HabitRPG.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul>' +
 '   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
 '</div>' +
 '<table></table>'
@@ -1142,7 +1146,7 @@ function collateAndDisplayTaskData() {
             var historyList = [];
             $.each(historyItems, function(index, histObj){
                 var value = histObj.value;
-                var date  = myDateConverter(histObj.date);
+                var date  = myDateConverter(histObj.date, 'long');
                 //// var buttonUsed = '?up/down?'; // default value
                 //// if (canDoBoth) {
                     //// if (previousValue != undefined) {
@@ -1186,6 +1190,7 @@ function collateAndDisplayTaskData() {
         var title   = 'Damage from Dailies';
         var orderId = 'damageDailies';
         var html = '<p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span id="damageDailiesExplanationToggle" class="showHideToggle" data-target="damageDailiesExplanation" data-linktext="explanation">show explanation</span></p><ul id="damageDailiesExplanation" class="padded hide"><li>These estimates have been accurate during testing but your usage of HabitRPG might involve factors that were not considered, and so this information cannot be guaranteed to be correct.</li><li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you will not die.</li><li>If you have not logged in to HabitRPG for more than a day, the damage that you (and your fellow quest participants) will take will be <span class="highlight">much greater</span> than shown here.</li><li class="showHideToggle lowlight" data-target="damageDailiesExplanation" data-resettoggletext="damageDailiesExplanationToggle" style="list-style-type: none; padding: 8px 0 20px 0">hide explanation</li></ul>';
+        var modifyHealthDashboardTile = false;
         if (sleeping) {
             html += '<p>You are <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a> so you will not take any damage from your uncompleted dailies.</p>';
             if (quest && quest.content.boss) {
@@ -1250,10 +1255,18 @@ function collateAndDisplayTaskData() {
                     health +
                     '</span>.</p>';
             }
+            if (damageTotal >= health) {
+                // make the Current Health dashboard tile
+                // turn red when your health is too low
+                modifyHealthDashboardTile = function(){
+                    $('#currentHealthDashboard > div')
+                            .removeClass('neutral').addClass('danger');};
+            }
         }
-
         TOC[orderId]  = {'target': id, 'title':  title};
-        MAIN[orderId] = {'id': id, 'title': title, 'html': html};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html,
+                         'function': modifyHealthDashboardTile };
+
         if (sleeping) {
             DASHBOARD.sleeping = {'label': '',
                 'hoverText': 'You are resting in the inn. Go to the ' +
@@ -1419,6 +1432,55 @@ function collateAndDisplayTaskData() {
             $('#dailiesIncompleteSection').hide();
             return;
         }
+    }
+
+
+    function todosDated() {
+        var id      = 'todosDatedSection';
+        var title   = 'To-Dos with Dates';
+        var orderId = 'todosDated';
+
+        var today = myDateConverter(new Date(), 'medium');
+        var items = [];
+        var countDue = 0;
+        for (var i=0,ic=todos.length; i<ic; i++) {
+            var obj = todos[i];
+            if (! obj.date) {
+                continue;
+            }
+            var date = myDateConverter(new Date(obj.date), 'medium');
+            var dateClass = 'notDue';
+            if (date <= today) {
+                dateClass = 'due';
+                countDue++;
+            }
+            items.push('<li class="' + dateClass + '"><span>' +
+                       date + '</span> ' +
+                       obj.text + '</li>');
+        }
+        if (items.length === 0) {
+            return;
+        }
+        var html = '<p class="lowlight"><span class="highlight">WARNING:' +
+                   '</span> I\'m not sure if this handles timezones ' +
+                   'correctly! To-dos due today might appear with ' +
+                   'tomorrow\'s date (and so the dashboard counter might ' +
+                   'be wrong). Watch out for that for the first few days ' +
+                   'that you use this feature. Please ' +
+                   tellMe + ' if you notice problems.</p>';
+        html += '<ul class="padded">';
+        html += items.sort().join('');
+        html += '</ul>';
+
+        if (countDue) {
+            DASHBOARD[orderId] = {'label': 'To-Dos Due Today',
+                'hoverText': 'number of to-dos due today or overdue ' +
+                             '(click for more information)',
+                'target': id,
+                'value': countDue, 'status': 'danger'};
+        }
+        TOC[orderId]  = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html};
     }
 
 
@@ -2758,6 +2820,18 @@ ul#tableOfContents > li {
 }
 
 
+#todosDatedSection ul {
+    list-style-type: none;
+}
+#todosDatedSection .due {
+    font-weight: bold;
+}
+#todosDatedSection li span {
+    display: inline-block;
+    width: 7em;
+}
+
+
 #statsAndStreaksSection .subsection {
     float: left;
     margin-left: 3em;
@@ -2921,6 +2995,16 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>2.1<span class="date">2014-05-13</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">To-Dos with Dates</span>: A list of all to-dos that have been given due dates, sorted by date. If there are any to-dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
+                    <li><span class="subheading">Current Health</span> dashboard tile now turns red when your expected damage is greater than your health.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>2.0.1<span class="date">2014-05-13</span></dt>
         <dd><ul>
             <li>Features:
@@ -2935,7 +3019,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>2.0<span class="date">2014-05-13</span></dt>
         <dd><ul>
             <li>Features:
@@ -3291,6 +3374,7 @@ ul#tableOfContents > li {
             <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
             <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
             <li><span class="subheading">Dailies Incomplete</span>: A list of dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
+            <li><span class="subheading">To-Dos with Dates</span>: A list of all to-dos that have been given due dates, sorted by date. If there are any to-dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
             <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
             <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
             <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
