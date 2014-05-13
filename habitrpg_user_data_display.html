@@ -1496,7 +1496,7 @@ randomTodo.text + '</p>'
         var html = '<p>This section lists information that you might need ' +
             'if you <a href="http://habitrpg.wikia.com/wiki/' +
             'Death_Mechanics">die</a> due to circumstances out of your ' +
-            'control (e.g., if you loose internet access and can\'t tick ' +
+            'control (e.g., if you lose internet access and can\'t tick ' +
             'off your dailies). ' +
             'Your stats (Health, etc) can be restored using "Fix Character ' +
             'Values" in the <a href="http://habitrpg.wikia.com/wiki/' +
@@ -1572,8 +1572,10 @@ function dropCountAndCap() {
         dropCap *= 2;
         html += dropCap +
                '</span>. It will increase if your <a href="' +
-               'http://habitrpg.wikia.com/wiki/Perception">perception</a>' +
-               ' increases.</p>';
+               'http://habitrpg.wikia.com/wiki/Perception">perception</a> ' +
+               'increases. Your perception is currently <a href="' +
+               'https://habitrpg.com/#/options/profile/stats">' +
+               computedStats['per'] + '</a>.</p>';
     }
     else {
         html += dropCap +
@@ -2976,7 +2978,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.1.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
