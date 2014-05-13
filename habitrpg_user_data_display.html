@@ -250,6 +250,14 @@ function parseData() {
         quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
     }
 
+    // put the user's equipped battle gear into an object, with all
+    // details about each piece:
+    var equippedKeys = {};
+    for (var i in user.items.gear.equipped) {
+        var key = user.items.gear.equipped[i];
+        equippedKeys[key] = content.gear.flat[key];
+    }
+
     var computedStats = computeStats(); // computed CON, INT, etc
     var userIsOnCollectionQuest = false;
 
@@ -567,7 +575,7 @@ function collateAndDisplayTaskData() {
         knownTags.push(obj.id);
     });
 
-    
+
     var habits  = collateHabitsData();  // populates the...
     var dailies = collateDailiesData(); // ... function global variables...
     var todos   = collateTodosData();   // ... defined above...
@@ -1894,13 +1902,15 @@ function analyseEquipment() {
                    'html':
 '<div id="equipmentRecommendationsExplanationToggle" class="showHideToggle" data-target="equipmentRecommendationsExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="equipmentRecommendationsExplanation" class="hide">' +
-'    <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p><p>By default, the table below shows you only the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p><p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "attributes" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page, which uses the same technology).</p><p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the attribute you care most about, then highlight the top one or more items, and then if you care about another attribute too, re-sort by it and select more items.</p><p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p>' +
+'    <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p><p>By default, the table below shows you only the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p><p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "attributes" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page, which uses the same technology).</p><p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the attribute you care most about, then highlight the top one or more items, and then if you care about another attribute too, re-sort by it and select more items.</p><p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p><p>Items that you are currently wearing are marked with *</p>' +
 '   <div class="showHideToggle closer" data-target="equipmentRecommendationsExplanation" data-resettoggletext="equipmentRecommendationsExplanationToggle">hide explanation</div>' +
 '</div>' +
 '<div id="qualityFilter"><p id="onlyBestIsShowing">Only your best equipment is shown below. To maximise your attributes, choose from only those items.<br /><input id="showAllEquipment" type="submit" value="Show All of My Equipment" /></p><p id="allEquipmentIsShowing">All of your equipment is shown below. Use the "quality" drop-down menu to show only the best.</p></div>' +
-'<table></table>' +
+'<table id="equipTable"></table>' +
 '<div id="equipmentChosen"></div>' +
 '<div class="clear"></div>'
+// NB: id="equipTable" is necessary because DataTables inserts other table(s)
+// and below we need to identify our own.
 };
 
         var aaData = collateEquipmentAndIdentifyBest(equipmentKeys);
@@ -1999,7 +2009,7 @@ function analyseEquipment() {
             var twoHandedWeaponSelected = false;
             var oneHandedWeaponSelected = false;
             var shieldSelected          = false;
-            $('#equipmentRecommendationsSection table').on(
+            $('#equipmentRecommendationsSection table#equipTable').on(
                                                 'click', 'tr', function() {
                 var type = $(this).data('type'); // armor, shield, etc
                 if (! $(this).hasClass('rowHighlight')) {
@@ -2214,6 +2224,11 @@ function analyseEquipment() {
                     // e.g., 'Kukri (shield-hand)' and 'Kukri (weapon-hand)'
                 }
 
+                // identify equipment already being worn:
+                if (equippedKeys[key]) {
+                    obj.text += ' *';
+                }
+
                 // categorise the item's quality according to the stats it
                 // gives ('best', 'middling', 'stats-free'):
                 if ((obj.con + obj.int + obj.per + obj.str) == 0) {
@@ -2346,14 +2361,14 @@ function computeStats() {
                      + user.stats.buffs[stat]
                      + ((user.stats.lvl - 1) / 2);
         // get appropriate stat for each piece of Battle Gear:
-        $.each(user.items.gear.equipped, function(index,key){
-            var obj = content.gear.flat[key];
+        for(var key in equippedKeys) {
+            var obj = equippedKeys[key];
             var value = obj[stat];
             if (obj.klass == userKlass || obj.specialClass == userKlass ) {
                 value *= 1.5;
             }
             computed += value;
-        });
+        }
         return computed;
     }
 }
@@ -2906,20 +2921,17 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
-        <dt>2.1<span class="date">2014-05-13</span></dt>
+        <dt>2.0.1<span class="date">2014-05-13</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
                     <li><span class="subheading">Dailies Incomplete</span> table is now neater and consistent in layout with the other tables.</li>
-                    <li><span class="subheading">
-</span>
-</li>
+                    <li><span class="subheading">Equipment Recommendations</span> table uses asterisks to indicate the battle gear you are already wearing.</li>
                 </ul>
             </li>
             <li>Code:
                 <ul>
-                    <li>
-                    </li>
+                    <li>Fixed a bug in Equipment Recommendations where clicking on a header would do weird things (table#equipTable).</li>
                 </ul>
             </li>
         </ul></dd>
