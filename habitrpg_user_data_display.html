@@ -78,7 +78,6 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
-/* TST - FOR TESTING:
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
@@ -91,9 +90,11 @@ $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 // d("tstfetchprocess: a: testdata submission");
 fetchData();
+/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
+sectionOpen = 'skillsAndBuffsSection'; //TST
                       // persists through re-fetch of data so we can
                       // reopen that section when the new data arrives
 var hideDropsInDashboard = true; // changes to false as soon as the user
@@ -329,7 +330,7 @@ function formatAndDisplayDASHBOARD() {
 
 
 function formatAndDisplayTOC() {
-    // TO ADD NEW SECTION: To create a Table of Content entry (mandatory),
+    // TO ADD NEW SECTION: To create a Table of Content entry (required),
     // add the unique identifier for the new section to this array (the array
     // elements are in the order that the TOC links appear on the page):
     var keys = [
@@ -340,7 +341,7 @@ function formatAndDisplayTOC() {
                 'questProgress', 'damageDailies', 'statsAndStreaks',
             'HEADING Other',
                 'unallocatedPoints', 'missingEquipment',
-                'currentGear', 'equipmentRecommendations'];
+                'currentGear', 'equipmentRecommendations', 'skillsAndBuffs'];
     var html = '';
     for (var i=0,ic=keys.length; i<ic; i++) {
         if (keys[i].match(/^HEADING/)) { // new section in Table of Contents
@@ -375,7 +376,8 @@ function formatAndDisplayMAIN() {
                 'habitHistory', 'dropsToday', 'questProgress',
                 'damageDailies', 'dailiesIncomplete', 'todosDated',
                 'statsAndStreaks', 'unallocatedPoints',
-                'missingEquipment', 'currentGear', 'equipmentRecommendations'];
+                'missingEquipment', 'currentGear', 'equipmentRecommendations',
+                'skillsAndBuffs'];
     var html = '';
     var functions = []; // functions to run after HTML code has been loaded
     for (var i=0,ic=keys.length; i<ic; i++) {
@@ -594,6 +596,7 @@ function collateAndDisplayTaskData() {
     dailiesIncomplete();
     todosDated();
     statsAndStreaks();
+    skillsAndBuffs();
 
     function collateHabitsData() {
         var habits = [];
@@ -1535,8 +1538,19 @@ randomTodo.text + '</p>'
         }
         html += '</ul></div><div class="clear"></div>';
         TOC[orderId]  = {'target': id, 'title':  title};
-        MAIN[orderId] = {'id': id, 'title': title, 'longContent': false,
-                   'html': html};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html};
+    }
+
+
+    function skillsAndBuffs() {
+        var id      = 'skillsAndBuffsSection';
+        var title   = 'Skills and Buffs';
+        var orderId = 'skillsAndBuffs';
+        var html = '<p>This section describes the skills you have available ' +
+                   'to you and the effect they will have if you cast them '+
+                   'now.</p>';
+        TOC[orderId]  = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html};
     }
 }
 
