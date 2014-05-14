@@ -1556,15 +1556,21 @@ randomTodo.text + '</p>'
 		var skills = { // each function returns: The target of the skill
 					   // (blank if the default target doesn't need to
 					   // be explained); The effect of the skill;
-					   // Additional explanatory text (can be blank).
+					   // Additional explanatory text (can be blank);
 			'fireball': function() { return ['', 'FIREBALL', '']; },
-			'mpheal': function() { 
+
+			'mpheal': function() {
 				var bonus = Math.ceil(computedStats['int'] * .1);
 		  		if (bonus > 25) { bonus = 25; }
 				return ['', 'Each of your party members will receive ' +
 							bonus + ' MP, except for yourself.', 'When you cast this skill, it will initially seem as if you do receive ' + bonus + ' MP (i.e., the skill will seem to cost you only ' + (30-bonus) + ' MP), but the ' + bonus + ' MP will later be removed from your account. The true cost of this skill to you is 30 MP and it benefits only your party members, not you.']; },
-			'earth': function() { return ['', 'EARTH', '']; },
-			'frost': function() { return ['', 'Any uncompleted dailies will not have their streaks reset to zero overnight.', 'After you have cast this, your <a href="https://habitrpg.com/#/options/profile/stats">User --> Stats page</a> will state "Streaks Frozen".']; },
+
+			'earth': function() {
+				var buff = Math.ceil(computedStats['int'] * .05);
+ return ['', 'Each of your party members will have their <a href="http://habitrpg.wikia.com/wiki/Intelligence">INT</a> increased by ' + buff + '.', '']; },
+
+			'frost': function() { return ['', 'All uncompleted dailies will not have their streaks reset to zero overnight.', 'After you have cast this, your <a href="https://habitrpg.com/#/options/profile/stats">User --> Stats page</a> will state "Streaks Frozen".']; },
+
 		};
 
 		for (var key in content.spells[userKlass]) {
@@ -1586,7 +1592,8 @@ randomTodo.text + '</p>'
 					'<li><label>mana: </label>'   + obj.mana  + '</li>' +
 					'<li><label>target: </label>' + target    + '</li>' +
 					'<li><label>effect: </label>' + skill[1]  +
-						(skill[2] ? '<span>' + skill[2] + '</span>' : '') +
+						(skill[2] ? ' <span>' + skill[2] + '</span>' : '') +
+						(skill[3] ? ' <span>' + skill[3] + '</span>' : '') +
 						'</li>' +
 					'</ul></div>';
 		}
