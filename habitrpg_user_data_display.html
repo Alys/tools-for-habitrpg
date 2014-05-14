@@ -1545,11 +1545,11 @@ randomTodo.text + '</p>'
         var id      = 'skillsAndBuffsSection';
         var title   = 'Skills and Buffs';
         var orderId = 'skillsAndBuffs';
-        // sectionOpen = id; //TST
+        sectionOpen = id; //TST
         var html = '<p>This section describes the skills you have available ' +
                    'to you and the effect they will have if you cast them '+
                    'now.</p>';
-        html = ''; // TST - hide the content
+        // html = ''; // TST - hide the content
         if (html) { // NB: pre-level XXX users don't have skills
             TOC[orderId]  = {'target': id, 'title':  title};
             MAIN[orderId] = {'id': id, 'title': title, 'html': html};
