@@ -1181,7 +1181,7 @@ randomTodo.text + '</p>'
                 habitText += ' <span>(no history)</span>';
             }
             else {
-                historyList.reverse(); // put most recent at top (we couldn't
+                historyList.reverse(); // put most recent at top; we couldn't
                        // do this earlier when we sorted the items because the
                        // 'buttonUsed' code needed them in chronological order
                 habitText += '<ul class="padded">' +
@@ -1542,6 +1542,9 @@ randomTodo.text + '</p>'
 
 
     function skillsAndBuffs() {
+		if (user.stats.lvl < 11) {
+			return; // user has no skills yet
+		}
         var id      = 'skillsAndBuffsSection';
         var title   = 'Skills and Buffs';
         var orderId = 'skillsAndBuffs';
@@ -1549,11 +1552,53 @@ randomTodo.text + '</p>'
         var html = '<p>This section describes the skills you have available ' +
                    'to you and the effect they will have if you cast them '+
                    'now.</p>';
+
+		var skills = { // each function returns: The target of the skill
+					   // (blank if the default target doesn't need to
+					   // be explained); The effect of the skill;
+					   // Additional explanatory text (can be blank).
+			'fireball': function() { return ['', 'FIREBALL', '']; },
+			'mpheal': function() { 
+				var bonus = Math.ceil(computedStats['int'] * .1);
+		  		if (bonus > 25) { bonus = 25; }
+				return ['', 'Each of your party members will receive ' +
+							bonus + ' MP, except for yourself.', 'When you cast this skill, it will initially seem as if you do receive ' + bonus + ' MP (i.e., the skill will seem to cost you only ' + (30-bonus) + ' MP), but the ' + bonus + ' MP will later be removed from your account. The true cost of this skill to you is 30 MP and it benefits only your party members, not you.']; },
+			'earth': function() { return ['', 'EARTH', '']; },
+			'frost': function() { return ['', 'Any uncompleted dailies will not have their streaks reset to zero overnight.', 'After you have cast this, your <a href="https://habitrpg.com/#/options/profile/stats">User --> Stats page</a> will state "Streaks Frozen".']; },
+		};
+
+		for (var key in content.spells[userKlass]) {
+			var obj = content.spells[userKlass][key];
+			if (obj.lvl > user.stats.lvl) {
+				continue;
+			}
+			if (obj.target != 'task' && obj.target != 'self' &&
+			    obj.target != 'party') { html += '<h3>WTF target: ' +
+			    obj.target + '</h3>'; } // TST
+
+			var skill = skills[obj.key]();
+			var target = skill[0] ||
+				((obj.target == 'self') ? 'yourself' : 'your ' + obj.target);
+			html += '<div class="subsection"><h3>' +
+					obj.text   + ' ('+obj.key+')'+ '</h3>' + // XXX remove key
+					'<p class="description">'   + obj.notes + '</p>' +
+					'<ul class="padded">' +
+					'<li><label>mana: </label>'   + obj.mana  + '</li>' +
+					'<li><label>target: </label>' + target    + '</li>' +
+					'<li><label>effect: </label>' + skill[1]  +
+						(skill[2] ? '<span>' + skill[2] + '</span>' : '') +
+						'</li>' +
+					'</ul></div>';
+		}
+		html += '<div class="clear"></div>' +
+				'<p><a href="http://habitrpg.wikia.com/wiki/' +
+				userKlassPretty + '#Skills">Learn more about the ' +
+				userKlassPretty + ' skills</a></p>'; // XXX test all links
+
+		// html += '<pre>' + JSON.stringify(obj, null, "  ") + '/<pre>'; // TST
         // html = ''; // TST - hide the content
-        if (html) { // NB: pre-level XXX users don't have skills
-            TOC[orderId]  = {'target': id, 'title':  title};
-            MAIN[orderId] = {'id': id, 'title': title, 'html': html};
-        }
+		TOC[orderId]  = {'target': id, 'title':  title};
+		MAIN[orderId] = {'id': id, 'title': title, 'html': html};
     }
 }
 
@@ -2871,6 +2916,37 @@ ul#tableOfContents > li {
 #statsAndStreaksSection li span {
     display: inline-block;
     width: 4em;
+}
+
+
+#skillsAndBuffsSection .subsection {
+    float: left;
+	width: 20%;
+    margin-left: 2em;
+}
+#skillsAndBuffsSection .description {
+    font-style: italic;
+}
+#skillsAndBuffsSection ul {
+    list-style-type: none;
+    margin:  0;
+    padding: 0;
+}
+#skillsAndBuffsSection ul li {
+    font-weight: bold;
+}
+#skillsAndBuffsSection ul li label {
+    display: inline-block;
+    width: 4em;
+    font-weight: normal;
+}
+#skillsAndBuffsSection ul li span {
+    margin-top: 0.5em;
+    display: inline-block;
+    font-weight: normal;
+}
+#skillsAndBuffsSection ul li a {
+	white-space: nowrap;
 }
 
 
