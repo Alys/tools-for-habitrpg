@@ -94,7 +94,6 @@ fetchData();
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
-sectionOpen = 'skillsAndBuffsSection'; //TST
                       // persists through re-fetch of data so we can
                       // reopen that section when the new data arrives
 var hideDropsInDashboard = true; // changes to false as soon as the user
@@ -1546,11 +1545,15 @@ randomTodo.text + '</p>'
         var id      = 'skillsAndBuffsSection';
         var title   = 'Skills and Buffs';
         var orderId = 'skillsAndBuffs';
+        // sectionOpen = id; //TST
         var html = '<p>This section describes the skills you have available ' +
                    'to you and the effect they will have if you cast them '+
                    'now.</p>';
-        TOC[orderId]  = {'target': id, 'title':  title};
-        MAIN[orderId] = {'id': id, 'title': title, 'html': html};
+        html = ''; // TST - hide the content
+        if (html) { // NB: pre-level XXX users don't have skills
+            TOC[orderId]  = {'target': id, 'title':  title};
+            MAIN[orderId] = {'id': id, 'title': title, 'html': html};
+        }
     }
 }
 
