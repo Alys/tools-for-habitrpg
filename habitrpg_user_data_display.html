@@ -78,6 +78,7 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
+/* TST - FOR TESTING:
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
@@ -90,7 +91,6 @@ $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 // d("tstfetchprocess: a: testdata submission");
 fetchData();
-/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -463,7 +463,6 @@ function upperCaseFirst(word) {
 
 
 function userDataInHeader() {
-    var html =
     $('#headerExtras').html('<div id="userNameDisplay">' +
             user.profile.name +
             '</div>' +
@@ -1448,22 +1447,36 @@ randomTodo.text + '</p>'
         var orderId = 'todosDated';
 
         var today = myDateConverter(new Date(), 'medium');
+        var lastWeek = new Date();
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        lastWeek = myDateConverter(lastWeek, 'medium');
+
         var items = [];
         var countDue = 0;
+        var dangerTodoFound = false;
         for (var i=0,ic=todos.length; i<ic; i++) {
             var obj = todos[i];
             if (! obj.date) {
                 continue;
             }
+            var challenge = (obj.challenge && obj.challenge.id)
+                          ? ' <span class="challenge">(challenge to-do)</span>'
+                          : '';
             var date = myDateConverter(new Date(obj.date), 'medium');
             var dateClass = 'notDue';
             if (date <= today) {
                 dateClass = 'due';
                 countDue++;
+                if (! challenge || date > lastWeek) {
+                    // An overdue to-do is not dangerous if it is from a
+                    // challenge and is more than a week old (because the
+                    // user probably doesn't care about it).
+                    dangerTodoFound = true;
+                }
             }
-            items.push('<li class="' + dateClass + '"><span>' +
+            items.push('<li class="' + dateClass + '"><span class="date">' +
                        date + '</span> ' +
-                       obj.text + '</li>');
+                       obj.text + challenge + '</li>');
         }
         if (items.length === 0) {
             return;
@@ -1484,7 +1497,8 @@ randomTodo.text + '</p>'
                 'hoverText': 'number of to-dos due today or overdue ' +
                              '(click for more information)',
                 'target': id,
-                'value': countDue, 'status': 'danger'};
+                'value': countDue,
+                'status': ((dangerTodoFound) ? 'danger' : 'neutral')};
         }
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'html': html};
@@ -2853,9 +2867,13 @@ ul#tableOfContents > li {
 #todosDatedSection .due {
     font-weight: bold;
 }
-#todosDatedSection li span {
+#todosDatedSection li span.date {
     display: inline-block;
     width: 7em;
+}
+#todosDatedSection li span.challenge {
+    font-style: italic;
+    font-variant: small-caps;
 }
 
 
