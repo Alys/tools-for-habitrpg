@@ -535,7 +535,7 @@ function getCurrentHealth() {
 function collateAndDisplayTaskData() {
     // Set up data structures for storing task information:
     var taskOrder = 0; // default order of tasks in HabitRPG
-    var allTasksArray = []; // for Task Overview table (not completed todos)
+    var allTasks = []; // except completed to-dos
     var untaggedTasks = {'habits':[], 'dailies':[], 'todos':[], 'rewards':[]};
     var template = {'total':0, 'con':0, 'int':0, 'per':0, 'str':0};
     var countTasks = {
@@ -607,7 +607,6 @@ function collateAndDisplayTaskData() {
         knownTags.push(obj.id);
     });
 
-
     var habits   = collateHabitsData();  // populates the...
     var dailies  = collateDailiesData(); // ... function's "global" variables...
     var todosAll = collateTodosData();   // ... defined above...
@@ -649,7 +648,7 @@ function collateAndDisplayTaskData() {
                 }
             }
             habits.push(obj);
-            allTasksArray.push(createTaskTableCellObj(obj));
+            allTasks.push(obj);
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['habits'].push(obj);
             }
@@ -730,7 +729,7 @@ function collateAndDisplayTaskData() {
             }
 
             dailies.push(obj);
-            allTasksArray.push(createTaskTableCellObj(obj));
+            allTasks.push(obj);
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['dailies'].push(obj);
             }
@@ -788,7 +787,7 @@ function collateAndDisplayTaskData() {
                     }
                 }
                 todos.push(obj);
-                allTasksArray.push(createTaskTableCellObj(obj));
+                allTasks.push(obj);
                 if (! taskIsTagged(obj.tags)) {
                     untaggedTasks['todos'].push(obj);
                 }
@@ -814,10 +813,13 @@ function collateAndDisplayTaskData() {
 
     function modifyTaskProperties(obj) {
         obj.text = String(obj.text).replace(/\&nbsp;/g, ' ');
-        obj.text = obj.text.replace(/[&<>"'\/]/g, function (s) {
-                        return entityMap[s];
-                    });
+        obj.text = obj.text.replace(/[&<>"'\/]/g,
+                        function(s) { return entityMap[s]; });
         obj.text = emoji(obj.text, 'js/emoji-images/pngs', 25);
+        // obj.textShort = obj.text.replace(/(^.{80}).+/, "$1 ..."),
+
+        obj.attributePretty = obj.attribute.toUpperCase(),
+        obj.typePretty   = (obj.type == 'todo') ? 'to-do' : obj.type;
         obj.valueRounded = Math.round(obj.value * 100) / 100;
         obj.magnitude    = Math.abs(obj.valueRounded);
         obj.order        = ++taskOrder;
@@ -874,25 +876,6 @@ function collateAndDisplayTaskData() {
     }
 
 
-    function createTaskTableCellObj(obj) { // XXX_LATER remove; use obj itself
-        var date = new Date(obj.dateCreated); // ASSUME 'date' is a real date!
-        var formattedDate = myDateConverter(date, 'long');
-        var shortDate     = myDateConverter(date, 'short');
-        return {'type':      ((obj.type == 'todo') ? 'to-do' : obj.type),
-                'attribute': obj.attribute.toUpperCase(),
-                'text': {'full':  obj.text,
-                         'short': obj.text.replace(/(^.{80}).+/, "$1 ..."),
-                        },
-                'colour':     obj.colour,
-                'value':      obj.valueRounded,
-                'magnitude':  obj.magnitude,
-                'creation':   obj.creation,
-                'order':      obj.order,
-                'valueColourHtml': obj.valueColourHtml,
-            };
-    }
-
-
     function myDateConverter(date, style) {
         var y = date.getFullYear();
         var m = date.getMonth() + 1;
@@ -941,15 +924,15 @@ randomTodo.text + '</p>'
             // visible first for layout to be correct):
             $('#taskOverviewSection').show();
             $('#taskOverviewSection table').dataTable({
-                'aaData': allTasksArray,
+                'aaData': allTasks,
                 'aoColumns': [
             { 'mData' : 'order', // needed to ensure correct starting sort
               'sTitle': '#',    'bVisible': false,
             },
-            { 'mData' : 'type',       'sClass': 'center',
+            { 'mData' : 'typePretty', 'sClass': 'center',
               'sTitle': 'type',       'sWidth': '10%',
             },
-            { 'mData' : 'attribute',  'sClass': 'center',
+            { 'mData' : 'attributePretty',  'sClass': 'center',
               'sTitle': 'attr.',      'sWidth': '10%',
             },
             { 'mData' : 'colour.label',
@@ -1000,12 +983,12 @@ randomTodo.text + '</p>'
                   return;
                 }
                 else if (type === 'display') {
-                  return source.text.full;
+                  return source.text;
                 }
                 else if (type === 'filter') {
-                  return source.text.full;
+                  return source.text;
                 }
-                return source.text.full;
+                return source.text;
                 // this routine made a lot more sense when I was
                 // experimenting with different text for
                 // display, filter, sort
@@ -1569,8 +1552,8 @@ randomTodo.text + '</p>'
             { 'mData' : 'order', // needed to ensure correct starting sort
               'sTitle': '#',    'bVisible': false,
             },
-            { 'mData' : 'attribute',  'sClass': 'center',
-              'sTitle': 'attr.',      'sWidth': '10%',
+            { 'mData' : 'attributePretty',  'sClass': 'center',
+              'sTitle': 'attr.',            'sWidth': '10%',
             },
             { 'mData' : 'colour.label',
               'sTitle': 'colour',     'sClass': 'center', 'bVisible': false,
