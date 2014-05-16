@@ -64,8 +64,9 @@ function d(msg) { console.log(msg) } /* laziness FTW! */
 //////////////////////////////////////////////////////////////////////
 ////   Global Variables                              /////////////////
 //////////////////////////////////////////////////////////////////////
-var content; // holds site-wide content (gear names and stats, quests, etc)
-var user;    // holds user's data
+var content;    // holds site-wide content (gear stats, quests, etc)
+var user;       // holds user's data
+var localeGear; // holds language-specific, human-friendly names for gear items
 
 
 //////////////////////////////////////////////////////////////////////
@@ -77,7 +78,16 @@ var serverPathContent = '/content';
 var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
+var localeServerUrl   = 'https://oldgods.net/habitrpg';
+// XXX FIXME!! When running this script locally, localeServerUrl causes this:
+//     XMLHttpRequest cannot load https://oldgods.net/habitrpg/locales/en/gear.json. No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin 'http://localhost' is therefore not allowed access.
+// A workaround is to copy locales/en/gear.json from the
+// HabitRPG/habitrpg-shared repository and put it on localhost:
+// localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 
+
+/* TST - FOR TESTING:
+localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
@@ -90,7 +100,6 @@ $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 // d("tstfetchprocess: a: testdata submission");
 fetchData();
-/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -181,7 +190,7 @@ function fetchData() {
     $('#loading .good').show();
     $('#loading .bad' ).hide();
 
-    var ajaxRunningCount = 2; // drops to 0 when all calls have succeeded
+    var ajaxRunningCount = 3; // drops to 0 when all calls have succeeded
 
     // fetch the user's own content (tasks, gear owned, etc):
     $.ajax({
@@ -207,6 +216,17 @@ function fetchData() {
         error: fetchFailure
     });
 
+    // fetch the equipment/gear language file:
+    var file = '/locales/en/gear.json';
+    $.ajax({
+        url: localeServerUrl + file,
+        type: 'GET',
+        dataType: 'json',
+        cache: true,
+        success: fetchLocaleGearSuccess,
+        error: fetchFailure
+    });
+
     function fetchFailure() {
         d("tstfetchprocess: loading failed");
         $('#loading .good').hide();
@@ -225,8 +245,14 @@ function fetchData() {
     }
     function fetchUserSuccess(data) {
         // d("tstfetchprocess: loading done - up to displayData");
-        // All data has been fetched successfully. Analyse and display it.
         user = data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
+    }
+    function fetchLocaleGearSuccess(data) {
+        localeGear = data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -268,7 +294,9 @@ function parseData() {
     // create the content, section by section:
     //
     // TO ADD NEW SECTION: add a function here, OR add it within one of the
-    // functions that is already here if appropriate for correct scoping:
+    // functions that is already here if appropriate for correct scoping
+    // (e.g., features related to tasks should have their function put
+    // inside collateAndDisplayTaskData):
     collateAndDisplayTaskData();
     dropCountAndCap();
     questProgress();
@@ -335,7 +363,9 @@ function formatAndDisplayTOC() {
     var keys = [
             'HEADING Tasks',
                 'taskOverview', 'taskStatistics', 'untaggedTasks',
+            'HEADING',
                 'habitHistory', 'dailiesIncomplete', 'todosDated',
+                'todosCompleted',
             'HEADING Drops, Quests, Damage', 'dropsToday',
                 'questProgress', 'damageDailies', 'statsAndStreaks',
             'HEADING Other',
@@ -348,7 +378,7 @@ function formatAndDisplayTOC() {
             if (html) {
                 html += '</ul></li>'; // close the previous section
             }
-            html += '<li>' + title + ':<ul>';
+            html += '<li>' + title + (title ? ':' : '&nbsp;') + '<ul>';
         }
         else {
             var data = TOC[keys[i]];
@@ -372,8 +402,9 @@ function formatAndDisplayMAIN() {
     // elements are in the order that the sections would appear on the page
     // if they were all visible at once):
     var keys = ['taskOverview', 'taskStatistics', 'untaggedTasks',
-                'habitHistory', 'dropsToday', 'questProgress',
-                'damageDailies', 'dailiesIncomplete', 'todosDated',
+                'habitHistory', 'todosDated', 'todosCompleted',
+                'dropsToday', 'questProgress',
+                'damageDailies','dailiesIncomplete',//keep in that order
                 'statsAndStreaks', 'unallocatedPoints',
                 'missingEquipment', 'currentGear', 'equipmentRecommendations',
                 'skillsAndBuffs'];
@@ -463,7 +494,6 @@ function upperCaseFirst(word) {
 
 
 function userDataInHeader() {
-    var html =
     $('#headerExtras').html('<div id="userNameDisplay">' +
             user.profile.name +
             '</div>' +
@@ -505,7 +535,7 @@ function getCurrentHealth() {
 function collateAndDisplayTaskData() {
     // Set up data structures for storing task information:
     var taskOrder = 0; // default order of tasks in HabitRPG
-    var allTasksArray = []; // for Task Overview table
+    var allTasksArray = []; // for Task Overview table (not completed todos)
     var untaggedTasks = {'habits':[], 'dailies':[], 'todos':[], 'rewards':[]};
     var template = {'total':0, 'con':0, 'int':0, 'per':0, 'str':0};
     var countTasks = {
@@ -578,10 +608,12 @@ function collateAndDisplayTaskData() {
     });
 
 
-    var habits  = collateHabitsData();  // populates the...
-    var dailies = collateDailiesData(); // ... function global variables...
-    var todos   = collateTodosData();   // ... defined above...
-    var rewards = collateRewardsData(); // ......
+    var habits   = collateHabitsData();  // populates the...
+    var dailies  = collateDailiesData(); // ... function's "global" variables...
+    var todosAll = collateTodosData();   // ... defined above...
+    var rewards  = collateRewardsData(); // ......
+    var todos          = todosAll[0];
+    var todosCompleted = todosAll[1];
 
     // TO ADD NEW SECTION: if the section is related specifically to tasks,
     // here is probably where you want to put its function.
@@ -594,6 +626,7 @@ function collateAndDisplayTaskData() {
     damageFromDailies();
     dailiesIncomplete();
     todosDated();
+    todosCompletedTable();
     statsAndStreaks();
     skillsAndBuffs();
 
@@ -724,6 +757,7 @@ function collateAndDisplayTaskData() {
 
     function collateTodosData() {
         var todos = [];
+        var todosCompleted = [];
         $.each(user.todos, function(index, obj){
             modifyTaskProperties(obj);
             if (obj.completed == true) {
@@ -733,7 +767,7 @@ function collateAndDisplayTaskData() {
                 countTasks['statsTotals']['total']++;
                 countTasks['todosAll']['total']++;
                 countTasks['todosAll'][obj.attribute]++;
-                return true; // currently we don't display completed to-dos
+                todosCompleted.push(obj);
             }
             else {
                 countTasks['todosIncomplete']['total']++;
@@ -753,14 +787,14 @@ function collateAndDisplayTaskData() {
                         exampleAttribute = exampleAttribute || obj.attribute;
                     }
                 }
-            }
-            todos.push(obj);
-            allTasksArray.push(createTaskTableCellObj(obj));
-            if (! taskIsTagged(obj.tags)) {
-                untaggedTasks['todos'].push(obj);
+                todos.push(obj);
+                allTasksArray.push(createTaskTableCellObj(obj));
+                if (! taskIsTagged(obj.tags)) {
+                    untaggedTasks['todos'].push(obj);
+                }
             }
         });
-        return todos;
+        return [todos, todosCompleted];
     }
 
 
@@ -785,13 +819,24 @@ function collateAndDisplayTaskData() {
                     });
         obj.text = emoji(obj.text, 'js/emoji-images/pngs', 25);
         obj.valueRounded = Math.round(obj.value * 100) / 100;
-        obj.order = ++taskOrder;
-        obj.colour = chooseColour(obj.value);
-        obj.valueColourHtml = '<span class="coloured '
-                + obj.colour.id + '">'
-                + obj.valueRounded + '<br />'
-                + obj.colour.nameNoSpace
-                + '</span>';
+        obj.magnitude    = Math.abs(obj.valueRounded);
+        obj.order        = ++taskOrder;
+        obj.creation     = reformatDate(obj.dateCreated);
+        obj.completion   = (obj.dateCompleted) ?
+                           reformatDate(obj.dateCompleted) : {};
+        obj.colour       = chooseColour(obj.value);
+        obj.valueColourHtml = '<span class="coloured ' +
+                              obj.colour.id + '">' +
+                              obj.valueRounded + '<br />' +
+                              obj.colour.nameNoSpace + '</span>';
+
+        function reformatDate(dateString) {
+            var date = new Date(dateString); // ASSUME a real date!
+            var formattedDate = myDateConverter(date, 'long');
+            var shortDate     = myDateConverter(date, 'short');
+            return { 'dateAndTime': formattedDate,
+                     'shortDate': shortDate };
+        }
 
         function chooseColour(value) {
             // from http://habitrpg.wikia.com/wiki/Task_Value :
@@ -838,13 +883,11 @@ function collateAndDisplayTaskData() {
                 'text': {'full':  obj.text,
                          'short': obj.text.replace(/(^.{80}).+/, "$1 ..."),
                         },
-                'colour':    obj.colour,
-                'value':     obj.valueRounded,
-                'magnitude': Math.abs(obj.valueRounded),
-                'creation':  {'dateAndTime': formattedDate,
-                              'shortDate': shortDate,
-                             },
-                'order':     obj.order,
+                'colour':     obj.colour,
+                'value':      obj.valueRounded,
+                'magnitude':  obj.magnitude,
+                'creation':   obj.creation,
+                'order':      obj.order,
                 'valueColourHtml': obj.valueColourHtml,
             };
     }
@@ -907,12 +950,12 @@ randomTodo.text + '</p>'
               'sTitle': 'type',       'sWidth': '10%',
             },
             { 'mData' : 'attribute',  'sClass': 'center',
-              'sTitle': 'attr.',       'sWidth': '10%',
+              'sTitle': 'attr.',      'sWidth': '10%',
             },
             { 'mData' : 'colour.label',
               'sTitle': 'colour',     'sClass': 'center', 'bVisible': false,
             },
-            { 'sTitle': 'value',  'sClass': 'center',       'sWidth': '10%',
+            { 'sTitle': 'value',      'sClass': 'center', 'sWidth': '10%',
               'mData': function ( source, type, val ) {
                 if (type === 'set') {
                   return; // http://datatables.net/ref#mData
@@ -1448,22 +1491,36 @@ randomTodo.text + '</p>'
         var orderId = 'todosDated';
 
         var today = myDateConverter(new Date(), 'medium');
+        var lastWeek = new Date();
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        lastWeek = myDateConverter(lastWeek, 'medium');
+
         var items = [];
         var countDue = 0;
+        var dangerTodoFound = false;
         for (var i=0,ic=todos.length; i<ic; i++) {
             var obj = todos[i];
             if (! obj.date) {
                 continue;
             }
+            var challenge = (obj.challenge && obj.challenge.id)
+                          ? ' <span class="challenge">(challenge to-do)</span>'
+                          : '';
             var date = myDateConverter(new Date(obj.date), 'medium');
             var dateClass = 'notDue';
             if (date <= today) {
                 dateClass = 'due';
                 countDue++;
+                if (! challenge || date > lastWeek) {
+                    // An overdue to-do is not dangerous if it is from a
+                    // challenge and is more than a week old (because the
+                    // user probably doesn't care about it).
+                    dangerTodoFound = true;
+                }
             }
-            items.push('<li class="' + dateClass + '"><span>' +
+            items.push('<li class="' + dateClass + '"><span class="date">' +
                        date + '</span> ' +
-                       obj.text + '</li>');
+                       obj.text + challenge + '</li>');
         }
         if (items.length === 0) {
             return;
@@ -1484,10 +1541,121 @@ randomTodo.text + '</p>'
                 'hoverText': 'number of to-dos due today or overdue ' +
                              '(click for more information)',
                 'target': id,
-                'value': countDue, 'status': 'danger'};
+                'value': countDue,
+                'status': ((dangerTodoFound) ? 'danger' : 'neutral')};
         }
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'html': html};
+    }
+
+
+    function todosCompletedTable() {
+        var id      = 'todosCompletedSection';
+        var title   = 'To-Dos Completed';
+        var orderId = 'todosCompleted';
+        var html = '<p>This shows all of your completed to-dos that HabitRPG has in its archive (not necessarily all the to-dos that you have ever completed because HabitRPG keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitrpg.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section.</span></p><table></table>';
+        TOC[orderId]  = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
+                         'function': createTodosCompletedTable,
+                         'html': html};
+
+        function createTodosCompletedTable() {
+            // Use DataTables to build the table (the table tag must be
+            // visible first for layout to be correct):
+            $('#todosCompletedSection').show();
+            $('#todosCompletedSection table').dataTable({
+                'aaData': todosCompleted,
+                'aoColumns': [
+            { 'mData' : 'order', // needed to ensure correct starting sort
+              'sTitle': '#',    'bVisible': false,
+            },
+            { 'mData' : 'attribute',  'sClass': 'center',
+              'sTitle': 'attr.',      'sWidth': '10%',
+            },
+            { 'mData' : 'colour.label',
+              'sTitle': 'colour',     'sClass': 'center', 'bVisible': false,
+            },
+            { 'sTitle': 'value',      'sClass': 'center', 'sWidth': '10%',
+              'mData': function ( source, type, val ) {
+                if (type === 'set') {
+                  return; // http://datatables.net/ref#mData
+                }
+                else if (type === 'display') {
+                  return source.valueColourHtml;
+                }
+                else if (type === 'filter') {
+                  return source.colour.name;
+                }
+                // 'sort', 'type' and undefined all just use the integer
+                return source.value;
+              }
+            },
+            { 'sTitle': '<abbr title="creation date">added</abbr>',
+              'sClass': 'center',       'sWidth': '10%',
+              'asSorting': ['desc','asc'],
+              'mData': function ( source, type, val ) {
+                if (type === 'set') {
+                  return;
+                }
+                else if (type === 'display') {
+                  return '<abbr title="' +
+                         source.creation.dateAndTime + '">' +
+                         source.creation.shortDate +
+                         '</abbr>';
+                }
+                else {
+                  return source.creation.dateAndTime;
+                }
+              }
+            },
+            { 'sTitle': '<abbr title="completion date">completed</abbr>',
+              'sClass': 'center',       'sWidth': '10%',
+              'asSorting': ['desc','asc'],
+              'mData': function ( source, type, val ) {
+                if (type === 'set') {
+                  return;
+                }
+                else if (type === 'display') {
+                  return '<abbr title="' +
+                         source.completion.dateAndTime + '">' +
+                         source.completion.shortDate +
+                         '</abbr>';
+                }
+                else {
+                  return source.completion.dateAndTime;
+                }
+              }
+            },
+            { 'sTitle': 'text and notes ', 'sWidth': '*',
+              'mData': function ( source, type, val ) {
+                if (type === 'set') {
+                  return;
+                }
+                else {
+                  return source.text + '<br />' +
+                         source.notes;
+                }
+              }
+            },
+                ],
+                // 'scrollY': 300,
+                // 'bInfo': false,
+                // 'sDom': 'W<"clear"><"top"if>rt<"bottom"iflp><"clear">',
+                'sDom': 'W<"clear"><"top"if>rt<"bottom"><"clear">',
+                'bAutoWidth': false,
+                'bPaginate': false,
+                'bDeferRender': true,
+                // 'bSortClasses': false,
+                "sScrollX": "100%",
+                // "sScrollXInner": "200%",
+                "bDestroy": true, // allows table to recreate on refetch
+                'oColumnFilterWidgets': {
+                    'aiExclude': [ 0, 3, 4, 5, 6 ],
+                }
+            });
+            $('#todosCompletedSection').hide();
+            return;
+        }
     }
 
 
@@ -1696,6 +1864,7 @@ function questProgress() {
     var title   = 'Quest Progress';
     var orderId = 'questProgress';
     var html = '';
+    html = '<p class="lowlight" style="margin-bottom:2.3em">Names of quests, quest bosses, and collection quest items are currently a bit messed up, due to a change that had been made on HabitRPG but that had not been duplicated on its API. The API will be updated soon, and then the quest names will be correct again.</p>';
     // on a quest:
     // "quest":{"completed":null,"key":"ghost_stag",
     //          "progress":{"collect":{},"down":0,"up":13.780066986139815}},
@@ -1721,10 +1890,10 @@ function questProgress() {
         // think they have even slightly more progress than they really
         // have. Imagine if they missed ending a quest overnight by 0.1
         // health because this page exaggerated their progress!
-        html = 'So far today you have done an estimated ' +
+        html += 'So far today you have done an estimated ' +
                '<span class="highlight">' +
                progress + '</span> points of damage to ' +
-               quest.content.boss.name + '.';
+               (quest.content.boss.name || quest.content.key) + '.'; // XXX 
         DASHBOARD[orderId] = {'label': title,
             'hoverText': 'amount of damage you have done to the quest boss ' +
                          'today (click for more information)',
@@ -1738,7 +1907,7 @@ function questProgress() {
         $.each(quest.progress.collect, function(tagId, value){
             uniqueItemsCount++;
             total += value;
-            var itemName = quest.content.collect[tagId].text;
+            var itemName = quest.content.collect[tagId].text || tagId; // XXX 
             if (uniqueItemsCount > 1) { // we have stuff already
                 stuff += ", ";
             }
@@ -1747,14 +1916,15 @@ function questProgress() {
         });
         var replaceStr = (uniqueItemsCount > 2) ? ", and" : " and";
         stuff = stuff.replace(/(.+),/, "$1" + replaceStr);
-        html = 'So far today you have found ' + '<span class="highlight">';
+        html += 'So far today you have found ' + '<span class="highlight">';
         if (total == 0) {
             html += 'no items';
         }
         else {
             html += stuff;
         }
-        html += '</span> for the ' + quest.content.text + ' quest.';
+        html += '</span> for the ' +
+                (quest.content.text || quest.content.key) + ' quest.'; // XXX 
         DASHBOARD[orderId] = {'label': title,
             'hoverText': 'number of items you have found today for your ' +
                          'collection quest (click for more information)',
@@ -2031,25 +2201,25 @@ function analyseEquipment() {
 
 
     function recommendedEquipment(equipmentKeys) {
-        var id      = 'equipmentRecommendationsSection';
-        var title   = 'Equipment Recommendations';
-        var orderId = 'equipmentRecommendations';
-        TOC[orderId] = {'target': id, 'title':  title};
-        MAIN[orderId] = {'id': id, 'title': title,
-                   'function': createEquipmentRecommendationsTable,
-                   'html':
+        var html =
 '<div id="equipmentRecommendationsExplanationToggle" class="showHideToggle" data-target="equipmentRecommendationsExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="equipmentRecommendationsExplanation" class="hide">' +
-'    <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p><p>By default, the table below shows you only the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p><p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "attributes" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page, which uses the same technology).</p><p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the attribute you care most about, then highlight the top one or more items, and then if you care about another attribute too, re-sort by it and select more items.</p><p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p><p>Items that you are currently wearing are marked with *</p>' +
+'    <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p><p>By default, the table below shows you only the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p><p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "attributes" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page).</p><p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the attribute you care most about, then highlight the top one or more items, and then if you care about another attribute too, re-sort by it and select more items.</p><p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p><p>Items that you are currently wearing are marked with *</p>' +
 '   <div class="showHideToggle closer" data-target="equipmentRecommendationsExplanation" data-resettoggletext="equipmentRecommendationsExplanationToggle">hide explanation</div>' +
 '</div>' +
 '<div id="qualityFilter"><p id="onlyBestIsShowing">Only your best equipment is shown below. To maximise your attributes, choose from only those items.<br /><input id="showAllEquipment" type="submit" value="Show All of My Equipment" /></p><p id="allEquipmentIsShowing">All of your equipment is shown below. Use the "quality" drop-down menu to show only the best.</p></div>' +
 '<table id="equipTable"></table>' +
 '<div id="equipmentChosen"></div>' +
-'<div class="clear"></div>'
+'<div class="clear"></div>';
 // NB: id="equipTable" is necessary because DataTables inserts other table(s)
 // and below we need to identify our own.
-};
+
+        var id      = 'equipmentRecommendationsSection';
+        var title   = 'Equipment Recommendations';
+        var orderId = 'equipmentRecommendations';
+        TOC[orderId] = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html,
+                   'function': createEquipmentRecommendationsTable};
 
         var aaData = collateEquipmentAndIdentifyBest(equipmentKeys);
 
@@ -2327,6 +2497,8 @@ function analyseEquipment() {
             var equipmentObjs = [];
             $.each(equipmentKeys, function(index,key){
                 var obj = $.extend({}, content.gear.flat[key]);
+                obj.text = prettyPrintKey(key, 'gear', {'nameOnly':true});
+
                 // adjust some equipment types:
                 if (obj.type == 'weapon' && obj.twoHanded) {
                     obj.type = 'weaponTwoHanded';
@@ -2437,17 +2609,29 @@ function analyseEquipment() {
         // Takes a "key" (e.g., weapon_warrior_0) from HabitRPG's "content"
         // data and returns the name of the item (and sometimes other info).
         // If the name can't be found, it treats the key as the name.
-        var name  = key;
+        var name = '';
         var extra = '';  // e.g., for gear: klass and type (weapon/armor/etc)
         if (itemType == 'gear') {
             var obj = content.gear.flat[key];
-            name = obj.text;
+            try {
+                var localeKey =
+                        convertContentKeyToLocaleKey(key, itemType, obj);
+                name = localeGear[localeKey] || key;
+            }
+            catch(err) {
+                name = key;
+            }
+            if (options && options.nameOnly) {
+        return name;
+            }
+
             if (name == 'Mustaine\'s Milestone Mashing Morning Star') {
                 name = '<abbr title="' + name + '">Mashing Morning Star</a>';
             }
             if (name == 'Stephen Weber\'s Shaft of the Dragon') {
                 name = '<abbr title="' + name + '">Shaft of the Dragon</a>';
             }
+
             var type = obj.type;
             if (type == 'head') { type = 'headwear'; }
             extra = obj.klass;
@@ -2470,7 +2654,6 @@ function analyseEquipment() {
         html += ' <span class="key">{' + key + '}</span></span>';
         return html;
 
-
         function prettyPrintStats(obj, options) {
             var stats = [];
             if (options && options.includeGold) {
@@ -2482,8 +2665,93 @@ function analyseEquipment() {
             if (obj.str) { stats.push(obj.str + " str"); }
             return stats.join(", ");
         }
+
+
+        function convertContentKeyToLocaleKey(key, itemType, obj) {
+            if (itemType == 'gear') {
+                return getGearLocaleKey(obj) || key;
+            }
+            // XXX convert other types of keys
+            return key;
+
+            function getGearLocaleKey(obj) {
+                // "events" is from
+                // dist/habitrpg-shared.js in the habitrpg-shared
+                // repository, taken Thu May 15 11:18:27 EST 2014
+                var events = {
+                  winter: {
+                    start: '2013-12-31',
+                    end: '2014-02-01'
+                  },
+                  birthday: {
+                    start: '2013-01-30',
+                    end: '2014-02-01'
+                  },
+                  spring: {
+                    start: '2014-03-21',
+                    end: '2014-05-01'
+                  }
+                };
+
+                // "mystery" is from
+                // dist/habitrpg-shared.js in the habitrpg-shared
+                // repository, taken Thu May 15 11:18:27 EST 2014
+                var mystery = {
+                  201402: {
+                    start: '2014-02-22',
+                    end: '2014-02-28'
+                  },
+                  201403: {
+                    start: '2014-03-24',
+                    end: '2014-04-01'
+                  },
+                  201404: {
+                    start: '2014-04-24',
+                    end: '2014-05-01'
+                  },
+                  wondercon: {
+                    start: '2014-03-24',
+                    end: '2014-04-01'
+                  }
+                };
+
+                // "gear" is from
+                // dist/habitrpg-shared.js in the habitrpg-shared
+                // repository, taken Thu May 15 11:18:27 EST 2014
+                function t(x) { return x; }
+                var gear = {
+                      weapon: {
+                        base: {
+                          0: {
+                            text: t('weaponBase0Text'),
+                            notes: t('weaponBase0Notes'),
+                            value: 0
+                          }
+                        },
+                        warrior: {
+                          0: {
+                            text: t('weaponWarrior0Text'),
+                            notes: t('weaponWarrior0Notes'),
+                            value: 0
+                          },
+                          1: {
+                            text: t('weaponWarrior1Text'),
+                            notes: t('weaponWarrior1Notes', {
+                              str: 3
+                            }),
+                            str: 3,
+                            value: 20
+                          },
+                          2: { text: t('weaponWarrior2Text'), notes: t('weaponWarrior2Notes', { str: 6 }), str: 6, value: 30 }, 3: { text: t('weaponWarrior3Text'), notes: t('weaponWarrior3Notes', { str: 9 }), str: 9, value: 45 }, 4: { text: t('weaponWarrior4Text'), notes: t('weaponWarrior4Notes', { str: 12 }), str: 12, value: 65 }, 5: { text: t('weaponWarrior5Text'), notes: t('weaponWarrior5Notes', { str: 15 }), str: 15, value: 90 }, 6: { text: t('weaponWarrior6Text'), notes: t('weaponWarrior6Notes', { str: 18 }), str: 18, value: 120, last: true } }, rogue: { 0: { text: t('weaponRogue0Text'), notes: t('weaponRogue0Notes'), str: 0, value: 0 }, 1: { text: t('weaponRogue1Text'), notes: t('weaponRogue1Notes', { str: 2 }), str: 2, value: 20 }, 2: { text: t('weaponRogue2Text'), notes: t('weaponRogue2Notes', { str: 3 }), str: 3, value: 35 }, 3: { text: t('weaponRogue3Text'), notes: t('weaponRogue3Notes', { str: 4 }), str: 4, value: 50 }, 4: { text: t('weaponRogue4Text'), notes: t('weaponRogue4Notes', { str: 6 }), str: 6, value: 70 }, 5: { text: t('weaponRogue5Text'), notes: t('weaponRogue5Notes', { str: 8 }), str: 8, value: 90 }, 6: { text: t('weaponRogue6Text'), notes: t('weaponRogue6Notes', { str: 10 }), str: 10, value: 120, last: true } }, wizard: { 0: { twoHanded: true, text: t('weaponWizard0Text'), notes: t('weaponWizard0Notes'), value: 0 }, 1: { twoHanded: true, text: t('weaponWizard1Text'), notes: t('weaponWizard1Notes', { int: 3, per: 1 }), int: 3, per: 1, value: 30 }, 2: { twoHanded: true, text: t('weaponWizard2Text'), notes: t('weaponWizard2Notes', { int: 6, per: 2 }), int: 6, per: 2, value: 50 }, 3: { twoHanded: true, text: t('weaponWizard3Text'), notes: t('weaponWizard3Notes', { int: 9, per: 3 }), int: 9, per: 3, value: 80 }, 4: { twoHanded: true, text: t('weaponWizard4Text'), notes: t('weaponWizard4Notes', { int: 12, per: 5 }), int: 12, per: 5, value: 120 }, 5: { twoHanded: true, text: t('weaponWizard5Text'), notes: t('weaponWizard5Notes', { int: 15, per: 7 }), int: 15, per: 7, value: 160 }, 6: { twoHanded: true, text: t('weaponWizard6Text'), notes: t('weaponWizard6Notes', { int: 18, per: 10 }), int: 18, per: 10, value: 200, last: true } }, healer: { 0: { text: t('weaponHealer0Text'), notes: t('weaponHealer0Notes'), value: 0 }, 1: { text: t('weaponHealer1Text'), notes: t('weaponHealer1Notes', { int: 2 }), int: 2, value: 20 }, 2: { text: t('weaponHealer2Text'), notes: t('weaponHealer2Notes', { int: 3 }), int: 3, value: 30 }, 3: { text: t('weaponHealer3Text'), notes: t('weaponHealer3Notes', { int: 5 }), int: 5, value: 45 }, 4: { text: t('weaponHealer4Text'), notes: t('weaponHealer4Notes', { int: 7 }), int: 7, value: 65 }, 5: { text: t('weaponHealer5Text'), notes: t('weaponHealer5Notes', { int: 9 }), int: 9, value: 90 }, 6: { text: t('weaponHealer6Text'), notes: t('weaponHealer6Notes', { int: 11 }), int: 11, value: 120, last: true } }, special: { 0: { text: t('weaponSpecial0Text'), notes: t('weaponSpecial0Notes', { str: 20 }), str: 20, value: 150, canOwn: (function(u) { var _ref; return +((_ref = u.backer) != null ? _ref.tier : void 0) >= 70; }) }, 1: { text: t('weaponSpecial1Text'), notes: t('weaponSpecial1Notes', { attrs: 6 }), str: 6, per: 6, con: 6, int: 6, value: 170, canOwn: (function(u) { var _ref; return +((_ref = u.contributor) != null ? _ref.level : void 0) >= 4; }) }, 2: { text: t('weaponSpecial2Text'), notes: t('weaponSpecial2Notes', { attrs: 25 }), str: 25, per: 25, value: 200, canOwn: (function(u) { var _ref; return (+((_ref = u.backer) != null ? _ref.tier : void 0) >= 300) || (u.items.gear.owned.weapon_special_2 != null); }) }, 3: { text: t('weaponSpecial3Text'), notes: t('weaponSpecial3Notes', { attrs: 17 }), str: 17, int: 17, con: 17, value: 200, canOwn: (function(u) { var _ref; return +((_ref = u.backer) != null ? _ref.tier : void 0) >= 300; }) }, critical: { text: t('weaponSpecialCriticalText'), notes: t('weaponSpecialCriticalNotes', { attrs: 40 }), str: 40, per: 40, value: 200, canOwn: (function(u) { var _ref; return !!((_ref = u.contributor) != null ? _ref.critical : void 0); }) },
+              yeti: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'warrior'; }), text: t('weaponSpecialYetiText'), notes: t('weaponSpecialYetiNotes', { str: 15 }), str: 15, value: 90 }, ski: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'rogue'; }), text: t('weaponSpecialSkiText'), notes: t('weaponSpecialSkiNotes', { str: 8 }), str: 8, value: 90 }, candycane: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'wizard'; }), twoHanded: true, text: t('weaponSpecialCandycaneText'), notes: t('weaponSpecialCandycaneNotes', { int: 15, per: 7 }), int: 15, per: 7, value: 160 }, snowflake: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'healer'; }), text: t('weaponSpecialSnowflakeText'), notes: t('weaponSpecialSnowflakeNotes', { int: 9 }), int: 9, value: 90 }, springRogue: { event: events.spring, specialClass: 'rogue', text: t('weaponSpecialSpringRogueText'), notes: t('weaponSpecialSpringRogueNotes', { str: 8 }), value: 80, str: 8 }, springWarrior: { event: events.spring, specialClass: 'warrior', text: t('weaponSpecialSpringWarriorText'), notes: t('weaponSpecialSpringWarriorNotes', { str: 15 }), value: 90, str: 15 }, springMage: { event: events.spring, specialClass: 'wizard', twoHanded: true, text: t('weaponSpecialSpringMageText'), notes: t('weaponSpecialSpringMageNotes', { int: 15, per: 7 }), value: 160, int: 15, per: 7 }, springHealer: { event: events.spring, specialClass: 'healer', text: t('weaponSpecialSpringHealerText'), notes: t('weaponSpecialSpringHealerNotes', { int: 9 }), value: 90, int: 9 } } }, armor: { base: { 0: { text: t('armorBase0Text'), notes: t('armorBase0Notes'), value: 0 } }, warrior: { 1: { text: t('armorWarrior1Text'), notes: t('armorWarrior1Notes', { con: 3 }), con: 3, value: 30 }, 2: { text: t('armorWarrior2Text'), notes: t('armorWarrior2Notes', { con: 5 }), con: 5, value: 45 }, 3: { text: t('armorWarrior3Text'), notes: t('armorWarrior3Notes', { con: 7 }), con: 7, value: 65 }, 4: { text: t('armorWarrior4Text'), notes: t('armorWarrior4Notes', { con: 9 }), con: 9, value: 90 }, 5: { text: t('armorWarrior5Text'), notes: t('armorWarrior5Notes', { con: 11 }), con: 11, value: 120, last: true } }, rogue: { 1: { text: t('armorRogue1Text'), notes: t('armorRogue1Notes', { per: 6 }), per: 6, value: 30 }, 2: { text: t('armorRogue2Text'), notes: t('armorRogue2Notes', { per: 9 }), per: 9, value: 45 }, 3: { text: t('armorRogue3Text'), notes: t('armorRogue3Notes', { per: 12 }), per: 12, value: 65 }, 4: { text: t('armorRogue4Text'), notes: t('armorRogue4Notes', { per: 15 }), per: 15, value: 90 }, 5: { text: t('armorRogue5Text'), notes: t('armorRogue5Notes', { per: 18 }), per: 18, value: 120, last: true } }, wizard: { 1: { text: t('armorWizard1Text'), notes: t('armorWizard1Notes', { int: 2 }), int: 2, value: 30 }, 2: { text: t('armorWizard2Text'), notes: t('armorWizard2Notes', { int: 4 }), int: 4, value: 45 }, 3: { text: t('armorWizard3Text'), notes: t('armorWizard3Notes', { int: 6 }), int: 6, value: 65 }, 4: { text: t('armorWizard4Text'), notes: t('armorWizard4Notes', { int: 9 }), int: 9, value: 90 }, 5: { text: t('armorWizard5Text'), notes: t('armorWizard5Notes', { int: 12 }), int: 12, value: 120, last: true } }, healer: { 1: { text: t('armorHealer1Text'), notes: t('armorHealer1Notes', { con: 6 }), con: 6, value: 30 }, 2: { text: t('armorHealer2Text'), notes: t('armorHealer2Notes', { con: 9 }), con: 9, value: 45 }, 3: { text: t('armorHealer3Text'), notes: t('armorHealer3Notes', { con: 12 }), con: 12, value: 65 }, 4: { text: t('armorHealer4Text'), notes: t('armorHealer4Notes', { con: 15 }), con: 15, value: 90 }, 5: { text: t('armorHealer5Text'), notes: t('armorHealer5Notes', { con: 18 }), con: 18, value: 120, last: true } }, special: { 0: { text: t('armorSpecial0Text'), notes: t('armorSpecial0Notes', { con: 20 }), con: 20, value: 150, canOwn: (function(u) { var _ref; return +((_ref = u.backer) != null ? _ref.tier : void 0) >= 45; }) }, 1: { text: t('armorSpecial1Text'), notes: t('armorSpecial1Notes', { attrs: 6 }), con: 6, str: 6, per: 6, int: 6, value: 170, canOwn: (function(u) { var _ref; return +((_ref = u.contributor) != null ? _ref.level : void 0) >= 2; }) }, 2: { text: t('armorSpecial2Text'), notes: t('armorSpecial2Notes', { attrs: 25 }), int: 25, con: 25, value: 200, canOwn: (function(u) { var _ref; return +((_ref = u.backer) != null ? _ref.tier : void 0) >= 300; }) }, yeti: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'warrior'; }), text: t('armorSpecialYetiText'), notes: t('armorSpecialYetiNotes', { con: 9 }), con: 9, value: 90 }, ski: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'rogue'; }), text: t('armorSpecialSkiText'), notes: t('armorSpecialSkiText', { per: 15 }), per: 15, value: 90 }, candycane: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'wizard'; }), text: t('armorSpecialCandycaneText'), notes: t('armorSpecialCandycaneNotes', { int: 9 }), int: 9, value: 90 }, snowflake: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'healer'; }), text: t('armorSpecialSnowflakeText'), notes: t('armorSpecialSnowflakeNotes', { con: 15 }), con: 15, value: 90 }, birthday: { event: events.birthday, text: t('armorSpecialBirthdayText'), notes: t('armorSpecialBirthdayNotes'), value: 0 }, springRogue: { event: events.spring, specialClass: 'rogue', text: t('armorSpecialSpringRogueText'), notes: t('armorSpecialSpringRogueNotes', { per: 15 }), value: 90, per: 15 }, springWarrior: { event: events.spring, specialClass: 'warrior', text: t('armorSpecialSpringWarriorText'), notes: t('armorSpecialSpringWarriorNotes', { con: 9 }), value: 90, con: 9 }, springMage: { event: events.spring, specialClass: 'wizard', text: t('armorSpecialSpringMageText'), notes: t('armorSpecialSpringMageNotes', { int: 9 }), value: 90, int: 9 }, springHealer: { event: events.spring, specialClass: 'healer', text: t('armorSpecialSpringHealerText'), notes: t('armorSpecialSpringHealerNotes', { con: 15 }), value: 90, con: 15 } }, mystery: { 201402: { text: t('armorMystery201402Text'), notes: t('armorMystery201402Notes'), mystery: mystery['201402'], value: 10 }, 201403: { text: t('armorMystery201403Text'), notes: t('armorMystery201403Notes'), mystery: mystery['201403'], value: 10 } } }, head: { base: { 0: { text: t('headBase0Text'), notes: t('headBase0Notes'), value: 0 } }, warrior: { 1: { text: t('headWarrior1Text'), notes: t('headWarrior1Notes', { str: 2 }), str: 2, value: 15 }, 2: { text: t('headWarrior2Text'), notes: t('headWarrior2Notes', { str: 4 }), str: 4, value: 25 }, 3: { text: t('headWarrior3Text'), notes: t('headWarrior3Notes', { str: 6 }), str: 6, value: 40 }, 4: { text: t('headWarrior4Text'), notes: t('headWarrior4Notes', { str: 9 }), str: 9, value: 60 }, 5: { text: t('headWarrior5Text'), notes: t('headWarrior5Notes', { str: 12 }), str: 12, value: 80, last: true } }, rogue: { 1: { text: t('headRogue1Text'), notes: t('headRogue1Notes', { per: 2 }), per: 2, value: 15 }, 2: { text: t('headRogue2Text'), notes: t('headRogue2Notes', { per: 4 }), per: 4, value: 25 }, 3: { text: t('headRogue3Text'), notes: t('headRogue3Notes', { per: 6 }), per: 6, value: 40 }, 4: { text: t('headRogue4Text'), notes: t('headRogue4Notes', { per: 9 }), per: 9, value: 60 }, 5: { text: t('headRogue5Text'), notes: t('headRogue5Notes', { per: 12 }), per: 12, value: 80, last: true } }, wizard: { 1: { text: t('headWizard1Text'), notes: t('headWizard1Notes', { per: 2 }), per: 2, value: 15 }, 2: { text: t('headWizard2Text'), notes: t('headWizard2Notes', { per: 3 }), per: 3, value: 25 }, 3: { text: t('headWizard3Text'), notes: t('headWizard3Notes', { per: 5 }), per: 5, value: 40 }, 4: { text: t('headWizard4Text'), notes: t('headWizard4Notes', { per: 7 }), per: 7, value: 60 }, 5: { text: t('headWizard5Text'), notes: t('headWizard5Notes', { per: 10 }), per: 10, value: 80, last: true } }, healer: { 1: { text: t('headHealer1Text'), notes: t('headHealer1Notes', { int: 2 }), int: 2, value: 15 }, 2: { text: t('headHealer2Text'), notes: t('headHealer2Notes', { int: 3 }), int: 3, value: 25 }, 3: { text: t('headHealer3Text'), notes: t('headHealer3Notes', { int: 5 }), int: 5, value: 40 }, 4: { text: t('headHealer4Text'), notes: t('headHealer4Notes', { int: 7 }), int: 7, value: 60 }, 5: { text: t('headHealer5Text'), notes: t('headHealer5Notes', { int: 9 }), int: 9, value: 80, last: true } }, special: { 0: { text: t('headSpecial0Text'), notes: t('headSpecial0Notes', { int: 20 }), int: 20, value: 150, canOwn: (function(u) { var _ref; return +((_ref = u.backer) != null ? _ref.tier : void 0) >= 45; }) }, 1: { text: t('headSpecial1Text'), notes: t('headSpecial1Notes', { attrs: 6 }), con: 6, str: 6, per: 6, int: 6, value: 170, canOwn: (function(u) { var _ref; return +((_ref = u.contributor) != null ? _ref.level : void 0) >= 3; }) }, 2: { text: t('headSpecial2Text'), notes: t('headSpecial2Notes', { attrs: 25 }), int: 25, str: 25, value: 200, canOwn: (function(u) { var _ref; return +((_ref = u.backer) != null ? _ref.tier : void 0) >= 300; }) }, nye: { event: events.winter, text: t('headSpecialNyeText'), notes: t('headSpecialNyeNotes'), value: 0 }, yeti: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'warrior'; }), text: t('headSpecialYetiText'), notes: t('headSpecialYetiNotes', { str: 9 }), str: 9, value: 60 }, ski: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'rogue'; }), text: t('headSpecialSkiText'), notes: t('headSpecialSkiNotes', { per: 9 }), per: 9, value: 60 }, candycane: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'wizard'; }), text: t('headSpecialCandycaneText'), notes: t('headSpecialCandycaneNotes', { per: 7 }), per: 7, value: 60 }, snowflake: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'healer'; }), text: t('headSpecialSnowflakeText'), notes: t('headSpecialSnowflakeNotes', { int: 7 }), int: 7, value: 60 }, springRogue: { event: events.spring, specialClass: 'rogue', text: t('headSpecialSpringRogueText'), notes: t('headSpecialSpringRogueNotes', { per: 9 }), value: 40, per: 9 }, springWarrior: { event: events.spring, specialClass: 'warrior', text: t('headSpecialSpringWarriorText'), notes: t('headSpecialSpringWarriorNotes', { str: 9 }), value: 40, str: 9 }, springMage: { event: events.spring, specialClass: 'wizard', text: t('headSpecialSpringMageText'), notes: t('headSpecialSpringMageNotes', { per: 7 }), value: 40, per: 7 }, springHealer: { event: events.spring, specialClass: 'healer', text: t('headSpecialSpringHealerText'), notes: t('headSpecialSpringHealerNotes', { int: 7 }), value: 40, int: 7 } }, mystery: { 201402: { text: t('headMystery201402Text'), notes: t('headMystery201402Notes'), mystery: mystery['201402'], value: 10 } } }, shield: { base: { 0: { text: t('shieldBase0Text'), notes: t('shieldBase0Notes'), value: 0 } }, warrior: { 1: { text: t('shieldWarrior1Text'), notes: t('shieldWarrior1Notes', { con: 2 }), con: 2, value: 20 }, 2: { text: t('shieldWarrior2Text'), notes: t('shieldWarrior2Notes', { con: 3 }), con: 3, value: 35 }, 3: { text: t('shieldWarrior3Text'), notes: t('shieldWarrior3Notes', { con: 5 }), con: 5, value: 50 }, 4: { text: t('shieldWarrior4Text'), notes: t('shieldWarrior4Notes', { con: 7 }), con: 7, value: 70 }, 5: { text: t('shieldWarrior5Text'), notes: t('shieldWarrior5Notes', { con: 9 }), con: 9, value: 90, last: true } }, rogue: { 0: { text: t('weaponRogue0Text'), notes: t('weaponRogue0Notes'), str: 0, value: 0 }, 1: { text: t('weaponRogue1Text'), notes: t('weaponRogue1Notes', { str: 2 }), str: 2, value: 20 }, 2: { text: t('weaponRogue2Text'), notes: t('weaponRogue2Notes', { str: 3 }), str: 3, value: 35 }, 3: { text: t('weaponRogue3Text'), notes: t('weaponRogue3Notes', { str: 4 }), str: 4, value: 50 }, 4: { text: t('weaponRogue4Text'), notes: t('weaponRogue4Notes', { str: 6 }), str: 6, value: 70 }, 5: { text: t('weaponRogue5Text'), notes: t('weaponRogue5Notes', { str: 8 }), str: 8, value: 90 }, 6: { text: t('weaponRogue6Text'), notes: t('weaponRogue6Notes', { str: 10 }), str: 10, value: 120, last: true } }, wizard: {}, healer: { 1: { text: t('shieldHealer1Text'), notes: t('shieldHealer1Notes', { con: 2 }), con: 2, value: 20 }, 2: { text: t('shieldHealer2Text'), notes: t('shieldHealer2Notes', { con: 4 }), con: 4, value: 35 }, 3: { text: t('shieldHealer3Text'), notes: t('shieldHealer3Notes', { con: 6 }), con: 6, value: 50 }, 4: { text: t('shieldHealer4Text'), notes: t('shieldHealer4Notes', { con: 9 }), con: 9, value: 70 }, 5: { text: t('shieldHealer5Text'), notes: t('shieldHealer5Notes', { con: 12 }), con: 12, value: 90, last: true } }, special: { 0: { text: t('shieldSpecial0Text'), notes: t('shieldSpecial0Notes', { per: 20 }), per: 20, value: 150, canOwn: (function(u) { var _ref; return +((_ref = u.backer) != null ? _ref.tier : void 0) >= 45; }) }, 1: { text: t('shieldSpecial1Text'), notes: t('shieldSpecial1Notes', { attrs: 6 }), con: 6, str: 6, per: 6, int: 6, value: 170, canOwn: (function(u) { var _ref; return +((_ref = u.contributor) != null ? _ref.level : void 0) >= 5; }) }, yeti: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'warrior'; }), text: t('shieldSpecialYetiText'), notes: t('shieldSpecialYetiNotes', { con: 7 }), con: 7, value: 70 }, ski: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'rogue'; }), text: t('weaponSpecialSkiText'), notes: t('weaponSpecialSkiNotes', { str: 8 }), str: 8, value: 90 }, snowflake: { event: events.winter, canOwn: (function(u) { return u.stats["class"] === 'healer'; }), text: t('shieldSpecialSnowflakeText'), notes: t('shieldSpecialSnowflakeNotes', { con: 9 }), con: 9, value: 70 }, springRogue: { event: events.spring, specialClass: 'rogue', text: t('shieldSpecialSpringRogueText'), notes: t('shieldSpecialSpringRogueNotes', { str: 8 }), value: 80, str: 8 }, springWarrior: { event: events.spring, specialClass: 'warrior', text: t('shieldSpecialSpringWarriorText'), notes: t('shieldSpecialSpringWarriorNotes', { con: 7 }), value: 70, con: 7 }, springHealer: { event: events.spring, specialClass: 'healer', text: t('shieldSpecialSpringHealerText'), notes: t('shieldSpecialSpringHealerNotes', { con: 9 }), value: 70, con: 9 } } }, back: { base: { 0: { text: t('backBase0Text'), notes: t('backBase0Notes'), value: 0 } }, mystery: { 201402: { text: t('backMystery201402Text'), notes: t('backMystery201402Notes'), mystery: mystery['201402'], value: 10 }, 201404: { text: t('backMystery201404Text'), notes: t('backMystery201404Notes'), mystery: mystery['201404'], value: 10 } }, special: { wondercon_red: { text: t('backSpecialWonderconRedText'), notes: t('backSpecialWonderconRedNotes'), value: 0, mystery: mystery.wondercon }, wondercon_black: { text: t('backSpecialWonderconBlackText'), notes: t('backSpecialWonderconBlackNotes'), value: 0, mystery: mystery.wondercon } } }, body: { base: { 0: { text: t('bodyBase0Text'), notes: t('bodyBase0Notes'), value: 0 } }, special: { wondercon_red: { text: t('bodySpecialWonderconRedText'), notes: t('bodySpecialWonderconRedNotes'), value: 0, mystery: mystery.wondercon }, wondercon_gold: { text: t('bodySpecialWonderconGoldText'), notes: t('bodySpecialWonderconGoldNotes'), value: 0, mystery: mystery.wondercon }, wondercon_black: { text: t('bodySpecialWonderconBlackText'), notes: t('bodySpecialWonderconBlackNotes'), value: 0, mystery: mystery.wondercon } } }, headAccessory: { base: { 0: { text: t('headAccessoryBase0Text'), notes: t('headAccessoryBase0Notes'), value: 0, last: true } }, special: { springRogue: { event: events.spring, specialClass: 'rogue', text: t('headAccessorySpecialSpringRogueText'), notes: t('headAccessorySpecialSpringRogueNotes'), value: 20 }, springWarrior: { event: events.spring, specialClass: 'warrior', text: t('headAccessorySpecialSpringWarriorText'), notes: t('headAccessorySpecialSpringWarriorNotes'), value: 20 }, springMage: { event: events.spring, specialClass: 'wizard', text: t('headAccessorySpecialSpringMageText'), notes: t('headAccessorySpecialSpringMageNotes'), value: 20 }, springHealer: { event: events.spring, specialClass: 'healer', text: t('headAccessorySpecialSpringHealerText'), notes: t('headAccessorySpecialSpringHealerNotes'), value: 20 }, wondercon_red: { text: t('headAccessorySpecialWonderconRedText'), notes: t('headAccessorySpecialWonderconRedNotes'), value: 0, mystery: mystery.wondercon }, wondercon_black: { text: t('headAccessorySpecialWonderconBlackText'), notes: t('headAccessorySpecialWonderconBlackNotes'), value: 0, mystery: mystery.wondercon } }, mystery: { 201403: { text: t('headAccessoryMystery201403Text'), notes: t('headAccessoryMystery201403Notes'), mystery: mystery['201403'], value: 10 }, 201404: { text: t('headAccessoryMystery201404Text'), notes: t('headAccessoryMystery201404Notes'), mystery: mystery['201404'], value: 10 } } }
+                };
+
+                return gear[obj.type][obj.klass][obj.index].text;
+            }
+        }
     }
 }
+
 
 
 function computeStats() {
@@ -2511,8 +2779,7 @@ function computeStats() {
     }
 }
 
-
-} // end of displayData() and its nested functions
+} // end of parseData() and its nested functions
 });
 </script>
 
@@ -2905,9 +3172,13 @@ ul#tableOfContents > li {
 #todosDatedSection .due {
     font-weight: bold;
 }
-#todosDatedSection li span {
+#todosDatedSection li span.date {
     display: inline-block;
     width: 7em;
+}
+#todosDatedSection li span.challenge {
+    font-style: italic;
+    font-variant: small-caps;
 }
 
 
@@ -3078,7 +3349,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.1.1 + skills)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.2 + skills)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3105,15 +3376,33 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
-        <dt>2.1.1<span class="date">2014-05-14</span></dt>
+        <dt>2.2<span class="date">2014-05-16</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>At the bottom of the <span class="subheading">Task Overview</span> section, you will now find one randomly-selected item from your to-do list. Re-fetch your data to see a different random to-do.</li>
+                    <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed to-dos that HabitRPG has in its archive. The to-dos' notes and completion dates are included.</li>
                 </ul>
             </li>
         </ul></dd>
 
+        <dt>2.1.2<span class="date">2014-05-15</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>(2.1.2a) Names of equipment have been fixes. Names of quests, quest bosses, and collection quest items are still not perfect, but it's easy enough to work out what they mean. I'll be fixing them properly soon.</li>
+                    <li>Temporary partial bug fixes have been inserted. (HabitRPG has changed how it reports the names of equipment, quests, bosses, and other items. I'm updating this tool to match.)</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>2.1.1<span class="date">2014-05-14</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>(2.1.1a) For "To-Dos with Dates", if the only "due" to-dos are from challenges and are more than a week old, then the dashboard tile will be yellow rather than red, since you're likely to not care so much about those to-dos.</li>
+                    <li>At the bottom of the <span class="subheading">Task Overview</span> section, you will now find one randomly-selected item from your to-do list. Re-fetch your data to see a different random to-do.</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>2.1<span class="date">2014-05-13</span></dt>
         <dd><ul>
             <li>Features:
@@ -3493,6 +3782,7 @@ ul#tableOfContents > li {
             <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
             <li><span class="subheading">Dailies Incomplete</span>: A list of dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
             <li><span class="subheading">To-Dos with Dates</span>: A list of all to-dos that have been given due dates, sorted by date. If there are any to-dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
+            <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed to-dos that HabitRPG has in its archive. The to-dos' notes and completion dates are included.</li>
             <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
             <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
             <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
