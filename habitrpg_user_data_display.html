@@ -1553,12 +1553,11 @@ randomTodo.text + '</p>'
         var id      = 'todosCompletedSection';
         var title   = 'To-Dos Completed';
         var orderId = 'todosCompleted';
-        var html = '<p>For information about this table\'s advanced features, read the explanation for the "Task Overview" section.</p><table></table>';
-
+        var html = '<p>This shows all of your completed to-dos that HabitRPG has in its archive (not necessarily all the to-dos that you have ever completed because HabitRPG keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitrpg.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section.</span></p><table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
-                   'function': createTodosCompletedTable,
-                   'html': html};
+                         'function': createTodosCompletedTable,
+                         'html': html};
 
         function createTodosCompletedTable() {
             // Use DataTables to build the table (the table tag must be
