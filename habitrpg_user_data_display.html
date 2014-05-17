@@ -86,7 +86,6 @@ var localeServerUrl   = 'https://oldgods.net/habitrpg';
 // localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 
 
-/* TST - FOR TESTING:
 localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -100,6 +99,7 @@ $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 // d("tstfetchprocess: a: testdata submission");
 fetchData();
+/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -833,9 +833,8 @@ function collateAndDisplayTaskData() {
                               obj.colour.nameNoSpace + '</span>';
 
         function reformatDate(dateString) {
-            var date = new Date(dateString); // ASSUME a real date!
-            var formattedDate = myDateConverter(date, 'long');
-            var shortDate     = myDateConverter(date, 'short');
+            var formattedDate = myDateConverter(dateString, 'long');
+            var shortDate     = myDateConverter(dateString, 'short');
             return { 'dateAndTime': formattedDate,
                      'shortDate': shortDate };
         }
@@ -877,6 +876,14 @@ function collateAndDisplayTaskData() {
 
 
     function myDateConverter(date, style) {
+        if (typeof date === 'string') {
+            try {
+                date = new Date(date);
+            }
+            catch(err) {
+                // XXX UPTOHERE
+            }
+        }
         var y = date.getFullYear();
         var m = date.getMonth() + 1;
         var d = date.getDate();
@@ -1489,7 +1496,7 @@ randomTodo.text + '</p>'
             var challenge = (obj.challenge && obj.challenge.id)
                           ? ' <span class="challenge">(challenge to-do)</span>'
                           : '';
-            var date = myDateConverter(new Date(obj.date), 'medium');
+            var date = myDateConverter(obj.date, 'medium');
             var dateClass = 'notDue';
             if (date <= today) {
                 dateClass = 'due';
