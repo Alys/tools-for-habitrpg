@@ -86,7 +86,6 @@ var localeServerUrl   = 'https://oldgods.net/habitrpg';
 // localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 
 
-/* TST - FOR TESTING:
 localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -100,6 +99,7 @@ $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 // d("tstfetchprocess: a: testdata submission");
 fetchData();
+/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -363,8 +363,9 @@ function formatAndDisplayTOC() {
     var keys = [
             'HEADING Tasks',
                 'taskOverview', 'taskStatistics', 'untaggedTasks',
+				'habitHistory', 
             'HEADING',
-                'habitHistory', 'dailiesIncomplete', 'todosDated',
+                'dailiesIncomplete', 'dailiesHistory', 'todosDated',
                 'todosCompleted',
             'HEADING Drops, Quests, Damage', 'dropsToday',
                 'questProgress', 'damageDailies', 'statsAndStreaks',
@@ -402,8 +403,8 @@ function formatAndDisplayMAIN() {
     // elements are in the order that the sections would appear on the page
     // if they were all visible at once):
     var keys = ['taskOverview', 'taskStatistics', 'untaggedTasks',
-                'habitHistory', 'todosDated', 'todosCompleted',
-                'dropsToday', 'questProgress',
+                'habitHistory', 'dailiesHistory', 'todosDated',
+                'todosCompleted', 'dropsToday', 'questProgress',
                 'damageDailies','dailiesIncomplete',//keep in that order
                 'statsAndStreaks', 'unallocatedPoints',
                 'missingEquipment', 'currentGear', 'equipmentRecommendations',
@@ -624,6 +625,7 @@ function collateAndDisplayTaskData() {
     habitHistory();
     damageFromDailies();
     dailiesIncomplete();
+	dailiesHistory();
     todosDated();
     todosCompletedTable();
     statsAndStreaks();
@@ -1465,6 +1467,32 @@ randomTodo.text + '</p>'
             $('#dailiesIncompleteSection').hide();
             return;
         }
+    }
+
+
+    function dailiesHistory() {
+        var id      = 'dailiesHistorySection';
+        var title   = 'Dailies History';
+        var orderId = 'dailiesHistory';
+		sectionOpen = id; // TST
+
+        var html = '';
+        for (var i=0,ic=dailies.length; i<ic; i++) {
+            var obj = dailies[i];
+			html += '<h3>' + obj.text + '</h3>';
+			// d(obj); // TST
+			// d(obj.history); // TST
+			for (var j=0,jc=obj.history.length; j<jc; j++) {
+				d(obj.history[j]); // TST
+				var formattedDate = myDateConverter(obj.date);
+				html += '<br />' + formattedDate + ' ' + obj.value;
+			}
+
+        }
+
+        TOC[orderId]  = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
+                         'html': html};
     }
 
 
