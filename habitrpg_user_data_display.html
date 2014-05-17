@@ -1795,7 +1795,6 @@ function questProgress() {
     var title   = 'Quest Progress';
     var orderId = 'questProgress';
     var html = '';
-    html = '<p class="lowlight" style="margin-bottom:2.3em">Names of quests, quest bosses, and collection quest items are currently a bit messed up, due to a change that had been made on HabitRPG but that had not been duplicated on its API. The API will be updated soon, and then the quest names will be correct again.</p>';
     // on a quest:
     // "quest":{"completed":null,"key":"ghost_stag",
     //          "progress":{"collect":{},"down":0,"up":13.780066986139815}},
@@ -1842,7 +1841,6 @@ function questProgress() {
             if (uniqueItemsCount > 1) { // we have stuff already
                 stuff += ", ";
             }
-            itemName = pluralise(itemName, value);
             stuff += value + " " + itemName;
         });
         var replaceStr = (uniqueItemsCount > 2) ? ", and" : " and";
@@ -3258,7 +3256,7 @@ ul#tableOfContents > li {
         <p>Please wait. Fetching data from
         <span id="serverName">HabitRPG</span>...</p>
         <p id="specialMessage" class="lowlight">
-        "You are made of 23049% awesome"<br />-- Clara Oswald
+"If you ever forget again how amazing you are and how much you contribute to HabitRPG, just let me know. I will be happy to explain it to you as many times as it takes."<br /> -- Megan
         </p>
     </div>
     <div class="bad hide">
