@@ -353,7 +353,7 @@ function formatAndDisplayTOC() {
     var keys = [
             'HEADING Tasks',
                 'taskOverview', 'taskStatistics', 'untaggedTasks',
-				'habitHistory', 
+                'habitHistory', 
             'HEADING',
                 'dailiesIncomplete', 'dailiesHistory', 'todosDated',
                 'todosCompleted',
@@ -614,7 +614,7 @@ function collateAndDisplayTaskData() {
     habitHistory();
     damageFromDailies();
     dailiesIncomplete();
-	dailiesHistory();
+    dailiesHistory();
     todosDated();
     todosCompletedTable();
     statsAndStreaks();
@@ -867,17 +867,17 @@ function collateAndDisplayTaskData() {
 
 
     function myDateConverter(date, style) {
-console.log(typeof date); // TST
-        if (typeof date === 'string') {
+        if (typeof date === 'string' || typeof date === 'number') {
             date = new Date(date);
-            if (isNaN(date.getTime())) {
-                // The date string that was passed in could not be converted
-                // to a Date object, presumably because it's in a non-standard
-                // format. We handle this by using today's date. It's a nasty
-                // hack, but it's unlikely to occur, and no one's paying for
-                // anything better.
-                date = new Date();
-            }
+        }
+        if (isNaN(date.getTime())) {
+            // Either the object that was passed in is not a Date object,
+            // OR the date string that was passed in could not be converted
+            // to a Date object, presumably because it's in a non-standard
+            // format. We handle this by using today's date. It's a nasty
+            // hack, but it's unlikely to occur, and no one's paying for
+            // anything better.
+            date = new Date();
         }
         var y = date.getFullYear();
         var m = date.getMonth() + 1;
@@ -1474,22 +1474,45 @@ randomTodo.text + '</p>'
         var id      = 'dailiesHistorySection';
         var title   = 'Dailies History';
         var orderId = 'dailiesHistory';
-		sectionOpen = id; // TST
+        sectionOpen = id; // TST
 
-        var html = '';
+        // preprocess the dailies to find all the dates on which data exists:
+        // var earliestDate = '';
+        // var latestDate   = '';
+        var allDates = {};
+        // var dailiesIdsInOrder = [];
+        // var dailiesKeyedById  = {};
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
-			html += '<h3>' + obj.text + '</h3>';
-			// d(obj.history); // TST
-			for (var j=0,jc=obj.history.length; j<jc; j++) {
-				// d(obj.history[j]); // TST
-				// d(obj.history[j].date); // TST
-				var formattedDate = myDateConverter(obj.history[j].date);
-				html += '<br />' + formattedDate + ' ' + obj.value;
-			}
+            // dailiesIdsInOrder.push(obj.id);
+            // html += '<h4>' + obj.text + '</h4>';
+            // console.log(obj.history); // TST
+            obj['historyItems'] = {};
+            for (var j=0,jc=obj.history.length; j<jc; j++) {
+                // console.log(obj.history[j]); // TST
+                var formattedDate = myDateConverter(obj.history[j].date);
+                obj['historyItems'][formattedDate] = obj.history[j].value;
+                allDates[formattedDate] = true;
+                // html += '<br />' + formattedDate + ' ' + obj.history[j].value;
+            }
+            dailiesKeyedById[obj.id] = obj;
+        }
+        var allDatesInOrder = Object.keys(allDates).sort().reverse();
 
+        var headerRow = '<tr><th>task</th><th>' +
+                        allDatesInOrder.join('</th><th>') + '</th></tr>';
+        var tableBody = '';
+        for (var i=0,ic=dailies.length; i<ic; i++) {
+            var obj = dailies[i];
+            html += '<tr><td>obj.text</td>';
+            for (var i=0,ic=allDatesInOrder.length; i<ic; i++) {
+                html += '<td>' +
+                        obj['historyItems'][allDatesInOrder][i] + '</td>';
+            }
+            html += '</tr>' ;
         }
 
+        var html = '<table>' + headerRow + tableBody + '</table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
