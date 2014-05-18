@@ -86,6 +86,7 @@ var localeServerUrl   = 'https://oldgods.net/habitrpg';
 // localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 
 
+/* TST - FOR TESTING:
 localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -99,7 +100,6 @@ $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 // d("tstfetchprocess: a: testdata submission");
 fetchData();
-/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -877,11 +877,14 @@ function collateAndDisplayTaskData() {
 
     function myDateConverter(date, style) {
         if (typeof date === 'string') {
-            try {
-                date = new Date(date);
-            }
-            catch(err) {
-                // XXX UPTOHERE
+            date = new Date(date);
+            if (isNaN(date.getTime())) {
+                // The date string that was passed in could not be converted
+                // to a Date object, presumably because it's in a non-standard
+                // format. We handle this by using today's date. It's a nasty
+                // hack, but it's unlikely to occur, and no one's paying for
+                // anything better.
+                date = new Date();
             }
         }
         var y = date.getFullYear();
@@ -902,7 +905,7 @@ function collateAndDisplayTaskData() {
                        ':' + (S<=9 ? '0'+S : S);
         }
         return dateStr;
-    };
+    }
 
 
     function taskOverview() { // Displays all tasks of all kinds.
