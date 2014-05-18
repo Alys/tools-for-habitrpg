@@ -835,9 +835,8 @@ function collateAndDisplayTaskData() {
                               obj.colour.nameNoSpace + '</span>';
 
         function reformatDate(dateString) {
-            var date = new Date(dateString); // ASSUME a real date!
-            var formattedDate = myDateConverter(date, 'long');
-            var shortDate     = myDateConverter(date, 'short');
+            var formattedDate = myDateConverter(dateString, 'long');
+            var shortDate     = myDateConverter(dateString, 'short');
             return { 'dateAndTime': formattedDate,
                      'shortDate': shortDate };
         }
@@ -879,6 +878,17 @@ function collateAndDisplayTaskData() {
 
 
     function myDateConverter(date, style) {
+        if (typeof date === 'string') {
+            date = new Date(date);
+            if (isNaN(date.getTime())) {
+                // The date string that was passed in could not be converted
+                // to a Date object, presumably because it's in a non-standard
+                // format. We handle this by using today's date. It's a nasty
+                // hack, but it's unlikely to occur, and no one's paying for
+                // anything better.
+                date = new Date();
+            }
+        }
         var y = date.getFullYear();
         var m = date.getMonth() + 1;
         var d = date.getDate();
@@ -897,7 +907,7 @@ function collateAndDisplayTaskData() {
                        ':' + (S<=9 ? '0'+S : S);
         }
         return dateStr;
-    };
+    }
 
 
     function taskOverview() { // Displays all tasks of all kinds.
@@ -1517,7 +1527,7 @@ randomTodo.text + '</p>'
             var challenge = (obj.challenge && obj.challenge.id)
                           ? ' <span class="challenge">(challenge to-do)</span>'
                           : '';
-            var date = myDateConverter(new Date(obj.date), 'medium');
+            var date = myDateConverter(obj.date, 'medium');
             var dateClass = 'notDue';
             if (date <= today) {
                 dateClass = 'due';
