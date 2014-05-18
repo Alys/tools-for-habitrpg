@@ -878,6 +878,7 @@ function collateAndDisplayTaskData() {
 
 
     function myDateConverter(date, style) {
+console.log(typeof date); // TST
         if (typeof date === 'string') {
             date = new Date(date);
             if (isNaN(date.getTime())) {
@@ -1490,11 +1491,11 @@ randomTodo.text + '</p>'
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
 			html += '<h3>' + obj.text + '</h3>';
-			// d(obj); // TST
 			// d(obj.history); // TST
 			for (var j=0,jc=obj.history.length; j<jc; j++) {
-				d(obj.history[j]); // TST
-				var formattedDate = myDateConverter(obj.date);
+				// d(obj.history[j]); // TST
+				// d(obj.history[j].date); // TST
+				var formattedDate = myDateConverter(obj.history[j].date);
 				html += '<br />' + formattedDate + ' ' + obj.value;
 			}
 
