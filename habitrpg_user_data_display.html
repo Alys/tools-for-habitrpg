@@ -1722,7 +1722,9 @@ function dropCountAndCap() {
                '</span></p><p>Your <a '  +
                'href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">' +
                'drop-cap</a> is <span class="highlight">';
-    var dropCap = 5 + Math.floor(computedStats['per'] / 25);
+    var dropCap = 5 + Math.floor(computedStats['per'] / 25) +
+                  (user.contributor.level || 0);
+
     if (user.purchased.plan.planId) { // XXX_LATER better way now?
         /*  JSON SUBSCRIPTION DATA:
         NON-subscriber:
@@ -1780,7 +1782,7 @@ function dropCountAndCap() {
                    // * (1 + computedStats['per'] / 100)
                    // * (1 + user.achievements.streak / 200);
     // if (user.contributor.level) {
-        // dropChance *= (1 + user.contributor.level / 20);
+        // dropChance *= (1 + user.contributor.level / 40);
     // }
     // dropChance = diminishingReturns(dropChance, 0.75);
     // function diminishingReturns(bonus, max) {
@@ -3275,7 +3277,7 @@ ul#tableOfContents > li {
     <div class="bad hide">
         <p>There was an error obtaining your data.</p>
         <ul class="padded">
-            <li>Please check that your <a href="https://habitrpg.com/#/options/settings/api">User ID and API Token</a> are correct.</li>
+            <li>Please reload the page and then check that your <a href="https://habitrpg.com/#/options/settings/api">User ID and API Token</a> are correct.</li>
             <li>If you're using Internet Explorer, try another browser. <a href="https://www.google.com/intl/en/chrome/browser/">Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a> will be more reliable.</li>
             <li>If neither of those help, contact me! See <strong>"Help and Contact Details"</strong> at the bottom of this page.</li>
         </ul>
