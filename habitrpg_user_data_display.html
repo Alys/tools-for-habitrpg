@@ -353,7 +353,7 @@ function formatAndDisplayTOC() {
     var keys = [
             'HEADING Tasks',
                 'taskOverview', 'taskStatistics', 'untaggedTasks',
-                'habitHistory', 
+                'habitHistory',
             'HEADING',
                 'dailiesIncomplete', 'dailiesHistory', 'todosDated',
                 'todosCompleted',
@@ -1480,35 +1480,27 @@ randomTodo.text + '</p>'
         // var earliestDate = '';
         // var latestDate   = '';
         var allDates = {};
-        // var dailiesIdsInOrder = [];
-        // var dailiesKeyedById  = {};
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
-            // dailiesIdsInOrder.push(obj.id);
-            // html += '<h4>' + obj.text + '</h4>';
-            // console.log(obj.history); // TST
             obj['historyItems'] = {};
             for (var j=0,jc=obj.history.length; j<jc; j++) {
-                // console.log(obj.history[j]); // TST
                 var formattedDate = myDateConverter(obj.history[j].date);
                 obj['historyItems'][formattedDate] = obj.history[j].value;
                 allDates[formattedDate] = true;
-                // html += '<br />'+ formattedDate +' ' + obj.history[j].value;
             }
-            // dailiesKeyedById[obj.id] = obj;
         }
         var allDatesInOrder = Object.keys(allDates).sort().reverse();
 
         var headerRow = '<tr><th>task</th><th>' +
                         allDatesInOrder.join('</th><th>') + '</th></tr>';
+        headerRow = headerRow.replace(/>20/g, ">'"); // remove century
         var tableBody = '';
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
             tableBody += '<tr><td>' + obj.text + '</td>';
-            for (var i=0,ic=allDatesInOrder.length; i<ic; i++) {
-                tableBody += '<td>' +
-                        (obj['historyItems'][[allDatesInOrder][i]] || '') +
-                        '</td>';
+            for (var j=0,jc=allDatesInOrder.length; j<jc; j++) {
+				var value = obj['historyItems'][ allDatesInOrder[j] ];
+                tableBody += '<td>' + value + '</td>';
             }
             tableBody += '</tr>' ;
         }
