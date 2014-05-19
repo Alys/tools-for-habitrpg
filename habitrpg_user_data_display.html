@@ -1531,9 +1531,9 @@ randomTodo.text + '</p>'
             tableBody += '</tr>' ;
         }
 
-        var html = '<div class="outer"><div class="inner"><table>' +
+        var html = '<table>' +
                    headerRow + '<tbody>' +
-                   tableBody + '</tbody></table></div></div>';
+                   tableBody + '</tbody></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
@@ -3167,22 +3167,10 @@ ul#tableOfContents > li {
 }
 
 
-#dailiesHistorySection .outer {
-    position: relative;
-}
-#dailiesHistorySection .inner {
-    overflow-x: scroll;
-    overflow-y: visible;
-    width: 90%;
-    margin-left:100px;
-}
 #dailiesHistorySection table {
     border-bottom: 1px solid black;
     border-right:  1px solid black;
-    TSTtable-layout: fixed; 
-    width: 100%;
 }
-
 #dailiesHistorySection table th,
 #dailiesHistorySection table td {
     text-align: center;
@@ -3191,12 +3179,7 @@ ul#tableOfContents > li {
 }
 #dailiesHistorySection table td:first-child {
     text-align: left;
-    position:absolute;
-    left:0; 
-    width: 100px;
 }
-
-
 
 
 #todosDatedSection ul {
