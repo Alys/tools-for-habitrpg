@@ -1477,15 +1477,15 @@ randomTodo.text + '</p>'
         sectionOpen = id; // TST
 
         // preprocess the dailies to find all the dates on which data
-        // exists, and to work out if each day with a success or fail
-        // or neither (grey daily) based on whether the day's value is higher or lower than the previous day's XXX or compare day with next day?
+        // exists, and to work out if each day was a success or fail
+        // or neither (e.g., grey daily) based on whether the day's value
+        // is higher or lower than the previous day's:
         var allDates = {};
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
             obj['historyItems'] = {};
             var previousValue = null;
             for (var j=0,jc=obj.history.length; j<jc; j++) {
-                // console.log(obj.history[j].date); // TST - number
                 var formattedDate = myDateConverter(obj.history[j].date);
                 var value = obj.history[j].value;
                 var success = '-'; // default (grey daily or no data)
@@ -1509,10 +1509,24 @@ randomTodo.text + '</p>'
             }
         }
         var allDatesInOrder = Object.keys(allDates).sort().reverse();
-
-        var headerRow = '<thead><tr><th>task</th><th>' +
-                        allDatesInOrder.join('&nbsp;</th><th>') +
-                        '&nbsp;</th></tr></thead>';
+        var datesWithGaps = {};
+        var previousDate = null;
+        var headerRow = '<thead><tr><th>task</th>';
+        for (var i=0,ic=allDatesInOrder.length; i<ic; i++) {
+            var date = new Date(allDatesInOrder[i]);
+            var missingDate = '';
+            if (previousDate !== null) {
+                if ((previousDate - date) > 24*60*60*1000) {
+                    // there's a gap between the dates of more than one day
+                    datesWithGaps[allDatesInOrder[i]] = true;
+                    missingDate = 'missingDate';
+                }
+            }
+            headerRow += '<th class="' + missingDate + '">' +
+                         allDatesInOrder[i] + '&nbsp;</th>';
+            previousDate = date;
+        }
+        headerRow += '</tr></thead>';
         headerRow = headerRow.replace(/>20/g, ">'"); // remove century
         headerRow = headerRow.replace(/-/g, "-<br />"); // line break after -
         var tableBody = '';
@@ -1520,13 +1534,17 @@ randomTodo.text + '</p>'
             var obj = dailies[i];
             tableBody += '<tr><td>' + obj.text + '</td>';
             for (var j=0,jc=allDatesInOrder.length; j<jc; j++) {
+                var missingDate = (datesWithGaps[allDatesInOrder[j]]) ?
+                                  'missingDate' : '';
                 var status = 'neutral';
                 var value  = '-';
                 if (obj['historyItems'][allDatesInOrder[j]]) {
                     status = obj['historyItems'][allDatesInOrder[j]]['status'];
                     value  = obj['historyItems'][allDatesInOrder[j]]['value'];
                 }
-                tableBody += '<td class="' + status + '">' + value + '</td>';
+                tableBody += '<td class="' +
+                             status + ' ' + missingDate + '">' +
+                             value + '</td>';
             }
             tableBody += '</tr>' ;
         }
@@ -3168,17 +3186,21 @@ ul#tableOfContents > li {
 
 
 #dailiesHistorySection table {
-    border-bottom: 1px solid black;
-    border-right:  1px solid black;
+    border-bottom: 1px solid #ccc;
+    border-left:   1px solid #ccc;
 }
 #dailiesHistorySection table th,
 #dailiesHistorySection table td {
     text-align: center;
-    border-top:  1px solid #ccc;
-    border-left: 1px solid #ccc;
+    border-top:   1px solid #ccc;
+    border-right: 1px solid #ccc;
 }
 #dailiesHistorySection table td:first-child {
     text-align: left;
+}
+#dailiesHistorySection table th.missingDate,
+#dailiesHistorySection table td.missingDate {
+    border-left: 0.3em solid #999;
 }
 
 
