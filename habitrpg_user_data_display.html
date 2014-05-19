@@ -317,7 +317,8 @@ function formatAndDisplayDASHBOARD() {
     var keys = ['currentHealth', 'dailiesIncomplete', 'damageToUser',
                 'damageToParty', 'questProgress', 'todosDated', 'dropsToday',
                 'unallocatedPoints', 'sleeping'];
-    var html = '<ul>';
+    var html = '<p class="lowlight">The <span class="subheading">Dashboard "Est. Damage to You"</span> tile has changed. It now shows the TOTAL damage you will take from your own dailies directly AND (if you are on a boss quest) from the quest boss due to those dailies. Click on it to open up the "Damage from Dailies" section which will explain the numbers in detail.</p><ul>';
+
     for (var i=0,ic=keys.length; i<ic; i++) {
         var data = DASHBOARD[keys[i]];
         if (! data) {
@@ -3632,8 +3633,6 @@ ul#tableOfContents > li {
     <div class="showHideToggle closer" data-target="versionChanges" data-scrolltotop="true">close version history <span class="lowlight">(or click the version number again to close)</span></div>
     <hr />
 </div><!-- end of div id="versionChanges" -->
-
-<p class="lowlight">The <span class="subheading">Dashboard "Est. Damage to You"</span> tile has changed. It now shows the TOTAL damage you will take from your own dailies directly AND (if you are on a boss quest) from the quest boss due to those dailies. Click on it to open up the "Damage from Dailies" section which will explain the numbers in detail.</p>
 
 <div id="DASHBOARD"></div>
 <div id="TOC"></div>
