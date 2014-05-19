@@ -84,6 +84,8 @@ var localeServerUrl   = 'https://oldgods.net/habitrpg';
 // localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 
 
+/* TST - FOR TESTING:
+$('body').css({'background-color':'#C4B4A4'});
 localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -96,7 +98,6 @@ userId            = 'home';
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
-/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -1307,15 +1308,19 @@ randomTodo.text + '</p>'
                 'status': 'safe'};
         }
         else {
-            DASHBOARD.damageToUser = {'label': 'Est. Damage',
+            var questMsg = (quest && quest.content.boss) ?
+                           'AND from your quest boss due to those dailies ' :
+                           '';
+            DASHBOARD.damageToUser = {'label': 'Est. Damage to You',
                 'hoverText': 'health loss you will take overnight from your ' +
-                         'uncompleted dailies (click for more information)',
-                'target': id, 'value': damageToUser,
+                         'uncompleted dailies ' +
+                         questMsg + '(click for more information)',
+                'target': id, 'value': damageTotal,
                 'status': ((damageToUser) ? 'danger' : 'safe')
                 };
             if (quest && quest.content.boss) {
-                DASHBOARD.damageToParty = {'label': 'Est. Boss Damage',
-                    'hoverText': 'health loss you and your party will take ' +
+                DASHBOARD.damageToParty = {'label': 'Est. Damage to Party',
+                    'hoverText': 'health loss your party will take ' +
                          'overnight from your quest boss due to your own ' +
                          'uncompleted dailies (click for more information)',
                     'target': id, 'value': damageToParty,
@@ -3246,7 +3251,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.3)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3255,7 +3260,7 @@ ul#tableOfContents > li {
         <p>Please wait. Fetching data from
         <span id="serverName">HabitRPG</span>...</p>
         <p id="specialMessage" class="lowlight">
-        "You are made of 23049% awesome"<br />-- Clara Oswald
+"Sorry to hear you're going through a rough patch. You're amazing and HabitRPG wouldn't be the same without you!" --sputnikvi
         </p>
     </div>
     <div class="bad hide">
@@ -3273,6 +3278,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>2.3<span class="date">2014-05-19</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>The <span class="subheading">Dashboard "Est. Damage to You"</span> tile has changed. It now shows the TOTAL damage you will take from your own dailies directly AND (if you are on a boss quest) from the quest boss due to those dailies. Click on it to open up the "Damage from Dailies" section which will explain the numbers in detail.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>2.2<span class="date">2014-05-16</span></dt>
         <dd><ul>
             <li>Features:
@@ -3281,7 +3295,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>2.1.2<span class="date">2014-05-15</span></dt>
         <dd><ul>
             <li>Code:
@@ -3620,6 +3633,7 @@ ul#tableOfContents > li {
     <hr />
 </div><!-- end of div id="versionChanges" -->
 
+<p class="lowlight">The <span class="subheading">Dashboard "Est. Damage to You"</span> tile has changed. It now shows the TOTAL damage you will take from your own dailies directly AND (if you are on a boss quest) from the quest boss due to those dailies. Click on it to open up the "Damage from Dailies" section which will explain the numbers in detail.</p>
 
 <div id="DASHBOARD"></div>
 <div id="TOC"></div>
