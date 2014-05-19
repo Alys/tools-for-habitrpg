@@ -1485,33 +1485,24 @@ randomTodo.text + '</p>'
             obj['historyItems'] = {};
             var previousValue = null;
             for (var j=0,jc=obj.history.length; j<jc; j++) {
+                // console.log(obj.history[j].date); // TST - number
                 var formattedDate = myDateConverter(obj.history[j].date);
                 var value = obj.history[j].value;
                 var success = '-'; // default (grey daily or no data)
                 var status = 'neutral'; // default (grey daily or no data)
-                if (previousValue === null) {
-                    if (value >= 1) {
-                        success = 'V'; // user did the daily
-                        status = 'safe';
-                    }
-                    else {
-                        success = 'x'; // user did not do the daily
-                        status = 'danger';
-                    }
+                if ( (previousValue === null && value >= 1) ||
+                     (previousValue !== null && value > previousValue) ) {
+                    success = 'V'; // user did the daily
+                    status = 'safe';
                 }
-                else {
-                    if (value > previousValue) {
-                        success = 'V'; // user did the daily
-                        status = 'safe';
-                    }
-                    else if (value < previousValue) {
-                        success = 'x'; // user did not do the daily
-                        status = 'danger';
-                    }
+                else if ( (previousValue === null && value < 1) ||
+                          (previousValue !== null && value < previousValue) ) {
+                    success = 'x'; // user did not do the daily
+                    status = 'danger';
                 }
                 obj['historyItems'][formattedDate] = [];
-                obj['historyItems'][formattedDate]['value'] = success
-                        + '<br />' + (Math.round(value * 10) / 10); // TST
+                obj['historyItems'][formattedDate]['value'] = success;
+                        // + '<br />' + (Math.round(value * 10) / 10); // TST
                 obj['historyItems'][formattedDate]['status'] = status;
                 allDates[formattedDate] = true;
                 previousValue = value;
@@ -1519,10 +1510,11 @@ randomTodo.text + '</p>'
         }
         var allDatesInOrder = Object.keys(allDates).sort().reverse();
 
-        var headerRow = '<tr><th>task</th><th>' +
+        var headerRow = '<thead><tr><th>task</th><th>' +
                         allDatesInOrder.join('&nbsp;</th><th>') +
-                        '&nbsp;</th></tr>';
+                        '&nbsp;</th></tr></thead>';
         headerRow = headerRow.replace(/>20/g, ">'"); // remove century
+        headerRow = headerRow.replace(/-/g, "-<br />"); // line break after -
         var tableBody = '';
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
@@ -1539,7 +1531,9 @@ randomTodo.text + '</p>'
             tableBody += '</tr>' ;
         }
 
-        var html = '<table>' + headerRow + tableBody + '</table>';
+        var html = '<div class="outer"><div class="inner"><table>' +
+                   headerRow + '<tbody>' +
+                   tableBody + '</tbody></table></div></div>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
@@ -3172,19 +3166,38 @@ ul#tableOfContents > li {
     margin-top: 3em;
 }
 
+
+#dailiesHistorySection .outer {
+    position: relative;
+}
+#dailiesHistorySection .inner {
+    overflow-x: scroll;
+    overflow-y: visible;
+    width: 90%;
+    margin-left:100px;
+}
 #dailiesHistorySection table {
     border-bottom: 1px solid black;
     border-right:  1px solid black;
+    TSTtable-layout: fixed; 
+    width: 100%;
 }
+
 #dailiesHistorySection table th,
 #dailiesHistorySection table td {
     text-align: center;
-    border-top:  1px solid black;
-    border-left: 1px solid black;
+    border-top:  1px solid #ccc;
+    border-left: 1px solid #ccc;
 }
 #dailiesHistorySection table td:first-child {
     text-align: left;
+    position:absolute;
+    left:0; 
+    width: 100px;
 }
+
+
+
 
 #todosDatedSection ul {
     list-style-type: none;
