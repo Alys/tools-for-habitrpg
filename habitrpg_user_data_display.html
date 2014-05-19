@@ -1493,9 +1493,9 @@ randomTodo.text + '</p>'
                 var formattedDate = myDateConverter(obj.history[j].date);
                 obj['historyItems'][formattedDate] = obj.history[j].value;
                 allDates[formattedDate] = true;
-                // html += '<br />' + formattedDate + ' ' + obj.history[j].value;
+                // html += '<br />'+ formattedDate +' ' + obj.history[j].value;
             }
-            dailiesKeyedById[obj.id] = obj;
+            // dailiesKeyedById[obj.id] = obj;
         }
         var allDatesInOrder = Object.keys(allDates).sort().reverse();
 
@@ -1504,15 +1504,17 @@ randomTodo.text + '</p>'
         var tableBody = '';
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
-            html += '<tr><td>obj.text</td>';
+            tableBody += '<tr><td>' + obj.text + '</td>';
             for (var i=0,ic=allDatesInOrder.length; i<ic; i++) {
-                html += '<td>' +
-                        obj['historyItems'][allDatesInOrder][i] + '</td>';
+                tableBody += '<td>' +
+                        (obj['historyItems'][[allDatesInOrder][i]] || '') +
+                        '</td>';
             }
-            html += '</tr>' ;
+            tableBody += '</tr>' ;
         }
 
-        var html = '<table>' + headerRow + tableBody + '</table>';
+        var html = '<table border="1">' + // XXX fix border
+				   headerRow + tableBody + '</table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
