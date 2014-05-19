@@ -1476,37 +1476,70 @@ randomTodo.text + '</p>'
         var orderId = 'dailiesHistory';
         sectionOpen = id; // TST
 
-        // preprocess the dailies to find all the dates on which data exists:
-        // var earliestDate = '';
-        // var latestDate   = '';
+        // preprocess the dailies to find all the dates on which data
+        // exists, and to work out if each day with a success or fail
+        // or neither (grey daily) based on whether the day's value is higher or lower than the previous day's XXX or compare day with next day?
         var allDates = {};
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
             obj['historyItems'] = {};
+            var previousValue = null;
             for (var j=0,jc=obj.history.length; j<jc; j++) {
                 var formattedDate = myDateConverter(obj.history[j].date);
-                obj['historyItems'][formattedDate] = obj.history[j].value;
+                var value = obj.history[j].value;
+                var success = '-'; // default (grey daily or no data)
+                var status = 'neutral'; // default (grey daily or no data)
+                if (previousValue === null) {
+                    if (value >= 1) {
+                        success = 'V'; // user did the daily
+                        status = 'safe';
+                    }
+                    else {
+                        success = 'x'; // user did not do the daily
+                        status = 'danger';
+                    }
+                }
+                else {
+                    if (value > previousValue) {
+                        success = 'V'; // user did the daily
+                        status = 'safe';
+                    }
+                    else if (value < previousValue) {
+                        success = 'x'; // user did not do the daily
+                        status = 'danger';
+                    }
+                }
+                obj['historyItems'][formattedDate] = [];
+                obj['historyItems'][formattedDate]['value'] = success
+                        + '<br />' + (Math.round(value * 10) / 10); // TST
+                obj['historyItems'][formattedDate]['status'] = status;
                 allDates[formattedDate] = true;
+                previousValue = value;
             }
         }
         var allDatesInOrder = Object.keys(allDates).sort().reverse();
 
         var headerRow = '<tr><th>task</th><th>' +
-                        allDatesInOrder.join('</th><th>') + '</th></tr>';
+                        allDatesInOrder.join('&nbsp;</th><th>') +
+                        '&nbsp;</th></tr>';
         headerRow = headerRow.replace(/>20/g, ">'"); // remove century
         var tableBody = '';
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
             tableBody += '<tr><td>' + obj.text + '</td>';
             for (var j=0,jc=allDatesInOrder.length; j<jc; j++) {
-				var value = obj['historyItems'][ allDatesInOrder[j] ];
-                tableBody += '<td>' + value + '</td>';
+                var status = 'neutral';
+                var value  = '-';
+                if (obj['historyItems'][allDatesInOrder[j]]) {
+                    status = obj['historyItems'][allDatesInOrder[j]]['status'];
+                    value  = obj['historyItems'][allDatesInOrder[j]]['value'];
+                }
+                tableBody += '<td class="' + status + '">' + value + '</td>';
             }
             tableBody += '</tr>' ;
         }
 
-        var html = '<table border="1">' + // XXX fix border
-				   headerRow + tableBody + '</table>';
+        var html = '<table>' + headerRow + tableBody + '</table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
@@ -2851,6 +2884,15 @@ ul.padded > li {
 .colourRed        { background-color: rgb(250,214,214); }
 .colourDarkRed    { background-color: rgb(240,197,190); }
 
+.neutral {
+    background-color: #fffbd0; /* yellow */
+}
+.danger {
+    background-color: #ffcccc; /* red */
+}
+.safe {
+    background-color: #ccffcc; /* green */
+}
 
 /*********************************************************************
 ****   Page-wide Show/Hide Toggling   ********************************
@@ -3016,15 +3058,6 @@ h2 {
     font-size: 0.75em;
     padding: 1px;
 }
-#DASHBOARD .neutral {
-    background-color: #fffbd0; /* yellow */
-}
-#DASHBOARD .danger {
-    background-color: #ffcccc; /* red */
-}
-#DASHBOARD .safe {
-    background-color: #ccffcc; /* green */
-}
 #DASHBOARD .dropCap {
     font-size: 0.7em;
 }
@@ -3139,6 +3172,19 @@ ul#tableOfContents > li {
     margin-top: 3em;
 }
 
+#dailiesHistorySection table {
+    border-bottom: 1px solid black;
+    border-right:  1px solid black;
+}
+#dailiesHistorySection table th,
+#dailiesHistorySection table td {
+    text-align: center;
+    border-top:  1px solid black;
+    border-left: 1px solid black;
+}
+#dailiesHistorySection table td:first-child {
+    text-align: left;
+}
 
 #todosDatedSection ul {
     list-style-type: none;
