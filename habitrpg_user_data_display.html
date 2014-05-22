@@ -901,7 +901,12 @@ function collateAndDisplayTaskData() {
 
     function taskOverview() { // Displays all tasks of all kinds.
         // Also shows one random to-do:
-        var randomTodo = todos[Math.floor(Math.random() * todos.length)];
+        var randomTodoHtml = '';
+        if (todos.length > 0) {
+            var randomTodo = todos[Math.floor(Math.random() * todos.length)];
+            randomTodoHtml = '<h3>Random To-Do</h3><p>' +
+                             randomTodo.text + '</p>';
+        }
 
         var title   = 'Task Overview';
         var id      = 'taskOverviewSection';
@@ -916,8 +921,7 @@ function collateAndDisplayTaskData() {
 '   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
 '</div>' +
 '<table></table>' +
-'<h3>Random To-Do</h3><p>' +
-randomTodo.text + '</p>'
+randomTodoHtml
 };
 
         function createTaskOverviewTable() {
@@ -3262,7 +3266,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.3.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.3.2)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3288,6 +3292,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>2.3.2<span class="date">2014-05-22</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Fixed a bug in the random to-do code that caused the whole page to fail if you had no to-dos.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>2.3.1<span class="date">2014-05-20</span></dt>
         <dd><ul>
             <li>Code:
@@ -3296,7 +3309,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>2.3<span class="date">2014-05-19</span></dt>
         <dd><ul>
             <li>Features:
