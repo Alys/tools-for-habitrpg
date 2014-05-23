@@ -84,7 +84,6 @@ var localeServerUrl   = 'https://oldgods.net/habitrpg';
 // localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 
 
-/* TST - FOR TESTING:
 $('body').css({'background-color':'#C4B4A4'});
 localeServerUrl   = 'http://localhost/HabitRPG-locale-files';
 serverName        = 'localhost';
@@ -98,6 +97,7 @@ userId            = 'home';
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
+/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -317,7 +317,7 @@ function formatAndDisplayDASHBOARD() {
     var keys = ['currentHealth', 'dailiesIncomplete', 'damageToUser',
                 'damageToParty', 'questProgress', 'todosDated', 'dropsToday',
                 'unallocatedPoints', 'sleeping'];
-    var html = '<p class="lowlight">The <span class="subheading">Dashboard "Est. Damage to You"</span> tile has changed. It now shows the TOTAL damage you will take from your own dailies directly AND (if you are on a boss quest) from the quest boss due to those dailies. Click on it to open up the "Damage from Dailies" section which will explain the numbers in detail.</p><ul>';
+    var html = '<ul>';
 
     for (var i=0,ic=keys.length; i<ic; i++) {
         var data = DASHBOARD[keys[i]];
@@ -357,7 +357,7 @@ function formatAndDisplayTOC() {
                 'taskOverview', 'taskStatistics', 'untaggedTasks',
                 'habitHistory',
             'HEADING',
-                'dailiesIncomplete', 'dailiesHistory', 'todosDated',
+                'dailiesHistory', 'dailiesIncomplete', 'todosDated',
                 'todosCompleted',
             'HEADING Drops, Quests, Damage', 'dropsToday',
                 'questProgress', 'damageDailies', 'statsAndStreaks',
@@ -1484,7 +1484,6 @@ randomTodoHtml
         var id      = 'dailiesHistorySection';
         var title   = 'Dailies History';
         var orderId = 'dailiesHistory';
-        sectionOpen = id; // TST
 
         // preprocess the dailies to find all the dates on which data
         // exists, and to work out if each day was a success or fail
@@ -1559,12 +1558,16 @@ randomTodoHtml
             tableBody += '</tr>' ;
         }
 
-        var html = '<table>' +
+        var html = '<p>The table below shows historical data for your dailies, with symbols indicating your action on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the daily, even if it was a <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey daily</a>.</li><li><span class="danger">x</span> You did not tick off the daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the daily but you took no damage from it for several possible reasons (the daily was not due that day; you ticked off all of the <a href="http://habitrpg.wikia.com/wiki/Checklist#Dailies">checklist</a> items under that daily, although not the daily itself; you evaded the daily with <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth</a>; you were <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a>; you had not logged in to HabitRPG that day; the daily did not yet exist on that day).</li></ul><p>Vertical grey bars in the table indicate gaps in the historical record (e.g., periods of a day or more in which you were resting in the inn).</p>' +
+'<p class="highlight">This is still experimental. The code has to perform calculations based on each daily\'s historical values to work out whether you ticked it or not, and this might be unreliable. Please ' + tellMe + ' if you are certain you see errors! Also, the formatting is going to be improved soon (better visibility for long task names; better horizontal scrolling; fixed positioning for task names when you scroll horizontally; background colours that are more distinct for colour-blind people).</p>' +
+                   '<table>' +
                    headerRow + '<tbody>' +
                    tableBody + '</tbody></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
+
+// LIST FORMAT FOR REASONS (INCOMPLETE): <li><span class="neutral">-</span> you did not tick off the daily but you took no damage from it for a reason such as:<ul><li>the daily was not due that day</li><li>you evaded the daily with <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth</a></li><li>you were <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a></li><li>you had not logged in to HabitRPG that day</li><li>the daily did not yet exist on that day</li></ul></li>      #dailiesHistorySection > ul ul { margin-left: 2em; }
     }
 
 
@@ -3205,9 +3208,22 @@ ul#tableOfContents > li {
 }
 
 
+#dailiesHistorySection > ul {
+    list-style-type: none;
+}
+#dailiesHistorySection ul li span {
+    display: inline-block;
+    padding: 0.3em 0.7em;
+    font-weight: bold;
+    border: 1px solid #ccc;
+    font-family: monospace;
+}
 #dailiesHistorySection table {
     border-bottom: 1px solid #ccc;
     border-left:   1px solid #ccc;
+}
+#dailiesHistorySection table th {
+    background-color: rgb(242, 242, 230); /* XXX_SOON replace with proper scrolling */
 }
 #dailiesHistorySection table th,
 #dailiesHistorySection table td {
@@ -3384,7 +3400,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.3.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.4)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3393,7 +3409,7 @@ ul#tableOfContents > li {
         <p>Please wait. Fetching data from
         <span id="serverName">HabitRPG</span>...</p>
         <p id="specialMessage" class="lowlight narrowContent">
-"Sorry to hear you're going through a rough patch. You're amazing and HabitRPG wouldn't be the same without you!" --sputnikvi
+"Just wanted to say thanks <span style="font-size:0.7em">- realized today that HabitRPG has become so much part of my day... I wake up and check my dailies, do some, check my to-do's, do those, check my dailies again... And if I have some spare time, I pick out another task to tackle.</span> Many thanks to all contributors. <span style="font-size:0.7em">Even my lazy days now have some productivity in them.</span> :)" -- Iris 
         </p>
     </div>
     <div class="bad hide">
@@ -3410,6 +3426,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>2.4<span class="date">2014-05-23</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your dailies.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>2.3.2<span class="date">2014-05-22</span></dt>
         <dd><ul>
             <li>Code:
@@ -3418,7 +3443,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>2.3.1<span class="date">2014-05-20</span></dt>
         <dd><ul>
             <li>Code:
@@ -3837,6 +3861,7 @@ ul#tableOfContents > li {
             <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
             <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
             <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
+            <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your dailies.</li>
             <li><span class="subheading">Dailies Incomplete</span>: A list of dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
             <li><span class="subheading">To-Dos with Dates</span>: A list of all to-dos that have been given due dates, sorted by date. If there are any to-dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
             <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed to-dos that HabitRPG has in its archive. The to-dos' notes and completion dates are included.</li>
