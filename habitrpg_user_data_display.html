@@ -627,7 +627,11 @@ function collateAndDisplayTaskData() {
         var dailies = [];
         var valueMin = -47.27; // task values are capped ...
         var valueMax =  21.27; // ... for some purposes
-        var today = ["su","m","t","w","th","f","s"][(new Date()).getDay()];
+        var today = new Date();
+        if (user.preferences.dayStart) { // Custom Day Start (CDS)
+            today.setHours(today.getHours() - user.preferences.dayStart);
+        }
+        today = ["su","m","t","w","th","f","s"][today.getDay()];
         var conBonus = 1 - (computedStats['con'] / 250);
         if (conBonus < 0.1) { conBonus = 0.1; }
         var stealth = user.stats.buffs.stealth; // user avoids dailies' damage
@@ -1468,7 +1472,17 @@ randomTodoHtml
             obj['historyItems'] = {};
             var previousValue = null;
             for (var j=0,jc=obj.history.length; j<jc; j++) {
-                var formattedDate = myDateConverter(obj.history[j].date);
+                // Get the date that is recorded in this history entry
+                // for this daily:
+                var historyDate = new Date(obj.history[j].date);
+                // Subtract one day from that date because the value assigned
+                // to this history entry comes from the action that was
+                // done to the daily on the PREVIOUS day -- i.e., if you
+                // tick off a daily, then after the cron time (i.e., on the
+                // NEXT day), the daily's value will be increased and that
+                // new value will be recorded with the new day's date:
+                historyDate.setHours(historyDate.getHours() - 24);
+                var formattedDate = myDateConverter(historyDate);
                 var value = obj.history[j].value;
                 var success = '-'; // default (grey daily or no data)
                 var status = 'neutral'; // default (grey daily or no data)
@@ -3283,7 +3297,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.4)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.4.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3309,6 +3323,16 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>2.4.1<span class="date">2014-05-31</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Fixed (probably) a bug related to HabitRPG's <a href="http://habitrpg.wikia.com/wiki/Settings#Custom_Day_Start">Custom Day Start</a> (CDS) feature. If you use a CDS, then you would have found that after midnight, the <span class="subheading">Dailies Incomplete</span> and <span class="subheading">Damage from Dailies</span> sections were incorrect - they were ignoring your CDS. I think I have fixed this now. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if it still seems wrong! @It's Bailey, thanks for mentioning this.</li>
+                    <li>Fixed a bug in the <span class="subheading">Dailies History</span> section that caused each date to be one day later than it should have been. Thanks, @rami.sedhom, for letting me know!</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>2.4<span class="date">2014-05-23</span></dt>
         <dd><ul>
             <li>Features:
@@ -3322,7 +3346,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>2.3.2<span class="date">2014-05-22</span></dt>
         <dd><ul>
             <li>Code:
