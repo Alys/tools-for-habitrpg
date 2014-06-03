@@ -1810,23 +1810,53 @@ function dropCountAndCap() {
     var dropCap = 5 + Math.floor(computedStats['per'] / 25) +
                   (user.contributor.level || 0);
 
-    if (user.purchased.plan.planId) { // XXX_LATER better way now?
+    if (user.purchased.plan.planId) {
         /*  JSON SUBSCRIPTION DATA:
-        NON-subscriber:
+        non-subscriber:
         "plan":{"mysteryItems":[],"gemsBought":0}
+
+        subscriber:
+        "plan":{"customerId":"cus_6MjXOKwfP4wmsZ",
+        "dateCreated":"2014-01-26T10:41:51.972Z",
+        "dateUpdated":"2014-03-01T19:32:31.441Z",
+        "paymentType":"Stripe",
+        "planId":"basic_earned",
+        "mysteryItems":[],"gemsBought":0}
+
+        "plan":{"customerId":"cus_3qOLJ01KMSMO14",
+        "dateCreated":"2014-04-13T06:58:18.017Z",
+        "dateUpdated":"2014-05-01T19:43:13.762Z",
+        "paymentMethod":"Stripe",
+        "planId":"basic_earned",
+        "mysteryItems":[],"gemsBought":25},
 
         subscriber awaiting termination:
         "plan":{"customerId":"cus_3qOLJ01KMSMO14",
         "dateCreated":"2014-04-13T06:58:18.017Z",
         "dateTerminated":"2014-06-01T00:00:00.000Z",
-        "dateUpdated":"2014-05-01T19:43:13.762Z","paymentMethod":"Stripe",
-        "planId":"basic_earned","mysteryItems":[],"gemsBought":25},
+        "dateUpdated":"2014-05-01T19:43:13.762Z",
+        "paymentMethod":"Stripe",
+        "planId":"basic_earned",
+        "mysteryItems":[],"gemsBought":25},
 
-        subscriber:
-        "plan":{"customerId":"cus_3qOLJ01KMSMO14",
-        "dateCreated":"2014-04-13T06:58:18.017Z",
-        "dateUpdated":"2014-05-01T19:43:13.762Z","paymentMethod":"Stripe",
-        "planId":"basic_earned","mysteryItems":[],"gemsBought":25},
+        ex-subscriber after termination:
+        "plan":{"customerId":null,
+        "dateCreated":"2014-01-26T10:41:51.972Z",
+        "dateTerminated":"2014-06-01T00:00:00.000Z",
+        "dateUpdated":"2014-06-01T19:09:10.058Z",
+        "paymentMethod":null,"paymentType":"Stripe",
+        "planId":null,
+        "mysteryItems":[],"gemsBought":0}
+
+        ex-subscriber after re-subscribing:
+        "plan":{"customerId":"cus_12hUIbdosmKG5p",
+        "dateCreated":"2014-01-26T10:41:51.972Z",
+        "dateTerminated":null,
+        "dateUpdated":"2014-06-03T23:01:21.933Z",
+        "paymentMethod":"Stripe",
+        "paymentType":"Stripe",
+        "planId":"basic_earned",
+        "mysteryItems":[],"gemsBought":0}
         */
         dropCap *= 2;
         html += dropCap +
