@@ -265,10 +265,6 @@ serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 */
 
-var tellMe = '<a href="mailto:lady_alys@oldgods.net">tell me</a>';
-
-
-
 
 //////////////////////////////////////////////////////////////////////
 ////   Data Fetch Function   /////////////////////////////////////////
@@ -305,6 +301,7 @@ function fetchData() {
         }
     }
 }
+
 function parseData() {
     var allGear = content.gear.flat;
 
@@ -423,7 +420,6 @@ function parseData() {
                      (klass == 'special') ? givesStats : // yes/no
                      'no';
 
-
         html += '' +
 '\n|-' +
 '\n|' + name +                // name
@@ -453,17 +449,16 @@ function parseData() {
             " copy it to the wiki.</p>" +
             "<pre>" + JSON.stringify(allGear, null, 4) + "</pre>";
 
+
     //////////////////////////////////////////////////////////////////////
-    ////   Display the HTML that the function has created   ////////////
+    ////   Display the HTML    ///////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
     $('#loading .good').hide();
     $('#output').html(html);
-
 }
 }); </script>
 
 <style>
-
 /*********************************************************************
 ****   Page-wide   ***************************************************
 *********************************************************************/
@@ -490,7 +485,6 @@ body {
 #loading ul a {
     color: orange;
 }
-
 
 
 hr {
@@ -570,23 +564,6 @@ ul.padded > li {
     background-color: #ccffcc; /* green */
 }
 
-/*********************************************************************
-****   Page-wide Show/Hide Toggling   ********************************
-*********************************************************************/
-.mainSectionClose,
-.showHideToggle {
-    text-decoration: underline;
-    color: purple;
-}
-.closer { /* as in "a thing that closes", not "nearer" */
-    margin-top: 30px;
-    padding-top: 15px;
-    padding-bottom: 15px;
-}
-.closer:hover {
-    border: 1px dashed lightgrey;
-}
-
 
 /*********************************************************************
 ****   Header   ******************************************************
@@ -603,27 +580,6 @@ h1>a:first-child:hover { /* "HabitRPG" link in header */
 }
 h1 span {
     font-size: 0.5em;
-}
-h2 {
-    margin-top: 30px;
-}
-
-#userNameDisplay {
-    text-align: right;
-    font-weight: bold;
-    font-size: 2em;
-    margin-bottom: 10px;
-}
-#emailDisplay {
-    text-align: right;
-    margin-bottom: 10px;
-}
-
-#explanationAndClearLinks {
-    text-align: right;
-}
-#explanationAndClearLinks span {
-    padding-left: 10px;
 }
 </style>
 </head>
