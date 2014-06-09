@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>HabitRPG Unofficial User Data Display</title>
+    <title>HabitRPG User Data Display</title>
 
 <!--
 
@@ -43,7 +43,7 @@ you'll find there.
 -->
 
 
-    <meta name="description" content="HabitRPG Unofficial User Data Display" />
+    <meta name="description" content="HabitRPG User Data Display" />
     <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
 
 
@@ -1552,8 +1552,8 @@ randomTodoHtml
             tableBody += '</tr>' ;
         }
 
-        var html = '<p>The table below shows historical data for your dailies, with symbols indicating your action on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the daily, even if it was a <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey daily</a>.</li><li><span class="danger">x</span> You did not tick off the daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the daily but you took no damage from it for several possible reasons (the daily was not due that day; you ticked off all of the <a href="http://habitrpg.wikia.com/wiki/Checklist#Dailies">checklist</a> items under that daily, although not the daily itself; you evaded the daily with <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth</a>; you were <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a>; you had not logged in to HabitRPG that day; the daily did not yet exist on that day).</li></ul><p>Vertical grey bars in the table indicate gaps in the historical record (e.g., periods of a day or more in which you were resting in the inn).</p>' +
-'<p class="highlight">This is still experimental. The code has to perform calculations based on each daily\'s historical values to work out whether you ticked it or not, and this might be unreliable. Please ' + tellMe + ' if you are certain you see errors! Also, the formatting is going to be improved soon (better visibility for long task names; better horizontal scrolling; fixed positioning for task names when you scroll horizontally; background colours that are more distinct for colour-blind people).</p>' +
+        var html = '<p>The table below shows historical data for your dailies. If you are a subscriber, you will see data for every day going back to the date on which you subscribed. If you are not a subscriber, you will see data for every day for the past week, but before that your data points start to be merged together (this is to save on expensive database storage space). In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the daily, even if it was a <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey daily</a>.</li><li><span class="danger">x</span> You did not tick off the daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the daily but you took no damage from it for several possible reasons (the daily was not due that day; you ticked off all of the <a href="http://habitrpg.wikia.com/wiki/Checklist#Dailies">checklist</a> items under that daily, although not the daily itself; you evaded the daily with <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth</a>; you were <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a>; you had not logged in to HabitRPG that day; the daily did not yet exist on that day). This symbol will also appear frequently for old data for non-subscribers because it is not possible to correctly determine the actions you took after your data has been merged.</li></ul><p>Vertical grey bars in the table indicate gaps in the historical record (e.g., periods of a day or more in which you were resting in the inn).</p>' +
+'<p class="highlight">This is still experimental. The code has to perform calculations based on each daily\'s historical values to work out whether you ticked it or not, and this might be unreliable. Please ' + tellMe + ' if you are certain you see errors! Also, the formatting is going to be improved soon (better visibility for long task names; better horizontal scrolling; fixed positioning for task names when you scroll horizontally).</p>' +
                    '<table>' +
                    headerRow + '<tbody>' +
                    tableBody + '</tbody></table>';
@@ -2858,10 +2858,13 @@ ul.padded > li {
 }
 .danger {
     background-color: #ffcccc; /* red */
+    /* background-color: #F5A9A9; */ /* darker red */
 }
 .safe {
-    background-color: #ccffcc; /* green */
+    background-color: #bdd8fc; /* blue */
+    /* green+red and green+yellow are not good for colour-blind people */
 }
+
 
 /*********************************************************************
 ****   Page-wide Show/Hide Toggling   ********************************
@@ -3333,8 +3336,8 @@ ul#tableOfContents > li {
 </head>
 <body><div id="innerBody">
 
-<h1><a href="https://habitrpg.com/">HabitRPG</a> Unofficial User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v2.4.1)</span></h1><!-- VERSION TOGGLE -->
+<h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.0)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3343,7 +3346,12 @@ ul#tableOfContents > li {
         <p>Please wait. Fetching data from
         <span id="serverName">HabitRPG</span>...</p>
         <p id="specialMessage" class="lowlight narrowContent">
-"Just wanted to say thanks <span style="font-size:0.7em">- realized today that HabitRPG has become so much part of my day... I wake up and check my dailies, do some, check my to-do's, do those, check my dailies again... And if I have some spare time, I pick out another task to tackle.</span> Many thanks to all contributors. <span style="font-size:0.7em">Even my lazy days now have some productivity in them.</span> :)" -- Iris 
+
+<br /><br />It gripped her hand gently. "Regret is for humans," it said.<br /><br />
+She laughed. "Really?"<br /><br />
+The machine shrugged and let go of her hand. "Oh, no. It's just something we tell ourselves."<br /><br />
+-- Iain M. Banks, Against a Dark Background
+
         </p>
     </div>
     <div class="bad hide">
@@ -3360,7 +3368,17 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
-        <dt>2.4.1<span class="date">2014-05-31</span></dt>
+        <dt>3.0 <span class="date">2014-06-09</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>"Official". :)</li>
+                    <li>Changed colour scheme to work better for most forms of colour-blindness. The previous red-green-yellow scheme was failing for red-green blindness and green-red blindness. <a href="mailto:lady_alys@oldgods.net">Tell me</a> if you still have problems distinguishing between colours in the dashboard or in the Dailies History section.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>2.4.1 <span class="date">2014-05-31</span></dt>
         <dd><ul>
             <li>Code:
                 <ul>
@@ -3369,8 +3387,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
-        <dt>2.4<span class="date">2014-05-23</span></dt>
+        <dt>2.4 <span class="date">2014-05-23</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3383,7 +3400,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>2.3.2<span class="date">2014-05-22</span></dt>
+        <dt>2.3.2 <span class="date">2014-05-22</span></dt>
         <dd><ul>
             <li>Code:
                 <ul>
@@ -3391,7 +3408,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>2.3.1<span class="date">2014-05-20</span></dt>
+        <dt>2.3.1 <span class="date">2014-05-20</span></dt>
         <dd><ul>
             <li>Code:
                 <ul>
@@ -3399,7 +3416,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>2.3<span class="date">2014-05-19</span></dt>
+        <dt>2.3 <span class="date">2014-05-19</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3407,7 +3424,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>2.2<span class="date">2014-05-16</span></dt>
+        <dt>2.2 <span class="date">2014-05-16</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3415,7 +3432,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>2.1.2<span class="date">2014-05-15</span></dt>
+        <dt>2.1.2 <span class="date">2014-05-15</span></dt>
         <dd><ul>
             <li>Code:
                 <ul>
@@ -3424,7 +3441,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>2.1.1<span class="date">2014-05-14</span></dt>
+        <dt>2.1.1 <span class="date">2014-05-14</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3433,7 +3450,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>2.1<span class="date">2014-05-13</span></dt>
+        <dt>2.1 <span class="date">2014-05-13</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3442,7 +3459,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>2.0.1<span class="date">2014-05-13</span></dt>
+        <dt>2.0.1 <span class="date">2014-05-13</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3456,7 +3473,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>2.0<span class="date">2014-05-13</span></dt>
+        <dt>2.0 <span class="date">2014-05-13</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3471,7 +3488,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.8.4<span class="date">2014-05-06</span></dt>
+        <dt>1.8.4 <span class="date">2014-05-06</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3485,7 +3502,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.8.3<span class="date">2014-04-28</span></dt>
+        <dt>1.8.3 <span class="date">2014-04-28</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3503,7 +3520,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.8.2<span class="date">2014-04-26</span></dt>
+        <dt>1.8.2 <span class="date">2014-04-26</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3517,7 +3534,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.8.1<span class="date">2014-04-25</span></dt>
+        <dt>1.8.1 <span class="date">2014-04-25</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
@@ -3536,7 +3553,7 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-        <dt>1.8<span class="date">2014-04-23</span></dt>
+        <dt>1.8 <span class="date">2014-04-23</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
