@@ -460,8 +460,15 @@ function upperCaseFirst(word) {
 
 
 function userDataInHeader() {
+    var displayName = user.profile.name;
+    if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' || // AliceHarris
+        userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
+    ) {
+        // displayName = 'Slayer of Dailies... Eater of Toast';
+        displayName = 'A valiant Github warrior';
+    }
     $('#headerExtras').html('<div id="userNameDisplay">' +
-            user.profile.name +
+            displayName +
             '</div>' +
             '<div id="emailDisplay" class="hide">' +
             user.auth.local.email +
