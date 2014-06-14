@@ -607,6 +607,9 @@ function collateAndDisplayTaskData() {
         knownTags.push(obj.id);
     });
 
+	var bluestTask  = {'value':0};
+	var redestTask  = {'value':0};
+	var biggestTask = {'value':0}; // task with greatest absolute magnitude
     var habits   = collateHabitsData();  // populates the...
     var dailies  = collateDailiesData(); // ... function's "global" variables...
     var todosAll = collateTodosData();   // ... defined above...
@@ -628,6 +631,13 @@ function collateAndDisplayTaskData() {
     todosCompletedTable();
     statsAndStreaks();
     skillsAndBuffs();
+
+    function diminishingReturns(bonus, max, halfway) {
+		if (! halfway) { // XXX test
+			halfway = max / 2;
+		}
+        return max * bonus / (bonus + halfway);
+    }
 
     function collateHabitsData() {
         var habits = [];
@@ -652,6 +662,10 @@ function collateAndDisplayTaskData() {
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['habits'].push(obj);
             }
+			if (         obj.value  < redestTask.value)  { redestTask = obj;  }
+			if (         obj.value  > bluestTask.value)  { bluestTask = obj;  }
+			if (Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+														   biggestTask = obj; }
         });
         return habits;
     }
@@ -733,6 +747,10 @@ function collateAndDisplayTaskData() {
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['dailies'].push(obj);
             }
+			if (         obj.value  < redestTask.value)  { redestTask = obj;  }
+			if (         obj.value  > bluestTask.value)  { bluestTask = obj;  }
+			if (Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+														   biggestTask = obj; }
         });
         return dailies;
 
@@ -792,6 +810,10 @@ function collateAndDisplayTaskData() {
                     untaggedTasks['todos'].push(obj);
                 }
             }
+			if (         obj.value  < redestTask.value)  { redestTask = obj;  }
+			if (         obj.value  > bluestTask.value)  { bluestTask = obj;  }
+			if (Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+														   biggestTask = obj; }
         });
         return [todos, todosCompleted];
     }
@@ -849,13 +871,13 @@ function collateAndDisplayTaskData() {
             // Orange       Between -10 and -1
             // Red          Between -20 and -10
             // Dark Red     Less than -20
-            if      (value >  10){ return colours[1]; }
-            else if (value >   5){ return colours[2]; }
-            else if (value >   1){ return colours[3]; }
-            else if (value >  -1){ return colours[4]; }
-            else if (value > -10){ return colours[5]; }
-            else if (value > -20){ return colours[6]; }
-            else                 { return colours[7]; }
+            if      (value < -20){ return colours[7]; }
+            else if (value < -10){ return colours[6]; }
+            else if (value <  -1){ return colours[5]; }
+            else if (value <   1){ return colours[4]; }
+            else if (value <   5){ return colours[3]; }
+            else if (value <  10){ return colours[2]; }
+            else                 { return colours[1]; }
         }
     }
 
@@ -1706,24 +1728,57 @@ randomTodo.text + '</p>'
 
 		// XXX http://www.mediafire.com/download/ehyh5xhm1k95ubt/Mage+Burst+of+Flames+calculations_public.xlsx  - merfy's Burst of Flames spreadsheet: Mage Burst of Flames calculations_public.xlsx
 
-		var skills = { // each function returns: The target of the skill
-					   // (blank if the default target doesn't need to
-					   // be explained); The effect of the skill;
+		var skills = { // each function returns:
+					   // The target of the skill (blank if the default
+					   // target doesn't need to be explained);
+					   // The effect of the skill;
 					   // Additional explanatory text (can be blank);
-			'fireball': function() { return ['', 'FIREBALL', '']; },
+			'fireball': function() {
+				var bluestTaskName = bluestTask.text;
+				var bluestTaskType = bluestTask.typePretty;
+				var currentValue   = bluestTask.value;
+				var bonus = computedStats.int; // * user.fns.crit('per')
+				var newValue = currentValue + diminishingReturns(bonus*.02, 4);
+				var tempValue = (newValue < 0) ? 1 : newValue + 1;
+				bonus *= Math.ceil(tempValue * .075);
+				var xpIncrease = diminishingReturns(bonus, 75);
+				var questIncrease = diminishingReturns(bonus * .1, 50, 30);
+				currentValue  = Math.floor(currentValue  * 10) / 10;
+				newValue      = Math.floor(newValue      * 10) / 10;
+				xpIncrease    = Math.floor(questIncrease * 10) / 10; 
+				questIncrease = Math.floor(questIncrease * 10) / 10; 
+                console.log("quest"); // TST
+                console.log(quest); // TST
+				console.log("quest.content.boss"); // TST
+				console.log(quest.content.boss); // TST
+                if (!(quest && quest.content.boss)) { // XXX test
+					// XXX UPTOHERE - quest.content.boss is undef
+					questIncrease = '';
+				}
+
+				return ['your bluest task',
+						'This skill is best cast on your "' + bluestTaskName + '" ' + bluestTaskType + '. The task\'s <a href="http://habitrpg.wikia.com/wiki/Task_Value">value</a> will be changed from ' + currentValue + ' to ' + newValue + '. You will gain ' + xpIncrease + ' XP.' + ((questIncrease) ? ' You will do ' + questIncrease + ' damage to your quest boss.' : ''), // XXX test - quest especially
+						'']; },
 
 			'mpheal': function() {
 				var bonus = Math.ceil(computedStats['int'] * .1);
 		  		if (bonus > 25) { bonus = 25; }
-				return ['', 'Each of your party members will receive ' +
-							bonus + ' MP, except for yourself.', 'When you cast this skill, it will initially seem as if you do receive ' + bonus + ' MP (i.e., the skill will seem to cost you only ' + (30-bonus) + ' MP), but the ' + bonus + ' MP will later be removed from your account. The true cost of this skill to you is 30 MP and it benefits only your party members, not you.']; },
+				return ['',
+                        'Each of your party members will receive ' + bonus + ' MP, except for yourself.',
+                        'When you cast this skill, it will initially seem as if you do receive ' + bonus + ' MP (i.e., the skill will seem to cost you only ' + (30-bonus) + ' MP), but the ' + bonus + ' MP will later be removed from your account. The true cost of this skill to you is 30 MP and it benefits only your party members, not you.']; },
 
 			'earth': function() {
 				var buff = Math.ceil(computedStats['int'] * .05);
- return ['', 'Each of your party members will have their <a href="http://habitrpg.wikia.com/wiki/Intelligence">INT</a> increased by ' + buff + '.', '']; },
+                return ['',
+						'Each of your party members will have their <a href="http://habitrpg.wikia.com/wiki/Intelligence">INT</a> increased by ' + buff + '.',
+						'']; },
 
-			'frost': function() { return ['', 'All uncompleted dailies will not have their streaks reset to zero overnight.', 'After you have cast this, your <a href="https://habitrpg.com/#/options/profile/stats">User --> Stats page</a> will state "Streaks Frozen".']; },
+			'frost': function() {
+				return ['',
+						'All uncompleted dailies will not have their streaks reset to zero overnight.',
+						'After you have cast this, your <a href="https://habitrpg.com/#/options/profile/stats">User --> Stats page</a> will state "Streaks Frozen".']; },
 
+			// XXX UPTOHERE other skills
 		};
 
 		for (var key in content.spells[userKlass]) {
@@ -1833,11 +1888,6 @@ function dropCountAndCap() {
         // dropChance *= (1 + user.contributor.level / 20);
     // }
     // dropChance = diminishingReturns(dropChance, 0.75);
-    // function diminishingReturns(bonus, max) {
-        // var halfway = max/2;
-        // var diminished = max * bonus / (bonus + halfway);
-        // return diminished;
-    // }
 
     TOC[orderId]  = {'target': id, 'title':  title};
     MAIN[orderId] = {'id': id, 'title': title, 'html': html};
