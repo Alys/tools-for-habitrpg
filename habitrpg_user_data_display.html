@@ -1999,10 +1999,14 @@ function unallocatedPoints() {
     if (user.stats.points < 1 || user.stats.lvl < 10) {
         return; // there are no points that the user can allocate
     }
+    var dashboardTitle = 'Unallocated Point';
+    var title = dashboardTitle + 's';
+    if (user.stats.points != 1) {
+        dashboardTitle += 's';
+    }
     var id      = 'unallocatedPointsSection';
-    var title   = 'Unallocated Points';
     var orderId = 'unallocatedPoints';
-    DASHBOARD[orderId] = {'label': title,
+    DASHBOARD[orderId] = {'label': dashboardTitle,
         'hoverText': 'points you have obtained from leveling up - go to ' +
                      'your Profile -> Stats page to allocate them ' +
                      '(click for more information)',
