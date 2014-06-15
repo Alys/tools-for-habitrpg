@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>HabitRPG Equipment Table Creator</title>
+
+<!--
+
+This page outputs the wikia code for creating the Equipment Table
+in this page: http://habitrpg.wikia.com/wiki/Equipment_Table
+
+This code is licenced under the same terms as HabitRPG:
+    https://raw2.github.com/HabitRPG/habitrpg/develop/LICENSE
+
+https://github.com/Alys/tools-for-habitrpg/blob/master/equipment_table_creator.html
+
+https://oldgods.net/habitrpg/equipment_table_creator.html
+
+Contributors:
+    Alys (Alice Harris), lady_alys@oldgods.net
+
+-->
+
+    <meta name="description" content="HabitRPG Equipment Table Creator" />
+    <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
+
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+
+<script type="text/javascript">
+$(function() { // wraps around all our code to not pollute global namespace
+
+
+
+//////////////////////////////////////////////////////////////////////
+////   IMAGE FILE NAMES FOR EACH EQUIPMENT PIECE       ///////////////
+////                                                   ///////////////
+////   Add new entries here (in any order) when new    ///////////////
+////   equipment becomes available.                    ///////////////
+////   Some types of equipment are never shown in the  ///////////////
+////   table so don't add images for them:             ///////////////
+////       - base equipment (Training Sword, etc)      ///////////////
+////       - monthly subscriber myster items           ///////////////
+//////////////////////////////////////////////////////////////////////
+var images = {
+    'armor_healer_1' : 'Acolyterobe.png',
+    'armor_healer_2' : 'Medicrobe.png',
+    'armor_healer_3' : 'Defendervestment.png',
+    'armor_healer_4' : 'Priestvestment.png',
+    'armor_healer_5' : 'Royalvestment.png',
+    'armor_rogue_1' : 'Oiledleatherarmor.png',
+    'armor_rogue_2' : 'Blackleatherarmor.png',
+    'armor_rogue_3' : 'Camoarmor.png',
+    'armor_rogue_4' : 'Penumbralarmor.png',
+    'armor_rogue_5' : 'Umbralarmor.png',
+    'armor_special_0' : 'BackerOnly-Equip-ShadeArmor.gif',
+    'armor_special_1' : 'ContributorOnly-Equip-CrystalArmor.gif',
+    'armor_special_2' : 'Chalard_Tunic.png',
+    'armor_special_birthday' : 'Absurd_Party_Robes_40x40px.png',
+    'armor_special_candycane' : 'Candycanerobe.png',
+    'armor_special_ski' : 'SkisassinParka.png',
+    'armor_special_snowflake' : 'SnowflakeRobe.png',
+    'armor_special_springHealer' : 'Fuzzypup.png',
+    'armor_special_springMage' : 'Rodentiarobes.png',
+    'armor_special_springRogue' : 'Sleekcatsuit.png',
+    'armor_special_springWarrior' : 'Bunarmour.png',
+    'armor_special_yeti' : 'Yetitamerrobe.png',
+    'armor_warrior_1' : 'A1.png',
+    'armor_warrior_2' : 'A2.png',
+    'armor_warrior_3' : 'A3.png',
+    'armor_warrior_4' : 'A4.png',
+    'armor_warrior_5' : 'A5.png',
+    'armor_wizard_1' : 'Magicianrobe.png',
+    'armor_wizard_2' : 'Wizardrobe.png',
+    'armor_wizard_3' : 'Robeofmysteries.png',
+    'armor_wizard_4' : 'Archmagerobe.png',
+    'armor_wizard_5' : 'Royalmagusrobe.png',
+    'headAccessory_special_springHealer' : 'yellowdogears.png',
+    'headAccessory_special_springMage' : 'Bluemouseears.png',
+    'headAccessory_special_springRogue' : 'Purplecatears.png',
+    'headAccessory_special_springWarrior' : 'Bunear.png',
+    'head_healer_1' : 'Quartzcirclet.png',
+    'head_healer_2' : 'Amethystcirclet.png',
+    'head_healer_3' : 'Sapphire_circlet.png',
+    'head_healer_4' : 'Emeralddiadem.png',
+    'head_healer_5' : 'Royaldiadem.png',
+    'head_rogue_1' : 'Leatherhood.png',
+    'head_rogue_2' : 'Blackleatherhood.png',
+    'head_rogue_3' : 'Camohood.png',
+    'head_rogue_4' : 'Penumbralhood.png',
+    'head_rogue_5' : 'Umbralhood.png',
+    'head_special_0' : 'BackerOnly-Equip-ShadeHelmet.gif',
+    'head_special_1' : 'ContributorOnly-Equip-CrystalHelmet.gif',
+    'head_special_2' : 'Nameless_Helm.png',
+    'head_special_candycane' : 'Candycanehat.png',
+    'head_special_nye' : 'Absurd_Party_Hat.png',
+    'head_special_ski' : 'SkisassinHelm.png',
+    'head_special_snowflake' : 'SnowflakeCrown.png',
+    'head_special_springHealer' : 'CrownFriendship.png',
+    'head_special_springMage' : 'Swisscheesehat.png',
+    'head_special_springRogue' : 'Stealthykittymask.png',
+    'head_special_springWarrior' : 'Bunhelmet.png',
+    'head_special_yeti' : 'Yetitamerhelm.png',
+    'head_warrior_1' : 'H1.png',
+    'head_warrior_2' : 'H2.png',
+    'head_warrior_3' : 'H3.png',
+    'head_warrior_4' : 'H4.png',
+    'head_warrior_5' : 'H5.png',
+    'head_wizard_1' : 'Magicianhat.png',
+    'head_wizard_2' : 'Cornuthaum.png',
+    'head_wizard_3' : 'Astrologerhat.png',
+    'head_wizard_4' : 'Archmagehat.png',
+    'head_wizard_5' : 'Head_wizard_5.png',
+    'shield_healer_1' : 'Medicbuckler.png',
+    'shield_healer_2' : 'Kiteshield.png',
+    'shield_healer_3' : 'Hospitalershield.png',
+    'shield_healer_4' : 'Saviorshield.png',
+    'shield_healer_5' : 'Royalshield.png',
+    'shield_rogue_0' : 'shield_rogue_0.png',
+    'shield_rogue_1' : 'shield_rogue_1.png',
+    'shield_rogue_2' : 'shield_rogue_2.png',
+    'shield_rogue_3' : 'shield_rogue_3.png',
+    'shield_rogue_4' : 'shield_rogue_4.png',
+    'shield_rogue_5' : 'shield_rogue_5.png',
+    'shield_rogue_6' : 'shield_rogue_6.png',
+    'shield_special_0' : 'BackerOnly-Shield-TormentedSkull.gif',
+    'shield_special_1' : 'Contributor_Shield.png',
+    'shield_special_ski' : 'SkisassinPoleR.png',
+    'shield_special_snowflake' : 'SnowflakeShield.png',
+    'shield_special_springHealer' : 'squeakyball.png',
+    'shield_special_springRogue' : 'Hookclaws.png',
+    'shield_special_springWarrior' : 'Eggshield.png',
+    'shield_special_yeti' : 'Yetitamershield.png',
+    'shield_warrior_1' : 'S1.png',
+    'shield_warrior_2' : 'S2.png',
+    'shield_warrior_3' : 'S3.png',
+    'shield_warrior_4' : 'S4.png',
+    'shield_warrior_5' : 'S5.png',
+    'weapon_healer_0' : 'Novicerod.png',
+    'weapon_healer_1' : 'Acolyterod.png',
+    'weapon_healer_2' : 'Quartzrod.png',
+    'weapon_healer_3' : 'Amethystrod.png',
+    'weapon_healer_4' : 'Priestrod.png',
+    'weapon_healer_5' : 'Royalcrosier.png',
+    'weapon_healer_6' : 'Goldencrosier.png',
+    'weapon_rogue_0' : 'Dagger.png',
+    'weapon_rogue_1' : 'Shortsword.png',
+    'weapon_rogue_2' : 'Scimitar.png',
+    'weapon_rogue_3' : 'Kukri.png',
+    'weapon_rogue_4' : 'Nunchaku.png',
+    'weapon_rogue_5' : 'Ninja-to.png',
+    'weapon_rogue_6' : 'Hooksword.png',
+    'weapon_special_0' : 'BackerOnly-Weapon-DarkSoulsBlade.gif',
+    'weapon_special_1' : 'ContributorOnly-Equip-CrystalBlade.png',
+    'weapon_special_2' : 'Weber_Shaft.png',
+    'weapon_special_3' : 'Mustaine_Morning_Star.png',
+    'weapon_special_candycane' : 'Candycanestaff.png',
+    'weapon_special_critical' : 'Glow_hammer_gif_by_zoebeagle.gif',
+    'weapon_special_ski' : 'SkisassinPoleL.png',
+    'weapon_special_snowflake' : 'SnowflakeWand.png',
+    'weapon_special_springHealer' : 'Lovelybone.png',
+    'weapon_special_springMage' : 'Swisscheesestaff.png',
+    'weapon_special_springRogue' : 'Hookclaws.png',
+    'weapon_special_springWarrior' : 'Carrotsword.png',
+    'weapon_special_yeti' : 'Yetitamerspear.png',
+    'weapon_warrior_0' : 'Trainingsword.png',
+    'weapon_warrior_1' : 'WarriorSword.png',
+    'weapon_warrior_2' : 'Axe.png',
+    'weapon_warrior_3' : 'Morningstar.png',
+    'weapon_warrior_4' : 'Sapphireblade.png',
+    'weapon_warrior_5' : 'Redsword.png',
+    'weapon_warrior_6' : 'Goldensword.png',
+    'weapon_wizard_0' : 'Apprenticestaff.png',
+    'weapon_wizard_1' : 'Woodenstaff.png',
+    'weapon_wizard_2' : 'Jeweledstaff.png',
+    'weapon_wizard_3' : 'Ironstaff.png',
+    'weapon_wizard_4' : 'Brassstaff.png',
+    'weapon_wizard_5' : 'Archmagestaff.png',
+    'weapon_wizard_6' : 'Weapon_wizard_6.png'
+};
+
+//////////////////////////////////////////////////////////////////////
+////   WIKI LINKS FOR **SOME** EQUIPMENT PIECES        ///////////////
+////                                                   ///////////////
+////   Add new entries here (in any order) when        ///////////////
+////   special new equipment would benefit from        ///////////////
+////   having a link to a wiki page. Do NOT do this    ///////////////
+////   for common equipment that most users will be    ///////////////
+////   familiar with.                                  ///////////////
+//////////////////////////////////////////////////////////////////////
+var urls = {
+    'armor_special_0' : 'Backers',
+    'armor_special_1' : 'Contributor_Rewards#Contributor_Gear',
+    'armor_special_birthday' : 'Winter_Wonderland#Absurd_Party_Robes',
+    'armor_special_candycane' : 'Winter_Wonderland#Special_Class_Gear',
+    'armor_special_ski' : 'Winter_Wonderland#Special_Class_Gear',
+    'armor_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear',
+    'armor_special_springHealer' : 'Spring_Fling',
+    'armor_special_springMage' : 'Spring_Fling',
+    'armor_special_springRogue' : 'Spring_Fling',
+    'armor_special_springWarrior' : 'Spring_Fling',
+    'armor_special_yeti' : 'Winter_Wonderland#Special_Class_Gear',
+    'headAccessory_special_springHealer' : 'Spring_Fling',
+    'headAccessory_special_springMage' : 'Spring_Fling',
+    'headAccessory_special_springRogue' : 'Spring_Fling',
+    'headAccessory_special_springWarrior' : 'Spring_Fling',
+    'head_special_0' : 'Backers',
+    'head_special_1' : 'Contributor_Rewards#Contributor_Gear',
+    'head_special_candycane' : 'Winter_Wonderland#Special_Class_Gear',
+    'head_special_nye' : 'Winter_Wonderland#Absurd_Party_Hat',
+    'head_special_ski' : 'Winter_Wonderland#Special_Class_Gear',
+    'head_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear',
+    'head_special_springHealer' : 'Spring_Fling',
+    'head_special_springMage' : 'Spring_Fling',
+    'head_special_springRogue' : 'Spring_Fling',
+    'head_special_springWarrior' : 'Spring_Fling',
+    'head_special_yeti' : 'Winter_Wonderland#Special_Class_Gear',
+    'shield_special_0' : 'Backers',
+    'shield_special_1' : 'Contributor_Rewards#Contributor_Gear',
+    'shield_special_ski' : 'Winter_Wonderland#Special_Class_Gear',
+    'shield_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear',
+    'shield_special_springHealer' : 'Spring_Fling',
+    'shield_special_springRogue' : 'Spring_Fling',
+    'shield_special_springWarrior' : 'Spring_Fling',
+    'shield_special_yeti' : 'Winter_Wonderland#Special_Class_Gear',
+    'weapon_special_0' : 'Backers',
+    'weapon_special_1' : 'Contributor_Rewards#Contributor_Gear',
+    'weapon_special_2' : 'Stephen_Weber%27s_Shaft_of_the_Dragon',
+    'weapon_special_3' : 'Mustaine%27s_Milestone_Mashing_Morningstar',
+    'weapon_special_candycane' : 'Winter_Wonderland#Special_Class_Gear',
+    'weapon_special_critical' : 'Critical_Warhammer_of_Bug-Crushing',
+    'weapon_special_ski' : 'Winter_Wonderland#Special_Class_Gear',
+    'weapon_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear',
+    'weapon_special_springHealer' : 'Spring_Fling',
+    'weapon_special_springMage' : 'Spring_Fling',
+    'weapon_special_springRogue' : 'Spring_Fling',
+    'weapon_special_springWarrior' : 'Spring_Fling',
+    'weapon_special_yeti' : 'Winter_Wonderland#Special_Class_Gear'
+};
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+////   Global Variables                              /////////////////
+//////////////////////////////////////////////////////////////////////
+var content; // holds site-wide content (gear names and stats, quests, etc)
+
+
+//////////////////////////////////////////////////////////////////////
+////   Global Connection Variables      //////////////////////////////
+//////////////////////////////////////////////////////////////////////
+var serverName        = 'HabitRPG'; // used in "loading" message
+var serverUrl         = 'https://habitrpg.com:443/api/v2';
+var serverPathContent = '/content';
+var serverPathUser    = '/user';
+var userId            = '';
+var apiToken          = '';
+
+/* TST - FOR TESTING:
+$('body').css({'background-color':'#C4B4A4'});
+serverName        = 'localhost';
+serverUrl         = 'http://localhost';
+serverPathContent = '/cgi-bin/hrpg_content.pl';
+*/
+
+
+//////////////////////////////////////////////////////////////////////
+////   Data Fetch Function   /////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+fetchData();
+function fetchData() {
+    $('#loading #serverName').text(serverName);
+    $('#loading .good').show();
+    $('#loading .bad' ).hide();
+
+    var ajaxRunningCount = 1; // drops to 0 when all calls have succeeded
+
+    // fetch the site-wide content (gear names and stats, etc):
+    $.ajax({
+        url: serverUrl + serverPathContent,
+        type: 'GET',
+        dataType: 'json',
+        cache: true,
+        success: fetchContentSuccess,
+        error: fetchFailure
+    });
+
+    function fetchFailure() {
+        $('#loading .good').hide();
+        $('#loading .bad' ).show();
+        $('#documentationAndForm').show(); // in case user has done a re-fetch
+        $('#documentationAndFormClose').hide();
+    }
+    function fetchContentSuccess(data) {
+        content = data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
+    }
+}
+
+function parseData() {
+    var allGear = content.gear.flat;
+
+    var html = '<p>This page outputs the wikia code for creating the ' +
+               '<a href="http://habitrpg.wikia.com/wiki/Equipment_Table">' +
+               'Equipment Table</a> on the ' +
+               '<a href="http://habitrpg.wikia.com/">HabitRPG wiki</a>. ' +
+               'Copy everything inside the textarea below and paste it ' +
+               'into the template for the Equipment Table page.</p>';
+
+    html += '<textarea rows="20" cols="120" wrap="off">';
+
+    // table header:
+    html += '' +
+'\n{| class="sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
+'\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"' +
+'\n! Name' +
+'\n! class="unsortable" | Image' +
+'\n! Class' +
+'\n! Type' +
+'\n! Cost' +
+'\n! data-sort-type="number" | CON' +
+'\n! data-sort-type="number" | INT' +
+'\n! data-sort-type="number" | PER' +
+'\n! data-sort-type="number" | STR' +
+'\n! Best' +
+'\n! style="text-align:left;"| Gives<br />Stats';
+
+
+    // table row for each piece of gear:
+    var attribs = ['con', 'int', 'per', 'str'];
+    for (var i in allGear) {
+        var obj = allGear[i];
+
+        if (obj.key == 'armor_special_2'  ||
+            obj.key == 'head_special_2'   ||
+            obj.key == 'weapon_special_3'
+           ) {
+      continue; // don't show items that aren't released yet
+        }
+
+        // if (obj.key == 'weapon_warrior_0' ||
+        //     obj.key == 'weapon_rogue_0'   ||
+        //     obj.key == 'shield_rogue_0'   ||
+        //     obj.key == 'weapon_healer_0'  ||
+        //     obj.key == 'weapon_wizard_0'
+        //    ) {
+        //     continue; // don't show "Training Sword", "Novice Rod", etc
+        // }
+
+        if (obj.mystery) {
+      continue; // don't show monthly subscriber mystery items
+        }
+
+        var type = (obj.type == 'headAccessory') ? 'head<br />accessory' :
+                   (obj.type == 'head') ? 'head<br />gear' :
+                   obj.type;
+
+        if (obj.klass == 'special' && !obj.specialClass) {
+            // deal with some class-specific special weapons that aren't
+            // marked as such
+            if (obj.key.match(/_special_snowflake/)) {
+                obj.specialClass = 'healer';
+            }
+            if (obj.key.match(/_special_ski/)) {
+                obj.specialClass = 'rogue';
+            }
+            if (obj.key.match(/_special_yeti/)) {
+                obj.specialClass = 'warrior';
+            }
+            if (obj.key.match(/_special_candycane/)) {
+                obj.specialClass = 'wizard';
+            }
+        }
+        var klass = (obj.klass == 'special') ? (obj.specialClass || 'special') :
+                     obj.klass;
+        klass = (klass == 'wizard') ? 'mage' : klass;
+        if (klass == 'base') {
+      continue; // don't show "No Weapon", "Plain Clothing", etc
+        }
+
+
+        var name = obj.text.replace(/ /g, '<br />');
+        var url = urls[obj.key] || '';
+        if (url) {
+            name = '[[' + url + '|' + name + ']]';
+        }
+
+        var image = images[obj.key] || '';
+        if (image) {
+            image = '[[File:' + image + ']]';
+        }
+        else {
+            console.log("WARNING: No image for " + obj.key);
+        }
+
+        var stats = [];
+        var givesStats = 'no';
+        for (var j in attribs) {
+            stat = attribs[j];
+            var val = obj[stat];
+            if (val == 0) {
+                stats[stat] = '';
+            }
+            else {
+                givesStats = 'yes';
+                stats[stat] = 'data-sort-value="' + val + '"|' + 
+                                            "'''" + val + "'''";
+                if (klass != 'special' && klass != 'base') { // class bonus
+                    stats[stat] += "<br /><sub>''" + (val*1.5) + "''</sub>";
+                }
+            }
+        }
+
+        var isBest = (obj.last) ? 'yes' :
+                     (klass == 'special') ? givesStats : // yes/no
+                     'no';
+
+        html += '' +
+'\n|-' +
+'\n|' + name +                // name
+'\n|' + image +               // image
+'\n|' + klass     +           // class (mage, etc)
+'\n|' + type      +           // type (weapon, etc)
+'\n|' + obj.value +           // cost (gp)
+'\n|' + stats.con +           // CON
+'\n|' + stats.int +           // INT
+'\n|' + stats.per +           // PER
+'\n|' + stats.str +           // STR
+'\n|' + isBest    +           // best (yes/no)
+'\n|' + givesStats;           // gives stats (yes/no)
+    }
+
+    // table footer:
+    html += '' +
+'\n|- class="sortbottom"' +
+'\n| colspan="11" style="height: 0px; border-bottom: 3px solid #284C6D;"|' +
+'\n|}\n';
+
+    html += '</textarea>';
+
+    html += "<p>The material below here is HabitRPG's JSON data that" +
+            " was used to make the wikia code above. You can ignore it" +
+            " unless you are interested in it. You do not need to" +
+            " copy it to the wiki.</p>" +
+            "<pre>" + JSON.stringify(allGear, null, 4) + "</pre>";
+
+
+    //////////////////////////////////////////////////////////////////////
+    ////   Display the HTML    ///////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    $('#loading .good').hide();
+    $('#output').html(html);
+}
+}); </script>
+
+<style>
+/*********************************************************************
+****   Page-wide   ***************************************************
+*********************************************************************/
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    background-color: rgb(173, 208, 215);
+}
+#innerBody {
+    margin: 20px;
+    padding: 5px 20px 30px 20px;
+    background-color: rgb(242, 242, 230);
+}
+#loading {
+    margin-right: 30px;
+    margin-left: 30px;
+    color: orange;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+#loading ul {
+    font-size: 0.8em;
+}
+#loading ul a {
+    color: orange;
+}
+
+
+hr {
+    width: 95%;
+}
+hr.padded {
+    margin-top:    1em;
+    margin-bottom: 2em;
+}
+
+.show {
+    display: block;
+}
+.hide {
+    display: none;
+}
+.clear {
+    clear: both;
+}
+
+.subheading {
+    font-weight: bold;
+}
+.highlight {
+    font-weight: bold;
+}
+.lowlight { /* like highlight but less so */
+    font-style: italic;
+}
+.explanation {
+    font-style: italic;
+}
+abbr {
+    border-bottom: 1px dashed black;
+}
+img.emoji {
+    margin-bottom: -0.25em;
+}
+.forCopyPaste {
+    /* used to add blank lines that we want when copying text to clipboard,
+       but we don't want to see extra whitespace on the screen */
+    margin-top: -1em;
+}
+ul.padded > li {
+    padding: 3px 0;
+}
+
+.gearList .item .stats {
+    font-variant: small-caps;
+}
+.gearList .item .key {
+    display: none;
+}
+
+
+.coloured {
+    display: inline-block;
+    width: 5.5em;
+    height: 3em;
+    padding-top: .7em;
+}
+.colourBrightBlue { background-color: rgb(209,226,248); }
+.colourBlueGrey   { background-color: rgb(216,230,232); }
+.colourGreen      { background-color: rgb(222,237,219); }
+.colourYellow     { background-color: rgb(255,244,216); }
+.colourOrange     { background-color: rgb(254,234,216); }
+.colourRed        { background-color: rgb(250,214,214); }
+.colourDarkRed    { background-color: rgb(240,197,190); }
+
+.neutral {
+    background-color: #fffbd0; /* yellow */
+}
+.danger {
+    background-color: #ffcccc; /* red */
+}
+.safe {
+    background-color: #ccffcc; /* green */
+}
+
+
+/*********************************************************************
+****   Header   ******************************************************
+*********************************************************************/
+h1 {
+    float: left;
+}
+h1>a:first-child { /* "HabitRPG" link in header */
+    color: black;
+    text-decoration: none;
+}
+h1>a:first-child:hover { /* "HabitRPG" link in header */
+    text-decoration: underline;
+}
+h1 span {
+    font-size: 0.5em;
+}
+</style>
+</head>
+<body><div id="innerBody">
+
+<h1><a href="https://habitrpg.com/">HabitRPG</a> Equipment Table Creator
+    <span>(v1.0)</span></h1><!-- VERSION -->
+<hr class="clear" />
+
+<div id="loading">
+    <div class="good hide">
+        <p>Please wait. Fetching data from
+        <span id="serverName">HabitRPG</span>...</p>
+    </div>
+    <div class="bad hide">
+        <p>There was an error obtaining the data.</p>
+        <ul class="padded">
+            <li>Please reload the page (but perhaps wait half an hour first in case HabitRPG is under heavy load).</li>
+            <li>If you're using Internet Explorer, try another browser. <a href="https://www.google.com/intl/en/chrome/browser/">Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a> will be more reliable.</li>
+            <li>If neither of those help, <a href="mailto:lady_alys@oldgods.net">contact me</a>!</li>
+        </ul>
+    </div>
+</div>
+
+
+<div id="output">
+</div>
+
+
+</div><!-- end of div id="innerBody" -->
+</body>
+</html>
