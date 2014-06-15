@@ -2834,12 +2834,14 @@ function computeStats() {
     computedStats['int'] = computeStat('int');
     computedStats['per'] = computeStat('per');
     computedStats['str'] = computeStat('str');
+    console.log(computedStats); // TST
     return computedStats;
 
     function computeStat(stat) {
+        var level = (user.stats.lvl > 101) ? 101 : user.stats.lvl;
         var computed = user.stats[stat]
                      + user.stats.buffs[stat]
-                     + ((user.stats.lvl - 1) / 2);
+                     + ((level - 1) / 2);
         // get appropriate stat for each piece of Battle Gear:
         for(var key in equippedKeys) {
             var obj = equippedKeys[key];
@@ -3474,7 +3476,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.0)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.0.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3505,6 +3507,16 @@ The machine shrugged and let go of her hand. "Oh, no. It's just something we tel
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.0.1 <span class="date">2014-06-15</span></dt>
+        <dd><ul>
+            <li>Features: none</li>
+            <li>Code:
+                <ul>
+                    <li>Modified the calculations for computed stats to match a recent change on HabitRPG - levels greater than 101 are now treated as level 101. As a level 110 mage, this makes me cry. :P But it is necessary to keep the game balanced at high levels.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.0 <span class="date">2014-06-09</span></dt>
         <dd><ul>
             <li>Features:
@@ -3514,7 +3526,6 @@ The machine shrugged and let go of her hand. "Oh, no. It's just something we tel
                 </ul>
             </li>
         </ul></dd>
-
         <dt>2.4.1 <span class="date">2014-05-31</span></dt>
         <dd><ul>
             <li>Code:
