@@ -76,7 +76,6 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
-/* TST - FOR TESTING:
 $('body').css({'background-color':'#C4B4A4'});
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -89,6 +88,7 @@ userId            = 'home';
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
+/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -251,7 +251,6 @@ function parseData() {
     }
 
     var computedStats = computeStats(); // computed CON, INT, etc
-    console.log(computedStats); // TST
     var userIsOnCollectionQuest = false;
 
     userDataInHeader();
@@ -1823,15 +1822,14 @@ randomTodoHtml
         var html = '<p>This section describes the skills you have available ' +
                    'to you and the effect they will have if you cast them '+
                    'now.</p>';
-
-		// XXX http://www.mediafire.com/download/ehyh5xhm1k95ubt/Mage+Burst+of+Flames+calculations_public.xlsx  - merfy's Burst of Flames spreadsheet: Mage Burst of Flames calculations_public.xlsx
+		console.log(computedStats); // TST
 
 		var skills = { // each function returns:
 					   // The target of the skill (blank if the default
 					   // target doesn't need to be explained);
 					   // The effect of the skill;
 					   // Additional explanatory text (can be blank);
-			'fireball': function() {
+			'fireball': function() { // Mage
 				var bluestTaskName = bluestTask.text;
 				var bluestTaskType = bluestTask.typePretty;
 				var currentValue   = bluestTask.value;
@@ -1841,39 +1839,213 @@ randomTodoHtml
 				bonus *= Math.ceil(tempValue * .075);
 				var xpIncrease = diminishingReturns(bonus, 75);
 				var questIncrease = diminishingReturns(bonus * .1, 50, 30);
-				currentValue  = Math.floor(currentValue  * 10) / 10;
-				newValue      = Math.floor(newValue      * 10) / 10;
-				xpIncrease    = Math.floor(questIncrease * 10) / 10; 
-				questIncrease = Math.floor(questIncrease * 10) / 10; 
-                if (!(quest && quest.content.boss)) { // XXX test
-					// XXX UPTOHERE - quest.content.boss is undef
-					questIncrease = '';
+				currentValue  = Math.round(currentValue  * 10) / 10;
+				newValue      = Math.round(newValue      * 10) / 10;
+				xpIncrease    = Math.round(xpIncrease * 10) / 10; 
+				questIncrease = Math.round(questIncrease * 10) / 10; 
+				var effects = 'This skill is best cast on your "' +
+                              bluestTaskName + '" ' +
+							  bluestTaskType + '. The task\'s <a href="' +
+							  'http://habitrpg.wikia.com/wiki/Task_Value">' +
+							  'value</a> will be changed from ' +
+							  currentValue + ' to ' +
+							  newValue + '. You will gain ' +
+							  xpIncrease + ' XP.';
+				var additional = 'There is a 3% chance of a critical hit ' +
+								 'which will increase your XP gained';
+                if (quest && quest.content.boss) {
+					effects += ' You will do ' +
+							   questIncrease + ' damage to your quest boss.';
+					additional += ' and the damage done to the boss';
 				}
-
+				additional += '. See also <a href="http://www.mediafire.com/' +
+				 'download/ehyh5xhm1k95ubt/Mage+Burst+of+Flames+calculations' +
+				 '_public.xlsx">merfy\'s Burst of Flames spreadsheet</a>.';
 				return ['your bluest task',
-						'This skill is best cast on your "' + bluestTaskName + '" ' + bluestTaskType + '. The task\'s <a href="http://habitrpg.wikia.com/wiki/Task_Value">value</a> will be changed from ' + currentValue + ' to ' + newValue + '. You will gain ' + xpIncrease + ' XP.' + ((questIncrease) ? ' You will do ' + questIncrease + ' damage to your quest boss.' : ''), // XXX test - quest especially
-						'']; },
+						effects,
+						additional]; },
 
-			'mpheal': function() {
+			'mpheal': function() { // Mage
 				var bonus = Math.ceil(computedStats['int'] * .1);
 		  		if (bonus > 25) { bonus = 25; }
 				return ['',
                         'Each of your party members will receive ' + bonus + ' MP, except for yourself.',
                         'When you cast this skill, it will initially seem as if you do receive ' + bonus + ' MP (i.e., the skill will seem to cost you only ' + (30-bonus) + ' MP), but the ' + bonus + ' MP will later be removed from your account. The true cost of this skill to you is 30 MP and it benefits only your party members, not you.']; },
 
-			'earth': function() {
+			'earth': function() { // Mage
 				var buff = Math.ceil(computedStats['int'] * .05);
                 return ['',
 						'Each of your party members will have their <a href="http://habitrpg.wikia.com/wiki/Intelligence">INT</a> increased by ' + buff + '.',
 						'']; },
 
-			'frost': function() {
+			'frost': function() { // Mage
 				return ['',
 						'All uncompleted dailies will not have their streaks reset to zero overnight.',
 						'After you have cast this, your <a href="https://habitrpg.com/#/options/profile/stats">User --> Stats page</a> will state "Streaks Frozen".']; },
 
+
+
+			'heal': function() { // Healer
+				return ['',
+						'',
+						'']; },
+
+
+			'brightness': function() { // Healer
+				return ['',
+						'',
+						'']; },
+
+
+			'protectAura': function() { // Healer
+				return ['',
+						'',
+						'']; },
+
+
+			'heallAll': function() { // Healer
+				return ['',
+						'',
+						'']; },
+
+
+
 			// XXX UPTOHERE other skills
+
+/*
+
+  healer:
+    heal:
+      text: t('spellHealerHealText')
+      mana: 15
+      lvl: 11
+      target: 'self'
+      notes: t('spellHealerHealNotes')
+      cast: (user, target) ->
+        user.stats.hp += (user._statsComputed.con + user._statsComputed.int + 5) * .075
+        user.stats.hp = 50 if user.stats.hp > 50
+    brightness:
+      text: t('spellHealerBrightnessText')
+      mana: 15
+      lvl: 12
+      target: 'self'
+      notes: t('spellHealerBrightnessNotes')
+      cast: (user, target) ->
+        _.each user.tasks, (target) ->
+          return if target.type is 'reward'
+          target.value += 1.5 * (user._statsComputed.int / (user._statsComputed.int + 40))
+    protectAura:
+      text: t('spellHealerProtectAuraText')
+      mana: 30
+      lvl: 13
+      target: 'party'
+      notes: t('spellHealerProtectAuraNotes')
+      cast: (user, target) ->
+        ## lasts 24 hours ##
+        _.each target, (member) ->
+          member.stats.buffs.con ?= 0
+          member.stats.buffs.con += Math.ceil(user._statsComputed.con * .15)
+    heallAll:
+      text: t('spellHealerHealAllText')
+      mana: 25
+      lvl: 14
+      target: 'party'
+      notes: t('spellHealerHealAllNotes')
+      cast: (user, target) ->
+        _.each target, (member) ->
+          member.stats.hp += (user._statsComputed.con + user._statsComputed.int + 5) * .04
+          member.stats.hp = 50 if member.stats.hp > 50
+
+  warrior:
+    smash:
+      text: t('spellWarriorSmashText')
+      mana: 10
+      lvl: 11
+      target: 'task'
+      notes: t('spellWarriorSmashNotes')
+      cast: (user, target) ->
+        target.value += 2.5 * (user._statsComputed.str / (user._statsComputed.str + 50)) * user.fns.crit('con')
+        user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.party.quest.key
+    defensiveStance:
+      text: t('spellWarriorDefensiveStanceText')
+      mana: 25
+      lvl: 12
+      target: 'self'
+      notes: t('spellWarriorDefensiveStanceNotes')
+      cast: (user, target) ->
+        user.stats.buffs.con ?= 0
+        user.stats.buffs.con += Math.ceil(user._statsComputed.con * .05)
+    valorousPresence:
+      text: t('spellWarriorValorousPresenceText')
+      mana: 20
+      lvl: 13
+      target: 'party'
+      notes: t('spellWarriorValorousPresenceNotes')
+      cast: (user, target) ->
+        _.each target, (member) ->
+          member.stats.buffs.str ?= 0
+          member.stats.buffs.str += Math.ceil(user._statsComputed.str * .05)
+    intimidate:
+      text: t('spellWarriorIntimidateText')
+      mana: 15
+      lvl: 14
+      target: 'party'
+      notes: t('spellWarriorIntimidateNotes')
+      cast: (user, target) ->
+        _.each target, (member) ->
+          member.stats.buffs.con ?= 0
+          member.stats.buffs.con += Math.ceil(user._statsComputed.con *  .03)
+
+  rogue:
+    pickPocket:
+      text: t('spellRoguePickPocketText')
+      mana: 10
+      lvl: 11
+      target: 'task'
+      notes: t('spellRoguePickPocketNotes')
+      cast: (user, target) ->
+        bonus = (if target.value < 0 then 1 else target.value+2) + (user._statsComputed.per * 0.5)
+        user.stats.gp += 25 * (bonus / (bonus + 75))
+    backStab:
+      text: t('spellRogueBackStabText')
+      mana: 15
+      lvl: 12
+      target: 'task'
+      notes: t('spellRogueBackStabNotes')
+      cast: (user, target) ->
+        _crit = user.fns.crit('str', .3)
+        target.value += _crit * .03
+        bonus =  (if target.value < 0 then 1 else target.value+1) * _crit
+        user.stats.exp += bonus
+        user.stats.gp += bonus
+        # user.party.quest.progress.up += bonus if user.party.quest.key # remove hurting bosses for rogues, seems OP for now
+    toolsOfTrade:
+      text: t('spellRogueToolsOfTradeText')
+      mana: 25
+      lvl: 13
+      target: 'party'
+      notes: t('spellRogueToolsOfTradeNotes')
+      cast: (user, target) ->
+        ## lasts 24 hours ##
+        _.each target, (member) ->
+          member.stats.buffs.per ?= 0
+          member.stats.buffs.per += Math.ceil(user._statsComputed.per * .03)
+    stealth:
+      text: t('spellRogueStealthText')
+      mana: 45
+      lvl: 14
+      target: 'self'
+      notes: t('spellRogueStealthNotes')
+      cast: (user, target) ->
+        user.stats.buffs.stealth ?= 0
+        ## scales to user's # of dailies; maxes out at 100% at 100 per ##
+        user.stats.buffs.stealth += Math.ceil(user.dailys.length * user._statsComputed.per / 100)
+
+*/
+
+
 		};
+		// XXX all mage skills tested and working Sun Jun 15 15:30:46 EST 2014
 
 		for (var key in content.spells[userKlass]) {
 			var obj = content.spells[userKlass][key];
@@ -1902,9 +2074,9 @@ randomTodoHtml
 		html += '<div class="clear"></div>' +
 				'<p><a href="http://habitrpg.wikia.com/wiki/' +
 				userKlassPretty + '#Skills">Learn more about the ' +
-				userKlassPretty + ' skills</a></p>'; // XXX test all links
+				userKlassPretty + ' skills</a></p>'; // XXX test all links - Mage ok
 
-		// html += '<pre>' + JSON.stringify(obj, null, "  ") + '/<pre>'; // TST
+		// html += '<pre>' + JSON.stringify(obj, null, "  ") + '</pre>'; // TST
         // html = ''; // TST - hide the content
 		TOC[orderId]  = {'target': id, 'title':  title};
 		MAIN[orderId] = {'id': id, 'title': title, 'html': html};
@@ -2834,7 +3006,6 @@ function computeStats() {
     computedStats['int'] = computeStat('int');
     computedStats['per'] = computeStat('per');
     computedStats['str'] = computeStat('str');
-    console.log(computedStats); // TST
     return computedStats;
 
     function computeStat(stat) {
