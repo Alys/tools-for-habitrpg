@@ -233,8 +233,6 @@ function parseData() {
     // extract some commonly-used data:
     var sleeping = user.preferences.sleep; // true if resting in the inn
     var userKlass = user.stats.class;
-    var userKlassPretty = (userKlass == 'wizard') ? 'Mage'
-                        : upperCaseFirst(userKlass);
     var health = getCurrentHealth(); // also sets dashboard tile
     var quest;
     if (user.party.quest.key) {
@@ -579,6 +577,11 @@ function collateAndDisplayTaskData() {
         knownTags.push(obj.id);
     });
 
+    var bluestTask   = {'value':0};
+    var reddestTask  = {'value':0};
+    var reddestHabit = {'value':0};
+    var reddestDaily = {'value':0};
+    var biggestTask  = {'value':0}; // task with greatest absolute magnitude
     var habits   = collateHabitsData();  // populates the...
     var dailies  = collateDailiesData(); // ... function's "global" variables...
     var todosAll = collateTodosData();   // ... defined above...
@@ -601,6 +604,13 @@ function collateAndDisplayTaskData() {
     todosCompletedTable();
     statsAndStreaks();
     skillsAndBuffs();
+
+    function diminishingReturns(bonus, max, halfway) {
+        if (! halfway) {
+            halfway = max / 2;
+        }
+        return max * bonus / (bonus + halfway);
+    }
 
     function collateHabitsData() {
         var habits = [];
@@ -625,6 +635,11 @@ function collateAndDisplayTaskData() {
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['habits'].push(obj);
             }
+            if (         obj.value < reddestHabit.value){ reddestHabit = obj; }
+            if (         obj.value < reddestTask.value) { reddestTask  = obj; }
+            if (         obj.value > bluestTask.value)  { bluestTask   = obj;  }
+            if (Math.abs(obj.value)> Math.abs(biggestTask.value)) {
+                                                           biggestTask = obj; }
         });
         return habits;
     }
@@ -710,6 +725,11 @@ function collateAndDisplayTaskData() {
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['dailies'].push(obj);
             }
+            if (         obj.value < reddestDaily.value){ reddestDaily = obj; }
+            if (         obj.value < reddestTask.value) { reddestTask  = obj; }
+            if (         obj.value > bluestTask.value)  { bluestTask   = obj;  }
+            if (Math.abs(obj.value)> Math.abs(biggestTask.value)) {
+                                                           biggestTask = obj; }
         });
         return dailies;
 
@@ -769,6 +789,12 @@ function collateAndDisplayTaskData() {
                     untaggedTasks['todos'].push(obj);
                 }
             }
+            if (obj.completed == false) {
+                if (obj.value  < reddestTask.value) { reddestTask = obj; }
+                if (obj.value  > bluestTask.value)  { bluestTask = obj;  }
+                if (Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+                                                      biggestTask = obj; }
+            }
         });
         return [todos, todosCompleted];
     }
@@ -825,13 +851,13 @@ function collateAndDisplayTaskData() {
             // Orange       Between -10 and -1
             // Red          Between -20 and -10
             // Dark Red     Less than -20
-            if      (value >  10){ return colours[1]; }
-            else if (value >   5){ return colours[2]; }
-            else if (value >   1){ return colours[3]; }
-            else if (value >  -1){ return colours[4]; }
-            else if (value > -10){ return colours[5]; }
-            else if (value > -20){ return colours[6]; }
-            else                 { return colours[7]; }
+            if      (value < -20){ return colours[7]; }
+            else if (value < -10){ return colours[6]; }
+            else if (value <  -1){ return colours[5]; }
+            else if (value <   1){ return colours[4]; }
+            else if (value <   5){ return colours[3]; }
+            else if (value <  10){ return colours[2]; }
+            else                 { return colours[1]; }
         }
     }
 
@@ -1199,7 +1225,7 @@ randomTodoHtml
                 habitText += ' <span>(no history)</span>';
             }
             else {
-                historyList.reverse(); // put most recent at top (we couldn't
+                historyList.reverse(); // put most recent at top; we couldn't
                        // do this earlier when we sorted the items because the
                        // 'buttonUsed' code needed them in chronological order
                 habitText += '<ul class="padded">' +
@@ -1790,16 +1816,394 @@ randomTodoHtml
 
 
     function skillsAndBuffs() {
+        var wikiUrl = 'http://habitrpg.wikia.com/wiki/';
+        var conLink       = '<a href="' + wikiUrl + 'Constitution">CON</a>';
+        var intLink       = '<a href="' + wikiUrl + 'Intelligence">INT</a>';
+        var perLink       = '<a href="' + wikiUrl + 'Perception">PER</a>';
+        var strLink       = '<a href="' + wikiUrl + 'Strength">STR</a>';
+        var taskValueLink = '<a href="' + wikiUrl + 'Task_Value">value</a>';
+        var classLink     = '<a href="' + wikiUrl + 'Class_System">class</a>';
+        var greyDailyLink = '<a href="' + wikiUrl +
+                              'Dailies#Grey_Dailies">grey dailies</a>';
         var id      = 'skillsAndBuffsSection';
         var title   = 'Skills and Buffs';
         var orderId = 'skillsAndBuffs';
-        var html = '<p>This section describes the skills you have available ' +
-                   'to you and the effect they will have if you cast them '+
-                   'now.</p>';
-        html = '';
-        if (html) {
-            TOC[orderId]  = {'target': id, 'title':  title};
-            MAIN[orderId] = {'id': id, 'title': title, 'html': html};
+        // sectionOpen = id; // TST
+
+        var html = '<p>This section describes the skills you ';
+        var more = false;
+        if (user.stats.lvl < 11) {
+            html += 'will be able to use when you reach levels 11 to 14, ' +
+                    'if you choose a ' + classLink + '.';
+        }
+        else if (false) { // XXX opt out - finish and test wording
+            html += ' would be able to use if you chose a ' + classLink + '.';
+        }
+        else if (user.stats.lvl < 14) {
+            html += 'have or will have when you reach level 14';
+            more = true;
+        }
+        else {
+            html += ' have available to you';
+            more = true;
+        }
+        if (more) {
+            html += ' and the effect they will have if you cast them '+
+                   'now. It also describes the skills belonging to other ' +
+                   'classes and the effect they would have if you changed ' +
+                   'class but kept your current <a href="' + wikiUrl +
+                   'Character_Attributes">attributes</a> (although in ' +
+                   'reality, your attributes will usually change at least ' +
+                   'a little when you change class).';
+        }
+        html += ' The wiki has more information about <a href="' +
+                wikiUrl + 'Skills">skills</a> and <a href="' +
+                wikiUrl + 'Buff">buffs</a>.</p>';
+
+        var conIncreaseDamageExplanation = '';
+        if (quest && quest.content.boss) {
+            conIncreaseDamageExplanation = 'This will reduce the damage ' +
+                    'that you take from your negative habits and from ' +
+                    'your dailies directly. It will not reduce the damage ' +
+                    'that your quest boss does to you.';
+        }
+
+        var skills = { // each function returns:
+                       // The target of the skill (blank if the default
+                       // target doesn't need to be explained);
+                       // The effect of the skill;
+                       // Additional explanatory text (can be blank);
+
+            'fireball': function() { // Mage - Burst of Flames
+                var bluestTaskName = bluestTask.text;
+                var bluestTaskType = bluestTask.typePretty;
+                var currentValue   = bluestTask.value;
+                var bonus = computedStats.int;
+                var newValue = currentValue + diminishingReturns(bonus*.02, 4);
+
+/*
+XXX add effects of crit
+cast: (user, target) ->
+    # I seriously have no idea what I'm doing here. I'm just mashing buttons until numbers seem right-ish. Anyone know math?
+    bonus = user._statsComputed.int * user.fns.crit('per')
+    target.value += diminishingReturns(bonus*.02, 4)
+    bonus *= Math.ceil ((if target.value < 0 then 1 else target.value+1) *.075)
+    #console.log {bonus, expBonus:bonus,upBonus:bonus*.1}
+    user.stats.exp += diminishingReturns(bonus,75)
+    user.party.quest.progress.up += diminishingReturns(bonus*.1,50,30) if user.party.quest.key
+*/
+
+                var tempValue = (newValue < 0) ? 1 : newValue + 1;
+                bonus *= Math.ceil(tempValue * .075);
+                var xpIncrease = diminishingReturns(bonus, 75);
+                var questIncrease = diminishingReturns(bonus * .1, 50, 30);
+                currentValue  = Math.round(currentValue  * 10) / 10;
+                newValue      = Math.round(newValue      * 10) / 10;
+                xpIncrease    = Math.round(xpIncrease * 10) / 10; 
+                questIncrease = Math.round(questIncrease * 10) / 10; 
+                var effects = 'This skill is best cast on your ' +
+                              '<span class="taskName">' +
+                              bluestTaskName + '</span> ' +
+                              bluestTaskType + '. The task\'s ' +
+                              taskValueLink + ' will change from ' +
+                              currentValue + ' to ' +
+                              newValue + '. You will gain ' +
+                              xpIncrease + ' XP.';
+                var additional = 'There is a 3% chance of a critical hit ' +
+                                 'which will increase your XP gained';
+                if (quest && quest.content.boss) {
+                    effects += ' You will do ' +
+                               questIncrease + ' damage to your quest boss.';
+                    additional += ' and the damage done to the boss';
+                }
+                additional += ' by an amount based on your ' +
+                    perLink + '.<br />See also merfy\'s ' +
+                    '<a href="http://www.mediafire.com/download/' +
+                    'ehyh5xhm1k95ubt/Mage+Burst+of+Flames+calculations' +
+                    '_public.xlsx">Burst of Flames spreadsheet</a>.';
+                return ['your bluest task',
+                        effects,
+                        additional]; },
+
+            'mpheal': function() { // Mage
+                var bonus = Math.ceil(computedStats['int'] * .1);
+                if (bonus > 25) { bonus = 25; }
+                return ['',
+                        'Each of your party members will receive ' +
+                        bonus + ' MP, except for yourself.',
+                        'When you cast this skill, it will initially seem ' +
+                        'as if you do receive ' +
+                        bonus + ' MP (i.e., the skill will seem to cost only ' +
+                        (30-bonus) + ' MP), but the ' +
+                        bonus + ' MP will later be removed from your account.' +
+                        ' The true cost of this skill to you is 30 MP and ' +
+                        'it benefits only your party members, not you.']; },
+
+            'earth': function() { // Mage
+                var buff = Math.ceil(computedStats['int'] * .05);
+                return ['',
+                        'Each of your party members will have their ' +
+                        intLink + ' increased by ' +
+                        buff + '.',
+                        '']; },
+
+            'frost': function() { // Mage
+                return ['',
+                    'All your uncompleted dailies will not have their ' +
+                    'streaks reset to zero overnight.',
+                    'After you have cast this, your <a href="' +
+                    'https://habitrpg.com/#/options/profile/stats">' +
+                    'User --> Stats page</a> will state "Streaks Frozen".']; },
+
+            'heal': function() { // Healer - Healing Light
+                var inc = (computedStats.con + computedStats.int + 5) * 0.075;
+                var health = Math.round((user.stats.hp + inc) * 10) / 10;
+                if (health > 50) { health = 50; }
+                return ['',
+                        'Your health will be increased by ' +
+                        inc + ' to a total of ' + health + ' HP.',
+                        '']; },
+
+            'brightness': function() { // Healer
+                var inc = 1.5 * computedStats.int / (computedStats.int + 40);
+                return ['',
+                        'The ' + taskValueLink + ' of each of your tasks ' +
+                        'will be increased (made more blue) by ' +
+                        (Math.round(inc * 100) / 100) + '.',
+                        'For example, your bluest task (the ' +
+                        '<span class="taskName">' +
+                        bluestTask.text + '</span> ' +
+                        bluestTask.typePretty +
+                        ') will have its value changed from ' +
+                        (Math.round(bluestTask.value * 100) / 100) + ' to ' +
+                        (Math.round((bluestTask.value + inc) * 100) / 100) +
+                        '. Your reddest task (the '+
+                        '<span class="taskName">' +
+                        reddestTask.text + '</span> ' +
+                        reddestTask.typePretty +
+                        ') will have its value changed from ' +
+                        (Math.round(reddestTask.value * 100) / 100) + ' to ' +
+                        (Math.round((reddestTask.value + inc) * 100) / 100) +
+                        '.']; },
+
+            'protectAura': function() { // Healer
+                var conInc = Math.ceil(computedStats.con * 0.15);
+                var con = computedStats.con + conInc;
+                return ['',
+                        'The ' + conLink + ' of each party member, ' +
+                        'including you, will be increased by ' +
+                        conInc + '. Your own CON will then be ' +
+                        con + '.',
+                        '']; },
+
+            'heallAll': function() { // Healer
+                var inc = (computedStats.con + computedStats.int + 5) * 0.04;
+                var health = Math.round((user.stats.hp + inc) * 10) / 10;
+                if (health > 50) { health = 50; }
+                inc = Math.round(inc * 10) / 10;
+                return ['',
+                        'The health of each party member, including you, ' +
+                        'will be increased by ' +
+                        inc + ' (to a maximum of 50 HP). Your own health ' +
+                        'will then be ' + health + '.',
+                        '']; },
+
+            'smash': function() { // Warrior - Brutal Smash
+/*
+XXX add effects of crit
+cast: (user, target) ->
+target.value += 2.5 * (user._statsComputed.str / (user._statsComputed.str + 50)) * user.fns.crit('con')
+user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.party.quest.key
+*/
+                var inc = 2.5 * computedStats.str / (computedStats.str + 50);
+                          // * user.fns.crit('con')
+                inc = Math.round(inc * 100) / 100; 
+                var effects = 'Your task\'s ' + taskValueLink +
+                              ' will be increased (made less red) by ' +
+                              inc + ' points.';
+                var additional = 'There is a 3% chance of a critical hit ' +
+                        'which will further increase your task\'s ' +
+                        'value by an amount based on your ' +
+                        conLink + '.' +
+                        '<br />This skill is best cast on ' +
+                        'a red daily or habit that is hurting you ' +
+                        'often (e.g., your ' +
+                        '<span class="taskName">' +
+                        reddestHabit.text + '</span> habit or your ' +
+                        '<span class="taskName">' +
+                        reddestDaily.text + '</span> daily). <br />' +
+                        'You can also cast it on a red to-do if you want ' + 
+                        'to receive smaller rewards when you complete that ' +
+                        'to-do.<br />The "Task Overview" section will show ' +
+                        'you your reddest tasks (sort the table by value).';
+                if (quest && quest.content.boss) {
+                    var questIncrease = Math.ceil(computedStats.str * 0.2);
+                    effects += ' You will do ' +
+                               questIncrease + ' damage to your quest boss.';
+                    additional += '<br /> If you want to use the skill to ' +
+                            'damage the boss but don\'t want to adjust the ' +
+                            'rewards you would receive for a task, then ' +
+                            'cast the skill on your bluest task (your ' +
+                            '<span class="taskName">' +
+                            bluestTask.text + '</span> ' +
+                            bluestTask.typePretty + ').';
+                }
+                return ['a red habit or daily',
+                        effects,
+                        additional]; },
+
+            'defensiveStance': function() { // Warrior - Defensive Stance
+                return ['',
+                        'Your ' + conLink + ' will increase from ' +
+                        computedStats.con + ' to ' +
+                        (computedStats.con +
+                         Math.ceil(computedStats.con * .05)) + '.',
+                        conIncreaseDamageExplanation]; },
+
+            'valorousPresence': function() { // Warrior - Valorous Presence
+                var inc = Math.ceil(computedStats.str * .05);
+                return ['',
+                        'Each of your party members will have their ' +
+                        strLink + ' increased by ' +
+                        inc + '. Your own STR will increase from ' +
+                        computedStats.str + ' to ' +
+                        (computedStats.str + inc) + '.',
+                        '']; },
+
+            'intimidate': function() { // Warrior - Intimidating Gaze
+                var inc = Math.ceil(computedStats.con * .03);
+                return ['',
+                        'Each of your party members will have their ' +
+                        conLink + ' increased by ' +
+                        inc + '. Your own CON will increase from ' +
+                        computedStats.con + ' to ' +
+                        (computedStats.con + inc) + '.',
+                        conIncreaseDamageExplanation]; },
+
+            'pickPocket': function() { // Rogue
+                var bluestTaskName = bluestTask.text;
+                var bluestTaskType = bluestTask.typePretty;
+                var currentValue   = bluestTask.value;
+                var tempValue = (currentValue < 0) ? 1 : currentValue + 2;
+                var bonus = tempValue + computedStats.per * 0.5;
+                var inc = 25 * (bonus / (bonus + 75));
+                inc = Math.floor(inc * 100) / 100; 
+                return ['your bluest task',
+                        'This skill is best cast on your ' +
+                        '<span class="taskName">' +
+                        bluestTaskName + '</span> ' +
+                        bluestTaskType + '. You will gain ' +
+                        inc + ' GP.',
+                        '']; },
+
+            'backStab': function() { // Rogue - Backstab
+/*
+XXX add effects of crit
+      cast: (user, target) ->
+        _crit = user.fns.crit('str', .3)
+        target.value += _crit * .03
+        bonus =  (if target.value < 0 then 1 else target.value+1) * _crit
+        user.stats.exp += bonus
+        user.stats.gp += bonus
+*/
+                var bluestTaskName = bluestTask.text;
+                var bluestTaskType = bluestTask.typePretty;
+                var currentValue   = bluestTask.value;
+                var newValue = currentValue + .03;
+                var bonus = (newValue < 0) ? 1 : newValue + 1;
+                var xpBonus = Math.floor(bonus * 10) / 10; 
+                var gpBonus = Math.floor(bonus * 100) / 100; 
+                return ['your bluest task',
+                        'This skill is best cast on your ' +
+                        '<span class="taskName">' +
+                        bluestTaskName + '</span> ' +
+                        bluestTaskType + '. The task\'s ' +
+                        taskValueLink + ' will be changed from ' +
+                        (Math.round(currentValue * 100)/100) + ' to ' +
+                        (Math.round(newValue * 100)/100) + '. You will gain ' +
+                        xpBonus + ' XP and ' +
+                        gpBonus + ' GP.',
+                        'There is a 30% chance of a critical hit ' +
+                        'which will increase your XP and GP ' +
+                        'gained by an amount based on your ' +
+                        strLink]; },
+
+            'toolsOfTrade': function() { // Rogue
+                var inc = Math.ceil(computedStats.per * 0.03);
+                var per = computedStats.per + inc;
+                return ['',
+                        'The ' + perLink + ' of each party member, ' +
+                        'including you, will be increased by ' +
+                        inc + '. Your own PER will then be ' +
+                        per + '.',
+                        '']; },
+
+            'stealth': function() { // Rogue - Stealth
+                var stealth = user.stats.buffs.stealth;
+                var avoid = Math.ceil(dailies.length * computedStats.per / 100);
+                var effects;
+                if (stealth) {
+                    effects = 'You have already cast stealth today, ' +
+                              'and so you will already avoid ' +
+                              stealth + ' dailies tonight. If you cast ' +
+                              'it again now, you will avoid an additional ' +
+                              avoid + ' dailies (' +
+                              (stealth + avoid) + ' in total).';
+                }
+                else {
+                    effects = 'You will avoid ' +
+                              avoid + ' dailies tonight.';
+                }
+                var additional = 'Those dailies will not cause damage and ' +
+                            'their streaks will not reset. Note that ' +
+                            'stealth is used up by ' + greyDailyLink +
+                            ' as well as by dailies due today!';
+                return ['',
+                        effects,
+                        additional]; },
+        };
+
+        klassDone = {};
+        klasses = [userKlass, 'healer', 'wizard', 'rogue', 'warrior'];
+        for (var i in klasses) {
+            var klassName = klasses[i];
+            if (klassDone[klassName]) {
+                continue;
+            }
+            klassDone[klassName] = true;
+            html += '<h3>' + makePrettyKlassName(klassName) + ' Skills</h3>';
+            for (var key in content.spells[klassName]) {
+                var obj = content.spells[klassName][key];
+                var skill = skills[obj.key]();
+                var target = skill[0] ||
+                    ((obj.target == 'self') ? 'yourself' : 'your '+obj.target);
+                html += '<div class="subsection"><h4>' +
+                        obj.text + '</h4>' +
+                        '<p class="description">'   + obj.notes + '</p>' +
+                        '<ul class="padded">' +
+                        '<li><label>mana: </label>'   + obj.mana  + '</li>' +
+                        '<li><label>target: </label>' + target    + '</li>' +
+                        '<li><label>effect: </label>' + skill[1]  +
+                            (skill[2] ? ' <span>' + skill[2] + '</span>' : '') +
+                            (skill[3] ? ' <span>' + skill[3] + '</span>' : '') +
+                            '</li>' +
+                        '</ul></div>';
+            }
+            html += '<div class="clear"></div>';
+        }
+        // html += '<pre>' + JSON.stringify(obj, null, "  ") + '</pre>'; // TST
+        TOC[orderId]  = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html};
+
+        function crit(stat, chance) {
+            // mimics the case where a critical hit DOES happen
+            if (!stat) {
+                stat = 'str';
+            }
+            if (!chance) {
+                chance = 0.03
+            }
+            return 1.5 + (.02 * computedStats[stat]);
         }
     }
 }
@@ -1907,11 +2311,6 @@ function dropCountAndCap() {
         // dropChance *= (1 + user.contributor.level / 40);
     // }
     // dropChance = diminishingReturns(dropChance, 0.75);
-    // function diminishingReturns(bonus, max) {
-        // var halfway = max/2;
-        // var diminished = max * bonus / (bonus + halfway);
-        // return diminished;
-    // }
 
     TOC[orderId]  = {'target': id, 'title':  title};
     MAIN[orderId] = {'id': id, 'title': title, 'html': html};
@@ -2093,8 +2492,8 @@ function analyseEquipment() {
                 'ghost','shadow'];
 
         // collate appearance elements:
-        var appearance = [ 'class: <span class="attributeValue">'
-                          + userKlassPretty + '</span>' ];
+        var appearance = [ 'class: <span class="attributeValue">' +
+                         makePrettyKlassName(userKlass) + '</span>' ];
         if (user.stats.buffs.snowball) {
             appearance.push('<span class="attributeValue">Snowball!</span>');
         }
@@ -2732,7 +3131,6 @@ function computeStats() {
     computedStats['int'] = computeStat('int');
     computedStats['per'] = computeStat('per');
     computedStats['str'] = computeStat('str');
-    console.log(computedStats); // TST
     return computedStats;
 
     function computeStat(stat) {
@@ -2753,6 +3151,9 @@ function computeStats() {
     }
 }
 
+function makePrettyKlassName(klass) {
+    return (klass == 'wizard') ? 'Mage' : upperCaseFirst(klass);
+}
 } // end of parseData() and its nested functions
 });
 </script>
@@ -3222,6 +3623,51 @@ ul#tableOfContents > li {
 }
 
 
+#skillsAndBuffsSection .subsection {
+    margin-left:  5em;
+    margin-right: 5em;
+}
+#skillsAndBuffsSection h3:first-of-type {
+    margin-top: 2em;
+}
+#skillsAndBuffsSection h3 {
+    font-size: 1.3em;
+    margin-top: 3em;
+}
+#skillsAndBuffsSection h4 {
+    margin-left: -2em;
+    font-size: 1.2em;
+}
+#skillsAndBuffsSection .description {
+    font-style: italic;
+}
+#skillsAndBuffsSection ul {
+    list-style-type: none;
+    margin:  0;
+    padding: 0;
+}
+#skillsAndBuffsSection ul li {
+    font-weight: bold;
+}
+#skillsAndBuffsSection ul li label {
+    display: inline-block;
+    width: 4em;
+    font-weight: normal;
+}
+#skillsAndBuffsSection ul li span {
+    margin-top: 0.5em;
+    display: inline-block;
+    font-weight: normal;
+}
+#skillsAndBuffsSection ul li a {
+    white-space: nowrap;
+}
+#skillsAndBuffsSection span.taskName {
+    font-weight: normal;
+    font-style: italic;
+}
+
+
 #missingEquipmentSection ul.gearList  {
     list-style-type: none;
 }
@@ -3343,7 +3789,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.0.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(beta 4)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
