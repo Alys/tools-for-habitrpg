@@ -1828,7 +1828,7 @@ randomTodoHtml
         var id      = 'skillsAndBuffsSection';
         var title   = 'Skills and Buffs';
         var orderId = 'skillsAndBuffs';
-        sectionOpen = id; // TST
+        // sectionOpen = id; // TST
 
         var html = '<p>This section describes the skills you ';
         var more = false;
@@ -1859,8 +1859,6 @@ randomTodoHtml
         html += ' The wiki has more information about <a href="' +
                 wikiUrl + 'Skills">skills</a> and <a href="' +
                 wikiUrl + 'Buff">buffs</a>.</p>';
-        // console.log(user.stats.lvl); // TST
-        // console.log(computedStats); // TST
 
         var conIncreaseDamageExplanation = '';
         if (quest && quest.content.boss) {
@@ -1958,11 +1956,12 @@ cast: (user, target) ->
                     'User --> Stats page</a> will state "Streaks Frozen".']; },
 
             'heal': function() { // Healer - Healing Light
-                var hpInc = (computedStats.con + computedStats.int + 5) * 0.075;
-                var health = Math.round((user.stats.hp + hpInc) * 10) / 10;
+                var inc = (computedStats.con + computedStats.int + 5) * 0.075;
+                var health = Math.round((user.stats.hp + inc) * 10) / 10;
                 if (health > 50) { health = 50; }
                 return ['',
-                        'Your health will be increased to ' + health + '.',
+                        'Your health will be increased by ' +
+                        inc + ' to a total of ' + health + ' HP.',
                         '']; },
 
             'brightness': function() { // Healer
@@ -2143,7 +2142,6 @@ XXX add effects of crit
                 var stealth = user.stats.buffs.stealth;
                 var avoid = Math.ceil(dailies.length * computedStats.per / 100);
                 var effects;
-                stealth = 1;
                 if (stealth) {
                     effects = 'You have already cast stealth today, ' +
                               'and so you will already avoid ' +
@@ -2166,7 +2164,7 @@ XXX add effects of crit
         };
 
         klassDone = {};
-        klasses = [userKlass, 'healer', 'rogue', 'wizard', 'warrior'];
+        klasses = [userKlass, 'healer', 'wizard', 'rogue', 'warrior'];
         for (var i in klasses) {
             var klassName = klasses[i];
             if (klassDone[klassName]) {
