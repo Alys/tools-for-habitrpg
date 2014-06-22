@@ -1908,8 +1908,9 @@ cast: (user, target) ->
                               currentValue + ' to ' +
                               newValue + '. You will gain ' +
                               xpIncrease + ' XP.';
-                var additional = 'There is a 3% chance of a critical hit ' +
-                                 'which will increase your XP gained';
+                var additional = 'There is a 3% or greater chance of a ' +
+                                 'critical hit which will increase your ' +
+                                 'XP gained';
                 if (quest && quest.content.boss) {
                     effects += ' You will do ' +
                                questIncrease + ' damage to your quest boss.';
@@ -2020,9 +2021,9 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                 var effects = 'Your task\'s ' + taskValueLink +
                               ' will be increased (made less red) by ' +
                               inc + ' points.';
-                var additional = 'There is a 3% chance of a critical hit ' +
-                        'which will further increase your task\'s ' +
-                        'value by an amount based on your ' +
+                var additional = 'There is a 3% or greater chance of a ' +
+                        'critical hit which will further increase your ' +
+                        'task\'s value by an amount based on your ' +
                         conLink + '.' +
                         '<br />This skill is best cast on ' +
                         'a red daily or habit that is hurting you ' +
@@ -2122,7 +2123,7 @@ XXX add effects of crit
                         (Math.round(newValue * 100)/100) + '. You will gain ' +
                         xpBonus + ' XP and ' +
                         gpBonus + ' GP.',
-                        'There is a 30% chance of a critical hit ' +
+                        'There is a 30% or greater chance of a critical hit ' +
                         'which will increase your XP and GP ' +
                         'gained by an amount based on your ' +
                         strLink]; },
