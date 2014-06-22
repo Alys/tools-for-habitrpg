@@ -41,7 +41,7 @@ $(function() { // wraps around all our code to not pollute global namespace
 ////   Some types of equipment are never shown in the  ///////////////
 ////   table so don't add images for them:             ///////////////
 ////       - base equipment (Training Sword, etc)      ///////////////
-////       - monthly subscriber myster items           ///////////////
+////       - monthly subscriber mystery items           ///////////////
 //////////////////////////////////////////////////////////////////////
 var images = {
     'armor_healer_1' : 'Acolyterobe.png',
@@ -177,7 +177,26 @@ var images = {
     'weapon_wizard_3' : 'Ironstaff.png',
     'weapon_wizard_4' : 'Brassstaff.png',
     'weapon_wizard_5' : 'Archmagestaff.png',
-    'weapon_wizard_6' : 'Weapon_wizard_6.png'
+    'weapon_wizard_6' : 'Weapon_wizard_6.png',
+    'weapon_special_summerRogue' : 'Weapon_special_summerRogue.png',
+    'weapon_special_summerWarrior' : 'Weapon_special_summerWarrior.png',
+    'weapon_special_summerMage' : 'Weapon_special_summerMage.png',
+    'weapon_special_summerHealer' : 'Weapon_special_summerHealer.png',
+    'armor_special_summerRogue' : 'Broad_armor_special_summerRogue.png',
+    'armor_special_summerWarrior' : 'Broad_armor_special_summerWarrior.png',
+    'armor_special_summerMage' : 'Broad_armor_special_summerMage.png',
+    'armor_special_summerHealer' : 'Broad_armor_special_summerHealer.png',
+    'head_special_summerRogue' : 'Head_special_summerRogue.png',
+    'head_special_summerWarrior' : 'Head_special_summerWarrior.png',
+    'head_special_summerMage' : 'Head_special_summerMage.png',
+    'head_special_summerHealer' : 'Head_special_summerHealer.png',
+    'shield_special_summerRogue' : 'Shield_special_summerRogue.png',
+    'shield_special_summerWarrior' : 'Shield_special_summerWarrior.png',
+    'shield_special_summerHealer' : 'Shield_special_summerHealer.png',
+    'body_special_summerHealer' : 'Body_special_summerHealer.png',
+    'body_special_summerMage' : 'Body_special_summerMage.png',
+    'headAccessory_special_summerRogue' : 'HeadAccessory_special_summerRogue.png',
+    'headAccessory_special_summerWarrior' : 'HeadAccessory_special_summerWarrior.png'
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -236,7 +255,26 @@ var urls = {
     'weapon_special_springMage' : 'Spring_Fling',
     'weapon_special_springRogue' : 'Spring_Fling',
     'weapon_special_springWarrior' : 'Spring_Fling',
-    'weapon_special_yeti' : 'Winter_Wonderland#Special_Class_Gear'
+    'weapon_special_yeti' : 'Winter_Wonderland#Special_Class_Gear',
+    'weapon_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
+    'weapon_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
+    'weapon_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
+    'weapon_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
+    'armor_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
+    'armor_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
+    'armor_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
+    'armor_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
+    'head_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
+    'head_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
+    'head_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
+    'head_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
+    'shield_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
+    'shield_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
+    'shield_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
+    'body_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
+    'body_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
+    'headAccessory_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
+    'headAccessory_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear'
 };
 
 
@@ -586,7 +624,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Equipment Table Creator
-    <span>(v1.0)</span></h1><!-- VERSION -->
+    <span>(v1.1)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">

@@ -1959,6 +1959,7 @@ cast: (user, target) ->
                 var inc = (computedStats.con + computedStats.int + 5) * 0.075;
                 var health = Math.round((user.stats.hp + inc) * 10) / 10;
                 if (health > 50) { health = 50; }
+                inc = Math.round(inc * 10) / 10;
                 return ['',
                         'Your health will be increased by ' +
                         inc + ' to a total of ' + health + ' HP.',
@@ -3821,7 +3822,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes.</li>
+                    <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes. Thanks very much to Ryan for testing all of the skills and providing useful suggestions.</li>
                 </ul>
             <li>Code:
                 <ul>
