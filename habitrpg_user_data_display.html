@@ -3276,6 +3276,7 @@ ul.padded > li {
 *********************************************************************/
 .mainSectionClose,
 .showHideToggle {
+    cursor: pointer;
     text-decoration: underline;
     color: purple;
 }
@@ -3309,6 +3310,9 @@ h2 {
     margin-top: 30px;
 }
 
+#headerExtras .showHideToggle {
+    white-space: nowrap;
+}
 #userNameDisplay {
     text-align: right;
     font-weight: bold;
@@ -3419,7 +3423,6 @@ h2 {
     list-style-type: none;
 }
 #DASHBOARD li.showHideToggle {
-    cursor: pointer;
     text-decoration: none;
     color: black;
 }
@@ -3818,6 +3821,10 @@ ul#tableOfContents > li {
             <li>Features:
                 <ul>
                     <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes.</li>
+                </ul>
+            <li>Code:
+                <ul>
+                    <li>Fixed (probably) a bug that was preventing most of the links from being used on iOS devices (iPads, etc). If you're still having trouble on your device, <a href="mailto:lady_alys@oldgods.net">tell me</a>!</li>
                 </ul>
             </li>
         </ul></dd>
