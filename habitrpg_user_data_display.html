@@ -1947,10 +1947,16 @@ cast: (user, target) ->
                         buff + '.',
                         '']; },
 
-            'frost': function() { // Mage
+            'frost': function() { // Mage - Chilling Frost
+                var msg = 'all your uncompleted dailies will not have ' +
+                          'their streaks reset to zero overnight.';
+                var effects = (user.stats.buffs.streaks) ?
+							  'You have already cast this today, so ' +
+                              msg + ' Casting it again will have no effect.' :
+                              'If you cast this, ' +
+                              msg;
                 return ['',
-                    'All your uncompleted dailies will not have their ' +
-                    'streaks reset to zero overnight.',
+                    effects,
                     'After you have cast this, your <a href="' +
                     'https://habitrpg.com/#/options/profile/stats">' +
                     'User --> Stats page</a> will state "Streaks Frozen".']; },
@@ -2184,8 +2190,8 @@ XXX add effects of crit
                         '<li><label>mana: </label>'   + obj.mana  + '</li>' +
                         '<li><label>target: </label>' + target    + '</li>' +
                         '<li><label>effect: </label>' + skill[1]  +
-                            (skill[2] ? ' <span>' + skill[2] + '</span>' : '') +
-                            (skill[3] ? ' <span>' + skill[3] + '</span>' : '') +
+                            (skill[2] ? ' <span class="additional">' +
+							 skill[2] + '</span>' : '') +
                             '</li>' +
                         '</ul></div>';
             }
@@ -3654,7 +3660,7 @@ ul#tableOfContents > li {
     width: 4em;
     font-weight: normal;
 }
-#skillsAndBuffsSection ul li span {
+#skillsAndBuffsSection ul li .additional {
     margin-top: 0.5em;
     display: inline-block;
     font-weight: normal;
