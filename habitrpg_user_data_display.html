@@ -1828,7 +1828,6 @@ randomTodoHtml
         var id      = 'skillsAndBuffsSection';
         var title   = 'Skills and Buffs';
         var orderId = 'skillsAndBuffs';
-        // sectionOpen = id; // TST
 
         var html = '<p>This section describes the skills you ';
         var more = false;
@@ -1909,8 +1908,9 @@ cast: (user, target) ->
                               currentValue + ' to ' +
                               newValue + '. You will gain ' +
                               xpIncrease + ' XP.';
-                var additional = 'There is a 3% chance of a critical hit ' +
-                                 'which will increase your XP gained';
+                var additional = 'There is a 3% or greater chance of a ' +
+                                 'critical hit which will increase your ' +
+                                 'XP gained';
                 if (quest && quest.content.boss) {
                     effects += ' You will do ' +
                                questIncrease + ' damage to your quest boss.';
@@ -1965,6 +1965,7 @@ cast: (user, target) ->
                 var inc = (computedStats.con + computedStats.int + 5) * 0.075;
                 var health = Math.round((user.stats.hp + inc) * 10) / 10;
                 if (health > 50) { health = 50; }
+                inc = Math.round(inc * 10) / 10;
                 return ['',
                         'Your health will be increased by ' +
                         inc + ' to a total of ' + health + ' HP.',
@@ -2027,9 +2028,9 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                 var effects = 'Your task\'s ' + taskValueLink +
                               ' will be increased (made less red) by ' +
                               inc + ' points.';
-                var additional = 'There is a 3% chance of a critical hit ' +
-                        'which will further increase your task\'s ' +
-                        'value by an amount based on your ' +
+                var additional = 'There is a 3% or greater chance of a ' +
+                        'critical hit which will further increase your ' +
+                        'task\'s value by an amount based on your ' +
                         conLink + '.' +
                         '<br />This skill is best cast on ' +
                         'a red daily or habit that is hurting you ' +
@@ -2129,7 +2130,7 @@ XXX add effects of crit
                         (Math.round(newValue * 100)/100) + '. You will gain ' +
                         xpBonus + ' XP and ' +
                         gpBonus + ' GP.',
-                        'There is a 30% chance of a critical hit ' +
+                        'There is a 30% or greater chance of a critical hit ' +
                         'which will increase your XP and GP ' +
                         'gained by an amount based on your ' +
                         strLink]; },
@@ -2197,7 +2198,6 @@ XXX add effects of crit
             }
             html += '<div class="clear"></div>';
         }
-        // html += '<pre>' + JSON.stringify(obj, null, "  ") + '</pre>'; // TST
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'html': html};
 
@@ -3284,6 +3284,7 @@ ul.padded > li {
 *********************************************************************/
 .mainSectionClose,
 .showHideToggle {
+    cursor: pointer;
     text-decoration: underline;
     color: purple;
 }
@@ -3317,6 +3318,9 @@ h2 {
     margin-top: 30px;
 }
 
+#headerExtras .showHideToggle {
+    white-space: nowrap;
+}
 #userNameDisplay {
     text-align: right;
     font-weight: bold;
@@ -3427,7 +3431,6 @@ h2 {
     list-style-type: none;
 }
 #DASHBOARD li.showHideToggle {
-    cursor: pointer;
     text-decoration: none;
     color: black;
 }
@@ -3795,7 +3798,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(beta 4)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3804,12 +3807,7 @@ ul#tableOfContents > li {
         <p>Please wait. Fetching data from
         <span id="serverName">HabitRPG</span>...</p>
         <p id="specialMessage" class="lowlight narrowContent">
-
-<br /><br />It gripped her hand gently. "Regret is for humans," it said.<br /><br />
-She laughed. "Really?"<br /><br />
-The machine shrugged and let go of her hand. "Oh, no. It's just something we tell ourselves."<br /><br />
--- Iain M. Banks, Against a Dark Background
-
+<br /><em>99 little bugs in the code,<br />99 little bugs in the code,<br />take one down, patch it around,<br />117 little bugs in the code!</em><br />-- No'Akei<br /><br />
         </p>
     </div>
     <div class="bad hide">
@@ -3826,6 +3824,19 @@ The machine shrugged and let go of her hand. "Oh, no. It's just something we tel
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.1 <span class="date">2014-06-22</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes. Thanks very much to Ryan for testing all of the skills and providing useful suggestions.</li>
+                </ul>
+            <li>Code:
+                <ul>
+                    <li>Fixed (probably) a bug that was preventing most of the links from being used on iOS devices (iPads, etc). If you're still having trouble on your device, <a href="mailto:lady_alys@oldgods.net">tell me</a>!</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.0.1 <span class="date">2014-06-15</span></dt>
         <dd><ul>
             <li>Features: none</li>
@@ -3835,7 +3846,6 @@ The machine shrugged and let go of her hand. "Oh, no. It's just something we tel
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.0 <span class="date">2014-06-09</span></dt>
         <dd><ul>
             <li>Features:
@@ -4305,14 +4315,15 @@ The machine shrugged and let go of her hand. "Oh, no. It's just something we tel
             <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
             <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
             <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
+            <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes.</li>
        </ul>
         <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
        <h2>Possible Future Features</h2>
        <ul>
-            <li><em>This week:</em> A few new features and then I'll update this list properly with all the features people have suggested recently.</li>
+            <li><em>I really need to update this soon with the new suggestions people have given me. They're all in my to-do list, just not here because I am slack.</em></li>
             <li><em>Probably:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
-            <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> also looks bad, but support for it might not be easy to implement. Apologies again.</li>
+            <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> looks bad, but support for it might not be easy to implement. Apologies again.</li>
             <li><em>Maybe:</em> <span class="subheading">Missing Equipment for Orb of Rebirthers</span>: do something to make the feature more useful for them.</li>
             <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
        </ul>
