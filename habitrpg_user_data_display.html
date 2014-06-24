@@ -1868,11 +1868,13 @@ randomTodoHtml
                     'that your quest boss does to you.';
         }
 
+        var before = ' before casting it.';
         var skills = { // each function returns:
                        // The target of the skill (blank if the default
                        // target doesn't need to be explained);
                        // The effect of the skill;
                        // Additional explanatory text (can be blank);
+                       // How to increase effect of the skill (can be blank).
 
             'fireball': function() { // Mage - Burst of Flames
                 var bluestTaskName = bluestTask.text;
@@ -1880,7 +1882,6 @@ randomTodoHtml
                 var currentValue   = bluestTask.value;
                 var bonus = computedStats.int;
                 var newValue = currentValue + diminishingReturns(bonus*.02, 4);
-
 /*
 XXX add effects of crit
 cast: (user, target) ->
@@ -1892,7 +1893,6 @@ cast: (user, target) ->
     user.stats.exp += diminishingReturns(bonus,75)
     user.party.quest.progress.up += diminishingReturns(bonus*.1,50,30) if user.party.quest.key
 */
-
                 var tempValue = (newValue < 0) ? 1 : newValue + 1;
                 bonus *= Math.ceil(tempValue * .075);
                 var xpIncrease = diminishingReturns(bonus, 75);
@@ -1922,13 +1922,18 @@ cast: (user, target) ->
                     '<a href="http://www.mediafire.com/download/' +
                     'ehyh5xhm1k95ubt/Mage+Burst+of+Flames+calculations' +
                     '_public.xlsx">Burst of Flames spreadsheet</a>.';
+                var increase = 'To increase all effects of the skill, ' +
+                               'increase your ' + intLink + before;
                 return ['your bluest task',
                         effects,
-                        additional]; },
+                        additional,
+                        increase]; },
 
-            'mpheal': function() { // Mage
+            'mpheal': function() { // Mage - Ethereal Surge
                 var bonus = Math.ceil(computedStats['int'] * .1);
                 if (bonus > 25) { bonus = 25; }
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + intLink + before;
                 return ['',
                         'Each of your party members will receive ' +
                         bonus + ' MP, except for yourself.',
@@ -1938,15 +1943,19 @@ cast: (user, target) ->
                         (30-bonus) + ' MP), but the ' +
                         bonus + ' MP will later be removed from your account.' +
                         ' The true cost of this skill to you is 30 MP and ' +
-                        'it benefits only your party members, not you.']; },
+                        'it benefits only your party members, not you.',
+                        increase]; },
 
-            'earth': function() { // Mage
+            'earth': function() { // Mage - Earthquake
                 var buff = Math.ceil(computedStats['int'] * .05);
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + intLink + before;
                 return ['',
                         'Each of your party members will have their ' +
                         intLink + ' increased by ' +
                         buff + '.',
-                        '']; },
+                        '',
+                        increase]; },
 
             'frost': function() { // Mage - Chilling Frost
                 var msg = 'all your uncompleted dailies will not have ' +
@@ -1967,13 +1976,19 @@ cast: (user, target) ->
                 var health = Math.round((user.stats.hp + inc) * 10) / 10;
                 if (health > 50) { health = 50; }
                 inc = Math.round(inc * 10) / 10;
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + conLink + ' or ' +
+                               intLink + ' or both' + before;
                 return ['',
                         'Your health will be increased by ' +
                         inc + ' to a total of ' + health + ' HP.',
-                        '']; },
+                        '',
+                        increase]; },
 
-            'brightness': function() { // Healer
+            'brightness': function() { // Healer - Searing Brightness
                 var inc = 1.5 * computedStats.int / (computedStats.int + 40);
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + intLink + before;
                 return ['',
                         'The ' + taskValueLink + ' of each of your tasks ' +
                         'will be increased (made more blue) by ' +
@@ -1992,29 +2007,37 @@ cast: (user, target) ->
                         ') will have its value changed from ' +
                         (Math.round(reddestTask.value * 100) / 100) + ' to ' +
                         (Math.round((reddestTask.value + inc) * 100) / 100) +
-                        '.']; },
+                        '.',
+                        increase]; },
 
-            'protectAura': function() { // Healer
+            'protectAura': function() { // Healer - Protective Aura
                 var conInc = Math.ceil(computedStats.con * 0.15);
                 var con = computedStats.con + conInc;
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + conLink + before;
                 return ['',
                         'The ' + conLink + ' of each party member, ' +
                         'including you, will be increased by ' +
                         conInc + '. Your own CON will then be ' +
                         con + '.',
-                        '']; },
+                        '',
+                        increase]; },
 
-            'heallAll': function() { // Healer
+            'heallAll': function() { // Healer - Blessing
                 var inc = (computedStats.con + computedStats.int + 5) * 0.04;
                 var health = Math.round((user.stats.hp + inc) * 10) / 10;
                 if (health > 50) { health = 50; }
                 inc = Math.round(inc * 10) / 10;
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + conLink + ' or ' +
+                               intLink + ' or both' + before;
                 return ['',
                         'The health of each party member, including you, ' +
                         'will be increased by ' +
                         inc + ' (to a maximum of 50 HP). Your own health ' +
                         'will then be ' + health + '.',
-                        '']; },
+                        '',
+                        increase]; },
 
             'smash': function() { // Warrior - Brutal Smash
 /*
@@ -2024,7 +2047,6 @@ target.value += 2.5 * (user._statsComputed.str / (user._statsComputed.str + 50))
 user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.party.quest.key
 */
                 var inc = 2.5 * computedStats.str / (computedStats.str + 50);
-                          // * user.fns.crit('con')
                 inc = Math.round(inc * 100) / 100; 
                 var effects = 'Your task\'s ' + taskValueLink +
                               ' will be increased (made less red) by ' +
@@ -2056,37 +2078,49 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                             bluestTask.text + '</span> ' +
                             bluestTask.typePretty + ').';
                 }
+                var increase = 'To increase all effects of the skill, ' +
+                               'increase your ' + strLink + before;
                 return ['a red habit or daily',
                         effects,
-                        additional]; },
+                        additional,
+                        increase]; },
 
             'defensiveStance': function() { // Warrior - Defensive Stance
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + conLink + before;
                 return ['',
                         'Your ' + conLink + ' will increase from ' +
                         computedStats.con + ' to ' +
                         (computedStats.con +
                          Math.ceil(computedStats.con * .05)) + '.',
-                        conIncreaseDamageExplanation]; },
+                        conIncreaseDamageExplanation,
+                        increase]; },
 
             'valorousPresence': function() { // Warrior - Valorous Presence
                 var inc = Math.ceil(computedStats.str * .05);
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + strLink + before;
                 return ['',
                         'Each of your party members will have their ' +
                         strLink + ' increased by ' +
                         inc + '. Your own STR will increase from ' +
                         computedStats.str + ' to ' +
                         (computedStats.str + inc) + '.',
-                        '']; },
+                        '',
+                        increase]; },
 
             'intimidate': function() { // Warrior - Intimidating Gaze
                 var inc = Math.ceil(computedStats.con * .03);
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + conLink + before;
                 return ['',
                         'Each of your party members will have their ' +
                         conLink + ' increased by ' +
                         inc + '. Your own CON will increase from ' +
                         computedStats.con + ' to ' +
                         (computedStats.con + inc) + '.',
-                        conIncreaseDamageExplanation]; },
+                        conIncreaseDamageExplanation,
+                        increase]; },
 
             'pickPocket': function() { // Rogue
                 var bluestTaskName = bluestTask.text;
@@ -2096,13 +2130,16 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                 var bonus = tempValue + computedStats.per * 0.5;
                 var inc = 25 * (bonus / (bonus + 75));
                 inc = Math.floor(inc * 100) / 100; 
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + perLink + before;
                 return ['your bluest task',
                         'This skill is best cast on your ' +
                         '<span class="taskName">' +
                         bluestTaskName + '</span> ' +
                         bluestTaskType + '. You will gain ' +
                         inc + ' GP.',
-                        '']; },
+                        '',
+                        increase]; },
 
             'backStab': function() { // Rogue - Backstab
 /*
@@ -2121,6 +2158,12 @@ XXX add effects of crit
                 var bonus = (newValue < 0) ? 1 : newValue + 1;
                 var xpBonus = Math.floor(bonus * 10) / 10; 
                 var gpBonus = Math.floor(bonus * 100) / 100; 
+                var increase = 'You cannot increase the effects of the ' +
+                               'skill by increasing your attributes unless ' +
+                               'you get a critical hit. To increase the ' +
+                               'chance and power of a critical hit, ' +
+                               'increase your ' + strLink + ' before casting ' +
+                               'the skill.';
                 return ['your bluest task',
                         'This skill is best cast on your ' +
                         '<span class="taskName">' +
@@ -2134,17 +2177,21 @@ XXX add effects of crit
                         'There is a 30% or greater chance of a critical hit ' +
                         'which will increase your XP and GP ' +
                         'gained by an amount based on your ' +
-                        strLink]; },
+                        strLink,
+                        increase]; },
 
             'toolsOfTrade': function() { // Rogue
                 var inc = Math.ceil(computedStats.per * 0.03);
                 var per = computedStats.per + inc;
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + perLink + before;
                 return ['',
                         'The ' + perLink + ' of each party member, ' +
                         'including you, will be increased by ' +
                         inc + '. Your own PER will then be ' +
                         per + '.',
-                        '']; },
+                        '',
+                        increase]; },
 
             'stealth': function() { // Rogue - Stealth
                 var stealth = user.stats.buffs.stealth;
@@ -2166,9 +2213,12 @@ XXX add effects of crit
                             'their streaks will not reset. Note that ' +
                             'stealth is used up by ' + greyDailyLink +
                             ' as well as by dailies due today!';
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + perLink + before;
                 return ['',
                         effects,
-                        additional]; },
+                        additional,
+                        increase]; },
         };
 
         klassDone = {};
@@ -2194,6 +2244,8 @@ XXX add effects of crit
                         '<li><label>effect: </label>' + skill[1]  +
                             (skill[2] ? ' <span class="additional">' +
                              skill[2] + '</span>' : '') +
+                            (skill[3] ? ' <span class="increase">' +
+                             skill[3] + '</span>' : '') +
                             '</li>' +
                         '</ul></div>';
             }
@@ -3664,7 +3716,8 @@ ul#tableOfContents > li {
     width: 4em;
     font-weight: normal;
 }
-#skillsAndBuffsSection ul li .additional {
+#skillsAndBuffsSection ul li .additional,
+#skillsAndBuffsSection ul li .increase   {
     margin-top: 0.5em;
     display: block;
     font-weight: normal;
@@ -3829,7 +3882,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Skills and Buffs</span>: the Chilling Frost section now tells you if you have already cast it.</li>
+                    <li><span class="subheading">Skills and Buffs</span>: the Chilling Frost section now tells you if you have already cast it, and each skill section now tells you how to increase the effects of the skill (i.e., which character attribute to maximise with equipment or points to get the most out of the skill.</li>
                 </ul>
         </ul></dd>
 
