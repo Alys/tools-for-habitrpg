@@ -2430,11 +2430,11 @@ function questProgress() {
         // think they have even slightly more progress than they really
         // have. Imagine if they missed ending a quest overnight by 0.1
         // health because this page exaggerated their progress!
+        var bossname = [(quest.content.boss.name || quest.content.key),
+                        tavern.quest.key].join(" and ");
         html += 'So far today you have done an estimated ' +
-               '<span class="highlight">' +
-               progress + '</span> points of damage to ' +
-               (quest.content.boss.name || quest.content.key) +
-               (tavern.quest.active ? ' and ' + tavern.quest.key + '.' : '.');
+            '<span class="highlight">' + progress +
+            '</span> points of damage to ' + bossname + '.';
         DASHBOARD[orderId] = {'label': title,
             'hoverText': 'amount of damage you have done to the quest boss ' +
                          'today (click for more information)',
