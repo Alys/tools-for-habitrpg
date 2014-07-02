@@ -76,7 +76,6 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
-/* TST - FOR TESTING:
 $('body').css({'background-color':'#C4B4A4'});
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -89,6 +88,7 @@ userId            = 'home';
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
+/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -98,6 +98,7 @@ var hideDropsInDashboard = true; // changes to false as soon as the user
                                  // looks at the drops section, then remains
                                  // false through all future re-fetches
 var tellMe = '<a href="mailto:lady_alys@oldgods.net">tell me</a>';
+var worldBoss = true;
 
 
 
@@ -234,9 +235,8 @@ function parseData() {
     var sleeping = user.preferences.sleep; // true if resting in the inn
     var userKlass = user.stats.class;
     var health = getCurrentHealth(); // also sets dashboard tile
-    var quest;
+    var quest = $.extend({}, user.party.quest);
     if (user.party.quest.key) {
-        quest = $.extend({}, user.party.quest);
         quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
     }
 
@@ -706,7 +706,7 @@ function collateAndDisplayTaskData() {
                 }
                 var delta = nextDelta; // Change this if we ever take
                                        // account of multiple missed days.
-                if (quest && quest.content.boss) {
+                if (quest.content && quest.content.boss) {
                     obj.damageToPartyUnrounded = delta*quest.content.boss.str;
                     obj.damageToParty
                             = Math.round(obj.damageToPartyUnrounded * 10) / 10;
@@ -1244,7 +1244,7 @@ randomTodoHtml
         var modifyHealthDashboardTile = false;
         if (sleeping) {
             html += '<p>You are <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a> so you will not take any damage from your uncompleted dailies.</p>';
-            if (quest && quest.content.boss) {
+			if (quest.content && quest.content.boss) {
                 html += '<p> However, you are also on a <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> so you <span class="highlight">will</span> still take damage from the uncompleted dailies of other quest participants.</p>';
             }
         }
@@ -1262,7 +1262,7 @@ randomTodoHtml
             // think they will take even slightly less damage than they really
             // will. Imagine if they died from an extra 0.1 damage that this
             // page didn't tell them they had!
-            if (quest && quest.content.boss) {
+			if (quest.content && quest.content.boss) {
                 if (damageToUser == 0) {
                     html += '<p>You and your fellow ' +
                         '<a href="http://habitrpg.wikia.com/wiki/Quests">' +
@@ -1326,7 +1326,7 @@ randomTodoHtml
                 'status': 'safe'};
         }
         else {
-            var questMsg = (quest && quest.content.boss) ?
+            var questMsg = (quest.content && quest.content.boss) ?
                            'AND from your quest boss due to those dailies ' :
                            '';
             DASHBOARD.damageToUser = {'label': 'Est. Damage to You',
@@ -1336,7 +1336,7 @@ randomTodoHtml
                 'target': id, 'value': damageTotal,
                 'status': ((damageToUser) ? 'danger' : 'safe')
                 };
-            if (quest && quest.content.boss) {
+            if (quest.content && quest.content.boss) {
                 DASHBOARD.damageToParty = {'label': 'Est. Damage to Party',
                     'hoverText': 'health loss your party will take ' +
                          'overnight from your quest boss due to your own ' +
@@ -1383,7 +1383,7 @@ randomTodoHtml
             html += '<p>The table below shows the dailies that are due ' +
                     'today and have not yet been completed. It tells you ' +
                     'the estimated damage you will take from each daily';
-            if (quest && quest.content.boss) {
+            if (quest.content && quest.content.boss) {
                 html += ' and how much damage each daily will let the <a ' +
                     'href="http://habitrpg.wikia.com/wiki/Quests">quest</a> ' +
                     '<a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> ' +
@@ -1465,7 +1465,7 @@ randomTodoHtml
             },
             { 'mData' : 'damageToParty',   'sClass': 'center',
               'sTitle': 'damage to party', 'asSorting': ['desc','asc'],
-              'bVisible': ((quest && quest.content.boss) ? true : false),
+              'bVisible': ((quest.content && quest.content.boss) ? true:false),
             },
             { 'sTitle': 'stealthed',       'sClass': 'center',
               'mData': function ( source, type, val ) {
@@ -1836,7 +1836,7 @@ randomTodoHtml
             html += 'will be able to use when you reach levels 11 to 14, ' +
                     'if you choose a ' + classLink + '.';
         }
-        else if (false) { // XXX opt out - finish and test wording
+        else if (false) { // XXX_SOON opt out - finish and test wording
             html += ' would be able to use if you chose a ' + classLink + '.';
         }
         else if (user.stats.lvl < 14) {
@@ -1861,7 +1861,7 @@ randomTodoHtml
                 wikiUrl + 'Buff">buffs</a>.</p>';
 
         var conIncreaseDamageExplanation = '';
-        if (quest && quest.content.boss) {
+        if (quest.content && quest.content.boss) {
             conIncreaseDamageExplanation = 'This will reduce the damage ' +
                     'that you take from your negative habits and from ' +
                     'your dailies directly. It will not reduce the damage ' +
@@ -1883,7 +1883,7 @@ randomTodoHtml
                 var bonus = computedStats.int;
                 var newValue = currentValue + diminishingReturns(bonus*.02, 4);
 /*
-XXX add effects of crit
+XXX_SOON add effects of crit
 cast: (user, target) ->
     # I seriously have no idea what I'm doing here. I'm just mashing buttons until numbers seem right-ish. Anyone know math?
     bonus = user._statsComputed.int * user.fns.crit('per')
@@ -1912,7 +1912,8 @@ cast: (user, target) ->
                 var additional = 'There is a 3% or greater chance of a ' +
                                  'critical hit which will increase your ' +
                                  'XP gained';
-                if (quest && quest.content.boss) {
+                if (quest.content && quest.content.boss) {
+// XXX 
                     effects += ' You will do ' +
                                questIncrease + ' damage to your quest boss.';
                     additional += ' and the damage done to the boss';
@@ -2041,7 +2042,7 @@ cast: (user, target) ->
 
             'smash': function() { // Warrior - Brutal Smash
 /*
-XXX add effects of crit
+XXX_SOON add effects of crit
 cast: (user, target) ->
 target.value += 2.5 * (user._statsComputed.str / (user._statsComputed.str + 50)) * user.fns.crit('con')
 user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.party.quest.key
@@ -2066,7 +2067,8 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                         'to receive smaller rewards when you complete that ' +
                         'to-do.<br />The "Task Overview" section will show ' +
                         'you your reddest tasks (sort the table by value).';
-                if (quest && quest.content.boss) {
+                if (quest.content && quest.content.boss) {
+// XXX 
                     var questIncrease = Math.ceil(computedStats.str * 0.2);
                     effects += ' You will do ' +
                                questIncrease + ' damage to your quest boss.';
@@ -2143,7 +2145,7 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
 
             'backStab': function() { // Rogue - Backstab
 /*
-XXX add effects of crit
+XXX_SOON add effects of crit
       cast: (user, target) ->
         _crit = user.fns.crit('str', .3)
         target.value += _crit * .03
@@ -2400,22 +2402,36 @@ function questProgress() {
     // "party":{"current":null,"invitation":null,"quest":
     // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
     //
-    if (quest && quest.content.boss) { // User is on a boss quest
-        var progress = Math.floor(quest.progress.up * 10) / 10;
-        // We round DOWN with floor because we must never let the user
-        // think they have even slightly more progress than they really
-        // have. Imagine if they missed ending a quest overnight by 0.1
-        // health because this page exaggerated their progress!
+	var bossProgress = Math.floor(quest.progress.up * 10) / 10;
+	// We round DOWN with floor so we don't let the user think 
+	// they have even slightly more progress than they really
+	// have. Imagine if they missed ending a quest overnight by 0.1
+	// health!
+	if (quest.content && quest.content.boss) {
         html += 'So far today you have done an estimated ' +
                '<span class="highlight">' +
-               progress + '</span> points of damage to ' +
-               (quest.content.boss.name || quest.content.key) + '.';
+               bossProgress + '</span> points of damage to ';
+		var dashboardLabel = '';
+	    if (quest.content && quest.content.boss) {
+			html += quest.content.boss.name || quest.content.key; // XXX test
+			dashboardLabel = 'your quest boss';
+			if (worldBoss) {
+				html += ' and to '; // XXX test, both on and off
+				dashboardLabel += ' and ';
+			}
+		}
+		if (worldBoss) {
+			html += "The Dread Drag'on of Dilatory"; // XXX_SOON automate
+			dashboardLabel += ' the world boss';
+		}
+		html += '.';
         DASHBOARD[orderId] = {'label': title,
-            'hoverText': 'amount of damage you have done to the quest boss ' +
-                         'today (click for more information)',
+            'hoverText': 'amount of damage you have done today to ' +
+						 dashboardLabel + // XXX test all options
+                         ' (click for more information)',
             'target': id, 'value': progress, 'status': 'neutral'};
     }
-    else if (quest && quest.content.collect) { // User is on a collection quest
+    else if (quest.content && quest.content.collect) { // collection quest
         userIsOnCollectionQuest = true;
         var total = 0;
         var stuff = '';
@@ -2446,6 +2462,7 @@ function questProgress() {
             'target': id, 'value': total, 'status': 'neutral'};
     }
     else { // user is not on a quest
+// XXX 
         return;
     }
     TOC[orderId]  = {'target': id, 'title':  title};
