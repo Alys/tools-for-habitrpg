@@ -63,6 +63,7 @@ $(function() { // wraps around all our code to not pollute global namespace
 ////   Global Variables                              /////////////////
 //////////////////////////////////////////////////////////////////////
 var content; // holds site-wide content (gear names and stats, quests, etc)
+var tavern;  // holds tavern data
 var user;    // holds user's data
 
 
@@ -72,6 +73,7 @@ var user;    // holds user's data
 var serverName        = 'HabitRPG'; // used in "loading" message
 var serverUrl         = 'https://habitrpg.com:443/api/v2';
 var serverPathContent = '/content';
+var serverPathTavern  = '/groups/habitrpg';
 var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
@@ -177,7 +179,7 @@ function fetchData() {
     $('#loading .good').show();
     $('#loading .bad' ).hide();
 
-    var ajaxRunningCount = 2; // drops to 0 when all calls have succeeded
+    var ajaxRunningCount = 3; // drops to 0 when all calls have succeeded
 
     // fetch the user's own content (tasks, gear owned, etc):
     $.ajax({
@@ -203,6 +205,21 @@ function fetchData() {
         error: fetchFailure
     });
 
+    // fetch tavern-specific content
+    $.ajax({
+        url: serverUrl + serverPathTavern,
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            },
+        success: fetchTavernSuccess,
+        error: fetchFailure,
+    });
+
+
     function fetchFailure() {
         $('#loading .good').hide();
         $('#loading .bad' ).show();
@@ -211,6 +228,13 @@ function fetchData() {
     }
     function fetchContentSuccess(data) {
         content = data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
+    }
+    function fetchTavernSuccess(data) {
+        tavern = data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -235,7 +259,7 @@ function parseData() {
     var userKlass = user.stats.class;
     var health = getCurrentHealth(); // also sets dashboard tile
     var quest;
-    if (user.party.quest.key) {
+    if ((user.party.quest.key) || tavern.quest.active) {
         quest = $.extend({}, user.party.quest);
         quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
     }
@@ -1465,7 +1489,7 @@ randomTodoHtml
             },
             { 'mData' : 'damageToParty',   'sClass': 'center',
               'sTitle': 'damage to party', 'asSorting': ['desc','asc'],
-              'bVisible': ((quest && quest.content.boss) ? true : false),
+              'bVisible': ((tavern.quest.active || (quest && quest.content.boss)) ? true : false),
             },
             { 'sTitle': 'stealthed',       'sClass': 'center',
               'mData': function ( source, type, val ) {
@@ -1899,8 +1923,8 @@ cast: (user, target) ->
                 var questIncrease = diminishingReturns(bonus * .1, 50, 30);
                 currentValue  = Math.round(currentValue  * 10) / 10;
                 newValue      = Math.round(newValue      * 10) / 10;
-                xpIncrease    = Math.round(xpIncrease * 10) / 10; 
-                questIncrease = Math.round(questIncrease * 10) / 10; 
+                xpIncrease    = Math.round(xpIncrease * 10) / 10;
+                questIncrease = Math.round(questIncrease * 10) / 10;
                 var effects = 'This skill is best cast on your ' +
                               '<span class="taskName">' +
                               bluestTaskName + '</span> ' +
@@ -2047,7 +2071,7 @@ target.value += 2.5 * (user._statsComputed.str / (user._statsComputed.str + 50))
 user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.party.quest.key
 */
                 var inc = 2.5 * computedStats.str / (computedStats.str + 50);
-                inc = Math.round(inc * 100) / 100; 
+                inc = Math.round(inc * 100) / 100;
                 var effects = 'Your task\'s ' + taskValueLink +
                               ' will be increased (made less red) by ' +
                               inc + ' points.';
@@ -2062,7 +2086,7 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                         reddestHabit.text + '</span> habit or your ' +
                         '<span class="taskName">' +
                         reddestDaily.text + '</span> daily). <br />' +
-                        'You can also cast it on a red to-do if you want ' + 
+                        'You can also cast it on a red to-do if you want ' +
                         'to receive smaller rewards when you complete that ' +
                         'to-do.<br />The "Task Overview" section will show ' +
                         'you your reddest tasks (sort the table by value).';
@@ -2129,7 +2153,7 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                 var tempValue = (currentValue < 0) ? 1 : currentValue + 2;
                 var bonus = tempValue + computedStats.per * 0.5;
                 var inc = 25 * (bonus / (bonus + 75));
-                inc = Math.floor(inc * 100) / 100; 
+                inc = Math.floor(inc * 100) / 100;
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + perLink + before;
                 return ['your bluest task',
@@ -2156,8 +2180,8 @@ XXX add effects of crit
                 var currentValue   = bluestTask.value;
                 var newValue = currentValue + .03;
                 var bonus = (newValue < 0) ? 1 : newValue + 1;
-                var xpBonus = Math.floor(bonus * 10) / 10; 
-                var gpBonus = Math.floor(bonus * 100) / 100; 
+                var xpBonus = Math.floor(bonus * 10) / 10;
+                var gpBonus = Math.floor(bonus * 100) / 100;
                 var increase = 'You cannot increase the effects of the ' +
                                'skill by increasing your attributes unless ' +
                                'you get a critical hit. To increase the ' +
@@ -2400,7 +2424,7 @@ function questProgress() {
     // "party":{"current":null,"invitation":null,"quest":
     // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
     //
-    if (quest && quest.content.boss) { // User is on a boss quest
+    if (tavern.quest.active || (quest && quest.content.boss)) { // User is on a boss quest
         var progress = Math.floor(quest.progress.up * 10) / 10;
         // We round DOWN with floor because we must never let the user
         // think they have even slightly more progress than they really
@@ -2409,7 +2433,7 @@ function questProgress() {
         html += 'So far today you have done an estimated ' +
                '<span class="highlight">' +
                progress + '</span> points of damage to ' +
-               (quest.content.boss.name || quest.content.key) + '.';
+               (tavern.quest.key || quest.content.boss.name || quest.content.key) + '.';
         DASHBOARD[orderId] = {'label': title,
             'hoverText': 'amount of damage you have done to the quest boss ' +
                          'today (click for more information)',
