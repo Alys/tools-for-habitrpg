@@ -2433,7 +2433,8 @@ function questProgress() {
         html += 'So far today you have done an estimated ' +
                '<span class="highlight">' +
                progress + '</span> points of damage to ' +
-               (tavern.quest.key || quest.content.boss.name || quest.content.key) + '.';
+               (quest.content.boss.name || quest.content.key) +
+               (tavern.quest.active ? ' and ' + tavern.quest.key + '.' : '.');
         DASHBOARD[orderId] = {'label': title,
             'hoverText': 'amount of damage you have done to the quest boss ' +
                          'today (click for more information)',
