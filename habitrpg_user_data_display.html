@@ -76,6 +76,7 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
+/* TST - FOR TESTING:
 $('body').css({'background-color':'#C4B4A4'});
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -88,7 +89,6 @@ userId            = 'home';
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
-/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -98,7 +98,7 @@ var hideDropsInDashboard = true; // changes to false as soon as the user
                                  // looks at the drops section, then remains
                                  // false through all future re-fetches
 var tellMe = '<a href="mailto:lady_alys@oldgods.net">tell me</a>';
-var worldBoss = true;
+var tavernBoss = true;
 
 
 
@@ -286,8 +286,8 @@ function formatAndDisplayDASHBOARD() {
     // add the unique identifier for the new section to this array (the array
     // elements are in the order that the dashboard tiles appear on the page):
     var keys = ['currentHealth', 'dailiesIncomplete', 'damageToUser',
-                'damageToParty', 'questProgress', 'todosDated', 'dropsToday',
-                'unallocatedPoints', 'sleeping'];
+                'damageToParty', 'questProgress', 'questProgressSecond',
+                'todosDated', 'dropsToday', 'unallocatedPoints', 'sleeping'];
     var html = '<ul>';
 
     for (var i=0,ic=keys.length; i<ic; i++) {
@@ -1244,7 +1244,7 @@ randomTodoHtml
         var modifyHealthDashboardTile = false;
         if (sleeping) {
             html += '<p>You are <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a> so you will not take any damage from your uncompleted dailies.</p>';
-			if (quest.content && quest.content.boss) {
+            if (quest.content && quest.content.boss) {
                 html += '<p> However, you are also on a <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> so you <span class="highlight">will</span> still take damage from the uncompleted dailies of other quest participants.</p>';
             }
         }
@@ -1262,7 +1262,7 @@ randomTodoHtml
             // think they will take even slightly less damage than they really
             // will. Imagine if they died from an extra 0.1 damage that this
             // page didn't tell them they had!
-			if (quest.content && quest.content.boss) {
+            if (quest.content && quest.content.boss) {
                 if (damageToUser == 0) {
                     html += '<p>You and your fellow ' +
                         '<a href="http://habitrpg.wikia.com/wiki/Quests">' +
@@ -1899,8 +1899,8 @@ cast: (user, target) ->
                 var questIncrease = diminishingReturns(bonus * .1, 50, 30);
                 currentValue  = Math.round(currentValue  * 10) / 10;
                 newValue      = Math.round(newValue      * 10) / 10;
-                xpIncrease    = Math.round(xpIncrease * 10) / 10; 
-                questIncrease = Math.round(questIncrease * 10) / 10; 
+                xpIncrease    = Math.round(xpIncrease * 10) / 10;
+                questIncrease = Math.round(questIncrease * 10) / 10;
                 var effects = 'This skill is best cast on your ' +
                               '<span class="taskName">' +
                               bluestTaskName + '</span> ' +
@@ -1913,7 +1913,7 @@ cast: (user, target) ->
                                  'critical hit which will increase your ' +
                                  'XP gained';
                 if (quest.content && quest.content.boss) {
-// XXX 
+// XXX  skills
                     effects += ' You will do ' +
                                questIncrease + ' damage to your quest boss.';
                     additional += ' and the damage done to the boss';
@@ -2048,7 +2048,7 @@ target.value += 2.5 * (user._statsComputed.str / (user._statsComputed.str + 50))
 user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.party.quest.key
 */
                 var inc = 2.5 * computedStats.str / (computedStats.str + 50);
-                inc = Math.round(inc * 100) / 100; 
+                inc = Math.round(inc * 100) / 100;
                 var effects = 'Your task\'s ' + taskValueLink +
                               ' will be increased (made less red) by ' +
                               inc + ' points.';
@@ -2063,12 +2063,12 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                         reddestHabit.text + '</span> habit or your ' +
                         '<span class="taskName">' +
                         reddestDaily.text + '</span> daily). <br />' +
-                        'You can also cast it on a red to-do if you want ' + 
+                        'You can also cast it on a red to-do if you want ' +
                         'to receive smaller rewards when you complete that ' +
                         'to-do.<br />The "Task Overview" section will show ' +
                         'you your reddest tasks (sort the table by value).';
                 if (quest.content && quest.content.boss) {
-// XXX 
+// XXX  skills
                     var questIncrease = Math.ceil(computedStats.str * 0.2);
                     effects += ' You will do ' +
                                questIncrease + ' damage to your quest boss.';
@@ -2131,7 +2131,7 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                 var tempValue = (currentValue < 0) ? 1 : currentValue + 2;
                 var bonus = tempValue + computedStats.per * 0.5;
                 var inc = 25 * (bonus / (bonus + 75));
-                inc = Math.floor(inc * 100) / 100; 
+                inc = Math.floor(inc * 100) / 100;
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + perLink + before;
                 return ['your bluest task',
@@ -2158,8 +2158,8 @@ XXX_SOON add effects of crit
                 var currentValue   = bluestTask.value;
                 var newValue = currentValue + .03;
                 var bonus = (newValue < 0) ? 1 : newValue + 1;
-                var xpBonus = Math.floor(bonus * 10) / 10; 
-                var gpBonus = Math.floor(bonus * 100) / 100; 
+                var xpBonus = Math.floor(bonus * 10) / 10;
+                var gpBonus = Math.floor(bonus * 100) / 100;
                 var increase = 'You cannot increase the effects of the ' +
                                'skill by increasing your attributes unless ' +
                                'you get a critical hit. To increase the ' +
@@ -2379,9 +2379,10 @@ function dropCountAndCap() {
 
 
 function questProgress() {
-    var id      = 'questProgressSection';
-    var title   = 'Quest Progress';
-    var orderId = 'questProgress';
+    var id            = 'questProgressSection';
+    var title         = 'Quest Progress';
+    var orderId       = 'questProgress';
+    var orderIdSecond = 'questProgressSecond';
     var html = '';
     // on a quest:
     // "quest":{"completed":null,"key":"ghost_stag",
@@ -2402,36 +2403,41 @@ function questProgress() {
     // "party":{"current":null,"invitation":null,"quest":
     // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
     //
-	var bossProgress = Math.floor(quest.progress.up * 10) / 10;
-	// We round DOWN with floor so we don't let the user think 
-	// they have even slightly more progress than they really
-	// have. Imagine if they missed ending a quest overnight by 0.1
-	// health!
-	if (quest.content && quest.content.boss) {
+    var alreadyHaveDashboardTile = false;
+    if ((quest.content && quest.content.boss) || tavernBoss) {
+        var progress = Math.floor(quest.progress.up * 10) / 10;
+        // We round DOWN with floor so we don't let the user think
+        // they have even slightly more progress than they really
+        // have. Imagine if they missed ending a quest overnight by 0.1
+        // health!
         html += 'So far today you have done an estimated ' +
                '<span class="highlight">' +
-               bossProgress + '</span> points of damage to ';
-		var dashboardLabel = '';
-	    if (quest.content && quest.content.boss) {
-			html += quest.content.boss.name || quest.content.key; // XXX test
-			dashboardLabel = 'your quest boss';
-			if (worldBoss) {
-				html += ' and to '; // XXX test, both on and off
-				dashboardLabel += ' and ';
-			}
-		}
-		if (worldBoss) {
-			html += "The Dread Drag'on of Dilatory"; // XXX_SOON automate
-			dashboardLabel += ' the world boss';
-		}
-		html += '.';
-        DASHBOARD[orderId] = {'label': title,
+               progress + '</span> points of damage to ';
+        var dashboardLabel = '';
+        if (quest.content && quest.content.boss) {
+            html += quest.content.boss.name || quest.content.key;
+            dashboardLabel = 'your quest boss';
+            if (tavernBoss) {
+                html += ' and to ';
+                dashboardLabel += ' and ';
+            }
+        }
+        if (tavernBoss) {
+            html += "The Dread Drag'on of Dilatory"; // XXX_SOON automate
+            dashboardLabel += 'the Tavern boss';
+        }
+        html += '.';
+        var dashboardTitle = 'Damage to Boss'; // XXX_SOON make better for all cases!
+        dashboardTitle += (quest.content && quest.content.boss) ? 'es' : '';
+        DASHBOARD[orderId] = {'label': dashboardTitle,
             'hoverText': 'amount of damage you have done today to ' +
-						 dashboardLabel + // XXX test all options
+                         dashboardLabel +
                          ' (click for more information)',
             'target': id, 'value': progress, 'status': 'neutral'};
+        alreadyHaveDashboardTile = true;
     }
-    else if (quest.content && quest.content.collect) { // collection quest
+
+    if (quest.content && quest.content.collect) { // collection quest
         userIsOnCollectionQuest = true;
         var total = 0;
         var stuff = '';
@@ -2447,6 +2453,9 @@ function questProgress() {
         });
         var replaceStr = (uniqueItemsCount > 2) ? ", and" : " and";
         stuff = stuff.replace(/(.+),/, "$1" + replaceStr);
+        if (tavernBoss) {
+            html += '<br />';
+        }
         html += 'So far today you have found ' + '<span class="highlight">';
         if (total == 0) {
             html += 'no items';
@@ -2456,17 +2465,19 @@ function questProgress() {
         }
         html += '</span> for the ' +
                 (quest.content.text || quest.content.key) + ' quest.';
-        DASHBOARD[orderId] = {'label': title,
+
+        var orderId1 = (alreadyHaveDashboardTile) ? orderIdSecond : orderId; // XXX test both
+        var dashboardTitle = 'Quest Progress';
+        DASHBOARD[orderId1] = {'label': dashboardTitle,
             'hoverText': 'number of items you have found today for your ' +
                          'collection quest (click for more information)',
             'target': id, 'value': total, 'status': 'neutral'};
     }
-    else { // user is not on a quest
-// XXX 
-        return;
+
+    if (html) { // user is not on a party quest and there is no Tavern quest
+        TOC[orderId]  = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html };
     }
-    TOC[orderId]  = {'target': id, 'title':  title};
-    MAIN[orderId] = {'id': id, 'title': title, 'html': html };
 }
 
 
@@ -3869,7 +3880,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.1.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3895,6 +3906,14 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.2 <span class="date">2014-07-03</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Tavern Boss</span>: The damage you have done so far today to the Tavern Boss is now displayed in the dashboard and in the "Quest Progress" section. You'll see these items even if you are not on a party quest, or are on a collection quest. (Soon I'll be updating the "Skills and Buffs" section for those skills that damage the Tavern boss as well as a quest boss, and there'll be an update to show exact Tavern boss stats.)</li>
+                </ul>
+        </ul></dd>
+
         <dt>3.1.1 <span class="date">2014-06-24</span></dt>
         <dd><ul>
             <li>Features:
@@ -3903,7 +3922,6 @@ ul#tableOfContents > li {
                     <li><span class="subheading">Skills and Buffs</span>: The Chilling Frost section now tells you if you have already cast it.</li>
                 </ul>
         </ul></dd>
-
         <dt>3.1 <span class="date">2014-06-22</span></dt>
         <dd><ul>
             <li>Features:
