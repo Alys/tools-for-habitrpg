@@ -617,11 +617,11 @@ function collateAndDisplayTaskData() {
         knownTags.push(obj.id);
     });
 
-    var bluestTask   = {'value':0};
-    var reddestTask  = {'value':0};
-    var reddestHabit = {'value':0};
-    var reddestDaily = {'value':0};
-    var biggestTask  = {'value':0}; // task with greatest absolute magnitude
+    var bluestTask   = {};
+    var reddestTask  = {};
+    var reddestHabit = {};
+    var reddestDaily = {};
+    var biggestTask  = {}; // task with greatest absolute magnitude
     var habits   = collateHabitsData();  // populates the...
     var dailies  = collateDailiesData(); // ... function's "global" variables...
     var todosAll = collateTodosData();   // ... defined above...
@@ -675,11 +675,23 @@ function collateAndDisplayTaskData() {
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['habits'].push(obj);
             }
-            if (obj.value <= reddestHabit.value){ reddestHabit = obj; }
-            if (obj.value <= reddestTask.value) { reddestTask  = obj; }
-            if (obj.value >= bluestTask.value)  { bluestTask   = obj; }
-            if (Math.abs(obj.value)> Math.abs(biggestTask.value)) {
-                                                  biggestTask = obj; }
+
+            if (typeof reddestHabit.value === "undefined" ||
+                obj.value < reddestHabit.value) {
+                reddestHabit = obj;
+            }
+            if (typeof reddestTask.value === "undefined" ||
+                obj.value < reddestTask.value) {
+                reddestTask = obj;
+            }
+            if (typeof bluestTask.value === "undefined" ||
+                obj.value > bluestTask.value) {
+                bluestTask = obj;
+            }
+            if (typeof biggestTask.value === "undefined" ||
+                Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+                biggestTask = obj;
+            }
         });
         return habits;
     }
@@ -765,11 +777,22 @@ function collateAndDisplayTaskData() {
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['dailies'].push(obj);
             }
-            if (obj.value <= reddestDaily.value){ reddestDaily = obj; }
-            if (obj.value <= reddestTask.value) { reddestTask  = obj; }
-            if (obj.value >= bluestTask.value)  { bluestTask   = obj; }
-            if (Math.abs(obj.value)> Math.abs(biggestTask.value)) {
-                                                  biggestTask = obj; }
+            if (typeof reddestDaily.value === "undefined" ||
+                obj.value < reddestDaily.value) {
+                reddestDaily = obj;
+            }
+            if (typeof reddestTask.value === "undefined" ||
+                obj.value < reddestTask.value) {
+                reddestTask = obj;
+            }
+            if (typeof bluestTask.value === "undefined" ||
+                obj.value > bluestTask.value) {
+                bluestTask = obj;
+            }
+            if (typeof biggestTask.value === "undefined" ||
+                Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+                biggestTask = obj;
+            }
         });
         return dailies;
 
@@ -830,10 +853,18 @@ function collateAndDisplayTaskData() {
                 }
             }
             if (obj.completed == false) {
-                if (obj.value <= reddestTask.value) { reddestTask = obj; }
-                if (obj.value >= bluestTask.value)  { bluestTask = obj;  }
-                if (Math.abs(obj.value) > Math.abs(biggestTask.value)) {
-                                                      biggestTask = obj; }
+                if (typeof reddestTask.value === "undefined" ||
+                    obj.value < reddestTask.value) {
+                    reddestTask = obj;
+                }
+                if (typeof bluestTask.value === "undefined" ||
+                    obj.value > bluestTask.value) {
+                    bluestTask = obj;
+                }
+                if (typeof biggestTask.value === "undefined" ||
+                    Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+                    biggestTask = obj;
+                }
             }
         });
         return [todos, todosCompleted];
@@ -3942,7 +3973,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.2)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3968,6 +3999,14 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.2.2 <span class="date">2014-07-03</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Fixed a bug that was preventing people's reddest/bluest tasks being identified (for Skills and Buffs) if they didn't have any tasks with values less than/greater than zero.</li>
+                </ul>
+        </ul></dd>
+
         <dt>3.2.1 <span class="date">2014-07-03</span></dt>
         <dd><ul>
             <li>Features:
@@ -3981,7 +4020,6 @@ ul#tableOfContents > li {
                     <li>The code that handles the Tavern Boss is now more future-proof and maintainable thanks to improvements by @thepeopleseason.</li>
                 </ul>
         </ul></dd>
-
         <dt>3.2 <span class="date">2014-07-03</span></dt>
         <dd><ul>
             <li>Features:
