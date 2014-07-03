@@ -63,6 +63,7 @@ $(function() { // wraps around all our code to not pollute global namespace
 ////   Global Variables                              /////////////////
 //////////////////////////////////////////////////////////////////////
 var content; // holds site-wide content (gear names and stats, quests, etc)
+var tavern;  // holds tavern data
 var user;    // holds user's data
 
 
@@ -72,6 +73,7 @@ var user;    // holds user's data
 var serverName        = 'HabitRPG'; // used in "loading" message
 var serverUrl         = 'https://habitrpg.com:443/api/v2';
 var serverPathContent = '/content';
+var serverPathTavern  = '/groups/habitrpg';
 var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
@@ -80,6 +82,7 @@ var apiToken          = '';
 $('body').css({'background-color':'#C4B4A4'});
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
+serverPathTavern  = '/cgi-bin/hrpg_tavern.pl';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
 apiToken          = 'null';
@@ -98,7 +101,6 @@ var hideDropsInDashboard = true; // changes to false as soon as the user
                                  // looks at the drops section, then remains
                                  // false through all future re-fetches
 var tellMe = '<a href="mailto:lady_alys@oldgods.net">tell me</a>';
-var tavernBoss = true;
 
 
 
@@ -178,7 +180,7 @@ function fetchData() {
     $('#loading .good').show();
     $('#loading .bad' ).hide();
 
-    var ajaxRunningCount = 2; // drops to 0 when all calls have succeeded
+    var ajaxRunningCount = 3; // drops to 0 when all calls have succeeded
 
     // fetch the user's own content (tasks, gear owned, etc):
     $.ajax({
@@ -204,6 +206,21 @@ function fetchData() {
         error: fetchFailure
     });
 
+    // fetch tavern-specific content
+    $.ajax({
+        url: serverUrl + serverPathTavern,
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            },
+        success: fetchTavernSuccess,
+        error: fetchFailure,
+    });
+
+
     function fetchFailure() {
         $('#loading .good').hide();
         $('#loading .bad' ).show();
@@ -212,6 +229,13 @@ function fetchData() {
     }
     function fetchContentSuccess(data) {
         content = data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
+    }
+    function fetchTavernSuccess(data) {
+        tavern = data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -237,7 +261,23 @@ function parseData() {
     var health = getCurrentHealth(); // also sets dashboard tile
     var quest = $.extend({}, user.party.quest);
     if (user.party.quest.key) {
+        quest = $.extend({}, user.party.quest);
         quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
+    }
+
+    var tavernBoss = tavern.quest && tavern.quest.active; // true/false
+
+    var bossesLabel = '';
+    var bossesWord  = 'boss';
+    if (quest.content && quest.content.boss) {
+        bossesLabel = 'your quest boss';
+        if (tavernBoss) {
+            bossesLabel += ' and ';
+            bossesWord  += 'es';
+        }
+    }
+    if (tavernBoss) {
+        bossesLabel += 'the Tavern boss';
     }
 
     // put the user's equipped battle gear into an object, with all
@@ -635,11 +675,11 @@ function collateAndDisplayTaskData() {
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['habits'].push(obj);
             }
-            if (         obj.value < reddestHabit.value){ reddestHabit = obj; }
-            if (         obj.value < reddestTask.value) { reddestTask  = obj; }
-            if (         obj.value > bluestTask.value)  { bluestTask   = obj;  }
+            if (obj.value <= reddestHabit.value){ reddestHabit = obj; }
+            if (obj.value <= reddestTask.value) { reddestTask  = obj; }
+            if (obj.value >= bluestTask.value)  { bluestTask   = obj; }
             if (Math.abs(obj.value)> Math.abs(biggestTask.value)) {
-                                                           biggestTask = obj; }
+                                                  biggestTask = obj; }
         });
         return habits;
     }
@@ -725,11 +765,11 @@ function collateAndDisplayTaskData() {
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['dailies'].push(obj);
             }
-            if (         obj.value < reddestDaily.value){ reddestDaily = obj; }
-            if (         obj.value < reddestTask.value) { reddestTask  = obj; }
-            if (         obj.value > bluestTask.value)  { bluestTask   = obj;  }
+            if (obj.value <= reddestDaily.value){ reddestDaily = obj; }
+            if (obj.value <= reddestTask.value) { reddestTask  = obj; }
+            if (obj.value >= bluestTask.value)  { bluestTask   = obj; }
             if (Math.abs(obj.value)> Math.abs(biggestTask.value)) {
-                                                           biggestTask = obj; }
+                                                  biggestTask = obj; }
         });
         return dailies;
 
@@ -790,8 +830,8 @@ function collateAndDisplayTaskData() {
                 }
             }
             if (obj.completed == false) {
-                if (obj.value  < reddestTask.value) { reddestTask = obj; }
-                if (obj.value  > bluestTask.value)  { bluestTask = obj;  }
+                if (obj.value <= reddestTask.value) { reddestTask = obj; }
+                if (obj.value >= bluestTask.value)  { bluestTask = obj;  }
                 if (Math.abs(obj.value) > Math.abs(biggestTask.value)) {
                                                       biggestTask = obj; }
             }
@@ -1912,12 +1952,14 @@ cast: (user, target) ->
                 var additional = 'There is a 3% or greater chance of a ' +
                                  'critical hit which will increase your ' +
                                  'XP gained';
-                if (quest.content && quest.content.boss) {
-// XXX  skills
+                if ((quest.content && quest.content.boss) || tavernBoss) {
                     effects += ' You will do ' +
-                               questIncrease + ' damage to your quest boss.';
-                    additional += ' and the damage done to the boss';
-                }
+                               questIncrease + ' damage to ' +
+                               bossesLabel + '.';
+                    additional += ' and the damage done to the ' +
+                                  bossesWord;
+                } // XXX_LATER if no quest: say that it WOULD affect bosses
+
                 additional += ' by an amount based on your ' +
                     perLink + '.<br />See also merfy\'s ' +
                     '<a href="http://www.mediafire.com/download/' +
@@ -2067,19 +2109,20 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                         'to receive smaller rewards when you complete that ' +
                         'to-do.<br />The "Task Overview" section will show ' +
                         'you your reddest tasks (sort the table by value).';
-                if (quest.content && quest.content.boss) {
-// XXX  skills
+                if ((quest.content && quest.content.boss) || tavernBoss) {
                     var questIncrease = Math.ceil(computedStats.str * 0.2);
                     effects += ' You will do ' +
-                               questIncrease + ' damage to your quest boss.';
+                               questIncrease + ' damage to ' +
+                               bossesLabel + '.';
                     additional += '<br /> If you want to use the skill to ' +
-                            'damage the boss but don\'t want to adjust the ' +
+                            'damage the ' +
+                            bossesWord + ' but don\'t want to adjust the ' +
                             'rewards you would receive for a task, then ' +
                             'cast the skill on your bluest task (your ' +
                             '<span class="taskName">' +
                             bluestTask.text + '</span> ' +
                             bluestTask.typePretty + ').';
-                }
+                } // XXX_LATER if no quest: say that it WOULD affect bosses
                 var increase = 'To increase all effects of the skill, ' +
                                'increase your ' + strLink + before;
                 return ['a red habit or daily',
@@ -2383,7 +2426,7 @@ function questProgress() {
     var title         = 'Quest Progress';
     var orderId       = 'questProgress';
     var orderIdSecond = 'questProgressSecond';
-    var html = '';
+    var html = '<p>';
     // on a quest:
     // "quest":{"completed":null,"key":"ghost_stag",
     //          "progress":{"collect":{},"down":0,"up":13.780066986139815}},
@@ -2403,35 +2446,30 @@ function questProgress() {
     // "party":{"current":null,"invitation":null,"quest":
     // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
     //
+
     var alreadyHaveDashboardTile = false;
     if ((quest.content && quest.content.boss) || tavernBoss) {
         var progress = Math.floor(quest.progress.up * 10) / 10;
-        // We round DOWN with floor so we don't let the user think
-        // they have even slightly more progress than they really
-        // have. Imagine if they missed ending a quest overnight by 0.1
-        // health!
+        // Round DOWN with floor so we don't let the user think they
+        // have even slightly more progress than they really have.
+        // Imagine if they missed ending a quest overnight by 0.1 health!
         html += 'So far today you have done an estimated ' +
                '<span class="highlight">' +
                progress + '</span> points of damage to ';
-        var dashboardLabel = '';
         if (quest.content && quest.content.boss) {
             html += quest.content.boss.name || quest.content.key;
-            dashboardLabel = 'your quest boss';
             if (tavernBoss) {
                 html += ' and to ';
-                dashboardLabel += ' and ';
             }
         }
         if (tavernBoss) {
             html += "The Dread Drag'on of Dilatory"; // XXX_SOON automate
-            dashboardLabel += 'the Tavern boss';
         }
         html += '.';
-        var dashboardTitle = 'Damage to Boss'; // XXX_SOON make better for all cases!
-        dashboardTitle += (quest.content && quest.content.boss) ? 'es' : '';
+        var dashboardTitle = 'Damage to ' + upperCaseFirst(bossesWord);
         DASHBOARD[orderId] = {'label': dashboardTitle,
             'hoverText': 'amount of damage you have done today to ' +
-                         dashboardLabel +
+                         bossesLabel +
                          ' (click for more information)',
             'target': id, 'value': progress, 'status': 'neutral'};
         alreadyHaveDashboardTile = true;
@@ -2466,12 +2504,31 @@ function questProgress() {
         html += '</span> for the ' +
                 (quest.content.text || quest.content.key) + ' quest.';
 
-        var orderId1 = (alreadyHaveDashboardTile) ? orderIdSecond : orderId; // XXX test both
+        var orderId1 = (alreadyHaveDashboardTile) ? orderIdSecond : orderId;
         var dashboardTitle = 'Quest Progress';
         DASHBOARD[orderId1] = {'label': dashboardTitle,
             'hoverText': 'number of items you have found today for your ' +
                          'collection quest (click for more information)',
             'target': id, 'value': total, 'status': 'neutral'};
+    }
+    html += '</p>';
+
+    if (tavernBoss && tavern.quest.progress) {
+        var name = "Dread Drag'on of Dilatory"; // XXX_LATER automate!
+        var hp = Math.round(tavern.quest.progress.hp);
+        var hpMax = 5000000; // XXX_LATER automate!
+        var hpPercent = Math.round(hp / hpMax * 1000) / 10;
+        html += '<h3>Stats for the ' + name + '</h3>' +
+                '<p>Health: ' + hpPercent + '% (' +
+                 hp + ' down from ' + hpMax + ')';
+        if (tavern.quest.progress.rage) {
+            var rage = Math.round(tavern.quest.progress.rage);
+            var rageMax = 4000000; // XXX_LATER automate!
+            var ragePercent = Math.round(rage / rageMax * 1000) / 10;
+            html += '<br />Rage: ' + ragePercent + '% (' +
+                    rage + ' out of ' + rageMax + ')';
+        }
+        html += '</p>';
     }
 
     if (html) {
@@ -3698,6 +3755,11 @@ ul#tableOfContents > li {
 }
 
 
+#questProgressSection h3 {
+    margin-top: 3em;
+}
+
+
 #statsAndStreaksSection .subsection {
     float: left;
     margin-left: 3em;
@@ -3880,7 +3942,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3906,6 +3968,20 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.2.1 <span class="date">2014-07-03</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Quest Progress</span> section now contains the precise stats for the Tavern boss.</li>
+                    <li><span class="subheading">Skills and Buffs</span> section now says when a skill will damage a Tavern boss (Burst of Flames and Brutal Smash).</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>The code that handles the Tavern Boss is now more future-proof and maintainable thanks to improvements by @thepeopleseason.</li>
+                </ul>
+        </ul></dd>
+
         <dt>3.2 <span class="date">2014-07-03</span></dt>
         <dd><ul>
             <li>Features:
@@ -3913,7 +3989,6 @@ ul#tableOfContents > li {
                     <li><span class="subheading">Tavern Boss</span>: The damage you have done so far today to the Tavern Boss is now displayed in the dashboard and in the "Quest Progress" section. You'll see these items even if you are not on a party quest, or are on a collection quest. (Soon I'll be updating the "Skills and Buffs" section for those skills that damage the Tavern boss as well as a quest boss, and there'll be an update to show exact Tavern boss stats.)</li>
                 </ul>
         </ul></dd>
-
         <dt>3.1.1 <span class="date">2014-06-24</span></dt>
         <dd><ul>
             <li>Features:
