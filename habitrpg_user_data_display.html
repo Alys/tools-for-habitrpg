@@ -277,7 +277,7 @@ function parseData() {
         }
     }
     if (tavernBoss) {
-        bossesLabel += 'the Tavern boss';
+        bossesLabel += 'the World boss';
     }
 
     // put the user's equipped battle gear into an object, with all
@@ -1984,13 +1984,31 @@ cast: (user, target) ->
                                  'critical hit which will increase your ' +
                                  'XP gained';
                 if ((quest.content && quest.content.boss) || tavernBoss) {
-                    effects += ' You will do ' +
-                               questIncrease + ' damage to ' +
-                               bossesLabel + '.';
+                    var emStarted = false;
+                    if (quest.content) {
+                        effects += ' You will do ' +
+                                   questIncrease + ' damage to ' +
+                                   bossesLabel + '.' +
+                                   '<br /><em>Note: When your party\'s ' +
+                                   'current quest ends, this ' +
+                                   'skill will no longer damage Drag\'on, ' +
+                                   'until you start another boss quest or ' +
+                                   'collection quest';
+                        emStarted = true;
+                    }
+                    else {
+                        effects += ' This skill will <strong>not</strong> ' +
+                                   'damage Drag\'on because you are not on ' +
+                                   'a boss quest or collection quest';
+                    }
+                    effects += ' (<a href="https://github.com/HabitRPG/' +
+                               'habitrpg-shared/pull/244">more info</a>).';
+                    if (emStarted) {
+                        effects += '</em>';
+                    }
                     additional += ' and the damage done to the ' +
                                   bossesWord;
                 } // XXX_LATER if no quest: say that it WOULD affect bosses
-
                 additional += ' by an amount based on your ' +
                     perLink + '.<br />See also merfy\'s ' +
                     '<a href="http://www.mediafire.com/download/' +
@@ -2142,9 +2160,29 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                         'you your reddest tasks (sort the table by value).';
                 if ((quest.content && quest.content.boss) || tavernBoss) {
                     var questIncrease = Math.ceil(computedStats.str * 0.2);
-                    effects += ' You will do ' +
-                               questIncrease + ' damage to ' +
-                               bossesLabel + '.';
+                    var emStarted = false;
+                    if (quest.content) {
+                        effects += ' You will do ' +
+                                   questIncrease + ' damage to ' +
+                                   bossesLabel + '.' +
+                                   '<br /><em>Note: When your party\'s ' +
+                                   'current quest ends, this ' +
+                                   'skill will no longer damage Drag\'on, ' +
+                                   'until you start another boss quest or ' +
+                                   'collection quest';
+                        emStarted = true;
+                    }
+                    else {
+                        effects += ' This skill will <strong>not</strong> ' +
+                                   'damage Drag\'on because you are not on ' +
+                                   'a boss quest or collection quest';
+                    }
+                    effects += ' (<a href="https://github.com/HabitRPG/' +
+                               'habitrpg-shared/pull/244">more info</a>).';
+                    if (emStarted) {
+                        effects += '</em>';
+                    }
+
                     additional += '<br /> If you want to use the skill to ' +
                             'damage the ' +
                             bossesWord + ' but don\'t want to adjust the ' +
@@ -3973,7 +4011,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.3)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -3999,14 +4037,22 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
-        <dt>3.2.2 <span class="date">2014-07-03</span></dt>
+        <dt>3.2.3 <span class="date">2014-07-05</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Quest Progress</span>: Now explains that Burst of Flames and Brutal Smash do NOT damage Drag'on, the World boss, unless you are on a boss quest or collection quest (see <a href="https://github.com/HabitRPG/habitrpg-shared/pull/244">GitHub habitrpg-shared issue 244</a> for details).</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>3.2.2 <span class="date">2014-07-05</span></dt>
         <dd><ul>
             <li>Code:
                 <ul>
                     <li>Fixed a bug that was preventing people's reddest/bluest tasks being identified (for Skills and Buffs) if they didn't have any tasks with values less than/greater than zero.</li>
                 </ul>
         </ul></dd>
-
         <dt>3.2.1 <span class="date">2014-07-03</span></dt>
         <dd><ul>
             <li>Features:
