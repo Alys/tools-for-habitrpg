@@ -645,13 +645,6 @@ function collateAndDisplayTaskData() {
     statsAndStreaks();
     skillsAndBuffs();
 
-    function diminishingReturns(bonus, max, halfway) {
-        if (! halfway) {
-            halfway = max / 2;
-        }
-        return max * bonus / (bonus + halfway);
-    }
-
     function collateHabitsData() {
         var habits = [];
         $.each(user.habits, function(index, obj){
@@ -2474,8 +2467,17 @@ function dropCountAndCap() {
                     user.items.lastDrop.count >= dropCap) ? 'safe' : 'neutral')
         };
 
-    // FOR TESTING (this does NOT contain all code for most drop chances):
-    // var dropChance = 1/150+0.2  // assume new task
+/*
+    // FOR TESTING (this might NOT contain all code for most drop chances):
+    // SITE CODE:  var chance = _.min([Math.abs(drop_TaskValue - 21.27),37.5])/150+.02   # Base drop chance is a percentage based on task value. Typical fresh task: 15%. Very ripe task: 25%. Very blue task: 2%.
+    var drop_TaskValue = -1710.61; // 0 = new task
+    var chance = Math.abs(drop_TaskValue - 21.27);
+    if (chance > 37.5) {
+        chance = 37.5;
+    }
+    chance = chance / 150 + .02;
+    console.log("chance 1: " + chance); // TST
+    var dropChance = 1/150+0.2  // assume new task
                    // * 1          // assume task priority easy
                    // * 1          // assume no streak
                    // * (1 + computedStats['per'] / 100)
@@ -2484,6 +2486,27 @@ function dropCountAndCap() {
         // dropChance *= (1 + user.contributor.level / 40);
     // }
     // dropChance = diminishingReturns(dropChance, 0.75);
+    var drop_TaskPriority = 2; // +50% for Medium (1.5), +100% for Hard (2)
+    var drop_Streak = 0; // +1% per streak
+    var drop_Perception = 0; // +1% per point
+    var drop_ContribTier = 2; // +2.5% per level
+    var drop_Rebirths = 1; // +5% per achievement
+    var drop_StreakAchievements = 10; // +0.5% per achievement
+    var drop_Crit = 1; // Use the crit multiplier if we got one
+    var drop_Checklist = 0; // (1 + .5*(_.reduce(task.checklist,((m,i)->m+(if i.completed then 1 else 0)),0) or 0)) # +50% per checklist item complete. TODO: make this into X individual drop chances instead
+    chance *=
+        drop_TaskPriority *
+        (1 + (drop_Streak / 100)) *
+        (1 + (drop_Perception / 100)) *
+        (1 + (drop_ContribTier / 40)) *
+        (1 + (drop_Rebirths / 20)) *
+        (1 + (drop_StreakAchievements / 200)) *
+        (drop_Crit || 1) *
+        (1 + drop_Checklist);
+    console.log("chance 2: " + chance); // TST
+    chance = diminishingReturns(chance, 0.75);
+    console.log("chance 3: " + chance); // TST
+*/
 
     TOC[orderId]  = {'target': id, 'title':  title};
     MAIN[orderId] = {'id': id, 'title': title, 'html': html};
@@ -2589,7 +2612,7 @@ function questProgress() {
         var hpPercent = Math.round(hp / hpMax * 1000) / 10;
         html += '<h3>Stats for the ' + name + '</h3>' +
                 '<p>Health: ' + hpPercent + '% (' +
-                 hp + ' down from ' + hpMax + ')';
+                 hp + ', down from ' + hpMax + ')';
         if (tavern.quest.progress.rage) {
             var rage = Math.round(tavern.quest.progress.rage);
             var rageMax = 4000000; // XXX_LATER automate!
@@ -2720,6 +2743,7 @@ function analyseEquipment() {
             ['hair',  'mustache',     'mustache',  'convertNumber'],
             ['hair',  'beard',        'beard',     'convertNumber'],
             ['',      'skin',         'skin colour'               ],
+            ['',      'background',   'background'                ],
         ], function(index,obj) {
             var value;
             if (obj[0]) { value = user.preferences[obj[0]][obj[1]]; }
@@ -2743,12 +2767,23 @@ function analyseEquipment() {
                 }
                 // if no match, we use the skin key (e.g., f133ee)
             }
+            if (obj[1] == 'background') { // XXX test with 1st and 2nd sets, and none
+                // {"backgrounds062014":{"beach":{"text":"Beach",
+                //  "notes":"Lounge upon a warm beach."},"fairy_ring":{ ...
+                for (var setId in content.backgrounds) {
+                    for (var backgroundId in content.backgrounds[setId]) {
+                        if (backgroundId == value) {
+                            value =
+                                content.backgrounds[setId][backgroundId].text;
+                        }
+                    }
+                }
+            }
             if (value) {
                 appearance.push(obj[2] + ': <span class="attributeValue">'
                                        + value + '</span>');
             }
         });
-
         var html = '';
         if (appearance.length > 0) {
             html += '<div class="subsection">'
@@ -3367,6 +3402,15 @@ function computeStats() {
 function makePrettyKlassName(klass) {
     return (klass == 'wizard') ? 'Mage' : upperCaseFirst(klass);
 }
+
+
+function diminishingReturns(bonus, max, halfway) {
+    if (! halfway) {
+        halfway = max / 2;
+    }
+    return max * bonus / (bonus + halfway);
+}
+
 } // end of parseData() and its nested functions
 });
 </script>
