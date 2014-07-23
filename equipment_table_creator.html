@@ -365,8 +365,8 @@ function parseData() {
 '\n! data-sort-type="number" | INT' +
 '\n! data-sort-type="number" | PER' +
 '\n! data-sort-type="number" | STR' +
-'\n! Best' +
-'\n! style="text-align:left;"| Gives<br />Stats';
+'\n! Best';
+// '\n! style="text-align:left;"| Gives<br />Stats';
 
 
     // table row for each piece of gear:
@@ -387,7 +387,7 @@ function parseData() {
         //     obj.key == 'weapon_healer_0'  ||
         //     obj.key == 'weapon_wizard_0'
         //    ) {
-        //     continue; // don't show "Training Sword", "Novice Rod", etc
+      // continue; // don't show "Training Sword", "Novice Rod", etc
         // }
 
         if (obj.mystery) {
@@ -458,6 +458,10 @@ function parseData() {
                      (klass == 'special') ? givesStats : // yes/no
                      'no';
 
+        if (givesStats == 'no') {
+      continue; // do not include any stats-free gear
+        }
+
         html += '' +
 '\n|-' +
 '\n|' + name +                // name
@@ -469,14 +473,14 @@ function parseData() {
 '\n|' + stats.int +           // INT
 '\n|' + stats.per +           // PER
 '\n|' + stats.str +           // STR
-'\n|' + isBest    +           // best (yes/no)
-'\n|' + givesStats;           // gives stats (yes/no)
+'\n|' + isBest    ;           // best (yes/no)
+// '\n|' + givesStats;           // gives stats (yes/no)
     }
 
     // table footer:
     html += '' +
 '\n|- class="sortbottom"' +
-'\n| colspan="11" style="height: 0px; border-bottom: 3px solid #284C6D;"|' +
+'\n| colspan="10" style="height: 0px; border-bottom: 3px solid #284C6D;"|' +
 '\n|}\n';
 
     html += '</textarea>';
@@ -624,7 +628,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Equipment Table Creator
-    <span>(v1.1)</span></h1><!-- VERSION -->
+    <span>(v1.2)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
