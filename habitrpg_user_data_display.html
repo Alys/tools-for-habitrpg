@@ -1978,6 +1978,7 @@ cast: (user, target) ->
                                  'XP gained';
                 if ((quest.content && quest.content.boss) || tavernBoss) {
                     var emStarted = false;
+                    var more = '';
                     if (quest.content) {
                         effects += ' You will do ' +
                                    questIncrease + ' damage to ' +
@@ -1993,9 +1994,13 @@ cast: (user, target) ->
                         effects += ' This skill will <strong>not</strong> ' +
                                    'damage Drag\'on because you are not on ' +
                                    'a boss quest or collection quest';
+                        more = ' If you were on a quest, you would do ' +
+                               questIncrease + ' damage to Drag\'on and ' +
+                               'the quest boss.';
                     }
                     effects += ' (<a href="https://github.com/HabitRPG/' +
-                               'habitrpg-shared/pull/244">more info</a>).';
+                               'habitrpg-shared/pull/244">more info</a>).' +
+                               more;
                     if (emStarted) {
                         effects += '</em>';
                     }
@@ -2154,6 +2159,7 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                 if ((quest.content && quest.content.boss) || tavernBoss) {
                     var questIncrease = Math.ceil(computedStats.str * 0.2);
                     var emStarted = false;
+                    var more = '';
                     if (quest.content) {
                         effects += ' You will do ' +
                                    questIncrease + ' damage to ' +
@@ -2169,9 +2175,13 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                         effects += ' This skill will <strong>not</strong> ' +
                                    'damage Drag\'on because you are not on ' +
                                    'a boss quest or collection quest';
+                        more = ' If you were on a quest, you would do ' +
+                               questIncrease + ' damage to Drag\'on and ' +
+                               'the quest boss.';
                     }
                     effects += ' (<a href="https://github.com/HabitRPG/' +
-                               'habitrpg-shared/pull/244">more info</a>).';
+                               'habitrpg-shared/pull/244">more info</a>).' +
+                               more;
                     if (emStarted) {
                         effects += '</em>';
                     }
@@ -4055,7 +4065,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.3)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.4)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -4081,6 +4091,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.2.4 <span class="date">2014-07-26</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><span class="subheading">Skills and Buffs</span>: For Brutal Smash and Burst of Flames, when you are not on a quest, you can now see the damage you would do to a boss if you were on a quest.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.2.3 <span class="date">2014-07-05</span></dt>
         <dd><ul>
             <li>Features:
@@ -4089,7 +4108,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.2.2 <span class="date">2014-07-05</span></dt>
         <dd><ul>
             <li>Code:
