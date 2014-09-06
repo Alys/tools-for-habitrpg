@@ -1304,7 +1304,7 @@ randomTodoHtml
         var id      = 'damageDailiesSection';
         var title   = 'Damage from Dailies';
         var orderId = 'damageDailies';
-        var html = '<p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span id="damageDailiesExplanationToggle" class="showHideToggle" data-target="damageDailiesExplanation" data-linktext="explanation">show explanation</span></p><ul id="damageDailiesExplanation" class="padded hide"><li>These estimates have been accurate during testing but your usage of HabitRPG might involve factors that were not considered, and so this information cannot be guaranteed to be correct.</li><li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you will not die.</li><li>If you have not logged in to HabitRPG for more than a day, the damage that you (and your fellow quest participants) will take will be <span class="highlight">much greater</span> than shown here.</li><li class="showHideToggle lowlight" data-target="damageDailiesExplanation" data-resettoggletext="damageDailiesExplanationToggle" style="list-style-type: none; padding: 8px 0 20px 0">hide explanation</li></ul>';
+        var html = '';
         var modifyHealthDashboardTile = false;
         if (sleeping) {
             html += '<p>You are <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a> so you will not take any damage from your uncompleted dailies.</p>';
@@ -1313,6 +1313,7 @@ randomTodoHtml
             }
         }
         else {
+            html += '<p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span id="damageDailiesExplanationToggle" class="showHideToggle" data-target="damageDailiesExplanation" data-linktext="explanation">show explanation</span></p><ul id="damageDailiesExplanation" class="padded hide"><li>These estimates have been accurate during testing but your usage of HabitRPG might involve factors that were not considered, and so this information cannot be guaranteed to be correct.</li><li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you will not die.</li><li>If you have not logged in to HabitRPG for more than a day, the damage that you (and your fellow quest participants) will take will be <span class="highlight">much greater</span> than shown here.</li><li class="showHideToggle lowlight" data-target="damageDailiesExplanation" data-resettoggletext="damageDailiesExplanationToggle" style="list-style-type: none; padding: 8px 0 20px 0">hide explanation</li></ul>';
             var damageToUser  = 0;
             var damageToParty = 0;
             $.each(dailies, function(index, obj){
@@ -1583,12 +1584,12 @@ randomTodoHtml
                 var value = obj.history[j].value;
                 var success = '-'; // default (grey daily or no data)
                 var status = 'neutral'; // default (grey daily or no data)
-                if ( (previousValue === null && value >= 1) ||
+                if ( (previousValue === null && value > 0) ||
                      (previousValue !== null && value > previousValue) ) {
                     success = 'V'; // user did the daily
                     status = 'safe';
                 }
-                else if ( (previousValue === null && value < 1) ||
+                else if ( (previousValue === null && value < 0) ||
                           (previousValue !== null && value < previousValue) ) {
                     success = 'x'; // user did not do the daily
                     status = 'danger';
@@ -1982,21 +1983,21 @@ cast: (user, target) ->
                     if (quest.content) {
                         effects += ' You will do ' +
                                    questIncrease + ' damage to ' +
-                                   bossesLabel + '.' +
-                                   '<br /><em>Note: When your party\'s ' +
-                                   'current quest ends, this ' +
-                                   'skill will no longer damage Drag\'on, ' +
-                                   'until you start another boss quest or ' +
-                                   'collection quest';
+                                   bossesLabel + '.';
+                                   //'<br /><em>Note: When your party\'s ' +
+                                   //'current quest ends, this ' +
+                                   //'skill will no longer damage Drag\'on, ' +
+                                   //'until you start another boss quest or ' +
+                                   //'collection quest';
                         emStarted = true;
                     }
                     else {
-                        effects += ' This skill will <strong>not</strong> ' +
-                                   'damage Drag\'on because you are not on ' +
-                                   'a boss quest or collection quest';
+                        //effects += ' This skill will <strong>not</strong> ' +
+                               //'damage Drag\'on because you are not on ' +
+                               //'a boss quest or collection quest';
                         more = ' If you were on a quest, you would do ' +
-                               questIncrease + ' damage to Drag\'on and ' +
-                               'the quest boss.';
+                               questIncrease + ' damage to the quest boss.';
+                               // Drag\'on and ' +
                     }
                     effects += ' (<a href="https://github.com/HabitRPG/' +
                                'habitrpg-shared/pull/244">more info</a>).' +
@@ -2163,21 +2164,21 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                     if (quest.content) {
                         effects += ' You will do ' +
                                    questIncrease + ' damage to ' +
-                                   bossesLabel + '.' +
-                                   '<br /><em>Note: When your party\'s ' +
-                                   'current quest ends, this ' +
-                                   'skill will no longer damage Drag\'on, ' +
-                                   'until you start another boss quest or ' +
-                                   'collection quest';
+                                   bossesLabel + '.';
+                                   //'<br /><em>Note: When your party\'s ' +
+                                   //'current quest ends, this ' +
+                                   //'skill will no longer damage Drag\'on, ' +
+                                   //'until you start another boss quest or ' +
+                                   //'collection quest';
                         emStarted = true;
                     }
                     else {
-                        effects += ' This skill will <strong>not</strong> ' +
-                                   'damage Drag\'on because you are not on ' +
-                                   'a boss quest or collection quest';
+                        //effects += ' This skill will <strong>not</strong> ' +
+                               //'damage Drag\'on because you are not on ' +
+                               //'a boss quest or collection quest';
                         more = ' If you were on a quest, you would do ' +
-                               questIncrease + ' damage to Drag\'on and ' +
-                               'the quest boss.';
+                               questIncrease + ' damage to the quest boss.';
+                               //Drag\'on and ' +
                     }
                     effects += ' (<a href="https://github.com/HabitRPG/' +
                                'habitrpg-shared/pull/244">more info</a>).' +
@@ -2486,7 +2487,7 @@ function dropCountAndCap() {
         chance = 37.5;
     }
     chance = chance / 150 + .02;
-    console.log("chance 1: " + chance); // TST
+    // console.log("chance 1: " + chance); // TST
     var dropChance = 1/150+0.2  // assume new task
                    // * 1          // assume task priority easy
                    // * 1          // assume no streak
@@ -2513,9 +2514,9 @@ function dropCountAndCap() {
         (1 + (drop_StreakAchievements / 200)) *
         (drop_Crit || 1) *
         (1 + drop_Checklist);
-    console.log("chance 2: " + chance); // TST
+    // console.log("chance 2: " + chance); // TST
     chance = diminishingReturns(chance, 0.75);
-    console.log("chance 3: " + chance); // TST
+    // console.log("chance 3: " + chance); // TST
 */
 
     TOC[orderId]  = {'target': id, 'title':  title};
@@ -2565,7 +2566,7 @@ function questProgress() {
             }
         }
         if (tavernBoss) {
-            html += "The Dread Drag'on of Dilatory"; // XXX_SOON automate
+            html += "The Dread Drag'on of Dilatory"; // XXX_LATER automate
         }
         html += '.';
         var dashboardTitle = 'Damage to ' + upperCaseFirst(bossesWord);
@@ -2620,6 +2621,18 @@ function questProgress() {
         var hp = Math.round(tavern.quest.progress.hp);
         var hpMax = 5000000; // XXX_LATER automate!
         var hpPercent = Math.round(hp / hpMax * 1000) / 10;
+        if (hp > 0 && hpPercent == 0) { // XXX_LATER do this better
+            hpPercent = Math.round(hp / hpMax * 10000) / 100;
+            if (hpPercent == 0) {
+                hpPercent = Math.round(hp / hpMax * 100000) / 1000;
+                if (hpPercent == 0) {
+                    hpPercent = Math.round(hp / hpMax * 1000000) / 10000;
+                    if (hpPercent == 0) {
+                        hpPercent = Math.round(hp / hpMax * 10000000) / 100000;
+                    }
+                }
+            }
+        }
         html += '<h3>Stats for the ' + name + '</h3>' +
                 '<p>Health: ' + hpPercent + '% (' +
                  hp + ', down from ' + hpMax + ')';
@@ -2753,7 +2766,7 @@ function analyseEquipment() {
             ['hair',  'mustache',     'mustache',  'convertNumber'],
             ['hair',  'beard',        'beard',     'convertNumber'],
             ['',      'skin',         'skin colour'               ],
-            ['',      'background',   'background'                ],
+            // ['',      'background',   'background'                ],
         ], function(index,obj) {
             var value;
             if (obj[0]) { value = user.preferences[obj[0]][obj[1]]; }
@@ -2777,18 +2790,18 @@ function analyseEquipment() {
                 }
                 // if no match, we use the skin key (e.g., f133ee)
             }
-            if (obj[1] == 'background') { // XXX test with 1st and 2nd sets, and none
-                // {"backgrounds062014":{"beach":{"text":"Beach",
-                //  "notes":"Lounge upon a warm beach."},"fairy_ring":{ ...
-                for (var setId in content.backgrounds) {
-                    for (var backgroundId in content.backgrounds[setId]) {
-                        if (backgroundId == value) {
-                            value =
-                                content.backgrounds[setId][backgroundId].text;
-                        }
-                    }
-                }
-            }
+            // if (obj[1] == 'background') { // XXX test with 1st and 2nd sets, and none
+                // // {"backgrounds062014":{"beach":{"text":"Beach",
+                // //  "notes":"Lounge upon a warm beach."},"fairy_ring":{ ...
+                // for (var setId in content.backgrounds) {
+                    // for (var backgroundId in content.backgrounds[setId]) {
+                        // if (backgroundId == value) {
+                            // value =
+                                // content.backgrounds[setId][backgroundId].text;
+                        // }
+                    // }
+                // }
+            // }
             if (value) {
                 appearance.push(obj[2] + ': <span class="attributeValue">'
                                        + value + '</span>');
@@ -2959,6 +2972,7 @@ function analyseEquipment() {
                         $(nRow).data('int',  aData['int']);
                         $(nRow).data('per',  aData['per']);
                         $(nRow).data('str',  aData['str']);
+                        // $(nRow).data('key',  aData['key']); // TST
                         return nRow;
                     },
                 'aaData': aaData,
@@ -2997,6 +3011,9 @@ function analyseEquipment() {
             { 'mData' : 'quality',    'sClass': 'center',
               'sTitle': 'quality',
             },
+            // { 'mData' : 'key',        'sClass': 'center',
+              // 'sTitle': 'key',
+            // }, // TST
                 ],
                 'sDom': 'W<"clear"><"top"f>rt<"bottom"><"clear">',
                 'bAutoWidth': false,
@@ -4065,7 +4082,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.4)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.6)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -4073,9 +4090,11 @@ ul#tableOfContents > li {
     <div class="good hide">
         <p>Please wait. Fetching data from
         <span id="serverName">HabitRPG</span>...</p>
+        <!--
         <p id="specialMessage" class="lowlight narrowContent">
 <br /><em>@Ryan v3.0.1b, you're always there to answer everyone's questions and help people out. You run great challenges and crack jokes. You are a true Habit Champion and everyone's favorite cyborg, and we love you.</em><br />-- Lemoness<br /><br />
         </p>
+        -->
     </div>
     <div class="bad hide">
         <p>There was an error obtaining your data.</p>
@@ -4091,6 +4110,23 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.2.6 <span class="date">2014-08-28</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Fixed a bug in <span class="subheading">Dailies History</span> that was incorrectly reporting the action you had taken on the first day that a daily was created.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>3.2.5 <span class="date">2014-08-19</span></dt>
+        <dd><ul>
+            <li>Features (minor):
+                <ul>
+                    <li><span class="subheading">Skills and Buffs</span>: Removed outdated information about the Drag'on Tavern boss.</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>3.2.4 <span class="date">2014-07-26</span></dt>
         <dd><ul>
             <li>Features:
@@ -4099,7 +4135,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.2.3 <span class="date">2014-07-05</span></dt>
         <dd><ul>
             <li>Features:
