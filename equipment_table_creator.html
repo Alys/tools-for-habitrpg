@@ -274,7 +274,8 @@ var urls = {
     'body_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
     'body_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
     'headAccessory_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
-    'headAccessory_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear'
+    'headAccessory_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
+    'head_special_2' : 'Nameless_Helm'
 };
 
 
@@ -375,7 +376,6 @@ function parseData() {
         var obj = allGear[i];
 
         if (obj.key == 'armor_special_2'  ||
-            obj.key == 'head_special_2'   ||
             obj.key == 'weapon_special_3'
            ) {
       continue; // don't show items that aren't released yet
@@ -628,7 +628,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Equipment Table Creator
-    <span>(v1.2)</span></h1><!-- VERSION -->
+    <span>(v1.3)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
