@@ -1643,8 +1643,13 @@ randomTodoHtml
             tableBody += '</tr>' ;
         }
 
-        var html = '<p>The table below shows historical data for your dailies. If you are a subscriber, you will see data for every day going back to the date on which you subscribed. If you are not a subscriber, you will see data for every day for the past week, but before that your data points start to be merged together (this is to save on expensive database storage space). In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the daily, even if it was a <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey daily</a>.</li><li><span class="danger">x</span> You did not tick off the daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the daily but you took no damage from it for several possible reasons (the daily was not due that day; you ticked off all of the <a href="http://habitrpg.wikia.com/wiki/Checklist#Dailies">checklist</a> items under that daily, although not the daily itself; you evaded the daily with <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth</a>; you were <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a>; you had not logged in to HabitRPG that day; the daily did not yet exist on that day). This symbol will also appear frequently for old data for non-subscribers because it is not possible to correctly determine the actions you took after your data has been merged.</li></ul><p>Vertical grey bars in the table indicate gaps in the historical record (e.g., periods of a day or more in which you were resting in the inn).</p>' +
-'<p class="highlight">This is still experimental. The code has to perform calculations based on each daily\'s historical values to work out whether you ticked it or not, and this might be unreliable. Please ' + tellMe + ' if you are certain you see errors! Also, the formatting is going to be improved soon (better visibility for long task names; better horizontal scrolling; fixed positioning for task names when you scroll horizontally).</p>' +
+
+        var html =
+'<div id="dailiesHistoryExplanationToggle" class="showHideToggle" data-target="dailiesHistoryExplanation" data-linktext="explanation">show explanation</div>' +
+'<div id="dailiesHistoryExplanation" class="hide">' +
+'    <p>The table below shows historical data for your dailies. If you are a subscriber, you will see data for every day going back to the date on which you subscribed. If you are not a subscriber, you will see data for every day for the past week, but before that your data points start to be merged together (this is to save on expensive database storage space). In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the daily, even if it was a <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey daily</a>.</li><li><span class="danger">x</span> You did not tick off the daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the daily but you took no damage from it for several possible reasons (the daily was not due that day; you ticked off all of the <a href="http://habitrpg.wikia.com/wiki/Checklist#Dailies">checklist</a> items under that daily, although not the daily itself; you evaded the daily with <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth</a>; you were <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a>; you had not logged in to HabitRPG that day; the daily did not yet exist on that day). This symbol will also appear frequently for old data for non-subscribers because it is not possible to correctly determine the actions you took after your data has been merged.</li></ul><p>Vertical grey bars in the table indicate gaps in the historical record (e.g., periods of a day or more in which you were resting in the inn).</p>' +
+'   <div class="showHideToggle closer" data-target="dailiesHistoryExplanation" data-resettoggletext="dailiesHistoryExplanationToggle">hide explanation</div>' +
+'</div>' +
                    '<table>' +
                    headerRow + '<tbody>' +
                    tableBody + '</tbody></table>';
@@ -1696,13 +1701,7 @@ randomTodoHtml
         if (items.length === 0) {
             return;
         }
-        var html = '<p class="lowlight"><span class="highlight">WARNING:' +
-                   '</span> I\'m not sure if this handles timezones ' +
-                   'correctly! To-dos due today might appear with ' +
-                   'tomorrow\'s date (and so the dashboard counter might ' +
-                   'be wrong). Watch out for that for the first few days ' +
-                   'that you use this feature. Please ' +
-                   tellMe + ' if you notice problems.</p>';
+        var html = '';
         html += '<ul class="padded">';
         html += items.sort().join('');
         html += '</ul>';
@@ -3850,6 +3849,7 @@ ul#tableOfContents > li {
     font-family: monospace;
 }
 #dailiesHistorySection table {
+    margin-top: 1.5em;
     border-bottom: 1px solid #ccc;
     border-left:   1px solid #ccc;
 }
