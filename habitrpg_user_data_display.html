@@ -1897,19 +1897,19 @@ randomTodoHtml
 
         var html = '<p>This section describes the skills you ';
         var more = false;
-        if (user.stats.lvl < 11) {
+        if (user.preferences.disableClasses) {
+            html += 'would be able to use if you chose a ' + classLink + '.';
+        }
+        else if (user.stats.lvl < 11) {
             html += 'will be able to use when you reach levels 11 to 14, ' +
                     'if you choose a ' + classLink + '.';
         }
-        else if (false) { // XXX_SOON opt out - finish and test wording
-            html += ' would be able to use if you chose a ' + classLink + '.';
-        }
         else if (user.stats.lvl < 14) {
-            html += 'have or will have when you reach level 14';
+            html += 'have now or will have when you reach level 14,';
             more = true;
         }
         else {
-            html += ' have available to you';
+            html += 'have available to you';
             more = true;
         }
         if (more) {
@@ -4082,7 +4082,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.6)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.7)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -4110,6 +4110,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.2.7 <span class="date">2014-09-07</span></dt>
+        <dd><ul>
+            <li>Documentation:
+                <ul>
+                    <li>Updated Possible Future Features with all the requests people have made.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.2.6 <span class="date">2014-08-28</span></dt>
         <dd><ul>
             <li>Code:
@@ -4118,7 +4127,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.2.5 <span class="date">2014-08-19</span></dt>
         <dd><ul>
             <li>Features (minor):
@@ -4674,10 +4682,73 @@ ul#tableOfContents > li {
 
        <h2>Possible Future Features</h2>
        <ul>
-            <li><em>I really need to update this soon with the new suggestions people have given me. They're all in my to-do list, just not here because I am slack.</em></li>
-            <li><em>Probably:</em> <span class="subheading">Pie Charts</span>: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a></li>
-            <li><em>Maybe:</em> <span class="subheading">Support for Markdown</span>: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> looks bad, but support for it might not be easy to implement. Apologies again.</li>
-            <li><em>Maybe:</em> <span class="subheading">Missing Equipment for Orb of Rebirthers</span>: do something to make the feature more useful for them.</li>
+
+            <li>Show the date and time that the data was last fetched (format "Thursday 5 October").</li>
+            <li>Display checklists and notes for tasks.</li>
+            <li>Expand the "To-Dos with Dates" section to include To-Dos without dates in a separate sub-section.
+<!--
+I'm wondering if I should merge todos with and without dates into one section, probably in a table like task overview, but with searching AND filtering to make it easy to see either todos with dates or todos without, or both but sorted by date with undated at one end of the sort list.
+OR just keep them as two separate sections.
+I suspect together might be more usable for more purposes (e.g., search for todo text)
+
+I'd merge them.  Have it as a section afterwards.
+
+To-Dos with Dates on top
+Kind of like the grey dailies
+Dailies Incompleted then says "And these dailies are greyed out, but you COULD do them"
+"These are To-Dos with dates." "And these are your To-Dos without dates!"
+
+Although... I'm still liking the idea of having them in one table, with dated todos at the top (dates closest today first) and then undated at the bottom of the same table. It's basically the same thing (I think) but because they're all in one table, they can all be searched/sorted/filtered together in other ways than date. Would that be okay for how you want to use it?
+
+Cool. At the top of the table there will be a summary like "3 todos dated today or earlier; 14 todos dated in the future; 7 todos undated". And you'll be able to filter the table to see only todos from one those three sets.
+-->
+</li>
+            <li>For relevant Skills And Buffs, show how to increase the chance of a critical hit happening.</li>
+            <li>Add percentages to Task Statistics.
+<!--
+<span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)
+-->
+</li>
+            <li>Create a section showing the days that all Dailies are scheduled for, to help you manage <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a>.</li>
+            <li>Hide information about drops for any players who have not yet had drops enabled.</li>
+            <li>Show the potential damage you would do to a boss even when you are not on a quest (but don't display it in the dashboard). Would help people who are questioning whether or not they're ready for a boss fight.</li>
+            <li>For Dailies History, improve the scrolling and the visibility and fixedness of the task names.</li>
+            <li>For Task Overview, add a column for <a href="https://github.com/HabitRPG/habitrpg/pull/3887">priority and difficulty</a>.</li>
+            <li>For Task Overview, add an invisible column for emoji and allow drop-down menu filtering using that column.</li>
+            <li>Create a "Random To-Do" button that displays a randomly-selected To-Do task near the top of the page. Allow the button to be clicked to show a different task without the whole page having to be refetched. Remove the random To-Do currently shown at the bottom of the Task Overview section.</li>
+            <li>For Habit History and Untagged Tasks, apply the "longContent" class if there are more than x number of items.</li>
+            <li>Add <a href="http://medleyweb.com/web-dev/jquery-chart-and-graph-plugins/">Pie Charts</a> to Task Statistics: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a>
+<!--
+I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more habits then last week or: how many red/orange/yellow to-dos are done this month etc. --lightsaber 
+
+@lightsaber Now those are some interesting ideas! Some I could add to my tool (anything that uses current data, or very recent data - basically any data available from the [API](https://habitrpg.com/static/api) ). Others could be created with a tool that also reads [exported historical data](https://habitrpg.com/#/options/settings/export), although the level of detail that you might want might not be stored permanently in that data. If only I had unlimited time....
+-->
+            </li>
+            <li>Prevent fatal failures when unexpected conditions occur (try/catch or similar everywhere).</li>
+            <li>Upgrade <a href="https://datatables.net/upgrade/1.10">Data Tables</a> to the latest version, adjust all calls to it as needed and test thoroughly.
+<!--
+- Use a CDN (https://datatables.net/manual/installation#CDN) instead of keeping a local copy. Remove the local copy from js-for-habitrpg_user_data_display.tar.gz
+- Consider cookies to save state https://datatables.net/examples/basic_init/state_save.html
+- (too slow?)  show/hide notes: https://datatables.net/examples/server_side/row_details.html
+-->
+</li>
+            <li><em>Maybe:</em> Support for Markdown: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> looks bad, but support for it might not be easy to implement.</li>
+            <li><em>Maybe:</em> Missing Equipment for Orb of Rebirthers: do something to make the feature more useful for them.
+<!--
+SabreCat:
+
+I was poking around the User Data Display, like ya do with such a useful thing, and stopped to ponder the "Missing Equipment" section. You've got this blurb at the bottom: "You have used an Orb of Rebirth so this list will include all the equipment you owned in your previous life that you have not yet repurchased. Unfortunately it is not currently possible to limit this list to recent death-induced losses - but I have some interesting ideas to work on..."
+
+I'm curious what "interesting ideas" you've got in mind. I think the main difficulty with the Missing Equipment section right now is that it shows all the explicit-false equipment, even if you couldn't purchase it after switching to the correct class etc. due to it being several steps into a class's equipment list. What if it filtered out the items that are unavailable because they're too high tier to reach? That would go a long way to making the list more useful--you mainly want it to see (a) where you've lost an item from earlier in an equipment chain, and (b) where you've lost a limited-edition item.
+
+Alys:
+
+What I was thinking of doing was using Web Storage to allow you to cache a list of your current equipment and then any time one of THOSE pieces went missing, it would be reported in that section. All the other missing gear would not be. So, for example, you'd rebirth, then you'd buy a few pieces back, cache that, and from that point on the section would be more usable. After a few more purchases, you'd cache again. At least I think that's what I was thinking of. It was a while ago. I decided it was lower priority than a whole bunch of other things, many of which are still not done. :(
+
+I like your idea though. It could also filter out gear for the wrong classes. However, instead of hiding all filtered gear, it would display them further down the page, so the top part of that section would be almost guaranteed to be very useful, but everything else would still be visible.
+
+-->
+</li>
             <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
        </ul>
 
