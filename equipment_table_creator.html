@@ -196,7 +196,22 @@ var images = {
     'body_special_summerHealer' : 'Body_special_summerHealer.png',
     'body_special_summerMage' : 'Body_special_summerMage.png',
     'headAccessory_special_summerRogue' : 'HeadAccessory_special_summerRogue.png',
-    'headAccessory_special_summerWarrior' : 'HeadAccessory_special_summerWarrior.png'
+    'headAccessory_special_summerWarrior' : 'HeadAccessory_special_summerWarrior.png',
+	'weapon_special_fallRogue' : 'Silver_stake_left.png',
+	'weapon_special_fallWarrior' : 'Grabby_claw_of_science.png',
+	'weapon_special_fallMage' : 'Magic_broom.png',
+	'weapon_special_fallHealer' : 'Scarab_wand.png',
+	'armor_special_fallRogue' : 'Bloodred_robes.png',
+	'armor_special_fallWarrior' : 'Labcoat_of_science.png',
+	'armor_special_fallMage' : 'Witchy_wizard_robes.png',
+	'armor_special_fallHealer' : 'Gauzy_gear.png',
+	'head_special_fallRogue' : 'Bloodred_hood.png',
+	'head_special_fallWarrior' : 'Monster_scalp_of_science.png',
+	'head_special_fallMage' : 'Pointy_hat.png',
+	'head_special_fallHealer' : 'Head_bandages.png',
+	'shield_special_fallRogue' : 'Silver_stake_right.png',
+	'shield_special_fallWarrior' : 'Potent_potion_of_science.png',
+	'shield_special_fallHealer' : 'Jeweled_shield.png'
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -275,7 +290,22 @@ var urls = {
     'body_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
     'headAccessory_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
     'headAccessory_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
-    'head_special_2' : 'Nameless_Helm'
+    'head_special_2' : 'Nameless_Helm',
+	'weapon_special_fallRogue' : 'Fall_Festival#Special_Class_Gear',
+	'weapon_special_fallWarrior' : 'Fall_Festival#Special_Class_Gear',
+	'weapon_special_fallMage' : 'Fall_Festival#Special_Class_Gear',
+	'weapon_special_fallHealer' : 'Fall_Festival#Special_Class_Gear',
+	'armor_special_fallRogue' : 'Fall_Festival#Special_Class_Gear',
+	'armor_special_fallWarrior' : 'Fall_Festival#Special_Class_Gear',
+	'armor_special_fallMage' : 'Fall_Festival#Special_Class_Gear',
+	'armor_special_fallHealer' : 'Fall_Festival#Special_Class_Gear',
+	'head_special_fallRogue' : 'Fall_Festival#Special_Class_Gear',
+	'head_special_fallWarrior' : 'Fall_Festival#Special_Class_Gear',
+	'head_special_fallMage' : 'Fall_Festival#Special_Class_Gear',
+	'head_special_fallHealer' : 'Fall_Festival#Special_Class_Gear',
+	'shield_special_fallRogue' : 'Fall_Festival#Special_Class_Gear',
+	'shield_special_fallWarrior' : 'Fall_Festival#Special_Class_Gear',
+	'shield_special_fallHealer' : 'Fall_Festival#Special_Class_Gear'
 };
 
 
@@ -345,11 +375,13 @@ function parseData() {
     var allGear = content.gear.flat;
 
     var html = '<p>This page outputs the wikia code for creating the ' +
-               '<a href="http://habitrpg.wikia.com/wiki/Equipment_Table">' +
-               'Equipment Table</a> on the ' +
-               '<a href="http://habitrpg.wikia.com/">HabitRPG wiki</a>. ' +
-               'Copy everything inside the textarea below and paste it ' +
-               'into the template for the Equipment Table page.</p>';
+        '<a href="http://habitrpg.wikia.com/wiki/Equipment_Table">' +
+        'Equipment Table</a> on the ' +
+        '<a href="http://habitrpg.wikia.com/">HabitRPG wiki</a>. ' +
+        'Copy everything inside the textarea below and paste it ' +
+        'into the <a href="' +
+        'http://habitrpg.wikia.com/wiki/Template:Equipment_Table_Code' +
+        '">template</a> for the Equipment Table page.</p>';
 
     html += '<textarea rows="20" cols="120" wrap="off">';
 
@@ -628,7 +660,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Equipment Table Creator
-    <span>(v1.3)</span></h1><!-- VERSION -->
+    <span>(v1.4)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
