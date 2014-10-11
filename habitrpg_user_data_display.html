@@ -928,16 +928,18 @@ function collateAndDisplayTaskData() {
 
     function taskIsTagged(tagObj) { // returns true if tagged, false otherwise
         tagFound = false; // we have not yet found any valid tags for this task
-        $.each(tagObj, function(tagId, value){
-            if (value === false) {
-                // this tag was once applied to the task, but no longer
-                return true; // go to next iteration
-            }
-            if ($.inArray(tagId, knownTags) >= 0) {
-                tagFound = true;
-                return false; // break out of the loop
-            }
-        });
+        if (tagObj) {
+            $.each(tagObj, function(tagId, value){
+                if (value === false) {
+                    // this tag was once applied to the task, but no longer
+                    return true; // go to next iteration
+                }
+                if ($.inArray(tagId, knownTags) >= 0) {
+                    tagFound = true;
+                    return false; // break out of the loop
+                }
+            });
+        }
         return tagFound;
     }
 
@@ -946,7 +948,7 @@ function collateAndDisplayTaskData() {
         if (typeof date === 'string' || typeof date === 'number') {
             date = new Date(date);
         }
-        if (isNaN(date.getTime())) {
+        if (!date || isNaN(date.getTime())) {
             // Either the object that was passed in is not a Date object,
             // OR the date string that was passed in could not be converted
             // to a Date object, presumably because it's in a non-standard
@@ -4110,6 +4112,14 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.2.8 <span class="date">2014-09-23</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Fixed a bug where a task with no tag object would cause the page to never finish loading. This seems to have been caused by a recent change to how new tasks are created in HabitRPG.</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>3.2.7 <span class="date">2014-09-07</span></dt>
         <dd><ul>
             <li>Documentation:
