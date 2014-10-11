@@ -1447,17 +1447,20 @@ randomTodoHtml
         var html = '';
         if (dailiesIncomplete.length > 0) {
             html += '<p>The table below shows the dailies that are due ' +
-                    'today and have not yet been completed. It tells you ' +
-                    'the estimated damage you will take from each daily';
+                    'today and have not yet been completed. ';
+            var damageToYouText;
             if (quest.content && quest.content.boss) {
-                html += ' and how much damage each daily will let the <a ' +
-                    'href="http://habitrpg.wikia.com/wiki/Quests">quest</a> ' +
-                    '<a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> ' +
-                    'do to your party members <span class="highlight"> ' +
-                    'and you</span>';
+                damageToYouText = 'damage to you alone';
+                html += 'For each daily, it tells you how much damage the daily will let the <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> do to all quest participants including you ("<strong>damage to party</strong>"); how much damage you alone will take from the daily - this is the damage you would take if you were not on a boss quest ("<strong>damage to you alone</strong>"), and the sum of the previous two values ("<strong>total damage to you</strong>").';
             }
-            html += '. Click on any column header to sort by that column; ' +
-                    'for example; sort by "damage to you" to find the most ' +
+            else {
+                damageToYouText = 'damage to you';
+                html += 'It tells you the estimated damage you will take ' +
+                        'from each daily.';
+            }
+            html += ' Click on any column header to sort by that column; ' +
+                    'for example; sort by "' + damageToYouText + '" ' +
+                    'to find the most ' +
                     'damaging dailies to action first if you won\'t have ' +
                     'time to do them all. The damage estimates take into ' +
                     'account damage reduction from partially-completed <a ' +
@@ -1497,7 +1500,6 @@ randomTodoHtml
                                 createDailiesIncompleteTable : false),
                    'html': html};
 
-
         function createDailiesIncompleteTable() {
             // Use DataTables to build the table (the table tag must be
             // visible first for layout to be correct):
@@ -1511,7 +1513,7 @@ randomTodoHtml
             { 'mData' : 'streak',         'sClass': 'center',
               'sTitle': 'current streak',
             },
-            { 'sTitle': 'value', 'sClass': 'center', 'asSorting': ['desc','asc'],
+            { 'sTitle': 'value', 'sClass': 'center', 'asSorting':['desc','asc'],
               'mData': function ( source, type, val ) {
                 if (type === 'set') {
                   return; // http://datatables.net/ref#mData
@@ -1526,12 +1528,19 @@ randomTodoHtml
                 return source.value;
               }
             },
-            { 'mData' : 'damageToUser',    'sClass': 'center',
-              'sTitle': 'damage to you',   'asSorting': ['desc','asc'],
-            },
             { 'mData' : 'damageToParty',   'sClass': 'center',
               'sTitle': 'damage to party', 'asSorting': ['desc','asc'],
               'bVisible': ((quest.content && quest.content.boss) ? true:false),
+            },
+            { 'mData' : 'damageToUser',    'sClass': 'center',
+              'sTitle': damageToYouText,   'asSorting': ['desc','asc'],
+            },
+            {                              'sClass': 'center',
+              'sTitle': 'total damage to you',   'asSorting': ['desc','asc'],
+              'bVisible': ((quest.content && quest.content.boss) ? true:false),
+              'mData': function ( source, type, val ) {
+                  return source.damageToParty + source.damageToUser;
+              },
             },
             { 'sTitle': 'stealthed',       'sClass': 'center',
               'mData': function ( source, type, val ) {
@@ -4084,7 +4093,8 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>Removed the <strong>Unallocated Points</strong> section because we now get notifications in HabitRPG itself, thanks to <a href="https://github.com/HabitRPG/habitrpg/pull/4112">betaveros</a>.</li>
+                    <li><strong>Dailies Incomplete</strong>: When you are on a boss quest, this now shows you the <strong>total</strong> damage to you, as well as the damage to your party from the boss and the normal damage to you alone from your incomplete Dailies.
+                    <li>The <strong>Unallocated Points</strong> section has been removed because we now get notifications in HabitRPG itself, thanks to <a href="https://github.com/HabitRPG/habitrpg/pull/4112">betaveros</a>.</li>
                 </ul>
             </li>
         </ul></dd>
