@@ -2336,10 +2336,7 @@ XXX_SOON add effects of crit
                     effects = 'You will avoid ' +
                               avoid + ' dailies tonight.';
                 }
-                var additional = 'Those dailies will not cause damage and ' +
-                            'their streaks will not reset. Note that ' +
-                            'stealth is used up by ' + greyDailyLink +
-                            ' as well as by dailies due today!';
+                var additional = 'Those dailies will not cause damage and their streaks will not reset. If you are on a <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, the dailies will not hurt your fellow quest participants. Note that stealth is used up by ' + greyDailyLink + ' as well as by dailies due today!';
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + perLink + before;
                 return ['',
@@ -4093,7 +4090,8 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><strong>Dailies Incomplete</strong>: When you are on a boss quest, this now shows you the <strong>total</strong> damage to you, as well as the damage to your party from the boss and the normal damage to you alone from your incomplete Dailies.
+                    <li><strong>Dailies Incomplete</strong>: When you are on a boss quest, this now shows you the <strong>total</strong> damage to you, as well as the damage to your party from the boss and the normal damage to you alone from your incomplete Dailies.</li>
+                    <li><strong>Skills and Buffs</strong>: Now states that Stealth protects your fellow boss quest participants as well as you.</li>
                     <li>The <strong>Unallocated Points</strong> section has been removed because we now get notifications in HabitRPG itself, thanks to <a href="https://github.com/HabitRPG/habitrpg/pull/4112">betaveros</a>.</li>
                 </ul>
             </li>
