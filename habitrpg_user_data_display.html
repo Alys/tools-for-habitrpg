@@ -78,7 +78,6 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
-/* TST - FOR TESTING:
 $('body').css({'background-color':'#C4B4A4'});
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -87,11 +86,12 @@ serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
 apiToken          = 'null';
 userId            = 'test';
-userId            = 'work';
 userId            = 'home';
+userId            = 'work';
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
+/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -2661,37 +2661,45 @@ function questProgress() {
 
 function analyseEquipment() {
     var missing = []; // gear lost due to death or rebirth
+    var missingPretty = []; // like missing but formatted
     var owned   = []; // gear actually owned right now
     $.each(user.items.gear.owned, function(key, value){
         if (value === false) {
-            missing.push( prettyPrintKey(key, 'gear',
+            missing.push(key);
+            missingPretty.push( prettyPrintKey(key, 'gear',
                             {'includeStats':true, 'includeGold':true, }) );
         }
         else {
             owned.push(key);
         }
     });
-    missingEquipment(missing);
+    missingEquipment(missing, missingPretty);
     currentEquipmentAndAppearance();
     recommendedEquipment(owned);
 
 
-    function missingEquipment(equipment) {
+    function missingEquipment(equipment, equipmentPretty) {
         if (equipment.length < 1) {
             return; // no missing gear
         }
         var html = '<p>You are missing this equipment: ';
+        var aaData;
         if (equipment.length == 1) {
-            html += '<span class="gearList">' + equipment[0] + '</span></p>';
+            html += '<span class="gearList">' +
+                    equipmentPretty[0] + '</span></p>';
+        }
+        else if (equipment.length < 4) {
+            html += '</p><ul class="gearList"><li>' +
+                    equipmentPretty.join('</li><li>') +
+                    '</li></ul>';
         }
         else {
-            html += '</p><ul class="gearList"><li>' +
-                    equipment.join('</li><li>') +
-                    '</li></ul>';
+            html += '</p><table></table>';
+            aaData = TSTcollateEquipmentAndIdentifyBest(equipment);
         }
         html += '<p><a href="http://habitrpg.wikia.com/wiki/' +
                 'Death_Mechanics#Lost_Equipment">Learn more.</a></p>';
-        if (user.achievements.rebirths > 0 && equipment.length > 6) {
+        if (user.achievements.rebirths > 0 && equipment.length > 6) { // XXX 
             // We show the message below when rebirthers are missing
             // lots of gear, but not when they've bought back most of it,
             // because by that time, they're unlikely to be confused by
@@ -2703,12 +2711,124 @@ function analyseEquipment() {
                 + ' Unfortunately it is not currently possible to limit'
                 + ' this list to recent death-induced losses - but'
                 + ' I have some interesting ideas to work on...</p>';
+            // XXX state the CON etc includes class bonus. What happens if no class?
         }
         var id    = 'missingEquipmentSection';
         var title = 'Missing Equipment';
         var orderId = 'missingEquipment';
         TOC[orderId] = {'target': id, 'title':  title};
-        MAIN[orderId] = {'id': id, 'title': title, 'html':html};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html};
+        if (aaData) {
+            MAIN[orderId]['function'] = createMissingEquipmentLotsTable;
+        }
+        sectionOpen = id; // TST
+
+        function TSTcollateEquipmentAndIdentifyBest(equipmentKeys) {
+            var equipmentObjs = [];
+            $.each(equipmentKeys, function(index,key){
+                var obj = adjustEquipmentObject(key);
+                equipmentObjs.push(obj);
+            });
+
+            return equipmentObjs;
+        }
+
+        function createMissingEquipmentLotsTable() {
+            // Use DataTables to build the table (the table tag must be
+            // visible first for layout to be correct):
+            $('#missingEquipmentSection').show();
+            $('#missingEquipmentSection table').dataTable({
+                'fnRowCallback':
+                    function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+                        // give each row a class based on the type of gear:
+                        $(nRow).addClass(aData['type']);
+                        // add 'data' to each row for later calculations etc:
+                        $(nRow).data('type',  aData['type']);
+                        $(nRow).data('name',  aData['text']);
+                        // $(nRow).data('klass', aData['klass']);
+                        $(nRow).data('value', aData['value']);
+                        $(nRow).data('con',   aData['con']);
+                        $(nRow).data('int',   aData['int']);
+                        $(nRow).data('per',   aData['per']);
+                        $(nRow).data('str',   aData['str']);
+                        // $(nRow).data('key',  aData['key']); // TST
+                        return nRow;
+                    },
+                'aaData': aaData,
+                'aoColumns': [
+            { 'sTitle': 'type',       'sClass': 'center',
+              'mData': function ( source, type, val ) {
+                if (type === 'set') {
+                  return; // http://datatables.net/ref#mData
+                }
+                return (source.type == 'weaponTwoHanded') ? 'weapon two-handed'
+                     : (source.type == 'headAccessory'  ) ? 'head accessory'
+                     :  source.type;
+              }
+            },
+            { 'mData' : 'text',       'sClass': 'center',
+              'sTitle': 'name',
+            },
+            { 'mData' : 'klass',      'sClass': 'center',
+              'sTitle': 'class',
+            },
+            { 'mData' : 'value',      'sClass': 'center',
+              'sTitle': 'cost',
+            },
+            { 'mData' : 'con',        'sClass': 'center',
+              'sTitle': 'CON',        'asSorting': ['desc','asc'],
+            },
+            { 'mData' : 'int',        'sClass': 'center',
+              'sTitle': 'INT',        'asSorting': ['desc','asc'],
+            },
+            { 'mData' : 'per',        'sClass': 'center',
+              'sTitle': 'PER',        'asSorting': ['desc','asc'],
+            },
+            { 'mData' : 'str',        'sClass': 'center',
+              'sTitle': 'STR',        'asSorting': ['desc','asc'],
+            },
+            // // { 'mData' : 'key',        'sClass': 'center',
+              // // 'sTitle': 'key',
+            // // }, // TST
+                ],
+                'sDom': 'W<"clear"><"top"f>rt<"bottom"><"clear">',
+                'bAutoWidth': false,
+                'bPaginate': false,
+                'bDeferRender': true,
+                "sScrollX": "100%",
+                "bDestroy": true,
+                'oColumnFilterWidgets': {
+                    'aiExclude': [ 1 ],
+                    // "sSeparator": "\\s*/+\\s*",
+                }
+            });
+            $('#missingEquipmentSection').hide();
+
+            /*
+            $('#missingEquipmentSection table tr.stats-free')
+                                    .addClass('missingEquipmentHide');
+            $('#missingEquipmentSection table tr.middling')
+                                    .addClass('missingEquipmentHide');
+            $('#missingEquipmentSection select.widget-8')
+                                    .addClass('missingEquipmentHide');
+
+            $('#showAllEquipment').click(function(event) {
+                event.preventDefault();
+                $('#missingEquipmentSection table tr.best td')
+                                .addClass('missingEquipmentHighlight');
+                $('#missingEquipmentSection table tr.stats-free')
+                                .removeClass('missingEquipmentHide');
+                $('#missingEquipmentSection table tr.middling')
+                                .removeClass('missingEquipmentHide');
+                $('#missingEquipmentSection select.widget-8')
+                                .removeClass('missingEquipmentHide');
+                $('#qualityFilter #onlyBestIsShowing').hide();
+                $('#qualityFilter #allEquipmentIsShowing').show();
+            });
+            */
+
+            return;
+        }
     }
 
 
@@ -3314,6 +3434,59 @@ function analyseEquipment() {
 
             return equipmentObjs;
         }
+    }
+
+
+    function adjustEquipmentObject(key) {
+        var obj = $.extend({}, content.gear.flat[key]);
+        if (! obj.text) {
+            obj.text = prettyPrintKey(key, 'gear', {'nameOnly':true});
+        }
+
+        // adjust some equipment types:
+        if (obj.type == 'weapon' && obj.twoHanded) {
+            obj.type = 'weaponTwoHanded';
+        }
+
+        // adjust equipment class && add class bonus:
+        if (obj.klass == 'special') {
+            // use the real character class for this item:
+            obj.klass = obj.specialClass || 'none';
+            obj.special = true; // XXX did special already exist?
+        }
+        if (obj.klass == userKlass) { // apply class bonus:
+            obj.currentClass = true; // XXX did currentClass already exist?
+            obj['con'] *= 1.5;
+            obj['int'] *= 1.5;
+            obj['per'] *= 1.5;
+            obj['str'] *= 1.5;
+        }
+        if (obj.klass == 'wizard') {
+            obj.klass = 'mage';
+        }
+
+        // adjust equipment names
+        if (obj.type == 'weaponTwoHanded') {
+            obj.text += ' <span class="lowlight">(two-handed)</span>';
+        }
+        if (obj.text =='Black Leather' || obj.text =='Oiled Leather') {
+            obj.text += ' '  // add type of gear to the name:
+                      + upperCaseFirst(obj.type);
+        }
+        if (obj.klass == 'rogue' &&
+                (obj.type == 'weapon' || obj.type == 'shield')) {
+            obj.text += ' <span class="lowlight">('
+                      + obj.type + '-hand)</span>';
+            // e.g., 'Kukri (shield-hand)' and 'Kukri (weapon-hand)'
+        }
+
+        // identify equipment already being worn:
+        if (equippedKeys[key]) {
+            obj.beingWorn = true; // XXX did beingWorn already exist?
+            obj.text += ' *'; // XXX move
+        }
+
+        return obj;
     }
 
 
