@@ -86,8 +86,8 @@ serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
 apiToken          = 'null';
 userId            = 'test';
-userId            = 'home';
 userId            = 'work';
+userId            = 'home';
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
@@ -2683,7 +2683,8 @@ function analyseEquipment() {
             return; // no missing gear
         }
         var html = '<p>You are missing this equipment: ';
-        var aaData;
+        // var missingEquipmentObjs;
+        var missingEquipmentObjs = []; // XXX ?
         if (equipment.length == 1) {
             html += '<span class="gearList">' +
                     equipmentPretty[0] + '</span></p>';
@@ -2695,7 +2696,25 @@ function analyseEquipment() {
         }
         else {
             html += '</p><table></table>';
-            aaData = TSTcollateEquipmentAndIdentifyBest(equipment);
+            var canBuyUncertain = {};
+            $.each(equipment, function(index,key){
+                var obj = adjustEquipmentObject(key);
+                if (! obj.isCurrentClass) {
+                    obj.canBuy = "no (wrong class)";
+                }
+                else if (obj.special) {
+                    obj.canBuy = "yes";
+                }
+                else {
+                    // Equipment that is part of the normal progression of
+                    // standard equipment - can buy it only if it's the lowest
+                    // value item. Sort this out later:
+                    // canBuyUncertain[obj.type] = 
+                }
+                // obj.isCurrentClass = true;
+                missingEquipmentObjs.push(obj);
+            });
+
         }
         html += '<p><a href="http://habitrpg.wikia.com/wiki/' +
                 'Death_Mechanics#Lost_Equipment">Learn more.</a></p>';
@@ -2718,20 +2737,10 @@ function analyseEquipment() {
         var orderId = 'missingEquipment';
         TOC[orderId] = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'html': html};
-        if (aaData) {
+        if (missingEquipmentObjs.length > 0) {
             MAIN[orderId]['function'] = createMissingEquipmentLotsTable;
         }
         sectionOpen = id; // TST
-
-        function TSTcollateEquipmentAndIdentifyBest(equipmentKeys) {
-            var equipmentObjs = [];
-            $.each(equipmentKeys, function(index,key){
-                var obj = adjustEquipmentObject(key);
-                equipmentObjs.push(obj);
-            });
-
-            return equipmentObjs;
-        }
 
         function createMissingEquipmentLotsTable() {
             // Use DataTables to build the table (the table tag must be
@@ -2754,7 +2763,7 @@ function analyseEquipment() {
                         // $(nRow).data('key',  aData['key']); // TST
                         return nRow;
                     },
-                'aaData': aaData,
+                'aaData': missingEquipmentObjs,
                 'aoColumns': [
             { 'sTitle': 'type',       'sClass': 'center',
               'mData': function ( source, type, val ) {
@@ -3326,48 +3335,10 @@ function analyseEquipment() {
             var allItems = []; // currently just for testing
             var equipmentObjs = [];
             $.each(equipmentKeys, function(index,key){
-                var obj = $.extend({}, content.gear.flat[key]);
-                if (! obj.text) {
-                    obj.text = prettyPrintKey(key, 'gear', {'nameOnly':true});
-                }
-
-                // adjust some equipment types:
-                if (obj.type == 'weapon' && obj.twoHanded) {
-                    obj.type = 'weaponTwoHanded';
-                }
-
-                // adjust equipment class && add class bonus:
-                if (obj.klass == 'special') {
-                    // use the real character class for this item:
-                    obj.klass = obj.specialClass || 'none';
-                }
-                if (obj.klass == userKlass) { // apply class bonus:
-                    obj['con'] *= 1.5;
-                    obj['int'] *= 1.5;
-                    obj['per'] *= 1.5;
-                    obj['str'] *= 1.5;
-                }
-                if (obj.klass == 'wizard') {
-                    obj.klass = 'mage';
-                }
-
-                // adjust equipment names
-                if (obj.type == 'weaponTwoHanded') {
-                    obj.text += ' <span class="lowlight">(two-handed)</span>';
-                }
-                if (obj.text =='Black Leather' || obj.text =='Oiled Leather') {
-                    obj.text += ' '  // add type of gear to the name:
-                              + upperCaseFirst(obj.type);
-                }
-                if (obj.klass == 'rogue' &&
-                        (obj.type == 'weapon' || obj.type == 'shield')) {
-                    obj.text += ' <span class="lowlight">('
-                              + obj.type + '-hand)</span>';
-                    // e.g., 'Kukri (shield-hand)' and 'Kukri (weapon-hand)'
-                }
+                var obj = adjustEquipmentObject(key);
 
                 // identify equipment already being worn:
-                if (equippedKeys[key]) {
+                if (obj.beingWorn) {
                     obj.text += ' *';
                 }
 
@@ -3452,10 +3423,10 @@ function analyseEquipment() {
         if (obj.klass == 'special') {
             // use the real character class for this item:
             obj.klass = obj.specialClass || 'none';
-            obj.special = true; // XXX did special already exist?
+            obj.special = true;
         }
         if (obj.klass == userKlass) { // apply class bonus:
-            obj.currentClass = true; // XXX did currentClass already exist?
+            obj.isCurrentClass = true;
             obj['con'] *= 1.5;
             obj['int'] *= 1.5;
             obj['per'] *= 1.5;
@@ -3482,8 +3453,7 @@ function analyseEquipment() {
 
         // identify equipment already being worn:
         if (equippedKeys[key]) {
-            obj.beingWorn = true; // XXX did beingWorn already exist?
-            obj.text += ' *'; // XXX move
+            obj.beingWorn = true;
         }
 
         return obj;
@@ -4231,7 +4201,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.2.9)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.3)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -4260,6 +4230,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.3 <span class="date">2014-10-12</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><strong>Missing Equipment</strong>: XXX</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.2.9 <span class="date">2014-10-11</span></dt>
         <dd><ul>
             <li>Features (minor):
@@ -4275,7 +4254,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.2.8 <span class="date">2014-09-23</span></dt>
         <dd><ul>
             <li>Code:
