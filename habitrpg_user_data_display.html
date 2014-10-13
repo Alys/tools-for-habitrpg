@@ -1540,7 +1540,7 @@ randomTodoHtml
               'sTitle': 'total damage to you',   'asSorting': ['desc','asc'],
               'bVisible': ((quest.content && quest.content.boss) ? true:false),
               'mData': function ( source, type, val ) {
-                  return source.damageToParty + source.damageToUser;
+                  return Math.round(source.damageToParty + source.damageToUser);
               },
             },
             { 'sTitle': 'stealthed',       'sClass': 'center',
@@ -4332,6 +4332,11 @@ ul#tableOfContents > li {
                     <li><strong>Missing Equipment</strong> is now more useful for people who have used an Orb of Rebirth or who have lost many items through deaths. It gives you a sortable, filterable table to help you choose which items to buy back first to maximise your stats.</li>
                 </ul>
             </li>
+            <li>Code:
+                <ul>
+                    <li><strong>Dailies Incomplete</strong> now has extra code to prevent JavaScript from adding 1 + 1 and getting 2.000000000002.</li>
+                </ul>
+            </li>
         </ul></dd>
 
         <dt>3.2.9 <span class="date">2014-10-11</span></dt>
@@ -4403,6 +4408,7 @@ ul#tableOfContents > li {
                 <ul>
                     <li>Fixed a bug that was preventing people's reddest/bluest tasks being identified (for Skills and Buffs) if they didn't have any tasks with values less than/greater than zero.</li>
                 </ul>
+            </li>
         </ul></dd>
         <dt>3.2.1 <span class="date">2014-07-03</span></dt>
         <dd><ul>
@@ -4416,6 +4422,7 @@ ul#tableOfContents > li {
                 <ul>
                     <li>The code that handles the Tavern Boss is now more future-proof and maintainable thanks to improvements by @thepeopleseason.</li>
                 </ul>
+            </li>
         </ul></dd>
         <dt>3.2 <span class="date">2014-07-03</span></dt>
         <dd><ul>
@@ -4423,6 +4430,7 @@ ul#tableOfContents > li {
                 <ul>
                     <li><span class="subheading">Tavern Boss</span>: The damage you have done so far today to the Tavern Boss is now displayed in the dashboard and in the "Quest Progress" section. You'll see these items even if you are not on a party quest, or are on a collection quest. (Soon I'll be updating the "Skills and Buffs" section for those skills that damage the Tavern boss as well as a quest boss, and there'll be an update to show exact Tavern boss stats.)</li>
                 </ul>
+            </li>
         </ul></dd>
         <dt>3.1.1 <span class="date">2014-06-24</span></dt>
         <dd><ul>
@@ -4431,6 +4439,7 @@ ul#tableOfContents > li {
                     <li><span class="subheading">Skills and Buffs</span>: Each skill section now tells you how to increase the effects of the skill (i.e., which character attribute to maximise with equipment or points to get the most out of the skill.</li>
                     <li><span class="subheading">Skills and Buffs</span>: The Chilling Frost section now tells you if you have already cast it.</li>
                 </ul>
+            </li>
         </ul></dd>
         <dt>3.1 <span class="date">2014-06-22</span></dt>
         <dd><ul>
@@ -4438,6 +4447,7 @@ ul#tableOfContents > li {
                 <ul>
                     <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes. Thanks very much to Ryan for testing all of the skills and providing useful suggestions.</li>
                 </ul>
+            </li>
             <li>Code:
                 <ul>
                     <li>Fixed (probably) a bug that was preventing most of the links from being used on iOS devices (iPads, etc). If you're still having trouble on your device, <a href="mailto:lady_alys@oldgods.net">tell me</a>!</li>
@@ -4964,7 +4974,7 @@ Cool. At the top of the table there will be a summary like "3 todos dated today 
             <li>For Habit History and Untagged Tasks, apply the "longContent" class if there are more than x number of items.</li>
             <li>Add <a href="http://medleyweb.com/web-dev/jquery-chart-and-graph-plugins/">Pie Charts</a> to Task Statistics: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a>
 <!--
-I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more habits then last week or: how many red/orange/yellow to-dos are done this month etc. --lightsaber 
+I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more habits then last week or: how many red/orange/yellow to-dos are done this month etc. --lightsaber
 
 @lightsaber Now those are some interesting ideas! Some I could add to my tool (anything that uses current data, or very recent data - basically any data available from the [API](https://habitrpg.com/static/api) ). Others could be created with a tool that also reads [exported historical data](https://habitrpg.com/#/options/settings/export), although the level of detail that you might want might not be stored permanently in that data. If only I had unlimited time....
 -->
