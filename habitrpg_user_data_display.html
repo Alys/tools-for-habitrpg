@@ -46,11 +46,11 @@ you'll find there.
     <meta name="description" content="HabitRPG User Data Display" />
     <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
 
+    <link href="js/DataTables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+    <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <link href="js/DataTables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
-    <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
 
@@ -78,6 +78,7 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
+/* TST - FOR TESTING:
 $('body').css({'background-color':'#C4B4A4'});
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -91,7 +92,6 @@ userId            = 'home';
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
-/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -101,6 +101,7 @@ var hideDropsInDashboard = true; // changes to false as soon as the user
                                  // looks at the drops section, then remains
                                  // false through all future re-fetches
 var tellMe = '<a href="mailto:lady_alys@oldgods.net">tell me</a>';
+var wikiUrl = 'http://habitrpg.wikia.com/wiki/';
 
 
 
@@ -1733,7 +1734,7 @@ randomTodoHtml
         var id      = 'todosCompletedSection';
         var title   = 'To-Dos Completed';
         var orderId = 'todosCompleted';
-        var html = '<p>This shows all of your completed to-dos that HabitRPG has in its archive (not necessarily all the to-dos that you have ever completed because HabitRPG keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitrpg.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section.</span></p><table></table>';
+        var html = '<p>This shows all of your completed to-dos that HabitRPG has in its archive (not necessarily all the to-dos that you have ever completed because HabitRPG keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitrpg.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p><table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'function': createTodosCompletedTable,
@@ -1890,7 +1891,6 @@ randomTodoHtml
 
 
     function skillsAndBuffs() {
-        var wikiUrl = 'http://habitrpg.wikia.com/wiki/';
         var conLink       = '<a href="' + wikiUrl + 'Constitution">CON</a>';
         var intLink       = '<a href="' + wikiUrl + 'Intelligence">INT</a>';
         var perLink       = '<a href="' + wikiUrl + 'Perception">PER</a>';
@@ -2682,55 +2682,83 @@ function analyseEquipment() {
         if (equipment.length < 1) {
             return; // no missing gear
         }
-        var html = '<p>You are missing this equipment: ';
-        // var missingEquipmentObjs;
-        var missingEquipmentObjs = []; // XXX ?
-        if (equipment.length == 1) {
-            html += '<span class="gearList">' +
-                    equipmentPretty[0] + '</span></p>';
-        }
-        else if (equipment.length < 4) {
-            html += '</p><ul class="gearList"><li>' +
-                    equipmentPretty.join('</li><li>') +
-                    '</li></ul>';
+        var missingEquipmentObjs = [];
+        var html = '';
+        var reasons = '<a href="' + wikiUrl + 'Death_Mechanics">Death</a>' +
+                      ((user.achievements.rebirths > 0 ) ? ' or ' +
+                      '<a href="' + wikiUrl + 'Orb_of_Rebirth">Rebirth</a>' :
+                      '');
+        if (equipment.length < 4) {
+            html = '<p>You are missing this equipment due to ' + reasons +
+                   ':</p>' +
+                   '<ul class="gearList"><li>' +
+                   equipmentPretty.join('</li><li>') +
+                   '</li></ul>';
         }
         else {
-            html += '</p><table></table>';
+            html = '<p>The table below shows you the equipment you have lost due to ' + reasons + '. It can help you work out which pieces are best to buy back first to maximise the stats you care about while minimising the gold you spend.</p>' +
+'<p>For equipment belonging to your current class, the CON, INT, PER, and STR columns show you the stats for the item modified by the <a href="http://habitrpg.wikia.com/wiki/Class_System#Class_Equip_Bonus">Class Equip Bonus</a>.</p>' +
+'<p>The "<strong>can buy?</strong>" column categorises the equipment based on whether you can buy it now or not. There are three possible values:</p><ul>' +
+'<li><strong>yes</strong>: you can buy it now (assuming you have enough gold)</li>' +
+'<li><strong>later (buy other gear first)</strong>: you cannot buy it until you have bought other, cheaper versions of that equipment</li>' +
+'<li><strong>no (wrong class)</strong>: you cannot buy it at all unless you change class</li>' +
+'</ul>' +
+'<p>Click on a column heading to sort by that column. Use the drop-down menus to filter the contents of the table. The "<strong>boosts stats?</strong>" drop-down menu will let you filter to show only equipment that increases your stats (i.e., to hide all stats-free gear). For more information about how to use this table, read the explanation for the "Task Overview" section, which has a table with similar features.</p>';
+            html += '<table></table>';
             var canBuyUncertain = {};
             $.each(equipment, function(index,key){
                 var obj = adjustEquipmentObject(key);
-                if (! obj.isCurrentClass) {
-                    obj.canBuy = "no (wrong class)";
+                if (obj.hasNoClass) {
+                    obj.canBuy         = "yes";
+                    obj.canBuyShort    = "yes";
+                    obj.canBuySortable = "1 yes";
+                }
+                else if (! obj.isCurrentClass) {
+                    obj.canBuy         = "no (wrong class)";
+                    obj.canBuyShort    = "no";
+                    obj.canBuySortable = "3 no";
                 }
                 else if (obj.special) {
-                    obj.canBuy = "yes";
+                    obj.canBuy         = "yes";
+                    obj.canBuyShort    = "yes";
+                    obj.canBuySortable = "1 yes";
                 }
                 else {
                     // Equipment that is part of the normal progression of
                     // standard equipment - can buy it only if it's the lowest
                     // value item. Sort this out later:
-                    // canBuyUncertain[obj.type] = 
+                    if (! canBuyUncertain[obj.type]) {
+                        canBuyUncertain[obj.type] = [];
+                    }
+                    canBuyUncertain[obj.type].push(obj);
                 }
-                // obj.isCurrentClass = true;
+                if ((obj.con + obj.int + obj.per + obj.str) == 0) {
+                    obj.boostsStats = 'no';
+                }
+                else {
+                    obj.boostsStats = 'yes';
+                }
                 missingEquipmentObjs.push(obj);
             });
-
-        }
-        html += '<p><a href="http://habitrpg.wikia.com/wiki/' +
-                'Death_Mechanics#Lost_Equipment">Learn more.</a></p>';
-        if (user.achievements.rebirths > 0 && equipment.length > 6) { // XXX 
-            // We show the message below when rebirthers are missing
-            // lots of gear, but not when they've bought back most of it,
-            // because by that time, they're unlikely to be confused by
-            // a long list of missing items, and the items are more and
-            // more likely to be missing due to actual, recent deaths.
-            html += '<p>You have used an Orb of Rebirth'
-                + ' so this list will include all the equipment you owned'
-                + ' in your previous life that you have not yet repurchased.'
-                + ' Unfortunately it is not currently possible to limit'
-                + ' this list to recent death-induced losses - but'
-                + ' I have some interesting ideas to work on...</p>';
-            // XXX state the CON etc includes class bonus. What happens if no class?
+            $.each(canBuyUncertain, function(type){
+                var cheapestFound = false;
+                $.each(
+                    canBuyUncertain[type].sort(function(a, b) { 
+                        return a.value - b.value || 1;
+                    }), function(index,obj){
+                    if (cheapestFound) {
+                        obj.canBuy         = "later (buy other gear first)";
+                        obj.canBuyShort    = "later";
+                        obj.canBuySortable = "2 later";
+                    }
+                    else {
+                        obj.canBuy         = "yes";
+                        obj.canBuyShort    = "yes";
+                        obj.canBuySortable = "1 yes";
+                        cheapestFound = true;
+                    }
+                });
+            });
         }
         var id    = 'missingEquipmentSection';
         var title = 'Missing Equipment';
@@ -2740,7 +2768,6 @@ function analyseEquipment() {
         if (missingEquipmentObjs.length > 0) {
             MAIN[orderId]['function'] = createMissingEquipmentLotsTable;
         }
-        sectionOpen = id; // TST
 
         function createMissingEquipmentLotsTable() {
             // Use DataTables to build the table (the table tag must be
@@ -2750,21 +2777,14 @@ function analyseEquipment() {
                 'fnRowCallback':
                     function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
                         // give each row a class based on the type of gear:
-                        $(nRow).addClass(aData['type']);
-                        // add 'data' to each row for later calculations etc:
-                        $(nRow).data('type',  aData['type']);
-                        $(nRow).data('name',  aData['text']);
-                        // $(nRow).data('klass', aData['klass']);
-                        $(nRow).data('value', aData['value']);
-                        $(nRow).data('con',   aData['con']);
-                        $(nRow).data('int',   aData['int']);
-                        $(nRow).data('per',   aData['per']);
-                        $(nRow).data('str',   aData['str']);
-                        // $(nRow).data('key',  aData['key']); // TST
+                        $(nRow).addClass('canBuy_' + aData['canBuyShort']);
                         return nRow;
                     },
                 'aaData': missingEquipmentObjs,
                 'aoColumns': [
+            { 'mData' : 'canBuySortable', 'bVisible': false, // for default sort
+              'sTitle': 'canBuySortable', 'sClass': 'center',
+            },
             { 'sTitle': 'type',       'sClass': 'center',
               'mData': function ( source, type, val ) {
                 if (type === 'set') {
@@ -2781,6 +2801,17 @@ function analyseEquipment() {
             { 'mData' : 'klass',      'sClass': 'center',
               'sTitle': 'class',
             },
+            { 'sTitle': 'can buy?',    'sClass': 'center',
+              'mData': function ( source, type, val ) {
+                if (type === 'set') {
+                  return; // http://datatables.net/ref#mData
+                }
+                else if (type === 'sort') {
+                  return source.canBuySortable;
+                }
+                return source.canBuy;
+              }
+            },
             { 'mData' : 'value',      'sClass': 'center',
               'sTitle': 'cost',
             },
@@ -2796,9 +2827,9 @@ function analyseEquipment() {
             { 'mData' : 'str',        'sClass': 'center',
               'sTitle': 'STR',        'asSorting': ['desc','asc'],
             },
-            // // { 'mData' : 'key',        'sClass': 'center',
-              // // 'sTitle': 'key',
-            // // }, // TST
+            { 'mData' : 'boostsStats', 'bVisible': false,
+              'sTitle': 'boosts stats?', 'sClass': 'center',
+            },
                 ],
                 'sDom': 'W<"clear"><"top"f>rt<"bottom"><"clear">',
                 'bAutoWidth': false,
@@ -2807,8 +2838,7 @@ function analyseEquipment() {
                 "sScrollX": "100%",
                 "bDestroy": true,
                 'oColumnFilterWidgets': {
-                    'aiExclude': [ 1 ],
-                    // "sSeparator": "\\s*/+\\s*",
+                    'aiExclude': [ 0,2, 5,6,7,8,9 ],
                 }
             });
             $('#missingEquipmentSection').hide();
@@ -3431,6 +3461,9 @@ function analyseEquipment() {
             obj['int'] *= 1.5;
             obj['per'] *= 1.5;
             obj['str'] *= 1.5;
+        }
+        if (obj.klass == 'none') {
+            obj.hasNoClass = true;
         }
         if (obj.klass == 'wizard') {
             obj.klass = 'mage';
@@ -4089,6 +4122,68 @@ ul#tableOfContents > li {
 #missingEquipmentSection .gearList .item .extra {
 }
 
+#missingEquipmentSection table tr td {
+    border-bottom: 1px solid lightgrey;
+}
+#missingEquipmentSection table tr.even.canBuy_yes,
+#missingEquipmentSection table tr.even.canBuy_yes .sorting_1,
+#missingEquipmentSection table tr.even.canBuy_yes .sorting_2,
+#missingEquipmentSection table tr.even.canBuy_yes .sorting_3,
+#missingEquipmentSection table tr.even.canBuy_yes .sorting_4,
+#missingEquipmentSection table tr.even.canBuy_yes .sorting_5,
+#missingEquipmentSection table tr.even.canBuy_yes .sorting_6,
+#missingEquipmentSection table tr.odd.canBuy_yes,
+#missingEquipmentSection table tr.odd.canBuy_yes .sorting_1,
+#missingEquipmentSection table tr.odd.canBuy_yes .sorting_2,
+#missingEquipmentSection table tr.odd.canBuy_yes .sorting_3,
+#missingEquipmentSection table tr.odd.canBuy_yes .sorting_4,
+#missingEquipmentSection table tr.odd.canBuy_yes .sorting_5,
+#missingEquipmentSection table tr.odd.canBuy_yes .sorting_6 {
+    background-color: rgb(242, 242, 230); /* yellowish */
+    color: black;
+    font-style: normal;
+    font-weight: bold;
+}
+#missingEquipmentSection table tr.even.canBuy_later,
+#missingEquipmentSection table tr.even.canBuy_later .sorting_1,
+#missingEquipmentSection table tr.even.canBuy_later .sorting_2,
+#missingEquipmentSection table tr.even.canBuy_later .sorting_3,
+#missingEquipmentSection table tr.even.canBuy_later .sorting_4,
+#missingEquipmentSection table tr.even.canBuy_later .sorting_5,
+#missingEquipmentSection table tr.even.canBuy_later .sorting_6,
+#missingEquipmentSection table tr.odd.canBuy_later,
+#missingEquipmentSection table tr.odd.canBuy_later .sorting_1,
+#missingEquipmentSection table tr.odd.canBuy_later .sorting_2,
+#missingEquipmentSection table tr.odd.canBuy_later .sorting_3,
+#missingEquipmentSection table tr.odd.canBuy_later .sorting_4,
+#missingEquipmentSection table tr.odd.canBuy_later .sorting_5,
+#missingEquipmentSection table tr.odd.canBuy_later .sorting_6 {
+    background-color: rgb(242, 242, 230) !important; /* yellowish */
+    // background-color: rgb(173, 208, 215); /* bluish */
+    color: black;
+    font-style: italic;
+    font-weight: normal;
+}
+#missingEquipmentSection table tr.even.canBuy_no,
+#missingEquipmentSection table tr.even.canBuy_no .sorting_1,
+#missingEquipmentSection table tr.even.canBuy_no .sorting_2,
+#missingEquipmentSection table tr.even.canBuy_no .sorting_3,
+#missingEquipmentSection table tr.even.canBuy_no .sorting_4,
+#missingEquipmentSection table tr.even.canBuy_no .sorting_5,
+#missingEquipmentSection table tr.even.canBuy_no .sorting_6,
+#missingEquipmentSection table tr.odd.canBuy_no,
+#missingEquipmentSection table tr.odd.canBuy_no .sorting_1,
+#missingEquipmentSection table tr.odd.canBuy_no .sorting_2,
+#missingEquipmentSection table tr.odd.canBuy_no .sorting_3,
+#missingEquipmentSection table tr.odd.canBuy_no .sorting_4,
+#missingEquipmentSection table tr.odd.canBuy_no .sorting_5,
+#missingEquipmentSection table tr.odd.canBuy_no .sorting_6 {
+    background-color: #E8E8E8; /* pale grey */
+    color: #909090; /* darker grey */
+    font-style: italic;
+    font-weight: normal;
+}
+
 
 #currentGearSection .subsection {
     float: left;
@@ -4234,7 +4329,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><strong>Missing Equipment</strong>: XXX</li>
+                    <li><strong>Missing Equipment</strong> is now more useful for people who have used an Orb of Rebirth or who have lost many items through deaths. It gives you a sortable, filterable table to help you choose which items to buy back first to maximise your stats.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -4883,22 +4978,6 @@ I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-
 -->
 </li>
             <li><em>Maybe:</em> Support for Markdown: <a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> looks bad, but support for it might not be easy to implement.</li>
-            <li><em>Maybe:</em> Missing Equipment for Orb of Rebirthers: do something to make the feature more useful for them.
-<!--
-SabreCat:
-
-I was poking around the User Data Display, like ya do with such a useful thing, and stopped to ponder the "Missing Equipment" section. You've got this blurb at the bottom: "You have used an Orb of Rebirth so this list will include all the equipment you owned in your previous life that you have not yet repurchased. Unfortunately it is not currently possible to limit this list to recent death-induced losses - but I have some interesting ideas to work on..."
-
-I'm curious what "interesting ideas" you've got in mind. I think the main difficulty with the Missing Equipment section right now is that it shows all the explicit-false equipment, even if you couldn't purchase it after switching to the correct class etc. due to it being several steps into a class's equipment list. What if it filtered out the items that are unavailable because they're too high tier to reach? That would go a long way to making the list more useful--you mainly want it to see (a) where you've lost an item from earlier in an equipment chain, and (b) where you've lost a limited-edition item.
-
-Alys:
-
-What I was thinking of doing was using Web Storage to allow you to cache a list of your current equipment and then any time one of THOSE pieces went missing, it would be reported in that section. All the other missing gear would not be. So, for example, you'd rebirth, then you'd buy a few pieces back, cache that, and from that point on the section would be more usable. After a few more purchases, you'd cache again. At least I think that's what I was thinking of. It was a while ago. I decided it was lower priority than a whole bunch of other things, many of which are still not done. :(
-
-I like your idea though. It could also filter out gear for the wrong classes. However, instead of hiding all filtered gear, it would display them further down the page, so the top part of that section would be almost guaranteed to be very useful, but everything else would still be visible.
-
--->
-</li>
             <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
        </ul>
 
