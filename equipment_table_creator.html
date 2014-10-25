@@ -226,6 +226,7 @@ var images = {
 var urls = {
     'armor_special_0' : 'Backers',
     'armor_special_1' : 'Contributor_Rewards#Contributor_Gear',
+    'armor_special_2' : 'Jean_Chalard%27s_Noble_Tunic',
     'armor_special_birthday' : 'Winter_Wonderland#Absurd_Party_Robes',
     'armor_special_candycane' : 'Winter_Wonderland#Special_Class_Gear',
     'armor_special_ski' : 'Winter_Wonderland#Special_Class_Gear',
@@ -407,9 +408,7 @@ function parseData() {
     for (var i in allGear) {
         var obj = allGear[i];
 
-        if (obj.key == 'armor_special_2'  ||
-            obj.key == 'weapon_special_3'
-           ) {
+        if (obj.key == 'weapon_special_3') {
       continue; // don't show items that aren't released yet
         }
 
@@ -660,7 +659,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Equipment Table Creator
-    <span>(v1.4)</span></h1><!-- VERSION -->
+    <span>(v1.5)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
