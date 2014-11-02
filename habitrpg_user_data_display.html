@@ -1140,7 +1140,7 @@ function collateAndDisplayTaskData() {
 
         function taskHTML() {
             if (obj.type == 'habit') {
-                return taskPartHTML(obj.up, '[+]') + taskPartHTML(obj.down, '[-]');
+                return taskPartHTML(obj.up, '&nbsp;+&nbsp;') + taskPartHTML(obj.down, '&nbsp;&ndash;&nbsp;');
             } else if (obj.type == 'daily') {
                 return taskPartHTML(obj.repeat['su'], 'Su') + taskPartHTML(obj.repeat['m'], 'Mo')
                      + taskPartHTML(obj.repeat['t' ], 'Tu') + taskPartHTML(obj.repeat['w'], 'We')
@@ -1154,7 +1154,7 @@ function collateAndDisplayTaskData() {
         }
 
         function taskPartHTML(val, txt) {
-            return ' ' + (val ? txt : '<span style="opacity:0.4;">' + txt + '</span>');
+            return ' <span style="border: solid 1px; opacity:' + (val ? '1' : '0.4') + ';">' + txt + '</span>';
         }
     }
 
