@@ -1104,6 +1104,7 @@ function collateAndDisplayTaskData() {
                               obj.colour.id + '">' +
                               obj.valueRounded + '<br />' +
                               obj.colour.nameNoSpace + '</span>';
+        obj.difficulty = chooseDifficulty(obj.priority);
 
         function reformatDate(dateString) {
             var formattedDate = myDateConverter(dateString, 'long');
@@ -1128,6 +1129,12 @@ function collateAndDisplayTaskData() {
             else if (value <   5){ return colours[3]; }
             else if (value <  10){ return colours[2]; }
             else                 { return colours[1]; }
+        }
+        function chooseDifficulty(value) {
+            if      (value == 1  ){ return 'easy'; }
+            else if (value == 1.5){ return 'medium'; }
+            else if (value == 2  ){ return 'hard'; }
+            else                  { return 'unknown (' + value + ')'; }
         }
     }
 
@@ -1225,6 +1232,25 @@ randomTodoHtml
             { 'mData' : 'attributePretty',  'sClass': 'center',
               'sTitle': 'attr.',      'sWidth': '10%',
             },
+            { 'mData' : function ( source, type, val ) {
+                // exclusively for filtering, not displayedin table
+                return source.priority + ') ' + source.difficulty;
+               },
+              'sTitle': 'difficulty',  'sClass': 'center', 'bVisible': false,
+            },
+            { 'sTitle': 'difficulty',  'sClass': 'center', 'sWidth': '10%',
+              'mData': function ( source, type, val ) {
+                if (type === 'set') {
+                  return; // http://datatables.net/ref#mData
+                }
+                else if (type === 'display') {
+                  return source.difficulty;
+                }
+                // 'sort', 'type' and undefined all just use the number
+                // 'filter' is used on the previous column, not this column
+                return source.priority;
+              }
+            },
             { 'mData' : 'colour.label',
               'sTitle': 'colour',     'sClass': 'center', 'bVisible': false,
             },
@@ -1297,7 +1323,7 @@ randomTodoHtml
                 // "sScrollXInner": "200%",
                 "bDestroy": true, // allows table to recreate on refetch
                 'oColumnFilterWidgets': {
-                    'aiExclude': [ 0, 4, 5, 6, 7, 8 ],
+                    'aiExclude': [ 0, 4, 6, 7, 8, 9 ],
                 }
             });
             $('#taskOverviewSection').hide();
@@ -1747,7 +1773,7 @@ randomTodoHtml
               'bVisible': ((quest.content && quest.content.boss) ? true:false),
               'mData': function ( source, type, val ) {
                   return Math.round((source.damageToParty +
-                                     source.damageToUser)*10)/10;
+							         source.damageToUser)*10)/10;
               },
             },
             { 'sTitle': 'stealthed',       'sClass': 'center',
