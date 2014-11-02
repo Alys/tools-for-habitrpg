@@ -1105,6 +1105,7 @@ function collateAndDisplayTaskData() {
                               obj.valueRounded + '<br />' +
                               obj.colour.nameNoSpace + '</span>';
         obj.difficulty = chooseDifficulty(obj.priority);
+        obj.taskHTML = taskHTML();
 
         function reformatDate(dateString) {
             var formattedDate = myDateConverter(dateString, 'long');
@@ -1135,6 +1136,25 @@ function collateAndDisplayTaskData() {
             else if (value == 1.5){ return 'medium'; }
             else if (value == 2  ){ return 'hard'; }
             else                  { return 'unknown (' + value + ')'; }
+        }
+
+        function taskHTML() {
+            if (obj.type == 'habit') {
+                return taskPartHTML(obj.up, '[+]') + taskPartHTML(obj.down, '[-]');
+            } else if (obj.type == 'daily') {
+                return taskPartHTML(obj.repeat['su'], 'Su') + taskPartHTML(obj.repeat['m'], 'Mo')
+                     + taskPartHTML(obj.repeat['t' ], 'Tu') + taskPartHTML(obj.repeat['w'], 'We')
+                     + taskPartHTML(obj.repeat['th'], 'Th') + taskPartHTML(obj.repeat['f'], 'Fr')
+                     + taskPartHTML(obj.repeat['s' ], 'Sa');
+            } else if (obj.type == 'todo') {
+                return obj.date == null ? '<span style="opacity:0.4;">(no date)</span>' : obj.date.substr(0, 10);
+            } else {
+                return '';
+            }
+        }
+
+        function taskPartHTML(val, txt) {
+            return ' ' + (val ? txt : '<span style="opacity:0.4;">' + txt + '</span>');
         }
     }
 
@@ -1299,7 +1319,7 @@ randomTodoHtml
                   return;
                 }
                 else if (type === 'display') {
-                  return source.text;
+                  return source.text + '<div style="float:right">' + source.taskHTML + '</div>';
                 }
                 else if (type === 'filter') {
                   return source.text;
@@ -1773,7 +1793,7 @@ randomTodoHtml
               'bVisible': ((quest.content && quest.content.boss) ? true:false),
               'mData': function ( source, type, val ) {
                   return Math.round((source.damageToParty +
-							         source.damageToUser)*10)/10;
+                                     source.damageToUser)*10)/10;
               },
             },
             { 'sTitle': 'stealthed',       'sClass': 'center',
