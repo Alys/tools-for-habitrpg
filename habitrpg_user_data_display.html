@@ -1935,12 +1935,15 @@ randomTodoHtml
         lastWeek.setDate(lastWeek.getDate() - 7);
         lastWeek = myDateConverter(lastWeek, 'medium');
 
-        var items = [];
-        var countDue = 0;
+        var items = [], itemsNotDue = [];
+        var countDue = 0, countNotDue = 0;
         var dangerTodoFound = false;
         for (var i=0,ic=todos.length; i<ic; i++) {
             var obj = todos[i];
             if (! obj.date) {
+                itemsNotDue.push('<li class="notDue">' +
+                       obj.text + '</li>');
+                countNotDue++;
                 continue;
             }
             var challenge = (obj.challenge && obj.challenge.id)
@@ -1962,12 +1965,16 @@ randomTodoHtml
                        date + '</span> ' +
                        obj.text + challenge + '</li>');
         }
-        if (items.length === 0) {
+        if (items.length == 0) {
             return;
         }
         var html = '';
         html += '<ul class="padded">';
         html += items.sort().join('');
+        html += '</ul>';
+        html += '<hr><h2>To-Dos without Dates</h2>';
+        html += '<ul class="padded">';
+        html += itemsNotDue.join('');
         html += '</ul>';
 
         if (countDue) {
