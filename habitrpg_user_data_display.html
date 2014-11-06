@@ -1105,7 +1105,8 @@ function collateAndDisplayTaskData() {
                               obj.valueRounded + '<br />' +
                               obj.colour.nameNoSpace + '</span>';
         obj.difficulty = chooseDifficulty(obj.priority);
-        obj.taskHTML = taskHTML();
+        obj.attributesHTML = '<div class="taskAttributes ' + obj.type + '">' +
+                             attributesHTML() + '</div>';
 
         function reformatDate(dateString) {
             var formattedDate = myDateConverter(dateString, 'long');
@@ -1131,6 +1132,7 @@ function collateAndDisplayTaskData() {
             else if (value <  10){ return colours[2]; }
             else                 { return colours[1]; }
         }
+
         function chooseDifficulty(value) {
             if      (value == 1  ){ return 'easy'; }
             else if (value == 1.5){ return 'medium'; }
@@ -1138,23 +1140,34 @@ function collateAndDisplayTaskData() {
             else                  { return 'unknown (' + value + ')'; }
         }
 
-        function taskHTML() {
+        function attributesHTML() {
             if (obj.type == 'habit') {
-                return taskPartHTML(obj.up, '&nbsp;+&nbsp;') + taskPartHTML(obj.down, '&nbsp;&ndash;&nbsp;');
-            } else if (obj.type == 'daily') {
-                return taskPartHTML(obj.repeat['su'], 'Su') + taskPartHTML(obj.repeat['m'], 'Mo')
-                     + taskPartHTML(obj.repeat['t' ], 'Tu') + taskPartHTML(obj.repeat['w'], 'We')
-                     + taskPartHTML(obj.repeat['th'], 'Th') + taskPartHTML(obj.repeat['f'], 'Fr')
-                     + taskPartHTML(obj.repeat['s' ], 'Sa');
-            } else if (obj.type == 'todo') {
-                return obj.date == null ? '<span style="opacity:0.4;">(no date)</span>' : obj.date.substr(0, 10);
-            } else {
+                return taskPartHTML(obj.up, '+') +
+                       taskPartHTML(obj.down, '&ndash;');
+            }
+            else if (obj.type == 'daily') {
+                return taskPartHTML(obj.repeat['su'], 'Su') +
+                       taskPartHTML(obj.repeat['m' ], 'Mo') +
+                       taskPartHTML(obj.repeat['t' ], 'Tu') +
+                       taskPartHTML(obj.repeat['w' ], 'We') +
+                       taskPartHTML(obj.repeat['th'], 'Th') +
+                       taskPartHTML(obj.repeat['f' ], 'Fr') +
+                       taskPartHTML(obj.repeat['s' ], 'Sa');
+            }
+            else if (obj.type == 'todo') {
+                return obj.date == null ?
+                       '<span class="attributeOff">(no date)</span>' :
+                       obj.date.substr(0, 10);
+            }
+            else {
                 return '';
             }
         }
 
         function taskPartHTML(val, txt) {
-            return ' <span style="border: solid 1px; opacity:' + (val ? '1' : '0.4') + ';">' + txt + '</span>';
+            return ' <span class="' +
+                   (val ? 'attributeOn' : 'attributeOff') + '">' +
+                   txt + '</span>';
         }
     }
 
@@ -1252,13 +1265,14 @@ randomTodoHtml
             { 'mData' : 'attributePretty',  'sClass': 'center',
               'sTitle': 'attr.',      'sWidth': '10%',
             },
-            { 'mData' : function ( source, type, val ) {
-                // exclusively for filtering, not displayedin table
+            { 'sTitle': 'difficulty',  'sClass': 'center', 'bVisible': false,
+              'mData' : function ( source, type, val ) {
+                // exclusively for 'oColumnFilterWidgets' drop-down menu
+                // filtering, not displayed in table
                 return source.priority + ') ' + source.difficulty;
-               },
-              'sTitle': 'difficulty',  'sClass': 'center', 'bVisible': false,
+               }
             },
-            { 'sTitle': 'difficulty',  'sClass': 'center', 'sWidth': '10%',
+            { 'sTitle': 'difficulty', 'sClass': 'center', 'sWidth': '10%',
               'mData': function ( source, type, val ) {
                 if (type === 'set') {
                   return; // http://datatables.net/ref#mData
@@ -1266,9 +1280,8 @@ randomTodoHtml
                 else if (type === 'display') {
                   return source.difficulty;
                 }
-                // 'sort', 'type' and undefined all just use the number
-                // 'filter' is used on the previous column, not this column
                 return source.priority;
+                // NB: previous column does drop-down filtering for difficulty
               }
             },
             { 'mData' : 'colour.label',
@@ -1319,7 +1332,7 @@ randomTodoHtml
                   return;
                 }
                 else if (type === 'display') {
-                  return source.text + '<div style="float:right">' + source.taskHTML + '</div>';
+                  return source.text + source.attributesHTML;
                 }
                 else if (type === 'filter') {
                   return source.text;
@@ -1935,48 +1948,49 @@ randomTodoHtml
         lastWeek.setDate(lastWeek.getDate() - 7);
         lastWeek = myDateConverter(lastWeek, 'medium');
 
-        var items = [], itemsNotDue = [];
-        var countDue = 0, countNotDue = 0;
+        var itemsDated = [], itemsNotDated = [];
+        var countDue = 0;
         var dangerTodoFound = false;
         for (var i=0,ic=todos.length; i<ic; i++) {
             var obj = todos[i];
-            if (! obj.date) {
-                itemsNotDue.push('<li class="notDue">' +
-                       obj.text + '</li>');
-                countNotDue++;
-                continue;
-            }
             var challenge = (obj.challenge && obj.challenge.id)
                           ? ' <span class="challenge">(challenge to-do)</span>'
                           : '';
-            var date = myDateConverter(obj.date, 'medium');
             var dateClass = 'notDue';
-            if (date <= today) {
-                dateClass = 'due';
-                countDue++;
-                if (! challenge || date > lastWeek) {
-                    // An overdue to-do is not dangerous if it is from a
-                    // challenge and is more than a week old (because the
-                    // user probably doesn't care about it).
-                    dangerTodoFound = true;
+            var dateString = '';
+            if (obj.date) {
+                var date = myDateConverter(obj.date, 'medium');
+                if (date <= today) {
+                    dateClass = 'due';
+                    countDue++;
+                    if (! challenge || date > lastWeek) {
+                        // An overdue to-do is not dangerous if it is from a
+                        // challenge and is more than a week old (because the
+                        // user probably doesn't care about it).
+                        dangerTodoFound = true;
+                    }
                 }
+                dateString = '<span class="date">' + date + '</span> ';
             }
-            items.push('<li class="' + dateClass + '"><span class="date">' +
-                       date + '</span> ' +
-                       obj.text + challenge + '</li>');
+            var todoString = '<li class="' + dateClass + '">' + dateString +
+                             obj.text + challenge + '</li>';
+            if (obj.date) {
+                itemsDated.push(todoString);
+            }
+            else {
+                itemsNotDated.push(todoString);
+            }
         }
-        if (items.length == 0) {
-            return;
+        if (itemsDated.length === 0) {
+      return;
         }
-        var html = '';
-        html += '<ul class="padded">';
-        html += items.sort().join('');
-        html += '</ul>';
-        html += '<hr><h2>To-Dos without Dates</h2>';
-        html += '<ul class="padded">';
-        html += itemsNotDue.join('');
-        html += '</ul>';
-
+        var html = '<ul class="padded">' +
+                   itemsDated.sort().join('') +
+                   '</ul>' +
+                   '<hr /><h2>To-Dos without Dates</h2>' +
+                   '<ul class="padded">' +
+                   itemsNotDated.join('') +
+                   '</ul>';
         if (countDue) {
             DASHBOARD[orderId] = {'label': 'To-Dos Due Today',
                 'hoverText': 'number of to-dos due today or overdue ' +
@@ -3204,7 +3218,7 @@ function analyseEquipment() {
                 }
                 // if no match, we use the skin key (e.g., f133ee)
             }
-            // if (obj[1] == 'background') { // XXX test with 1st and 2nd sets, and none
+            // if (obj[1] == 'background') { // XXX_SOON test with 1st and 2nd sets, and none
                 // // {"backgrounds062014":{"beach":{"text":"Beach",
                 // //  "notes":"Lounge upon a warm beach."},"fairy_ring":{ ...
                 // for (var setId in content.backgrounds) {
@@ -4215,6 +4229,25 @@ ul#tableOfContents > li {
 #taskOverviewSection h3 {
     margin-top: 3em;
 }
+#taskOverviewSection .taskAttributes {
+    float: right;
+}
+#taskOverviewSection .taskAttributes .attributeOn {
+    opacity: 1;
+}
+#taskOverviewSection .taskAttributes .attributeOff {
+    opacity: 0.4;
+}
+#taskOverviewSection .taskAttributes.habit span,
+#taskOverviewSection .taskAttributes.daily span {
+    border: solid 1px;
+}
+#taskOverviewSection .taskAttributes.habit span {
+    padding: 0 4px;
+}
+#taskOverviewSection .taskAttributes.daily span {
+    padding: 0 1px;
+}
 
 
 #taskStatisticsSection h3 {
@@ -4579,7 +4612,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.3.1a)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.4)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -4608,6 +4641,21 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.4 <span class="date">2014-11-06</span></dt>
+        <dd><ul>
+            <li>Feature enhancements, all created by <strong>goldfndr</strong>:
+                <ul>
+                    <li>The <strong>Task Overview</strong> section now has:<ul>
+                        <li>A <strong><a href="http://habitrpg.wikia.com/wiki/Difficulty">Difficulty</a></strong> column.</li>
+                        <li><strong>Habit directions</strong>: plus and minus buttons for Habits in the "task" column.</li>
+                        <li><strong>Daily repeat days</strong> in the "task" column to help you manage <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a>.</li>
+                        <li><strong>To-Do due dates</strong> in the "task" column.</li>
+                    </ul></li>
+                    <li>The <strong>To-Dos with Dates</strong> section now includes a separate sub-section for To-Dos without dates, in case you need to refer to your undated To-Dos while examining your dated ones. (This To-Dos with Dates section appears only if you have one or more dated To-Dos, but you can always see all To-Dos in the Task Overview, which provides sorting, searching, and filtering.)</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.3.1a <span class="date">2014-10-14</span></dt>
         <dd><ul>
             <li>Features:
@@ -4616,7 +4664,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.3 <span class="date">2014-10-14</span></dt>
         <dd><ul>
             <li>Features:
@@ -5231,35 +5278,15 @@ ul#tableOfContents > li {
 
             <li>Show the date and time that the data was last fetched (format "Thursday 5 October").</li>
             <li>Display checklists and notes for tasks.</li>
-            <li>Expand the "To-Dos with Dates" section to include To-Dos without dates in a separate sub-section.
-<!--
-I'm wondering if I should merge todos with and without dates into one section, probably in a table like task overview, but with searching AND filtering to make it easy to see either todos with dates or todos without, or both but sorted by date with undated at one end of the sort list.
-OR just keep them as two separate sections.
-I suspect together might be more usable for more purposes (e.g., search for todo text)
-
-I'd merge them.  Have it as a section afterwards.
-
-To-Dos with Dates on top
-Kind of like the grey dailies
-Dailies Incompleted then says "And these dailies are greyed out, but you COULD do them"
-"These are To-Dos with dates." "And these are your To-Dos without dates!"
-
-Although... I'm still liking the idea of having them in one table, with dated todos at the top (dates closest today first) and then undated at the bottom of the same table. It's basically the same thing (I think) but because they're all in one table, they can all be searched/sorted/filtered together in other ways than date. Would that be okay for how you want to use it?
-
-Cool. At the top of the table there will be a summary like "3 todos dated today or earlier; 14 todos dated in the future; 7 todos undated". And you'll be able to filter the table to see only todos from one those three sets.
--->
-</li>
             <li>For relevant Skills And Buffs, show how to increase the chance of a critical hit happening.</li>
             <li>Add percentages to Task Statistics.
 <!--
 <span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)
 -->
 </li>
-            <li>Create a section showing the days that all Dailies are scheduled for, to help you manage <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a>.</li>
             <li>Hide information about drops for any players who have not yet had drops enabled.</li>
             <li>Show the potential damage you would do to a boss even when you are not on a quest (but don't display it in the dashboard). Would help people who are questioning whether or not they're ready for a boss fight.</li>
             <li>For Dailies History, improve the scrolling and the visibility and fixedness of the task names.</li>
-            <li>For Task Overview, add a column for <a href="https://github.com/HabitRPG/habitrpg/pull/3887">priority and difficulty</a>.</li>
             <li>For Task Overview, add an invisible column for emoji and allow drop-down menu filtering using that column.</li>
             <li>Create a "Random To-Do" button that displays a randomly-selected To-Do task near the top of the page. Allow the button to be clicked to show a different task without the whole page having to be refetched. Remove the random To-Do currently shown at the bottom of the Task Overview section.</li>
             <li>For Habit History and Untagged Tasks, apply the "longContent" class if there are more than x number of items.</li>
