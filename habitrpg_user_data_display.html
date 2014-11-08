@@ -3400,6 +3400,7 @@ function analyseEquipment() {
                         $(nRow).data('int',  aData['int']);
                         $(nRow).data('per',  aData['per']);
                         $(nRow).data('str',  aData['str']);
+                        $(nRow).data('key',  aData['key']);
                         return nRow;
                     },
                 'aaData': aaData,
@@ -3593,13 +3594,16 @@ function analyseEquipment() {
         }
 
         function sumEquipmentRecommendations() {
-            var countCon    = 0;
-            var countInt    = 0;
-            var countPer    = 0;
-            var countStr    = 0;
-            var list        = '';
+            var countCon = 0;
+            var countInt = 0;
+            var countPer = 0;
+            var countStr = 0;
+            var list     = '';
+            var keys     = '';
             $('#equipmentRecommendationsSection table tr.rowHighlight').each(
                 function(index,value){
+                    if (keys) keys += ', ';
+                    keys        += $(this).data('key');
                     list        += '<li>' + $(this).data('name') + '</li>';
                     countCon    += $(this).data('con');
                     countInt    += $(this).data('int');
@@ -3620,7 +3624,8 @@ function analyseEquipment() {
                 (countCon + countInt) +
                 ' <span class="attributeName">con+int</span></li>' +
                 list +
-                '</ul>'
+                '</ul>' +
+                '<p id="equipmentChosenKeys">API keys: ' + keys + '</p>'
             );
             $('#equipmentChosenClear').click( function(event) {
                 event.preventDefault();
@@ -4606,13 +4611,18 @@ ul#tableOfContents > li {
     font-variant: small-caps;
     padding-right: 10px;
 }
+#equipmentRecommendationsSection #equipmentChosen p#equipmentChosenKeys {
+	clear: both;
+    font-size:  0.8em;
+    font-style: italic;
+}
 
 </style>
 </head>
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.4)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.4.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -4641,9 +4651,18 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.4.1 <span class="date">2014-11-09</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>The <strong>Equipment Recommendations</strong> section now shows you the API object key for each of the items you have selected. This would be useful if you have any third-party tools that let you equip/dequip gear. by specifying keys.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.4 <span class="date">2014-11-06</span></dt>
         <dd><ul>
-            <li>Feature enhancements, all created by <strong>goldfndr</strong>:
+            <li>Features, all created by <strong>goldfndr</strong>:
                 <ul>
                     <li>The <strong>Task Overview</strong> section now has:<ul>
                         <li>A <strong><a href="http://habitrpg.wikia.com/wiki/Difficulty">Difficulty</a></strong> column.</li>
@@ -4655,7 +4674,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.3.1a <span class="date">2014-10-14</span></dt>
         <dd><ul>
             <li>Features:
