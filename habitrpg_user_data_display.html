@@ -3602,8 +3602,7 @@ function analyseEquipment() {
             var keys     = '';
             $('#equipmentRecommendationsSection table tr.rowHighlight').each(
                 function(index,value){
-                    if (keys) keys += ', ';
-                    keys        += $(this).data('key');
+                    keys        += $(this).data('key') + ' ';
                     list        += '<li>' + $(this).data('name') + '</li>';
                     countCon    += $(this).data('con');
                     countInt    += $(this).data('int');
