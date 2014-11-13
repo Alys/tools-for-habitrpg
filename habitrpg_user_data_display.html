@@ -2757,48 +2757,6 @@ function dropCountAndCap() {
         'status': ((user.items.lastDrop.count &&
                     user.items.lastDrop.count >= dropCap) ? 'safe' : 'neutral')
         };
-
-/*
-    // FOR TESTING (this might NOT contain all code for most drop chances):
-    // SITE CODE:  var chance = _.min([Math.abs(drop_TaskValue - 21.27),37.5])/150+.02   # Base drop chance is a percentage based on task value. Typical fresh task: 15%. Very ripe task: 25%. Very blue task: 2%.
-    var drop_TaskValue = -1710.61; // 0 = new task
-    var chance = Math.abs(drop_TaskValue - 21.27);
-    if (chance > 37.5) {
-        chance = 37.5;
-    }
-    chance = chance / 150 + .02;
-    // console.log("chance 1: " + chance); // TST
-    var dropChance = 1/150+0.2  // assume new task
-                   // * 1          // assume task priority easy
-                   // * 1          // assume no streak
-                   // * (1 + computedStats['per'] / 100)
-                   // * (1 + user.achievements.streak / 200);
-    // if (user.contributor.level) {
-        // dropChance *= (1 + user.contributor.level / 40);
-    // }
-    // dropChance = diminishingReturns(dropChance, 0.75);
-    var drop_TaskPriority = 2; // +50% for Medium (1.5), +100% for Hard (2)
-    var drop_Streak = 0; // +1% per streak
-    var drop_Perception = 0; // +1% per point
-    var drop_ContribTier = 2; // +2.5% per level
-    var drop_Rebirths = 1; // +5% per achievement
-    var drop_StreakAchievements = 10; // +0.5% per achievement
-    var drop_Crit = 1; // Use the crit multiplier if we got one
-    var drop_Checklist = 0; // (1 + .5*(_.reduce(task.checklist,((m,i)->m+(if i.completed then 1 else 0)),0) or 0)) # +50% per checklist item complete. TODO: make this into X individual drop chances instead
-    chance *=
-        drop_TaskPriority *
-        (1 + (drop_Streak / 100)) *
-        (1 + (drop_Perception / 100)) *
-        (1 + (drop_ContribTier / 40)) *
-        (1 + (drop_Rebirths / 20)) *
-        (1 + (drop_StreakAchievements / 200)) *
-        (drop_Crit || 1) *
-        (1 + drop_Checklist);
-    // console.log("chance 2: " + chance); // TST
-    chance = diminishingReturns(chance, 0.75);
-    // console.log("chance 3: " + chance); // TST
-*/
-
     TOC[orderId]  = {'target': id, 'title':  title};
     MAIN[orderId] = {'id': id, 'title': title, 'html': html};
 }
