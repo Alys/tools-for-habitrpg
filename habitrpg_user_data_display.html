@@ -49,7 +49,7 @@ you'll find there.
     <link href="js/DataTables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
     <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
@@ -480,6 +480,7 @@ function fetchData() {
 }
 function parseData() {
     // variables for storing the content:
+    var fetchtime = new Date(); // save the fetch time early
     var MAIN = {}; // each element defines the HTML for one section on the page
     var TOC  = {}; // each element defines one Table of Contents entry
     var DASHBOARD = {}; // each element defines the HTML for one dashboard tile
@@ -545,6 +546,7 @@ function parseData() {
     formatAndDisplayDASHBOARD();
     formatAndDisplayTOC();
     formatAndDisplayMAIN();
+    formatAndDisplayFETCHTIME(fetchtime);
 
     // everything below here is functions used within this function
 
@@ -672,6 +674,14 @@ function formatAndDisplayMAIN() {
         $('#' + sectionOpen).show();
         openRelatedSections();
     }
+}
+
+
+function formatAndDisplayFETCHTIME(date) {
+    // Format date as (weekday date month) and hh:mm:ss; toDateString ordering might be locale-specific
+    //var dateStr = date.toDateString().split(' ').slice(0,3).join(' ') + ' ' + date.toTimeString().split(' ')[0];
+    var dateStr = date.toLocaleString(undefined, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+    $('#refetch').val('Re-Fetch Data (last fetched ' + dateStr + ')');
 }
 
 
