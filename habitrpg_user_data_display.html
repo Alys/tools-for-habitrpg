@@ -3411,7 +3411,7 @@ function analyseEquipment() {
                   return; // http://datatables.net/ref#mData
                 }
                 if (gearLookups[source.key]) {
-                    return '<img src="' + gearLookups[source.key] + '" title="' + source.key + '" height="50%" />';
+                    return '<img src="' + gearLookups[source.key] + '" title="' + source.key + '" />';
                 }
                 else {
                     return source.key;
@@ -3629,7 +3629,7 @@ function analyseEquipment() {
                 ' <span class="attributeName">con+int</span></li>' +
                 list +
                 '</ul>' +
-                '<div style="float:right;">' + images + '</div>' +
+                '<div id="equipmentChosenImages">' + images + '</div>' +
                 '<p id="equipmentChosenKeys">API keys: ' + keys + '</p>'
             );
             $('#equipmentChosenClear').click( function(event) {
@@ -4541,6 +4541,9 @@ ul#tableOfContents > li {
 #equipmentRecommendationsSection table tr td {
     border-bottom: 1px solid lightgrey;
 }
+#equipmentRecommendationsSection table tr td img {
+    height: 50%;
+}
 #equipmentRecommendationsSection table tr.even,
 #equipmentRecommendationsSection table tr.even .sorting_1,
 #equipmentRecommendationsSection table tr.even .sorting_2,
@@ -4616,8 +4619,11 @@ ul#tableOfContents > li {
     font-variant: small-caps;
     padding-right: 10px;
 }
+#equipmentRecommendationsSection #equipmentChosen div#equipmentChosenImages {
+    float: right;
+}
 #equipmentRecommendationsSection #equipmentChosen p#equipmentChosenKeys {
-	clear: both;
+    clear: both;
     font-size:  0.8em;
     font-style: italic;
 }
