@@ -787,11 +787,7 @@ function userDataInHeader() {
     $('#headerExtras').html('<div id="userNameDisplay">' +
             displayName +
             '</div>' +
-            '<div id="emailDisplay" class="hide">' +
-            user.auth.local.email +
-            '</div>' +
             '<div id="explanationAndClearLinks">' +
-            '<span class="showHideToggle" data-target="emailDisplay" data-linktext="email address" title="view the email address that you used to sign up to HabitRPG">show email address</span>' +
             '<input id="refetch" type="submit" value="' +
             'Re-Fetch Data (last fetched ' + fetchtime + ')" />' +
             '<span id="documentationAndFormToggle" class="showHideToggle" data-target="documentationAndForm" data-linktext="documentation" data-closemainsections="true">show documentation</span>' +
@@ -4064,10 +4060,6 @@ h2 {
     text-align: right;
     font-weight: bold;
     font-size: 2em;
-    margin-bottom: 10px;
-}
-#emailDisplay {
-    text-align: right;
     margin-bottom: 10px;
 }
 
