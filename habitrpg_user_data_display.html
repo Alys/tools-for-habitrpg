@@ -3412,13 +3412,22 @@ function analyseEquipment() {
             { 'sTitle': 'image',      'sClass': 'center', 'bSortable' : false,
               'mData': function ( source, type, val ) {
                 if (type === 'set') {
-                  return; // http://datatables.net/ref#mData
+                  return;
                 }
                 if (gearLookups[source.key]) {
-                    return '<img src="' + gearLookups[source.key] + '" title="' + source.key + '" />';
+                    return '<img src="' +
+                           gearLookups[source.key] + '" title="' +
+                           source.key + '" />';
+                }
+                else if (userId == 'd904bd62-da08-416b-a816-ba797c9ee265' ||
+                         userId == 'home'     // Alys or local test account
+                        ) {
+                    console.log('WARNING: No image URL in gearLookups for ' +
+                                source.key);
+                    return source.key;
                 }
                 else {
-                    return source.key;
+                    return ' ';
                 }
               }
             },
@@ -3467,7 +3476,7 @@ function analyseEquipment() {
                                     .addClass('equipmentRecommendationsHide');
             $('#equipmentRecommendationsSection table tr.middling')
                                     .addClass('equipmentRecommendationsHide');
-            $('#equipmentRecommendationsSection select.widget-8')
+            $('#equipmentRecommendationsSection select.widget-9')
                                     .addClass('equipmentRecommendationsHide');
 
             $('#showAllEquipment').click(function(event) {
@@ -3478,7 +3487,7 @@ function analyseEquipment() {
                                 .removeClass('equipmentRecommendationsHide');
                 $('#equipmentRecommendationsSection table tr.middling')
                                 .removeClass('equipmentRecommendationsHide');
-                $('#equipmentRecommendationsSection select.widget-8')
+                $('#equipmentRecommendationsSection select.widget-9')
                                 .removeClass('equipmentRecommendationsHide');
                 $('#qualityFilter #onlyBestIsShowing').hide();
                 $('#qualityFilter #allEquipmentIsShowing').show();
@@ -3610,13 +3619,15 @@ function analyseEquipment() {
             var images   = '';
             $('#equipmentRecommendationsSection table tr.rowHighlight').each(
                 function(index,value){
-                    keys        += $(this).data('key') + ' ';
-                    images      += gearLookups[$(this).data('key')] ? '<img src="' + gearLookups[$(this).data('key')] + '" />' : '';
-                    list        += '<li>' + $(this).data('name') + '</li>';
-                    countCon    += $(this).data('con');
-                    countInt    += $(this).data('int');
-                    countPer    += $(this).data('per');
-                    countStr    += $(this).data('str');
+                    keys     += $(this).data('key') + ' ';
+                    images   += gearLookups[$(this).data('key')] ?
+                                '<img src="' +
+                                gearLookups[$(this).data('key')] + '" />' : '?';
+                    list     += '<li>' + $(this).data('name') + '</li>';
+                    countCon += $(this).data('con');
+                    countInt += $(this).data('int');
+                    countPer += $(this).data('per');
+                    countStr += $(this).data('str');
             });
             $('#equipmentRecommendationsSection #equipmentChosen').html(
                 '<p><input id="equipmentChosenClear" type="submit"' +
