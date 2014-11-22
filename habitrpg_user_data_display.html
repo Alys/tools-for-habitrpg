@@ -50,7 +50,7 @@ you'll find there.
     <link href="js/DataTables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
     <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
@@ -480,6 +480,7 @@ function fetchData() {
 }
 function parseData() {
     // variables for storing the content:
+    var fetchtime = new Date(); // save the fetch time early
     var MAIN = {}; // each element defines the HTML for one section on the page
     var TOC  = {}; // each element defines one Table of Contents entry
     var DASHBOARD = {}; // each element defines the HTML for one dashboard tile
@@ -545,6 +546,7 @@ function parseData() {
     formatAndDisplayDASHBOARD();
     formatAndDisplayTOC();
     formatAndDisplayMAIN();
+    formatAndDisplayFETCHTIME(fetchtime);
 
     // everything below here is functions used within this function
 
@@ -672,6 +674,14 @@ function formatAndDisplayMAIN() {
         $('#' + sectionOpen).show();
         openRelatedSections();
     }
+}
+
+
+function formatAndDisplayFETCHTIME(date) {
+    // Format date as (weekday date month) and hh:mm:ss; toDateString ordering might be locale-specific
+    //var dateStr = date.toDateString().split(' ').slice(0,3).join(' ') + ' ' + date.toTimeString().split(' ')[0];
+    var dateStr = date.toLocaleString(undefined, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+    $('#refetch').val('Re-Fetch Data (last fetched ' + dateStr + ')');
 }
 
 
@@ -3395,6 +3405,19 @@ function analyseEquipment() {
                      :  source.type;
               }
             },
+            { 'sTitle': 'image',      'sClass': 'center', 'bSortable' : false,
+              'mData': function ( source, type, val ) {
+                if (type === 'set') {
+                  return; // http://datatables.net/ref#mData
+                }
+                if (gearLookups[source.key]) {
+                    return '<img src="' + gearLookups[source.key] + '" title="' + source.key + '" />';
+                }
+                else {
+                    return source.key;
+                }
+              }
+            },
             { 'mData' : 'text',       'sClass': 'center',
               'sTitle': 'name',
             },
@@ -3430,7 +3453,7 @@ function analyseEquipment() {
                 "sScrollX": "100%",
                 "bDestroy": true,
                 'oColumnFilterWidgets': {
-                    'aiExclude': [ 1,3,4,5,6 ],
+                    'aiExclude': [ 1,2,4,5,6,7 ],
                     "sSeparator": "\\s*/+\\s*",
                 }
             });
@@ -3580,9 +3603,11 @@ function analyseEquipment() {
             var countStr = 0;
             var list     = '';
             var keys     = '';
+            var images   = '';
             $('#equipmentRecommendationsSection table tr.rowHighlight').each(
                 function(index,value){
                     keys        += $(this).data('key') + ' ';
+                    images      += gearLookups[$(this).data('key')] ? '<img src="' + gearLookups[$(this).data('key')] + '" />' : '';
                     list        += '<li>' + $(this).data('name') + '</li>';
                     countCon    += $(this).data('con');
                     countInt    += $(this).data('int');
@@ -3604,6 +3629,7 @@ function analyseEquipment() {
                 ' <span class="attributeName">con+int</span></li>' +
                 list +
                 '</ul>' +
+                '<div id="equipmentChosenImages">' + images + '</div>' +
                 '<p id="equipmentChosenKeys">API keys: ' + keys + '</p>'
             );
             $('#equipmentChosenClear').click( function(event) {
@@ -4515,6 +4541,9 @@ ul#tableOfContents > li {
 #equipmentRecommendationsSection table tr td {
     border-bottom: 1px solid lightgrey;
 }
+#equipmentRecommendationsSection table tr td img {
+    height: 50%;
+}
 #equipmentRecommendationsSection table tr.even,
 #equipmentRecommendationsSection table tr.even .sorting_1,
 #equipmentRecommendationsSection table tr.even .sorting_2,
@@ -4589,6 +4618,9 @@ ul#tableOfContents > li {
 #equipmentRecommendationsSection #equipmentChosen .attributeName {
     font-variant: small-caps;
     padding-right: 10px;
+}
+#equipmentRecommendationsSection #equipmentChosen div#equipmentChosenImages {
+    float: right;
 }
 #equipmentRecommendationsSection #equipmentChosen p#equipmentChosenKeys {
     clear: both;
