@@ -480,10 +480,12 @@ function fetchData() {
 }
 function parseData() {
     // variables for storing the content:
-    var fetchtime = new Date(); // save the fetch time early
     var MAIN = {}; // each element defines the HTML for one section on the page
     var TOC  = {}; // each element defines one Table of Contents entry
     var DASHBOARD = {}; // each element defines the HTML for one dashboard tile
+
+    // save the fetch time early:
+    var fetchtime = myDateConverter(new Date(), 'pretty');
 
     // extract some commonly-used data:
     var sleeping = user.preferences.sleep; // true if resting in the inn
@@ -546,7 +548,6 @@ function parseData() {
     formatAndDisplayDASHBOARD();
     formatAndDisplayTOC();
     formatAndDisplayMAIN();
-    formatAndDisplayFETCHTIME(fetchtime);
 
     // everything below here is functions used within this function
 
@@ -677,12 +678,52 @@ function formatAndDisplayMAIN() {
 }
 
 
-function formatAndDisplayFETCHTIME(date) {
-    // Format date as (weekday date month) and hh:mm:ss; toDateString ordering might be locale-specific
-    //var dateStr = date.toDateString().split(' ').slice(0,3).join(' ') + ' ' + date.toTimeString().split(' ')[0];
-    var dateStr = date.toLocaleString(undefined, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
-    $('#refetch').val('Re-Fetch Data (last fetched ' + dateStr + ')');
+function myDateConverter(date, style) {
+    if (typeof date === 'string' || typeof date === 'number') {
+        date = new Date(date);
+    }
+    if (!date || isNaN(date.getTime())) {
+        // Either the object that was passed in is not a Date object,
+        // OR the date string that was passed in could not be converted
+        // to a Date object, presumably because it's in a non-standard
+        // format. We handle this by using today's date. It's a nasty
+        // hack, but it's unlikely to occur, and no one's paying for
+        // anything better.
+        date = new Date();
+    }
+
+    if (style === 'pretty') {
+        // Format date as (weekday date month) and hh:mm:ss;
+        // toDateString ordering might be locale-specific
+        // var dateStr = date.toDateString().split(' ').slice(0,3).join(' ') +
+        // ' ' + date.toTimeString().split(' ')[0];
+        var dateStr = date.toLocaleString(undefined,
+            { weekday: 'long', day: 'numeric', month: 'long',
+              hour: '2-digit', minute: '2-digit' });
+    }
+    else {
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        var d = date.getDate();
+        var H = date.getHours();
+        var M = date.getMinutes();
+        var S = date.getSeconds();
+        var dateStr = y +
+               '-' + (m<=9 ? '0'+m : m) +
+               '-' + (d<=9 ? '0'+d : d);
+        if (style === 'short') {
+            dateStr = dateStr.replace(/^20/, ""); // remove century
+        }
+        if (style === 'long') {
+            dateStr += ' ' + (H<=9 ? '0'+H : H) +
+                       ':' + (M<=9 ? '0'+M : M) +
+                       ':' + (S<=9 ? '0'+S : S);
+        }
+    }
+    return dateStr;
 }
+
+
 
 
 openRelatedSections = function() {
@@ -750,8 +791,9 @@ function userDataInHeader() {
             user.auth.local.email +
             '</div>' +
             '<div id="explanationAndClearLinks">' +
-            '<input id="refetch" type="submit" value="Re-Fetch Data" />' +
             '<span class="showHideToggle" data-target="emailDisplay" data-linktext="email address" title="view the email address that you used to sign up to HabitRPG">show email address</span>' +
+            '<input id="refetch" type="submit" value="' +
+            'Re-Fetch Data (last fetched ' + fetchtime + ')" />' +
             '<span id="documentationAndFormToggle" class="showHideToggle" data-target="documentationAndForm" data-linktext="documentation" data-closemainsections="true">show documentation</span>' +
             '</div>'
     );
@@ -1219,40 +1261,6 @@ function collateAndDisplayTaskData() {
             });
         }
         return tagFound;
-    }
-
-
-    function myDateConverter(date, style) {
-        if (typeof date === 'string' || typeof date === 'number') {
-            date = new Date(date);
-        }
-        if (!date || isNaN(date.getTime())) {
-            // Either the object that was passed in is not a Date object,
-            // OR the date string that was passed in could not be converted
-            // to a Date object, presumably because it's in a non-standard
-            // format. We handle this by using today's date. It's a nasty
-            // hack, but it's unlikely to occur, and no one's paying for
-            // anything better.
-            date = new Date();
-        }
-        var y = date.getFullYear();
-        var m = date.getMonth() + 1;
-        var d = date.getDate();
-        var H = date.getHours();
-        var M = date.getMinutes();
-        var S = date.getSeconds();
-        var dateStr = y +
-               '-' + (m<=9 ? '0'+m : m) +
-               '-' + (d<=9 ? '0'+d : d);
-        if (style === 'short') {
-            dateStr = dateStr.replace(/^20/, ""); // remove century
-        }
-        if (style === 'long') {
-            dateStr += ' ' + (H<=9 ? '0'+H : H) +
-                       ':' + (M<=9 ? '0'+M : M) +
-                       ':' + (S<=9 ? '0'+S : S);
-        }
-        return dateStr;
     }
 
 
