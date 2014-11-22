@@ -17,9 +17,10 @@ https://oldgods.net/habitrpg/habitrpg_user_data_display.html
     or http://is.gd/hrpguserdata
 
 Contributors:
-    Alys (Alice Harris), lady_alys@oldgods.net
-    thepeopleseason (James Hsiao)
-
+    Alys (Alice Harris), lady_alys@oldgods.net https://github.com/Alys
+    thepeopleseason (James Hsiao) https://github.com/thepeopleseason
+    goldfndr (Richard Finegold) https://github.com/goldfndr
+    Blade Barringer https://github.com/crookedneighbor
 
 
 TO ADD A NEW SECTION TO THIS PAGE:
@@ -359,13 +360,16 @@ function enableShowHideToggling() {
     });
 }
 
+
 //////////////////////////////////////////////////////////////////////
 ////   Get UUID from URL      ////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-
-// Function found at http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url#answer-4656873
-function getUrlVars()
-{
+var url_vars = getUrlVars();
+if (url_vars.uuid) {
+    $("#userId").val(url_vars.uuid);
+}
+function getUrlVars() {
+    // Function found at http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url#answer-4656873
     var vars = [], hash;
     var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
     for(var i = 0; i < hashes.length; i++)
@@ -377,10 +381,6 @@ function getUrlVars()
     return vars;
 }
 
-var url_vars = getUrlVars();
-if(url_vars.uuid) {
-  $("#userId").val(url_vars.uuid);
-}
 
 //////////////////////////////////////////////////////////////////////
 ////   Login events      /////////////////////////////////////////////
@@ -4591,7 +4591,7 @@ ul#tableOfContents > li {
     padding-right: 10px;
 }
 #equipmentRecommendationsSection #equipmentChosen p#equipmentChosenKeys {
-	clear: both;
+    clear: both;
     font-size:  0.8em;
     font-style: italic;
 }
@@ -4601,7 +4601,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.4.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.5)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -4630,6 +4630,23 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.5 <span class="date">2014-11-22</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>The <strong>
+</strong> section now 
+</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>Added support for automatic filling of your User ID when you access this page from the HabitRPG <strong>Data</strong> menu. Feature won't work yet because a change to HabitRPG needs to go live first. Feature created by <strong>Blade Barringer</strong>.</li>
+                    <li>Added Blade and goldfndr to the Contributors list at the top of the source code (sorry, goldfndr, I forgot about that for your earlier change).</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.4.1 <span class="date">2014-11-09</span></dt>
         <dd><ul>
             <li>Features:
@@ -4638,7 +4655,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.4 <span class="date">2014-11-06</span></dt>
         <dd><ul>
             <li>Features, all created by <strong>goldfndr</strong>:
@@ -5225,6 +5241,11 @@ ul#tableOfContents > li {
             <input type="submit" value="Fetch My Data" />
             <p class="highlight">Privacy and security notes:</p>
             <ul>
+<!--
+            <li>If you access this page from the Data menu on the HabitRPG
+            website, your User ID will be automatically added to the form
+            above.</li>
+-->
             <li>Your API Token is a password - do not share it with anyone,
             not even the maintainer of this page if you are seeking help.</li>
             <li>When you enter your User ID and API Token here and click
