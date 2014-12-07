@@ -3150,7 +3150,7 @@ function analyseEquipment() {
             ['hair',  'mustache',     'mustache',  'convertNumber'],
             ['hair',  'beard',        'beard',     'convertNumber'],
             ['',      'skin',         'skin colour'               ],
-            // ['',      'background',   'background'                ],
+            ['',      'background',   'background'                ],
         ], function(index,obj) {
             var value;
             if (obj[0]) { value = user.preferences[obj[0]][obj[1]]; }
@@ -3174,18 +3174,16 @@ function analyseEquipment() {
                 }
                 // if no match, we use the skin key (e.g., f133ee)
             }
-            // if (obj[1] == 'background') { // XXX_SOON test with 1st and 2nd sets, and none
-                // // {"backgrounds062014":{"beach":{"text":"Beach",
-                // //  "notes":"Lounge upon a warm beach."},"fairy_ring":{ ...
-                // for (var setId in content.backgrounds) {
-                    // for (var backgroundId in content.backgrounds[setId]) {
-                        // if (backgroundId == value) {
-                            // value =
-                                // content.backgrounds[setId][backgroundId].text;
-                        // }
-                    // }
-                // }
-            // }
+            if (obj[1] == 'background') {
+                for (var setId in content.backgrounds) {
+                    for (var backgroundId in content.backgrounds[setId]) {
+                        if (backgroundId == value) {
+                            value =
+                                content.backgrounds[setId][backgroundId].text;
+                        }
+                    }
+                }
+            }
             if (value) {
                 appearance.push(obj[2] + ': <span class="attributeValue">'
                                        + value + '</span>');
@@ -3239,6 +3237,7 @@ function analyseEquipment() {
                   + beasts.join('</li><li>')
                   + '</li></ul></div>';
         }
+
         html += '<div class="clear"></div>'
 
         var id    = 'currentGearSection';
@@ -4606,7 +4605,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.5.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.5.3)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4641,6 +4640,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.5.3 <span class="date">2014-12-07</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>The <strong>Current Appearance and Gear</strong> section now includes the avatar's Background, if any.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.5.2 <span class="date">2014-12-06</span></dt>
         <dd><ul>
             <li>Code:
@@ -4649,7 +4657,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.5.1 <span class="date">2014-11-25</span></dt>
         <dd><ul>
             <li>Features:
