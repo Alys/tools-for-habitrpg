@@ -2247,12 +2247,18 @@ randomTodoHtml
                 wikiUrl + 'Skills">skills</a> and <a href="' +
                 wikiUrl + 'Buff">buffs</a>.</p>';
 
-        var conIncreaseDamageExplanation = '';
+        var conIncreaseDamageExplanation      = '';
+        var conIncreaseDamageExplanationParty = '';
         if (quest.content && quest.content.boss) {
             conIncreaseDamageExplanation = 'This will reduce the damage ' +
                     'that you take from your negative habits and from ' +
                     'your dailies directly. It will not reduce the damage ' +
                     'that your quest boss does to you.';
+            conIncreaseDamageExplanationParty = 'This will reduce the damage ' +
+                    'that you and your party members will each take from ' +
+                    'your own negative habits and your own dailies directly. ' +
+                    'It will not reduce the damage that your quest boss ' +
+                    'does to each of you.';
         }
 
         var before = ' before casting it.';
@@ -2433,7 +2439,7 @@ cast: (user, target) ->
                         'including you, will be increased by ' +
                         conInc + '. Your own CON will then be ' +
                         con + '.',
-                        '',
+                        conIncreaseDamageExplanationParty,
                         increase]; },
 
             'heallAll': function() { // Healer - Blessing
@@ -4605,6 +4611,7 @@ ul#tableOfContents > li {
 <hr class="clear" />
 <!--
 <p style="font-size:18px; color:orange"><strong>If you are unable to use HabitRPG, please try with this alternative URL: <a href="https://habitrpg.herokuapp.com/">https://habitrpg.herokuapp.com/</a></strong></p>
+
 <p><i>The usual website is down because the Domain Registrar company that we use is having problems.</i></p>
 <hr class="clear" />
 -->
@@ -4615,7 +4622,7 @@ ul#tableOfContents > li {
         <span id="serverName">HabitRPG</span>...</p>
         <!--
         <p id="specialMessage" class="lowlight narrowContent">
-<br /><em>@Ryan v3.0.1b, you're always there to answer everyone's questions and help people out. You run great challenges and crack jokes. You are a true Habit Champion and everyone's favorite cyborg, and we love you.</em><br />-- Lemoness<br /><br />
+<br /><em>@Ryan v3.0.1b, you're always there to answer everyone's questions and help people out. You run great challenges and crack jokes. You are a true Habit Champion and everyone's favorite cyborg, and we love you.</em><br />- Lemoness<br /><br />
         </p>
         -->
     </div>
