@@ -73,6 +73,7 @@ var user;    // holds user's data
 //////////////////////////////////////////////////////////////////////
 var serverName        = 'HabitRPG'; // used in "loading" message
 var serverUrl         = 'https://habitrpg.com:443/api/v2';
+// serverUrl         = 'https://habitrpg.herokuapp.com:443/api/v2';
 var serverPathContent = '/content';
 var serverPathTavern  = '/groups/habitrpg';
 var serverPathUser    = '/user';
@@ -2716,54 +2717,7 @@ function dropCountAndCap() {
     var dropCap = 5 + Math.floor(computedStats['per'] / 25) +
                   (user.contributor.level || 0);
 
-    if (user.purchased.plan.planId) {
-        /*  JSON SUBSCRIPTION DATA:
-        non-subscriber:
-        "plan":{"mysteryItems":[],"gemsBought":0}
-
-        subscriber:
-        "plan":{"customerId":"cus_6MjXOKwfP4wmsZ",
-        "dateCreated":"2014-01-26T10:41:51.972Z",
-        "dateUpdated":"2014-03-01T19:32:31.441Z",
-        "paymentType":"Stripe",
-        "planId":"basic_earned",
-        "mysteryItems":[],"gemsBought":0}
-
-        "plan":{"customerId":"cus_3qOLJ01KMSMO14",
-        "dateCreated":"2014-04-13T06:58:18.017Z",
-        "dateUpdated":"2014-05-01T19:43:13.762Z",
-        "paymentMethod":"Stripe",
-        "planId":"basic_earned",
-        "mysteryItems":[],"gemsBought":25},
-
-        subscriber awaiting termination:
-        "plan":{"customerId":"cus_3qOLJ01KMSMO14",
-        "dateCreated":"2014-04-13T06:58:18.017Z",
-        "dateTerminated":"2014-06-01T00:00:00.000Z",
-        "dateUpdated":"2014-05-01T19:43:13.762Z",
-        "paymentMethod":"Stripe",
-        "planId":"basic_earned",
-        "mysteryItems":[],"gemsBought":25},
-
-        ex-subscriber after termination:
-        "plan":{"customerId":null,
-        "dateCreated":"2014-01-26T10:41:51.972Z",
-        "dateTerminated":"2014-06-01T00:00:00.000Z",
-        "dateUpdated":"2014-06-01T19:09:10.058Z",
-        "paymentMethod":null,"paymentType":"Stripe",
-        "planId":null,
-        "mysteryItems":[],"gemsBought":0}
-
-        ex-subscriber after re-subscribing:
-        "plan":{"customerId":"cus_12hUIbdosmKG5p",
-        "dateCreated":"2014-01-26T10:41:51.972Z",
-        "dateTerminated":null,
-        "dateUpdated":"2014-06-03T23:01:21.933Z",
-        "paymentMethod":"Stripe",
-        "paymentType":"Stripe",
-        "planId":"basic_earned",
-        "mysteryItems":[],"gemsBought":0}
-        */
+    if (user.purchased.plan.customerId) {
         dropCap *= 2;
         html += dropCap +
                '</span>. It will increase if your <a href="' +
@@ -4646,7 +4600,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.5)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.5.2)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -4675,6 +4629,23 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.5.2 <span class="date">2014-12-06</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Adjust how a subscriber is recognised to include gift subscriptions (<a href="https://github.com/HabitRPG/habitrpg/issues/4340#issuecomment-65790508">ref</a>).</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>3.5.1 <span class="date">2014-11-25</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>When you access this tool from the <a href="https://habitrpg.com/">HabitRPG website's</a> "Data" menu, your <strong>User ID</strong> will be automatically filled in for you! You'll need to copy and paste only your API Token. Thanks to <strong>Blade Barringer</strong> for this!</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>3.5 <span class="date">2014-11-22</span></dt>
         <dd><ul>
             <li>Features:
@@ -4682,7 +4653,6 @@ ul#tableOfContents > li {
                     <li>The <strong>Equipment Recommendations</strong> section now includes images! Also, if you hover over an image, you'll see the "key" for that image, which might help anyone who uses the <a href="https://habitrpg.com/static/api">API</a> for manipulating their avatar. Thanks to <strong>goldfndr</strong> for this change! </li>
                     <li>The <strong>Re-Fetch</strong> button now tells you when your data was last fetched; <strong>goldfndr</strong> also made this enhancement.</li>
                     <li>The feature that used to show you your email address has been removed because you can now see your address on the website at <https://habitrpg.com/#/options/settings/settings>Settings -> Site</a>.</li>
-
                 </ul>
             </li>
             <li>Code:
@@ -4692,7 +4662,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.4.1 <span class="date">2014-11-09</span></dt>
         <dd><ul>
             <li>Features:
@@ -5287,11 +5256,9 @@ ul#tableOfContents > li {
             <input type="submit" value="Fetch My Data" />
             <p class="highlight">Privacy and security notes:</p>
             <ul>
-<!--
             <li>If you access this page from the Data menu on the HabitRPG
             website, your User ID will be automatically added to the form
             above.</li>
--->
             <li>Your API Token is a password - do not share it with anyone,
             not even the maintainer of this page if you are seeking help.</li>
             <li>When you enter your User ID and API Token here and click
