@@ -1902,7 +1902,7 @@ randomTodoHtml
                 var status = 'neutral'; // default (grey daily or no data)
                 if ( (previousValue === null && value > 0) ||
                      (previousValue !== null && value > previousValue) ) {
-                    success = 'V'; // user did the daily
+                    success = '✓'; // user did the daily
                     status = 'safe';
                 }
                 else if ( (previousValue === null && value < 0) ||
@@ -4605,7 +4605,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.5.3)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.5.4)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4640,6 +4640,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.5.4 <span class="date">2014-12-08</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>The <strong>Dailies History</strong> section now uses a ✓ instead of a V.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.5.3 <span class="date">2014-12-07</span></dt>
         <dd><ul>
             <li>Features:
@@ -4648,7 +4657,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.5.2 <span class="date">2014-12-06</span></dt>
         <dd><ul>
             <li>Code:
