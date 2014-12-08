@@ -1219,13 +1219,17 @@ function collateAndDisplayTaskData() {
                        taskPartHTML(obj.down, '&ndash;');
             }
             else if (obj.type == 'daily') {
-                return taskPartHTML(obj.repeat['su'], 'Su') +
-                       taskPartHTML(obj.repeat['m' ], 'Mo') +
-                       taskPartHTML(obj.repeat['t' ], 'Tu') +
-                       taskPartHTML(obj.repeat['w' ], 'We') +
-                       taskPartHTML(obj.repeat['th'], 'Th') +
-                       taskPartHTML(obj.repeat['f' ], 'Fr') +
-                       taskPartHTML(obj.repeat['s' ], 'Sa');
+                if (obj.repeat) {
+                    // a bug means that the repeat data might not be there
+                    // https://github.com/HabitRPG/habitrpg/issues/2334#issuecomment-66168155
+                    return taskPartHTML(obj.repeat['su'], 'Su') +
+                           taskPartHTML(obj.repeat['m' ], 'Mo') +
+                           taskPartHTML(obj.repeat['t' ], 'Tu') +
+                           taskPartHTML(obj.repeat['w' ], 'We') +
+                           taskPartHTML(obj.repeat['th'], 'Th') +
+                           taskPartHTML(obj.repeat['f' ], 'Fr') +
+                           taskPartHTML(obj.repeat['s' ], 'Sa');
+                }
             }
             else if (obj.type == 'todo') {
                 return obj.date == null ?
@@ -4642,11 +4646,17 @@ ul#tableOfContents > li {
 
         <dt>3.5.4 <span class="date">2014-12-08</span></dt>
         <dd><ul>
-            <li>Features:
+            <li>Features (minor):
                 <ul>
                     <li>The <strong>Dailies History</strong> section now uses a ✓ instead of a V.</li>
                 </ul>
             </li>
+            <li>Code:
+                <ul>
+                    <li>Fixed a bug in Task Overview, related to this HabitRPG bug: https://github.com/HabitRPG/habitrpg/issues/2334#issuecomment-66168155</li>
+                </ul>
+            </li>
+
         </ul></dd>
 
         <dt>3.5.3 <span class="date">2014-12-07</span></dt>
