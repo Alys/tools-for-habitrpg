@@ -104,7 +104,6 @@ var hideDropsInDashboard = true; // changes to false as soon as the user
                                  // looks at the drops section, then remains
                                  // false through all future re-fetches
 var tellMe = '<a href="mailto:lady_alys@oldgods.net">tell me</a>';
-var wikiUrl = 'http://habitrpg.wikia.com/wiki/';
 
 
 //////////////////////////////////////////////////////////////////////
@@ -731,7 +730,7 @@ function myDateConverter(date, style) {
 function wiki(wikilink, pipelink) {
     // http://stackoverflow.com/a/1145525
     var wiki_link = wikilink.split(' ').join('_');
-    return '<a href="' + wikiUrl + wiki_link + '">' +
+    return '<a href="http://habitrpg.wikia.com/wiki/' + wiki_link + '">' +
         ((typeof pipelink === "undefined") ? wikilink : pipelink) +
         '</a>';
 }
@@ -1422,7 +1421,7 @@ randomTodoHtml
                 "bDestroy": true, // allows table to recreate on refetch
                 'oColumnFilterWidgets': {
                     'aiExclude': [ 0, 4, 6, 7, 8, 9 ],
-					// For putting extra data in separate columns:
+                    // For putting extra data in separate columns:
                     // 'aiExclude': [ 0, 4, 6, 7, 8, 9, 10, 11 ],
                 }
             });
@@ -1502,12 +1501,11 @@ randomTodoHtml
            ) {
             title += ' and Training Points';
             html += '<h3>Training Points</h3>' +
-                '<p>When you use task-based <a ' +
-                'href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">' +
-                'auto-allocation</a>, you gain and lose points of training ' +
-                'for the <a ' +
-                'href="http://habitrpg.wikia.com/wiki/Character_Attributes">' +
-                'attributes</a> you\'ve assigned to your tasks. When you ' +
+                '<p>When you use task-based ' +
+                wiki('Automatic Allocation', 'auto-allocation') +
+                ' you gain and lose points of training for the ' +
+                wiki('Character Attributes', 'attributes') +
+                ' you\'ve assigned to your tasks. When you ' +
                 'level up, the attribute with the most training gets a ' +
                 'point assigned, and all training resets to 0 for the ' +
                 'next level. Your current training points are:</p>' +
@@ -1645,9 +1643,17 @@ randomTodoHtml
         var html = '';
         var modifyHealthDashboardTile = false;
         if (sleeping) {
-            html += '<p>You are <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a> so you will not take any damage from your uncompleted dailies.</p>';
+            html += '<p>You are ' +
+                    wiki('Tavern', 'resting in the inn') +
+                    ' so you will not take any damage from your' +
+                    ' uncompleted dailies.</p>';
             if (quest.content && quest.content.boss) {
-                html += '<p> However, you are also on a <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> so you <span class="highlight">will</span> still take damage from the uncompleted dailies of other quest participants.</p>';
+                html += '<p> However, you are also on a ' +
+                        wiki('Boss', 'boss') + ' ' +
+                        wiki('Quests', 'quest') +
+                        ' so you <span class="highlight">will</span> still' +
+                        ' take damage from the uncompleted dailies of other' +
+                        ' quest participants.</p>';
             }
         }
         else {
@@ -1668,8 +1674,8 @@ randomTodoHtml
             if (quest.content && quest.content.boss) {
                 if (damageToUser == 0) {
                     html += '<p>You and your fellow ' +
-                        '<a href="http://habitrpg.wikia.com/wiki/Quests">' +
-                        'quest</a> participants will take an ' +
+                        wiki('Quests', 'quest') +
+                        ' participants will take an ' +
                         '<span class="highlight">estimated 0</span> damage ' +
                         'from your own dailies.</p><p>However you ' +
                         '<span class="highlight">will</span> still take ' +
@@ -1681,10 +1687,9 @@ randomTodoHtml
                         'take an <span class="highlight">estimated ' +
                         damageToUser +
                         '</span> damage from your dailies directly.</p>' +
-                        '<p>In addition, you are on a <a ' +
-                        'href="http://habitrpg.wikia.com/wiki/Quests">' +
-                        'quest</a>, so the <a ' +
-                        'href="http://habitrpg.wikia.com/wiki/Boss">boss</a>' +
+                        '<p>In addition, you are on a ' +
+                        wiki('Quests', 'quest') + ', so the ' +
+                        wiki('Boss', 'boss') +
                         ' will inflict an <span class="highlight">estimated ' +
                         damageToParty +
                         '</span> damage to you and to your fellow quest ' +
@@ -1788,7 +1793,11 @@ randomTodoHtml
             var damageToYouText;
             if (quest.content && quest.content.boss) {
                 damageToYouText = 'damage to you alone';
-                html += 'For each daily, it tells you how much damage the daily will let the <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> do to all quest participants including you ("<strong>damage to party</strong>"); how much damage you alone will take from the daily - this is the damage you would take if you were not on a boss quest ("<strong>damage to you alone</strong>"), and the sum of the previous two values ("<strong>total damage to you</strong>").';
+                html += 'For each daily, it tells you how much damage the' +
+                        ' daily will let the ' +
+                        wiki('Quests', 'quest') + ' ' +
+                        wiki('Boss', 'boss') +
+                        ' do to all quest participants including you ("<strong>damage to party</strong>"); how much damage you alone will take from the daily - this is the damage you would take if you were not on a boss quest ("<strong>damage to you alone</strong>"), and the sum of the previous two values ("<strong>total damage to you</strong>").';
             }
             else {
                 damageToYouText = 'damage to you';
@@ -1800,9 +1809,9 @@ randomTodoHtml
                     'to find the most ' +
                     'damaging dailies to action first if you won\'t have ' +
                     'time to do them all. The damage estimates take into ' +
-                    'account damage reduction from partially-completed <a ' +
-                    'href="http://habitrpg.wikia.com/wiki/Checklist#Dailies">' +
-                    'checklists</a>, so you might find it is better to do ' +
+                    'account damage reduction from partially-completed ' +
+                    wiki('Checklist#Dailies', 'checklists') +
+                    ', so you might find it is better to do ' +
                     'a blue daily instead of a mostly-completed red daily.' +
                     '</p><table></table>';
         }
@@ -1811,11 +1820,10 @@ randomTodoHtml
         }
         if (dailiesIncompleteGrey.length > 0) {
             html += '<h3>Grey Dailies</h3><p>' +
-                    pluralise('This', dailiesIncompleteGrey.length) +
-                    ' <a href="http://habitrpg.wikia.com/wiki/Dailies#' +
-                    'Grey_Dailies">grey ' +
-                    pluralise('daily', dailiesIncompleteGrey.length) +
-                    '</a> ' +
+                    pluralise('This', dailiesIncompleteGrey.length) + ' ' +
+                    wiki('Dailies#Grey_Dailies', 'Grey ' +
+                        pluralise('daily', dailiesIncompleteGrey.length)) +
+                    ' ' +
                     pluralise('is', dailiesIncompleteGrey.length) +
                     ' <span class="highlight">not</span> due today but' +
                     ' you can still complete ' +
@@ -1991,11 +1999,17 @@ randomTodoHtml
             tableBody += '</tr>' ;
         }
 
-
         var html =
 '<div id="dailiesHistoryExplanationToggle" class="showHideToggle" data-target="dailiesHistoryExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="dailiesHistoryExplanation" class="hide">' +
-'    <p>The table below shows historical data for your dailies. If you are a subscriber, you will see data for every day going back to the date on which you subscribed. If you are not a subscriber, you will see data for every day for the past week, but before that your data points start to be merged together (this is to save on expensive database storage space). In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the daily, even if it was a <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey daily</a>.</li><li><span class="danger">x</span> You did not tick off the daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the daily but you took no damage from it for several possible reasons (the daily was not due that day; you ticked off all of the <a href="http://habitrpg.wikia.com/wiki/Checklist#Dailies">checklist</a> items under that daily, although not the daily itself; you evaded the daily with <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth</a>; you were <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a>; you had not logged in to HabitRPG that day; the daily did not yet exist on that day). This symbol will also appear frequently for old data for non-subscribers because it is not possible to correctly determine the actions you took after your data has been merged.</li></ul><p>Vertical grey bars in the table indicate gaps in the historical record (e.g., periods of a day or more in which you were resting in the inn).</p>' +
+'    <p>The table below shows historical data for your dailies. If you are a subscriber, you will see data for every day going back to the date on which you subscribed. If you are not a subscriber, you will see data for every day for the past week, but before that your data points start to be merged together (this is to save on expensive database storage space). In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the daily, even if it was a ' +
+wiki('Dailies#Grey_Dailies', 'grey daily') +
+'.</li><li><span class="danger">x</span> You did not tick off the daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the daily but you took no damage from it for several possible reasons (the daily was not due that day; you ticked off all of the ' +
+wiki('Checklist#Dailies', 'checklist') +
+' items under that daily, although not the daily itself; you evaded the daily with ' +
+wiki('Rogue#Skills', 'Stealth') + '; you were ' +
+wiki('Tavern', 'resting in the inn') +
+'; you had not logged in to HabitRPG that day; the daily did not yet exist on that day). This symbol will also appear frequently for old data for non-subscribers because it is not possible to correctly determine the actions you took after your data has been merged.</li></ul><p>Vertical grey bars in the table indicate gaps in the historical record (e.g., periods of a day or more in which you were resting in the inn).</p>' +
 '   <div class="showHideToggle closer" data-target="dailiesHistoryExplanation" data-resettoggletext="dailiesHistoryExplanationToggle">hide explanation</div>' +
 '</div>' +
                    '<table>' +
@@ -2189,16 +2203,16 @@ randomTodoHtml
         var id      = 'statsAndStreaksSection';
         var title   = 'Stats and Streaks Backup';
         var orderId = 'statsAndStreaks';
-        var html = '<p>This section lists information that you might need ' +
-            'if you <a href="http://habitrpg.wikia.com/wiki/' +
-            'Death_Mechanics">die</a> due to circumstances out of your ' +
-            'control (e.g., if you lose internet access and can\'t tick ' +
-            'off your dailies). ' +
-            'Your stats (Health, etc) can be restored using "Fix Character ' +
-            'Values" in the <a href="http://habitrpg.wikia.com/wiki/' +
-            'Settings">Settings</a> page. Your dailies\' streaks can be ' +
-            'reset using <a href="http://habitrpg.wikia.com/wiki/Streaks">' +
-            'Restore Streak</a> in the Avanced Options for each daily.</p>' +
+        var html = '<p>This section lists information you might need if you ' +
+            wiki('Death_Mechanics', 'die') +
+            ' due to circumstances out of your' +
+            ' control (e.g., if you lose internet access and can\'t tick' +
+            ' off your dailies). Your stats (Health, etc) can be restored' +
+            ' using "Fix Character Values" in the ' +
+            wiki('Settings') +
+            ' page. Your dailies\' streaks can be reset using ' +
+            wiki('Streaks', 'Restore Streak') +
+            ' in the Avanced Options for each daily.</p>' +
             '<p><span class="highlight">IMPORTANT!</span> If you have ' +
             'already died, this page <span class="highlight">cannot</span> ' +
             'tell you what your stats and streaks were before death; it\'s ' +
@@ -2236,14 +2250,12 @@ randomTodoHtml
 
 
     function skillsAndBuffs() {
-        var conLink       = '<a href="' + wikiUrl + 'Constitution">CON</a>';
-        var intLink       = '<a href="' + wikiUrl + 'Intelligence">INT</a>';
-        var perLink       = '<a href="' + wikiUrl + 'Perception">PER</a>';
-        var strLink       = '<a href="' + wikiUrl + 'Strength">STR</a>';
-        var taskValueLink = '<a href="' + wikiUrl + 'Task_Value">value</a>';
-        var classLink     = '<a href="' + wikiUrl + 'Class_System">class</a>';
-        var greyDailyLink = '<a href="' + wikiUrl +
-                              'Dailies#Grey_Dailies">grey dailies</a>';
+        var conLink       = wiki('Constitution',  'CON');
+        var intLink       = wiki('Intelligence', 'INT');
+        var perLink       = wiki('Perception',   'PER');
+        var strLink       = wiki('Strength',     'STR');
+        var taskValueLink = wiki('Task_Value',   'value');
+        var classLink     = wiki('Class_System', 'class');
         var id      = 'skillsAndBuffsSection';
         var title   = 'Skills and Buffs';
         var orderId = 'skillsAndBuffs';
@@ -2270,14 +2282,14 @@ randomTodoHtml
             html += ' and the effect they will have if you cast them '+
                    'now. It also describes the skills belonging to other ' +
                    'classes and the effect they would have if you changed ' +
-                   'class but kept your current <a href="' + wikiUrl +
-                   'Character_Attributes">attributes</a> (although in ' +
-                   'reality, your attributes will usually change at least ' +
-                   'a little when you change class).';
+                   'class but kept your current ' +
+                   wiki('Character_Attributes', 'attributes') +
+                   ' (although in reality, your attributes will usually' +
+                   ' change at least a little when you change class).';
         }
-        html += ' The wiki has more information about <a href="' +
-                wikiUrl + 'Skills">skills</a> and <a href="' +
-                wikiUrl + 'Buff">buffs</a>.</p>';
+        html += ' The wiki has more information about ' +
+                wiki('Skills', 'skills') + ' and ' +
+                wiki('Buff', 'buffs') + '.</p>';
 
         var conIncreaseDamageExplanation      = '';
         var conIncreaseDamageExplanationParty = '';
@@ -2687,7 +2699,14 @@ XXX_SOON add effects of crit
                     effects = 'You will avoid ' +
                               avoid + ' dailies tonight.';
                 }
-                var additional = 'Those dailies will not cause damage and their streaks will not reset. If you are on a <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, the dailies will not hurt your fellow quest participants. Note that stealth is used up by ' + greyDailyLink + ' as well as by dailies due today!';
+                var additional = 'Those dailies will not cause damage and' +
+                    ' their streaks will not reset. If you are on a ' +
+                    wiki('Boss', 'boss') + ' ' +
+                    wiki('Quests', 'quest') +
+                    ', the dailies will not hurt your fellow quest' +
+                    ' participants. Note that stealth is used up by ' +
+                    wiki('Dailies#Grey_Dailies', 'Grey Dailies') +
+                    ' as well as by dailies due today!';
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + perLink + before;
                 return ['',
@@ -2749,18 +2768,18 @@ function dropCountAndCap() {
     var title   = 'Drops Received Today';
     var html = '<p>Drops received so far today: <span class="highlight">' +
                user.items.lastDrop.count +
-               '</span></p><p>Your <a '  +
-               'href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">' +
-               'drop-cap</a> is <span class="highlight">';
+               '</span></p><p>Your '  +
+               wiki('Drops#Drop-Cap', 'drop-cap') +
+               ' is <span class="highlight">';
     var dropCap = 5 + Math.floor(computedStats['per'] / 25) +
                   (user.contributor.level || 0);
 
     if (user.purchased.plan.customerId) {
         dropCap *= 2;
         html += dropCap +
-               '</span>. It will increase if your <a href="' +
-               'http://habitrpg.wikia.com/wiki/Perception">perception</a> ' +
-               'increases. Your perception is currently <a href="' +
+               '</span>. It will increase if your ' +
+               wiki('Perception', 'perception') +
+               ' increases. Your perception is currently <a href="' +
                'https://habitrpg.com/#/options/profile/stats">' +
                computedStats['per'] + '</a>.</p>';
     }
@@ -2769,11 +2788,10 @@ function dropCountAndCap() {
                '</span>. It will become <span class="highlight">' +
                (dropCap * 2) +
                '</span> if you ' +
-               '<a href="http://habitrpg.wikia.com/wiki/Subscription">' +
-               'subscribe</a>. You can also increase your drop-cap slightly ' +
+               wiki('Subscription', 'subscribe') +
+               '. You can also increase your drop-cap slightly ' +
                'by increasing your ' +
-               '<a href="http://habitrpg.wikia.com/wiki/Perception">' +
-               'perception</a>.</p>';
+               wiki('Perception', 'perception') + '.</p>';
     }
 
     DASHBOARD[orderId] = {'id': 'dropsTodayDashboard',
@@ -2946,10 +2964,9 @@ function analyseEquipment() {
         }
         var missingEquipmentObjs = [];
         var html = '';
-        var reasons = '<a href="' + wikiUrl + 'Death_Mechanics">Death</a>' +
+        var reasons = wiki('Death_Mechanics', 'Death') +
                       ((user.achievements.rebirths > 0 ) ? ' or ' +
-                      '<a href="' + wikiUrl + 'Orb_of_Rebirth">Rebirth</a>' :
-                      '');
+                      wiki('Orb_of_Rebirth', 'Rebirth')  : '');
         if (equipment.length < 4) {
             html = '<p>You are missing this equipment due to ' + reasons +
                    ':</p>' +
@@ -2959,7 +2976,8 @@ function analyseEquipment() {
         }
         else {
             html = '<p>The table below shows you the equipment you have lost due to ' + reasons + '. It can help you work out which pieces are best to buy back first to maximise the stats you care about while minimising the gold you spend.</p>' +
-'<p>For equipment belonging to your current class, the CON, INT, PER, and STR columns show you the stats for the item modified by the <a href="http://habitrpg.wikia.com/wiki/Class_System#Class_Equip_Bonus">Class Equip Bonus</a>.</p>' +
+'<p>For equipment belonging to your current class, the CON, INT, PER, and STR columns show you the stats for the item modified by the ' +
+wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
 '<p>The "<strong>can buy?</strong>" column categorises the equipment based on whether you can buy it now or not. There are three possible values:</p><ul>' +
 '<li><strong>yes</strong>: you can buy it now (assuming you have enough gold)</li>' +
 '<li><strong>later (buy other gear first)</strong>: you cannot buy it until you have bought other, cheaper versions of that equipment</li>' +
@@ -4681,14 +4699,21 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
-        <dt>3.64 <span class="date">2014-12-14</span></dt>
+        <dt>3.6 <span class="date">2014-12-14</span></dt>
         <dd><ul>
+
             <li>Features created by <strong>goldfndr</strong>:
                 <ul>
                     <li>All links now open in a new window or tab.</li>
                     <li>The <strong>Task Overview</strong> section now has a <strong>toggle developer data</strong> link for showing/hiding data about each tasks that might be useful to anyone who uses the API for manipulating their tasks. The toggle will adjust the "task" and "added" columns for each task to add the unique ID and the exact "dateCreated" string.</li>
                 </ul>
             </li>
+            <li>Code improvement by <strong>goldfndr</strong>:
+                <ul>
+                    <li>Wiki links are now inserted with a nifty wiki() function instead of hideous repeated HTML code.</li>
+                </ul>
+            </li>
+
         </ul></dd>
 
         <dt>3.5.4 <span class="date">2014-12-08</span></dt>
