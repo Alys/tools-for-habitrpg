@@ -728,6 +728,13 @@ function myDateConverter(date, style) {
 }
 
 
+function wiki(wikilink, pipelink) {
+    // http://stackoverflow.com/a/1145525
+    var wiki_link = wikilink.split(' ').join('_');
+    return '<a href="' + wikiUrl + wiki_link + '">' +
+        ((typeof pipelink === "undefined") ? wikilink : pipelink) +
+        '</a>';
+}
 
 
 openRelatedSections = function() {
@@ -1286,7 +1293,7 @@ function collateAndDisplayTaskData() {
                    'html':
 '<div id="taskOverviewExplanationToggle" class="showHideToggle" data-target="taskOverviewExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="taskOverviewExplanation" class="hide">' +
-'   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (habits, dailies, and to-dos), with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in HabitRPG.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your to-do list. Re-fetch your data to see a different random to-do.</p>' +
+'   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (habits, dailies, and to-dos), with their ' + wiki('Advanced Options', 'attributes') + ' and ' + wiki('Task Value', 'colours, values, and magnitudes') + ' (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in HabitRPG.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your to-do list. Re-fetch your data to see a different random to-do.</p>' +
 '   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
 '</div>' +
 '<div id="taskOverviewExtraColumns">Toggle extra column visibility: <a class="toggle-vis" column-class="id">id</a> <a class="toggle-vis" column-class="dateCreated">created</a></div>' +
@@ -1428,8 +1435,7 @@ randomTodoHtml
         var html = '<p>This table shows the number of tasks you have ' +
             'for each kind of task (habits, dailies, to-dos) ' +
             'and the number of tasks assigned to each ' +
-            '<a href="http://habitrpg.wikia.com/wiki/Character_Attributes">' +
-            'attribute</a>.';
+            wiki('Character Attributes', 'attribute') + '.';
         if (exampleTaskType && exampleAttribute) {
             html += ' For example, you have ' +
                     countTasks[exampleTaskType]['total'] + ' ' +
@@ -1450,9 +1456,8 @@ randomTodoHtml
                     exampleAttribute.toUpperCase() + '.';
         }
         html += ' Note that attributes on tasks are only relevant if you ' +
-            'have task-based <a ' +
-            'href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">' +
-            'auto-allocation</a> turned on.</p><table><tr>' +
+            'have task-based ' + wiki('Automatic Allocation')
+            + ' turned on.</p><table><tr>' +
             '<th>Attribute</th><th>Habits</th><th>Dailies</th>' +
             '<th>To-Dos - Incomplete</th><th>To-Dos - Complete *</th>' +
             '<th>To-Dos - All</th><th>Total Tasks for each Attribute</th>' +
@@ -1475,8 +1480,8 @@ randomTodoHtml
             'are automatically archived after three days to improve ' +
             'HabitRPG\'s speed and so most of them cannot be seen in ' +
             'HabitRPG. However, at least some of them can be exported ' +
-            'using the <a href="http://habitrpg.wikia.com/wiki/Data_Export">' +
-            '"User Data" export option</a>. This total number of completed ' +
+            'using the ' + wiki('Data Export', '"User Data" export option') +
+            '. This total number of completed ' +
             'to-dos includes those archived ones.</p>' +
             '<p style="margin-top:2em">You have <span class="highlight"> ' +
             countTasks['rewards']['total'] + ' ' +
