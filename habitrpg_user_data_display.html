@@ -1295,7 +1295,7 @@ function collateAndDisplayTaskData() {
 '   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (habits, dailies, and to-dos), with their ' + wiki('Advanced Options', 'attributes') + ' and ' + wiki('Task Value', 'colours, values, and magnitudes') + ' (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in HabitRPG.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your to-do list. Re-fetch your data to see a different random to-do.</p>' +
 '   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
 '</div>' +
-'<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs and dateCreated strings">toggle developer data</div>' +
+'<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs">toggle developer data</div>' +
 '<table></table>' +
 randomTodoHtml
 };
@@ -1366,9 +1366,7 @@ randomTodoHtml
                   return;
                 }
                 else if (type === 'display') {
-                  return '<span class="developerData">' +
-                         source.dateCreated + '<br /></span>' +
-                         '<abbr title="' +
+                  return '<abbr title="' +
                          source.creation.dateAndTime + '">' +
                          source.creation.shortDate +
                          '</abbr>';
@@ -1385,9 +1383,10 @@ randomTodoHtml
                   return;
                 }
                 else if (type === 'display') {
-                  return '<span class="developerData">' +
-                         source.id + '<br /></span>' +
-                         source.text + source.attributesHTML;
+                  return source.text +
+                         '<span class="developerData"><br />' +
+                         source.id + '</span>' +
+                         source.attributesHTML;
                 }
                 else if (type === 'filter') {
                   return source.text;
@@ -1398,14 +1397,10 @@ randomTodoHtml
                 // display, filter, sort
               }
             },
-            // For putting extra data in separate columns:
+            // For putting extra data in a separate column:
             // { 'sTitle': 'id',    'bVisible': true, 'sWidth': '10%',
-              // 'sClass': 'id',
+              // 'sClass': 'developerData',
               // 'mData': 'id',
-            // },
-            // { 'sTitle': 'created',    'bVisible': true, 'sWidth': '10%',
-              // 'sClass': 'dateCreated',
-              // 'mData': 'dateCreated',
             // },
                 ],
                 // 'scrollY': 300,
@@ -1421,12 +1416,12 @@ randomTodoHtml
                 "bDestroy": true, // allows table to recreate on refetch
                 'oColumnFilterWidgets': {
                     'aiExclude': [ 0, 4, 6, 7, 8, 9 ],
-                    // For putting extra data in separate columns:
-                    // 'aiExclude': [ 0, 4, 6, 7, 8, 9, 10, 11 ],
+                    // For putting extra data in a separate column:
+                    // 'aiExclude': [ 0, 4, 6, 7, 8, 9, 10 ],
                 }
             });
             $('#taskOverviewSection').hide();
-            // Hide extras
+            // Hide developer data
             $('#taskOverviewSection .developerData').hide();
             $('#taskOverviewSection .showHideToggleClass').on('click', function (e) {
                 e.preventDefault();
@@ -4056,8 +4051,7 @@ ul.padded > li {
     border: 1px dashed lightgrey;
 }
 .developerData {
-    font-weight: bold;
-    font-style: italic;
+    font-family: monospace;
 }
 
 
@@ -4699,13 +4693,13 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
-        <dt>3.6 <span class="date">2014-12-14</span></dt>
+        <dt>3.6 <span class="date">2014-12-16</span></dt>
         <dd><ul>
 
             <li>Features created by <strong>goldfndr</strong>:
                 <ul>
                     <li>All links now open in a new window or tab.</li>
-                    <li>The <strong>Task Overview</strong> section now has a <strong>toggle developer data</strong> link for showing/hiding data about each tasks that might be useful to anyone who uses the API for manipulating their tasks. The toggle will adjust the "task" and "added" columns for each task to add the unique ID and the exact "dateCreated" string.</li>
+                    <li>The <strong>Task Overview</strong> section now has a <strong>toggle developer data</strong> link for showing/hiding data about each task that might be useful to anyone who uses <a href="http://habitrpg.wikia.com/wiki/The_HabitRPG_Application_Programming_Interface">the API</a> for manipulating their tasks. The toggle will adjust the "task" column for each task to add the unique ID.</li>
                 </ul>
             </li>
             <li>Code improvement by <strong>goldfndr</strong>:
@@ -4725,7 +4719,7 @@ ul#tableOfContents > li {
             </li>
             <li>Code:
                 <ul>
-                    <li>Fixed a bug in Task Overview, related to this HabitRPG bug: https://github.com/HabitRPG/habitrpg/issues/2334#issuecomment-66168155</li>
+                    <li>Fixed a bug in Task Overview, related to this HabitRPG bug: (<a href="https://github.com/HabitRPG/habitrpg/issues/2334#issuecomment-66168155">ref</a>)</li>
                 </ul>
             </li>
         </ul></dd>
