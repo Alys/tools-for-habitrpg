@@ -117,13 +117,6 @@ var images = {
     'shield_healer_3' : 'Hospitalershield.png',
     'shield_healer_4' : 'Saviorshield.png',
     'shield_healer_5' : 'Royalshield.png',
-    'shield_rogue_0' : 'shield_rogue_0.png',
-    'shield_rogue_1' : 'shield_rogue_1.png',
-    'shield_rogue_2' : 'shield_rogue_2.png',
-    'shield_rogue_3' : 'shield_rogue_3.png',
-    'shield_rogue_4' : 'shield_rogue_4.png',
-    'shield_rogue_5' : 'shield_rogue_5.png',
-    'shield_rogue_6' : 'shield_rogue_6.png',
     'shield_special_0' : 'BackerOnly-Shield-TormentedSkull.gif',
     'shield_special_1' : 'Contributor_Shield.png',
     'shield_special_ski' : 'SkisassinPoleR.png',
@@ -179,23 +172,6 @@ var images = {
     'weapon_wizard_4' : 'Brassstaff.png',
     'weapon_wizard_5' : 'Archmagestaff.png',
     'weapon_wizard_6' : 'Weapon_wizard_6.png',
-    'weapon_special_summerRogue' : 'Weapon_special_summerRogue.png',
-    'weapon_special_summerWarrior' : 'Weapon_special_summerWarrior.png',
-    'weapon_special_summerMage' : 'Weapon_special_summerMage.png',
-    'weapon_special_summerHealer' : 'Weapon_special_summerHealer.png',
-    'armor_special_summerRogue' : 'Broad_armor_special_summerRogue.png',
-    'armor_special_summerWarrior' : 'Broad_armor_special_summerWarrior.png',
-    'armor_special_summerMage' : 'Broad_armor_special_summerMage.png',
-    'armor_special_summerHealer' : 'Broad_armor_special_summerHealer.png',
-    'head_special_summerRogue' : 'Head_special_summerRogue.png',
-    'head_special_summerWarrior' : 'Head_special_summerWarrior.png',
-    'head_special_summerMage' : 'Head_special_summerMage.png',
-    'head_special_summerHealer' : 'Head_special_summerHealer.png',
-    'shield_special_summerRogue' : 'Shield_special_summerRogue.png',
-    'shield_special_summerWarrior' : 'Shield_special_summerWarrior.png',
-    'shield_special_summerHealer' : 'Shield_special_summerHealer.png',
-    'body_special_summerHealer' : 'Body_special_summerHealer.png',
-    'body_special_summerMage' : 'Body_special_summerMage.png',
     'eyewear_special_summerRogue' : 'HeadAccessory_special_summerRogue.png',
     'eyewear_special_summerWarrior' : 'HeadAccessory_special_summerWarrior.png',
     'weapon_special_fallRogue' : 'Silver_stake_left.png',
@@ -497,7 +473,13 @@ function parseData() {
             image = '[[File:' + image + ']]';
         }
         else {
-            warnings += 'No image for ' + obj.key + '<br />';
+			// assume image name is same as key name
+            image = '[[File:';
+			if (/armor/.test(obj.key)) {
+				image += 'Broad_';
+			}
+            image += obj.key + '.png]]';
+            // warnings += 'No image for ' + obj.key + '<br />';
         }
 
         html += '' +
@@ -668,7 +650,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Equipment Table Creator
-    <span>(v1.7)</span></h1><!-- VERSION -->
+    <span>(v1.8)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
