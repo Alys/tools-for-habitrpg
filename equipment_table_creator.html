@@ -439,8 +439,9 @@ function parseData() {
 
         var name = obj.text.replace(/ /g, '<br />');
         var url = urls[obj.key] || '';
-        // if (!url && obj.key.match(/_winter2015/)) {
-        // }
+        if (!url && obj.key.match(/_winter2015/)) {
+            url = 'Winter_Wonderland#Special_Class_Gear_2015';
+        }
         if (url) {
             name = '[[' + url + '|' + name + ']]';
         }
@@ -476,11 +477,11 @@ function parseData() {
             image = '[[File:' + image + ']]';
         }
         else {
-			// assume image name is same as key name
+            // assume image name is same as key name
             image = '[[File:';
-			if (/armor/.test(obj.key)) {
-				image += 'Broad_';
-			}
+            if (/armor/.test(obj.key)) {
+                image += 'Broad_';
+            }
             image += obj.key + '.png]]';
             // warnings += 'No image for ' + obj.key + '<br />';
         }
