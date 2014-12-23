@@ -205,51 +205,51 @@ var urls = {
     'armor_special_1' : 'Contributor_Rewards#Contributor_Gear',
     'armor_special_2' : 'Jean_Chalard%27s_Noble_Tunic',
     'armor_special_birthday' : 'Winter_Wonderland#Absurd_Party_Robes',
-    'armor_special_candycane' : 'Winter_Wonderland#Special_Class_Gear',
-    'armor_special_ski' : 'Winter_Wonderland#Special_Class_Gear',
-    'armor_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear',
+    'armor_special_candycane' : 'Winter_Wonderland#Special_Class_Gear_2014',
+    'armor_special_ski' : 'Winter_Wonderland#Special_Class_Gear_2014',
+    'armor_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear_2014',
     'armor_special_springHealer' : 'Spring_Fling',
     'armor_special_springMage' : 'Spring_Fling',
     'armor_special_springRogue' : 'Spring_Fling',
     'armor_special_springWarrior' : 'Spring_Fling',
-    'armor_special_yeti' : 'Winter_Wonderland#Special_Class_Gear',
+    'armor_special_yeti' : 'Winter_Wonderland#Special_Class_Gear_2014',
     'headAccessory_special_springHealer' : 'Spring_Fling',
     'headAccessory_special_springMage' : 'Spring_Fling',
     'headAccessory_special_springRogue' : 'Spring_Fling',
     'headAccessory_special_springWarrior' : 'Spring_Fling',
     'head_special_0' : 'Backers',
     'head_special_1' : 'Contributor_Rewards#Contributor_Gear',
-    'head_special_candycane' : 'Winter_Wonderland#Special_Class_Gear',
+    'head_special_candycane' : 'Winter_Wonderland#Special_Class_Gear_2014',
     'head_special_nye' : 'Winter_Wonderland#Absurd_Party_Hat',
-    'head_special_ski' : 'Winter_Wonderland#Special_Class_Gear',
-    'head_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear',
+    'head_special_ski' : 'Winter_Wonderland#Special_Class_Gear_2014',
+    'head_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear_2014',
     'head_special_springHealer' : 'Spring_Fling',
     'head_special_springMage' : 'Spring_Fling',
     'head_special_springRogue' : 'Spring_Fling',
     'head_special_springWarrior' : 'Spring_Fling',
-    'head_special_yeti' : 'Winter_Wonderland#Special_Class_Gear',
+    'head_special_yeti' : 'Winter_Wonderland#Special_Class_Gear_2014',
     'shield_special_0' : 'Backers',
     'shield_special_1' : 'Contributor_Rewards#Contributor_Gear',
-    'shield_special_ski' : 'Winter_Wonderland#Special_Class_Gear',
-    'shield_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear',
+    'shield_special_ski' : 'Winter_Wonderland#Special_Class_Gear_2014',
+    'shield_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear_2014',
     'shield_special_springHealer' : 'Spring_Fling',
     'shield_special_springRogue' : 'Spring_Fling',
     'shield_special_springWarrior' : 'Spring_Fling',
-    'shield_special_yeti' : 'Winter_Wonderland#Special_Class_Gear',
+    'shield_special_yeti' : 'Winter_Wonderland#Special_Class_Gear_2014',
     'weapon_special_0' : 'Backers',
     'weapon_special_1' : 'Contributor_Rewards#Contributor_Gear',
     'weapon_special_2' : 'Stephen_Weber%27s_Shaft_of_the_Dragon',
     'weapon_special_3' : 'Mustaine%27s_Milestone_Mashing_Morningstar',
     'shield_special_goldenknight' : 'Mustaine%27s_Milestone_Mashing_Morningstar',
-    'weapon_special_candycane' : 'Winter_Wonderland#Special_Class_Gear',
+    'weapon_special_candycane' : 'Winter_Wonderland#Special_Class_Gear_2014',
     'weapon_special_critical' : 'Critical_Warhammer_of_Bug-Crushing',
-    'weapon_special_ski' : 'Winter_Wonderland#Special_Class_Gear',
-    'weapon_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear',
+    'weapon_special_ski' : 'Winter_Wonderland#Special_Class_Gear_2014',
+    'weapon_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear_2014',
     'weapon_special_springHealer' : 'Spring_Fling',
     'weapon_special_springMage' : 'Spring_Fling',
     'weapon_special_springRogue' : 'Spring_Fling',
     'weapon_special_springWarrior' : 'Spring_Fling',
-    'weapon_special_yeti' : 'Winter_Wonderland#Special_Class_Gear',
+    'weapon_special_yeti' : 'Winter_Wonderland#Special_Class_Gear_2014',
     'weapon_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
     'weapon_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
     'weapon_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
@@ -415,6 +415,7 @@ function parseData() {
         if (obj.klass == 'special' && !obj.specialClass) {
             // deal with some class-specific special weapons that aren't
             // marked as such
+            // XXX is this still necessary?
             if (obj.key.match(/_special_snowflake/)) {
                 obj.specialClass = 'healer';
             }
@@ -438,6 +439,8 @@ function parseData() {
 
         var name = obj.text.replace(/ /g, '<br />');
         var url = urls[obj.key] || '';
+        // if (!url && obj.key.match(/_winter2015/)) {
+        // }
         if (url) {
             name = '[[' + url + '|' + name + ']]';
         }
@@ -650,7 +653,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Equipment Table Creator
-    <span>(v1.8)</span></h1><!-- VERSION -->
+    <span>(v1.8.1)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
