@@ -235,8 +235,8 @@ var gearLookups = {
     'body_special_wondercon_black': 'gear/events/wondercon/shop/shop_body_special_wondercon_black.png',
     'body_special_wondercon_gold': 'gear/events/wondercon/shop/shop_body_special_wondercon_gold.png',
     'body_special_wondercon_red': 'gear/events/wondercon/shop/shop_body_special_wondercon_red.png',
-    'headAccessory_special_wondercon_black': 'gear/events/wondercon/shop/shop_headAccessory_special_wondercon_black.png',
-    'headAccessory_special_wondercon_red': 'gear/events/wondercon/shop/shop_headAccessory_special_wondercon_red.png',
+    'eyewear_special_wondercon_black': 'gear/events/wondercon/shop/shop_eyewear_special_wondercon_black.png',
+    'eyewear_special_wondercon_red': 'gear/events/wondercon/shop/shop_eyewear_special_wondercon_red.png',
     'head_healer_1': 'gear/head/shop/shop_head_healer_1.png',
     'head_healer_2': 'gear/head/shop/shop_head_healer_2.png',
     'head_healer_3': 'gear/head/shop/shop_head_healer_3.png',
@@ -3442,7 +3442,9 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
                            source.key + '" />';
                 }
                 else if (userId == 'd904bd62-da08-416b-a816-ba797c9ee265' ||
-                         userId == 'home'     // Alys or local test account
+                         userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' ||
+                         userId == 'home'  ||
+                         userId == 'work'     // Alys or local test account
                         ) {
                     console.log('WARNING: No image URL in gearLookups for ' +
                                 source.key);
