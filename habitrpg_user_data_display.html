@@ -2118,6 +2118,36 @@ wiki('Tavern', 'resting in the inn') +
                 wiki('Skills', 'skills') + ' and ' +
                 wiki('Buff', 'buffs') + '.</p>';
 
+        var nowMP  = Math.round(user.stats.mp  * 10) / 10;
+        var maxMP  = 2 * computedStats['int'] + 30;
+        var cronMP = (maxMP > 100) ? maxMP/10 : 10;
+        html += '<p>Your current ' +
+                wiki('Character_Attributes', 'attributes') + ' and ' +
+                wiki('Mana Points', 'mana') + ' values are:</p>' +
+                '<ul class="attributes">' +
+                '<li><label>Constitution (CON):</label> ' +
+                     ((computedStats['con'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['con'] + '</li>' +
+                '<li><label>Intelligence (INT):</label> ' +
+                     ((computedStats['in'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['int'] + '</li>' +
+                '<li><label>Perception (PER):</label> '   +
+                     ((computedStats['per'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['per'] + '</li>' +
+                '<li><label>Strength (STR):</label> '     +
+                     ((computedStats['str'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['str'] + '</li>' +
+                '<li><label>maximum MP:</label> ' +
+                     ((maxMP < 100) ? '&nbsp;&nbsp;' : '') +
+                       maxMP + '</li>' +
+                '<li><label>MP gained at cron:</label> ' +
+                     ((cronMP < 100) ? '&nbsp;&nbsp;' : '') +
+                       cronMP + '</li>' +
+                '<li><label>current MP:</label> ' +
+                     ((nowMP < 100) ? '&nbsp;&nbsp;' : '') +
+                       nowMP + '</li>' +
+                '</ul>';
+
         var conIncreaseDamageExplanation      = '';
         var conIncreaseDamageExplanationParty = '';
         if (quest.content && quest.content.boss) {
@@ -4299,6 +4329,13 @@ ul#tableOfContents > li {
     width: 4em;
     font-weight: normal;
 }
+#skillsAndBuffsSection ul.attributes li {
+    margin-left: 5em;
+    margin-bottom: 0.5em;
+}
+#skillsAndBuffsSection ul.attributes li label {
+    width: 10em;
+}
 #skillsAndBuffsSection ul li .additional,
 #skillsAndBuffsSection ul li .increase   {
     margin-top: 0.5em;
@@ -4513,7 +4550,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.6.1a)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.6.2)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4548,6 +4585,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>3.6.2 <span class="date">2014-12-27</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li><strong>Skills and Buffs</strong>: Now lists your current attributes, your maximum MP, and the MP that you will gain during cron. The latter two values are affected by your Intelligence, so you can use this data to tailor your attributes to maximise your MP.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.6.1 <span class="date">2014-12-22</span></dt>
         <dd><ul>
             <li>Code:
@@ -4557,7 +4603,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.6 <span class="date">2014-12-18</span></dt>
         <dd><ul>
             <li>Features created by <strong>goldfndr</strong>:
