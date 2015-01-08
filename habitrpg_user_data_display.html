@@ -2679,7 +2679,7 @@ function questProgress() {
             }
         }
         if (tavernBoss) {
-            html += "The Dread Drag'on of Dilatory"; // XXX_LATER automate
+            html += "The Abominable Stressbeast of the Stoïkalm Steppes"; // XXX_LATER automate
         }
         html += '.';
         var dashboardTitle = 'Damage to ' + upperCaseFirst(bossesWord);
@@ -2730,9 +2730,9 @@ function questProgress() {
     html += '</p>';
 
     if (tavernBoss && tavern.quest.progress) {
-        var name = "Dread Drag'on of Dilatory"; // XXX_LATER automate!
+        var name = "The Abominable Stressbeast of the Stoïkalm Steppes"; // XXX_LATER automate!
         var hp = Math.round(tavern.quest.progress.hp);
-        var hpMax = 5000000; // XXX_LATER automate!
+        var hpMax = 2800000; // XXX_LATER automate!
         var hpPercent = Math.round(hp / hpMax * 1000) / 10;
         if (hp > 0 && hpPercent == 0) { // XXX_LATER do this better
             hpPercent = Math.round(hp / hpMax * 10000) / 100;
@@ -2751,7 +2751,7 @@ function questProgress() {
                  hp + ', down from ' + hpMax + ')';
         if (tavern.quest.progress.rage) {
             var rage = Math.round(tavern.quest.progress.rage);
-            var rageMax = 4000000; // XXX_LATER automate!
+            var rageMax = 1400000; // XXX_LATER automate!
             var ragePercent = Math.round(rage / rageMax * 1000) / 10;
             html += '<br />Rage: ' + ragePercent + '% (' +
                     rage + ' out of ' + rageMax + ')';
