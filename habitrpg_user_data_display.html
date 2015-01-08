@@ -75,7 +75,7 @@ var user;    // holds user's data
 var serverName        = 'HabitRPG'; // used in "loading" message
 var serverUrl         = 'https://habitrpg.com:443/api/v2';
 // serverUrl         = 'https://habitrpg.herokuapp.com:443/api/v2';
-var serverPathContent = '/content';
+var serverPathContent = '/content?language=en';
 var serverPathTavern  = '/groups/habitrpg';
 var serverPathUser    = '/user';
 var userId            = '';
@@ -2118,36 +2118,6 @@ wiki('Tavern', 'resting in the inn') +
                 wiki('Skills', 'skills') + ' and ' +
                 wiki('Buff', 'buffs') + '.</p>';
 
-        var nowMP  = Math.round(user.stats.mp  * 10) / 10;
-        var maxMP  = 2 * computedStats['int'] + 30;
-        var cronMP = (maxMP > 100) ? maxMP/10 : 10;
-        html += '<p>Your current ' +
-                wiki('Character_Attributes', 'attributes') + ' and ' +
-                wiki('Mana Points', 'mana') + ' values are:</p>' +
-                '<ul class="attributes">' +
-                '<li><label>Constitution (CON):</label> ' +
-                     ((computedStats['con'] < 100) ? '&nbsp;&nbsp;' : '') +
-                       computedStats['con'] + '</li>' +
-                '<li><label>Intelligence (INT):</label> ' +
-                     ((computedStats['in'] < 100) ? '&nbsp;&nbsp;' : '') +
-                       computedStats['int'] + '</li>' +
-                '<li><label>Perception (PER):</label> '   +
-                     ((computedStats['per'] < 100) ? '&nbsp;&nbsp;' : '') +
-                       computedStats['per'] + '</li>' +
-                '<li><label>Strength (STR):</label> '     +
-                     ((computedStats['str'] < 100) ? '&nbsp;&nbsp;' : '') +
-                       computedStats['str'] + '</li>' +
-                '<li><label>maximum MP:</label> ' +
-                     ((maxMP < 100) ? '&nbsp;&nbsp;' : '') +
-                       maxMP + '</li>' +
-                '<li><label>MP gained at cron:</label> ' +
-                     ((cronMP < 100) ? '&nbsp;&nbsp;' : '') +
-                       cronMP + '</li>' +
-                '<li><label>current MP:</label> ' +
-                     ((nowMP < 100) ? '&nbsp;&nbsp;' : '') +
-                       nowMP + '</li>' +
-                '</ul>';
-
         var conIncreaseDamageExplanation      = '';
         var conIncreaseDamageExplanationParty = '';
         if (quest.content && quest.content.boss) {
@@ -2709,7 +2679,7 @@ function questProgress() {
             }
         }
         if (tavernBoss) {
-            html += "The Dread Drag'on of Dilatory"; // XXX_LATER automate
+            html += "the Abominable Stressbeast of Stoïkalm"; // XXX_LATER automate
         }
         html += '.';
         var dashboardTitle = 'Damage to ' + upperCaseFirst(bossesWord);
@@ -2760,9 +2730,9 @@ function questProgress() {
     html += '</p>';
 
     if (tavernBoss && tavern.quest.progress) {
-        var name = "Dread Drag'on of Dilatory"; // XXX_LATER automate!
+        var name = "Abominable Stressbeast of Stoïkalm"; // XXX_LATER automate!
         var hp = Math.round(tavern.quest.progress.hp);
-        var hpMax = 5000000; // XXX_LATER automate!
+        var hpMax = 2750000; // XXX_LATER automate!
         var hpPercent = Math.round(hp / hpMax * 1000) / 10;
         if (hp > 0 && hpPercent == 0) { // XXX_LATER do this better
             hpPercent = Math.round(hp / hpMax * 10000) / 100;
@@ -2781,7 +2751,7 @@ function questProgress() {
                  hp + ', down from ' + hpMax + ')';
         if (tavern.quest.progress.rage) {
             var rage = Math.round(tavern.quest.progress.rage);
-            var rageMax = 4000000; // XXX_LATER automate!
+            var rageMax = 1450000; // XXX_LATER automate!
             var ragePercent = Math.round(rage / rageMax * 1000) / 10;
             html += '<br />Rage: ' + ragePercent + '% (' +
                     rage + ' out of ' + rageMax + ')';
@@ -4329,13 +4299,6 @@ ul#tableOfContents > li {
     width: 4em;
     font-weight: normal;
 }
-#skillsAndBuffsSection ul.attributes li {
-    margin-left: 5em;
-    margin-bottom: 0.5em;
-}
-#skillsAndBuffsSection ul.attributes li label {
-    width: 10em;
-}
 #skillsAndBuffsSection ul li .additional,
 #skillsAndBuffsSection ul li .increase   {
     margin-top: 0.5em;
@@ -4550,7 +4513,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.6.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.7)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4585,11 +4548,11 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
-        <dt>3.6.2 <span class="date">2014-12-27</span></dt>
+        <dt>3.7 <span class="date">2015-01-09</span></dt>
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><strong>Skills and Buffs</strong>: Now lists your current attributes, your maximum MP, and the MP that you will gain during cron. The latter two values are affected by your Intelligence, so you can use this data to tailor your attributes to maximise your MP.</li>
+                    <li>updated for new world boss.</li>
                 </ul>
             </li>
         </ul></dd>
