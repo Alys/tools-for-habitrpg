@@ -357,6 +357,17 @@ function parseData() {
     var computedStats = computeStats(); // computed CON, INT, etc
     var userIsOnCollectionQuest = false;
 
+    // When calculating drop chance for a task, some of the user's stats
+    // are used. We calculate those parts of the drop chance here since
+    // they'll be identical for all tasks:
+    var userStatsDropChance =
+        (1 + (  computedStats.per                / 100)) *
+        (1 + ( (user.contributor.level     || 0) / 40 )) *
+        (1 + ( (user.achievements.rebirths || 0) / 20 )) *
+        (1 + ( (user.achievements.streak   || 0) / 200));
+    // console.log("computedStats.per: " + computedStats.per); // TST
+    // console.log("userStatsDropChance: " + userStatsDropChance); // TST
+
     userDataInHeader();
 
 
@@ -1019,6 +1030,28 @@ function collateAndDisplayTaskData() {
         obj.attributesHTML = '<div class="taskAttributes ' + obj.type + '">' +
                              attributesHTML() + '</div>';
 
+        // calculate drop chance:
+        if (obj.type === 'habit' && obj.up === false) {
+            obj.dropChance = 0; // no drops from habits with + button disabled
+        }
+        else {
+            var tempValue = Math.abs(obj.value - 21.27);
+            if (tempValue > 37.5) tempValue = 37.5;
+            var checklistChance = 0 //(_.reduce(obj.checklist, (function(m, i) {
+                        // return m + (i.completed ? 1 : 0);
+                      // }), 0) || 0); // XXX 
+            var chance = tempValue / 150 + .02;
+            chance *= obj.priority *
+                      (1 + ((obj.streak || 0) / 100)) *
+                      userStatsDropChance *
+                      (1 + .5 * checklistChance);
+            // var chanceBefore = Math.round(chance * 100); // TST
+            chance = diminishingReturns(chance, 0.75);
+            obj.dropChance = Math.round(chance * 100) + '%';
+                    // + ' (' + chanceBefore + ' %)'; // TST
+            // drop chance is 0 for negative habits
+        }
+
         function reformatDate(dateString) {
             var formattedDate = myDateConverter(dateString, 'long');
             var shortDate     = myDateConverter(dateString, 'short');
@@ -1189,6 +1222,10 @@ randomTodoHtml
               'sTitle': '<abbr title="magnitude (the value, but with negative'
                         + ' signs removed)">mag.</abbr>',
             },
+            // { 'mData' : 'dropChance', 'sClass': 'center', 'sWidth': '10%',
+               // 'asSorting': ['desc','asc'], // XXX ?
+              // 'sTitle': 'drop chance'
+            // },
             { 'sTitle': '<abbr title="creation date">added</abbr>',
               'sClass': 'center',       'sWidth': '10%',
               'asSorting': ['desc','asc'],
@@ -1248,7 +1285,7 @@ randomTodoHtml
                 "bDestroy": true, // allows table to recreate on refetch
                 'oColumnFilterWidgets': {
                     'aiExclude': [ 0, 4, 6, 7, 8, 9 ],
-                    // For putting extra data in a separate column:
+                    // For including drop-chance column:
                     // 'aiExclude': [ 0, 4, 6, 7, 8, 9, 10 ],
                 }
             });
@@ -2118,6 +2155,36 @@ wiki('Tavern', 'resting in the inn') +
                 wiki('Skills', 'skills') + ' and ' +
                 wiki('Buff', 'buffs') + '.</p>';
 
+        var nowMP  = Math.round(user.stats.mp  * 10) / 10;
+        var maxMP  = 2 * computedStats['int'] + 30;
+        var cronMP = (maxMP > 100) ? maxMP/10 : 10;
+        html += '<p>Your current ' +
+                wiki('Character_Attributes', 'attributes') + ' and ' +
+                wiki('Mana Points', 'mana') + ' values are:</p>' +
+                '<ul class="attributes">' +
+                '<li><label>Constitution (CON):</label> ' +
+                     ((computedStats['con'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['con'] + '</li>' +
+                '<li><label>Intelligence (INT):</label> ' +
+                     ((computedStats['in'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['int'] + '</li>' +
+                '<li><label>Perception (PER):</label> '   +
+                     ((computedStats['per'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['per'] + '</li>' +
+                '<li><label>Strength (STR):</label> '     +
+                     ((computedStats['str'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['str'] + '</li>' +
+                '<li><label>maximum MP:</label> ' +
+                     ((maxMP < 100) ? '&nbsp;&nbsp;' : '') +
+                       maxMP + '</li>' +
+                '<li><label>MP gained at cron:</label> ' +
+                     ((cronMP < 100) ? '&nbsp;&nbsp;' : '') +
+                       cronMP + '</li>' +
+                '<li><label>current MP:</label> ' +
+                     ((nowMP < 100) ? '&nbsp;&nbsp;' : '') +
+                       nowMP + '</li>' +
+                '</ul>';
+
         var conIncreaseDamageExplanation      = '';
         var conIncreaseDamageExplanationParty = '';
         if (quest.content && quest.content.boss) {
@@ -2179,34 +2246,14 @@ cast: (user, target) ->
                 if ((quest.content && quest.content.boss) || tavernBoss) {
                     var emStarted = false;
                     var more = '';
-                    if (quest.content) {
-                        effects += ' You will do ' +
-                                   questIncrease + ' damage to ' +
-                                   bossesLabel + '.';
-                                   //'<br /><em>Note: When your party\'s ' +
-                                   //'current quest ends, this ' +
-                                   //'skill will no longer damage Drag\'on, ' +
-                                   //'until you start another boss quest or ' +
-                                   //'collection quest';
-                        emStarted = true;
-                    }
-                    else {
-                        //effects += ' This skill will <strong>not</strong> ' +
-                               //'damage Drag\'on because you are not on ' +
-                               //'a boss quest or collection quest';
-                        more = ' If you were on a quest, you would do ' +
-                               questIncrease + ' damage to the quest boss.';
-                               // Drag\'on and ' +
-                    }
-                    // effects += ' (<a href="https://github.com/HabitRPG/' +
-                               // 'habitrpg-shared/pull/244">more info</a>).';
-                    effects += more;
-                    if (emStarted) {
-                        effects += '</em>';
-                    }
+                    effects += ' You will do ' +
+                               questIncrease + ' damage to ' +
+                               bossesLabel + '.';
                     additional += ' and the damage done to the ' +
                                   bossesWord;
                 } // XXX_LATER if no quest: say that it WOULD affect bosses
+                        // more = ' If you were on a quest, you would do ' +
+                               // questIncrease + ' damage to the quest boss.';
                 additional += ' by an amount based on your ' +
                     perLink + '.<br />See also merfy\'s ' +
                     '<a href="http://www.mediafire.com/download/' +
@@ -2360,32 +2407,9 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                     var questIncrease = Math.ceil(computedStats.str * 0.2);
                     var emStarted = false;
                     var more = '';
-                    if (quest.content) {
-                        effects += ' You will do ' +
-                                   questIncrease + ' damage to ' +
-                                   bossesLabel + '.';
-                                   //'<br /><em>Note: When your party\'s ' +
-                                   //'current quest ends, this ' +
-                                   //'skill will no longer damage Drag\'on, ' +
-                                   //'until you start another boss quest or ' +
-                                   //'collection quest';
-                        emStarted = true;
-                    }
-                    else {
-                        //effects += ' This skill will <strong>not</strong> ' +
-                               //'damage Drag\'on because you are not on ' +
-                               //'a boss quest or collection quest';
-                        more = ' If you were on a quest, you would do ' +
-                               questIncrease + ' damage to the quest boss.';
-                               //Drag\'on and ' +
-                    }
-                    // effects += ' (<a href="https://github.com/HabitRPG/' +
-                               // 'habitrpg-shared/pull/244">more info</a>).';
-                    effects += more;
-                    if (emStarted) {
-                        effects += '</em>';
-                    }
-
+                    effects += ' You will do ' +
+                               questIncrease + ' damage to ' +
+                               bossesLabel + '.';
                     additional += '<br /> If you want to use the skill to ' +
                             'damage the ' +
                             bossesWord + ' but don\'t want to adjust the ' +
@@ -2395,6 +2419,8 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                             bluestTask.text + '</span> ' +
                             bluestTask.typePretty + ').';
                 } // XXX_LATER if no quest: say that it WOULD affect bosses
+                        // more = ' If you were on a quest, you would do ' +
+                               // questIncrease + ' damage to the quest boss.';
                 var increase = 'To increase all effects of the skill, ' +
                                'increase your ' + strLink + before;
                 return ['a red habit or daily',
@@ -4299,6 +4325,13 @@ ul#tableOfContents > li {
     width: 4em;
     font-weight: normal;
 }
+#skillsAndBuffsSection ul.attributes li {
+    margin-left: 5em;
+    margin-bottom: 0.5em;
+}
+#skillsAndBuffsSection ul.attributes li label {
+    width: 10em;
+}
 #skillsAndBuffsSection ul li .additional,
 #skillsAndBuffsSection ul li .increase   {
     margin-top: 0.5em;
@@ -4513,7 +4546,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.7)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.7a)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4552,7 +4585,8 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>updated for new world boss.</li>
+                    <li><strong>Skills and Buffs</strong>: Now lists your current attributes, your maximum MP, and the MP that you will gain during cron. The latter two values are affected by your Intelligence, so you can use this data to tailor your attributes to maximise your MP.</li>
+                    <li>Updated for new world boss.</li>
                 </ul>
             </li>
         </ul></dd>
