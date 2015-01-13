@@ -2026,7 +2026,7 @@ wiki('Tavern', 'resting in the inn') +
                          '</abbr>';
                 }
                 else {
-                  return source.completion.dateAndTime;
+                  return source.completion.dateAndTime || null;
                 }
               }
             },
@@ -2779,7 +2779,7 @@ function questProgress() {
             var rage = Math.round(tavern.quest.progress.rage);
             var rageMax = 1450000; // XXX_LATER automate!
             var ragePercent = Math.round(rage / rageMax * 1000) / 10;
-            html += '<br />Rage: ' + ragePercent + '% (' +
+            html += '<br />Stress: ' + ragePercent + '% (' +
                     rage + ' out of ' + rageMax + ')';
         }
         html += '</p>';
@@ -4546,7 +4546,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.7a)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.7c)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
