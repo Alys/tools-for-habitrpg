@@ -1425,7 +1425,36 @@ randomTodoHtml
 
 
     function habitHistory() {
-        var html = '<p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks. <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. --> Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p><ul>';
+        var html = '<p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks. <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. --> Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
+        html += '<div id="habit-chart"></div><ul>';
+        var habitTimeData = extractHabitTimeData();
+        var habitNames = habits.reduce(function(names, item) {
+             names.push(item.text);
+             return names;
+        }, []);
+        var createHabitChart = function createHabitChart() {
+            return c3.generate({
+                bindto: '#habit-chart',
+                data: {
+                    json: habitTimeData,
+                    type: 'spline',
+                    keys: {
+                        x: 'date',
+                        value: habitNames
+                    }
+                },
+                axis: {
+                    x: {
+                        type: 'category',
+                        extent: [5, 10]
+                    }
+                },
+                subchart: {
+                    show: true
+                }
+            });
+        }
+
         $.each(habits, function(index, obj){
             html += collateHistoryForOneHabit(obj);
         });
@@ -1435,7 +1464,19 @@ randomTodoHtml
         var orderId = 'habitHistory';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
-                         'html': html};
+                         'html': html, 'function': createHabitChart};
+
+        function extractHabitTimeData() {
+            var timeline = collectTimelineDays(habits);
+            var habitTimeData = timeline.map(function(dateString) {
+                dateRow = {'date': dateString};
+                $.each(habits, function(index, obj){
+                    dateRow[obj.text] = getValueOfTaskByDay(obj, dateString);
+                });
+                return dateRow;
+            });
+            return habitTimeData;
+        }
 
         function collateHistoryForOneHabit(obj) {
             //// The commented out code below is only useful if ALL recent
@@ -3796,6 +3837,35 @@ function diminishingReturns(bonus, max, halfway) {
         halfway = max / 2;
     }
     return max * bonus / (bonus + halfway);
+}
+
+// Collect a unique array of all the dates from all the histories in asc order.
+// Used to lay out time for charts, the date granularity is limited to a single day.
+function collectTimelineDays(data) {
+    return [].reduce.call(data, function(carry, item) {
+        if (item.hasOwnProperty('history')) return carry.concat(collectDaysFromSingleTaskHistory(item));
+        return carry;
+    }, []).filter(function(date, index, self) {
+        return self.indexOf(date) === index;  // this reduces it to a unique list
+    }).sort(function(a,b) {
+        return new Date(a) - new Date(b);  // and puts it in ascending order
+    });
+}
+function collectDaysFromSingleTaskHistory(task) {
+    return task.history.reduce(function(dates, historical_item) {
+        dates.push((new Date(historical_item.date)).toDateString());
+        return dates;
+    }, [])
+}
+// If there are multiple values for a day, we grab the last entry we see
+function getValueOfTaskByDay(task, day) {
+    return task.history.reduce(function(task_value, historical_item) {
+        var historical_date = (new Date(historical_item.date)).toDateString();
+        if (historical_date == day) {
+            return historical_item.value;
+        }
+        return task_value;
+    }, 0);
 }
 
 } // end of parseData() and its nested functions
