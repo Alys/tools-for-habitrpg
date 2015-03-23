@@ -1426,18 +1426,29 @@ randomTodoHtml
 
     function habitHistory() {
         var html = '<p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks. <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. --> Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
-        html += '<div id="habit-chart"></div><ul>';
-        var habitTimeData = extractHabitTimeData();
+
+        var allHabitTimeData = extractHabitTimeData();
         var habitNames = habits.reduce(function(names, item) {
              names.push(item.text);
              return names;
         }, []);
+        // see reported issue for limit of ~500 elements prior to performance degradation
+        // https://github.com/masayuki0812/c3/issues/172
+        var limit = habitNames.length == 0 ? 0 : Math.floor(500 / habitNames.length);
+        var habitTimeData = allHabitTimeData.splice(allHabitTimeData.length - limit, allHabitTimeData.length);
+
+        if (habitTimeData.length !== allHabitTimeData.length) {
+            html += '<button title="Zoom to the most recent habit data" onclick="habitChart.zoom([' +
+                (habitTimeData.length - 7) + ',' +
+                habitTimeData.length + '])">Recent Habits</button>';
+        }
+        html += '<div class="habit-chart-container"><div id="habit-chart"></div></div><ul>';
         var createHabitChart = function createHabitChart() {
-            return c3.generate({
+            habitChart = c3.generate({
                 bindto: '#habit-chart',
                 data: {
                     json: habitTimeData,
-                    type: 'spline',
+                    type: 'area-spline',
                     keys: {
                         x: 'date',
                         value: habitNames
@@ -1446,13 +1457,48 @@ randomTodoHtml
                 axis: {
                     x: {
                         type: 'category',
-                        extent: [5, 10]
+                        height: 70
                     }
                 },
-                subchart: {
-                    show: true
+                zoom: {
+                    enabled: true
+                },
+                legend: {
+                    show: false
+                },
+                point: {
+                    r: 0,
+                    focus: {
+                        expand: {
+                            r: 4
+                        }
+                    }
                 }
             });
+            d3.select('.habit-chart-container').insert('div').attr('class', 'legend').selectAll('span')
+                .data(habitNames)
+                .enter().append('span')
+                .attr('data-id', function (id) { return id; })
+                .html(function (id) { return id; })
+                .each(function (id) {
+                    d3.select(this).style('background-color', habitChart.color(id));
+                    d3.select(this).style('border-radius', '.5em');
+                    d3.select(this).style('padding', '.5em');
+                    d3.select(this).style('margin', '.25em');
+                    d3.select(this).style('height', '2em');
+                    d3.select(this).style('cursor', 'pointer');
+                    d3.select(this).style('display','inline-table');
+                })
+                .on('mouseover', function (id) {
+                    habitChart.focus(id);
+                })
+                .on('mouseout', function (id) {
+                    habitChart.revert();
+                })
+                .on('click', function (id) {
+                    habitChart.toggle(id);
+                    $(this).toggleClass('legend-toggle');
+                });
         }
 
         $.each(habits, function(index, obj){
@@ -3853,14 +3899,14 @@ function collectTimelineDays(data) {
 }
 function collectDaysFromSingleTaskHistory(task) {
     return task.history.reduce(function(dates, historical_item) {
-        dates.push((new Date(historical_item.date)).toDateString());
+        dates.push(formatDayDate(historical_item));
         return dates;
     }, [])
 }
 // If there are multiple values for a day, we grab the last entry we see
 function getValueOfTaskByDay(task, day) {
     return task.history.reduce(function(task_value, historical_item) {
-        var historical_date = (new Date(historical_item.date)).toDateString();
+        var historical_date = formatDayDate(historical_item);
         if (historical_date == day) {
             return historical_item.value;
         }
@@ -3868,6 +3914,9 @@ function getValueOfTaskByDay(task, day) {
     }, 0);
 }
 
+function formatDayDate(historical_item) {
+    return (new Date(historical_item.date)).toDateString()
+}
 } // end of parseData() and its nested functions
 });
 </script>
@@ -4278,6 +4327,12 @@ ul#tableOfContents > li {
     font-size:  .8em;
     font-style: italic;
     font-weight: normal;
+}
+#habitHistorySection .legend {
+    text-align: center;
+}
+#habitHistorySection .legend-toggle {
+    opacity: .2;
 }
 
 
