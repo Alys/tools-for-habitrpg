@@ -1525,6 +1525,45 @@ randomTodoHtml
             return habitTimeData;
         }
 
+        // Collect a unique array of all the dates from all the histories in asc order.
+        // Used to lay out time for charts, the date granularity is limited to a single day.
+        function collectTimelineDays(data) {
+            return [].reduce.call(data, function(carry, item) {
+                if (item.hasOwnProperty('history')) return carry.concat(collectDaysFromSingleTaskHistory(item));
+                return carry;
+            }, []).filter(function(date, index, self) {
+                return self.indexOf(date) === index;  // this reduces it to a unique list
+            }).map(function(dateString) {
+                return new Date(dateString);
+            }).sort(function(a,b) {
+                return a - b;  // and puts it in ascending order
+            });
+        }
+
+        function collectDaysFromSingleTaskHistory(task) {
+            return task.history.reduce(function(dates, historical_item) {
+                dates.push(formatDayDate(historical_item));
+                return dates;
+            }, [])
+        }
+
+        // If there are multiple values for a day, we grab the last entry we see.
+        // Use the most recent value if none is available for that day.
+        function getValueOfTaskByDay(task, day, prev) {
+            return task.history.reduce(function(task_value, historical_item) {
+                var historical_date = formatDayDate(historical_item);
+                if (historical_date == day) {
+                    return historical_item.value;
+                }
+                return task_value;
+            }, prev);
+        }
+
+        // Use dateStrings to make filtering to a unique list easier later
+        function formatDayDate(historical_item) {
+            return (new Date(historical_item.date)).toDateString()
+        }
+
         function collateHistoryForOneHabit(obj) {
             //// The commented out code below is only useful if ALL recent
             //// habit clicks are recorded in the user's data.
@@ -3884,42 +3923,6 @@ function diminishingReturns(bonus, max, halfway) {
         halfway = max / 2;
     }
     return max * bonus / (bonus + halfway);
-}
-
-// Collect a unique array of all the dates from all the histories in asc order.
-// Used to lay out time for charts, the date granularity is limited to a single day.
-function collectTimelineDays(data) {
-    return [].reduce.call(data, function(carry, item) {
-        if (item.hasOwnProperty('history')) return carry.concat(collectDaysFromSingleTaskHistory(item));
-        return carry;
-    }, []).filter(function(date, index, self) {
-        return self.indexOf(date) === index;  // this reduces it to a unique list
-    }).map(function(dateString) {
-        return new Date(dateString);
-    }).sort(function(a,b) {
-        return a - b;  // and puts it in ascending order
-    });
-}
-function collectDaysFromSingleTaskHistory(task) {
-    return task.history.reduce(function(dates, historical_item) {
-        dates.push(formatDayDate(historical_item));
-        return dates;
-    }, [])
-}
-// If there are multiple values for a day, we grab the last entry we see.
-// Use the most recent value if none is available for that day.
-function getValueOfTaskByDay(task, day, prev) {
-    return task.history.reduce(function(task_value, historical_item) {
-        var historical_date = formatDayDate(historical_item);
-        if (historical_date == day) {
-            return historical_item.value;
-        }
-        return task_value;
-    }, prev);
-}
-// Use dateStrings to make filtering to a unique list easier later
-function formatDayDate(historical_item) {
-    return (new Date(historical_item.date)).toDateString()
 }
 } // end of parseData() and its nested functions
 });
