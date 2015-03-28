@@ -473,17 +473,48 @@ function formatAndDisplayDASHBOARD() {
                     '" data-closemainsections="true" data-forceopen="true" ' +
                     'class="showHideToggle ' + classes + '"';
         }
-        html += '><div class="' +
-                data.status     + '"><div class="value">' +
-                data.value      + '</div><div class="label">' +
-                data.label      + '</div></div></li>';
+
+        html += '><div class="' + data.status + '">';
+        html += useGauge(data) ? '<div id="' + data.id + 'Chart"></div>' : '<div class="value">' + data.value + '</div>';
+        html += '<div class="label">' + data.label + '</div></div></li>';
     }
 
 
     html += '</ul><div class="clear"></div>';
     $('#DASHBOARD').html(html);
+    $.each(DASHBOARD, function(key, data) {
+        if (!useGauge(data)) { return; }
+        step = (data.max - data.min) * .3;
+        return c3.generate({
+            bindto: '#' + data.id + 'Chart',
+            data: {
+                columns: [
+                    [data.label, data.value]
+                ],
+                type: 'gauge',
+            },
+            gauge: {
+                label: {
+                    format: function(value, ratio) {
+                        return data.hasOwnProperty('chartLabel') ? data.chartLabel : value;
+                    },
+                },
+                min: data.min,
+                max: data.max,
+            },
+            color: {
+                pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'],
+                threshold: {
+                    values: [data.min + step, data.min + step * 2, data.min + step * 3, data.max]
+                }
+            }
+        });
+    });
 }
 
+function useGauge(data) {
+    return data.hasOwnProperty('min') && data.hasOwnProperty('max');
+}
 
 function formatAndDisplayTOC() {
     // TO ADD NEW SECTION: To create a Table of Content entry (required),
@@ -737,7 +768,7 @@ function getCurrentHealth() {
     }
     DASHBOARD.currentHealth = {'id': 'currentHealthDashboard',
         'label': 'Current Health', 'hoverText': 'your health',
-        'value': health, 'status': 'neutral'};
+        'value': health, 'status': 'neutral' ,'min': 0, 'max': 50};
     return health;
 }
 
@@ -1958,7 +1989,8 @@ randomTodoHtml
         if ((dailiesIncomplete.length + dailiesIncompleteGrey.length) == 0) {
             DASHBOARD[orderId] = {'label': title,
                 'hoverText': 'you have completed all Dailies and Grey Dailies',
-                'value': '0', 'status': 'safe'};
+                'value': dailies.length, 'status': 'safe', 'min': 0, 'max': dailies.length,
+                'chartLabel': dailiesIncomplete.length};
             return;
         }
         var html = '';
@@ -2012,8 +2044,11 @@ randomTodoHtml
             'hoverText': 'number of Dailies you have not yet completed ' +
                          '(click for more information)',
             'target': id,
-            'value': dailiesIncomplete.length,
-            'status': ((dailiesIncomplete.length > 0) ? 'danger' : 'safe')
+            'value': dailies.length - dailiesIncomplete.length,
+            'status': ((dailiesIncomplete.length > 0) ? 'danger' : 'safe'),
+            'min': 0,
+            'max': dailies.length,
+            'chartLabel': dailiesIncomplete.length,
             };
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
@@ -4416,7 +4451,7 @@ h2 {
 }
 #DASHBOARD li {
     text-align: center;
-    width: 120px;
+    width: 240px;
     background-color: #fffbd0; /* yellow */
     border: 1px;
     padding: 4px;
@@ -4431,8 +4466,8 @@ h2 {
 #DASHBOARD li > div {
     box-shadow: 1px 1px 1px 1px #666666;
 }
-#DASHBOARD .value {
-    font-size: 2.15em;
+#DASHBOARD .value, .c3-gauge-value {
+    font-size: 30.1px !important; /* needed to override element style from c3 */
     font-weight: bold;
     padding: 2px;
 }
