@@ -475,7 +475,7 @@ function formatAndDisplayDASHBOARD() {
         }
 
         html += '><div class="' + data.status + '">';
-        html += useGauge(data) ? '<div id="' + data.id + 'Chart"></div>' : '<div class="value">' + data.value + '</div>';
+        html += useGauge(data) || usePie(data) ? '<div id="' + data.id + 'Chart"></div>' : '<div class="value">' + data.value + '</div>';
         html += '<div class="label">' + data.label + '</div></div></li>';
     }
 
@@ -483,7 +483,17 @@ function formatAndDisplayDASHBOARD() {
     html += '</ul><div class="clear"></div>';
     $('#DASHBOARD').html(html);
     $.each(DASHBOARD, function(key, data) {
-        if (!useGauge(data)) { return; }
+        if (useGauge(data)) initGauge(data);
+        if (usePie(data)) initPie(data);
+    });
+
+    function useGauge(data) {
+        return data.hasOwnProperty('min') && data.hasOwnProperty('max');
+    }
+    function usePie(data) {
+        return data.hasOwnProperty('columns') && data.hasOwnProperty('colors');
+    }
+    function initGauge(data) {
         step = (data.max - data.min) * .3;
         return c3.generate({
             bindto: '#' + data.id + 'Chart',
@@ -502,6 +512,13 @@ function formatAndDisplayDASHBOARD() {
                 min: data.min,
                 max: data.max,
             },
+            tooltip: {
+                format: {
+                    value: function (value, ratio, id) {
+                        return data.hasOwnProperty('chartLabel') ? data.chartLabel : value;
+                    }
+                }
+            },
             color: {
                 pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'],
                 threshold: {
@@ -509,11 +526,40 @@ function formatAndDisplayDASHBOARD() {
                 }
             }
         });
-    });
-}
-
-function useGauge(data) {
-    return data.hasOwnProperty('min') && data.hasOwnProperty('max');
+    }
+    function initPie(data) {
+        return c3.generate({
+            bindto: '#' + data.id + 'Chart',
+            data: {
+                columns: data.columns,
+                type: 'pie',
+                colors: data.colors,
+            },
+            pie: {
+                label: {
+                    format: function (value, ratio, id) {
+                        return value;
+                    }
+                }
+            },
+            legend: {
+                show: false
+            },
+            size: {
+                height: 160
+            },
+            tooltip: {
+                position: function (data, width, height, element) {
+                    return {top: 0, left: 0}
+                },
+                format: {
+                    value: function (value, ratio, id) {
+                        return value;
+                    }
+                }
+            }
+        });
+    }
 }
 
 function formatAndDisplayTOC() {
@@ -1942,13 +1988,21 @@ randomTodoHtml
             var questMsg = (quest.content && quest.content.boss) ?
                            'AND from your quest boss due to those Dailies ' :
                            '';
-            DASHBOARD.damageToUser = {'label': 'Est. Damage to You',
+            DASHBOARD.damageToUser = {'label': 'Est. Damage to You', 'id': id + 'Dashboard',
                 'hoverText': 'health loss you will take overnight from your ' +
                          'uncompleted Dailies ' +
                          questMsg + '(click for more information)',
                 'target': id, 'value': damageTotal,
-                'status': ((damageToUser) ? 'danger' : 'safe')
-                };
+                'status': ((damageToUser) ? 'danger' : 'safe'),
+                'columns':[
+                    ['Remaining Health', user.stats.hp - damageTotal],
+                    ['Estimated Damage', damageTotal],
+                ],
+                'colors': {
+                    'Remaining Health': '#60B044',
+                    'Estimated Damage': '#FF0000',
+                }
+            };
             if (quest.content && quest.content.boss) {
                 DASHBOARD.damageToParty = {'label': 'Est. Damage to Party',
                     'hoverText': 'health loss your party will take ' +
@@ -1987,7 +2041,7 @@ randomTodoHtml
         }
 
         if ((dailiesIncomplete.length + dailiesIncompleteGrey.length) == 0) {
-            DASHBOARD[orderId] = {'label': title,
+            DASHBOARD[orderId] = {'label': title, 'id': id + 'Dashboard',
                 'hoverText': 'you have completed all Dailies and Grey Dailies',
                 'value': dailies.length, 'status': 'safe', 'min': 0, 'max': dailies.length,
                 'chartLabel': dailiesIncomplete.length};
@@ -2040,7 +2094,7 @@ randomTodoHtml
                     dailiesIncompleteGrey.join('</li><li>') +
                     '</li></ul>';
         }
-        DASHBOARD[orderId] = {'label': title,
+        DASHBOARD[orderId] = {'label': title, 'id': id + 'Dashboard',
             'hoverText': 'number of Dailies you have not yet completed ' +
                          '(click for more information)',
             'target': id,
@@ -4468,6 +4522,11 @@ h2 {
 }
 #DASHBOARD .value, .c3-gauge-value {
     font-size: 30.1px !important; /* needed to override element style from c3 */
+    font-weight: bold;
+    padding: 2px;
+}
+#DASHBOARD .c3-target text { /* pie chart values */
+    font-size: 2em;
     font-weight: bold;
     padding: 2px;
 }
