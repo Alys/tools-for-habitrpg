@@ -461,21 +461,22 @@ function formatAndDisplayDASHBOARD() {
         if (! data) {
             continue;
         }
-        var classes = (data.hidden) ? 'hide' : '';
         html += '<li ';
         if (data.id) {
-            // id is needed only if other code will change tile background
+            // id is needed only if other code will change tile background, or using a chart
             html += 'id="' + data.id + '" ';
         }
         html += 'title="' + data.hoverText + '" ';
-        if (data.target) {
-            html += 'data-target="' + data.target +
-                    '" data-closemainsections="true" data-forceopen="true" ' +
-                    'class="showHideToggle ' + classes + '"';
-        }
-
-        html += '><div class="' + data.status + '">';
-        html += useGauge(data) || usePie(data) ? '<div id="' + data.id + 'Chart"></div>' : '<div class="value">' + data.value + '</div>';
+        var classes = [];
+        classes.push((data.hidden) ? 'hide' : '');
+        classes.push((useGauge(data) || usePie(data)) ? '' : 'value-only');
+        html += data.target ?
+                'data-target="' + data.target + '" data-closemainsections="true" data-forceopen="true" ' +
+                    'class="showHideToggle ' + classes.join(' ') + '"' :
+                'class=' + classes.join(' ');
+        html += useGauge(data) || usePie(data) ?
+            '><div id="' + data.id + 'Chart"></div>' :
+            '><div class="' + data.status + '"><div class="value">' + data.value + '</div>';
         html += '<div class="label">' + data.label + '</div></div></li>';
     }
 
@@ -538,7 +539,7 @@ function formatAndDisplayDASHBOARD() {
             pie: {
                 label: {
                     format: function (value, ratio, id) {
-                        return value;
+                        return data.hasOwnProperty('pieLabels') ? data.pieLabels[id] : value;
                     }
                 }
             },
@@ -2001,6 +2002,10 @@ randomTodoHtml
                 'colors': {
                     'Remaining Health': '#60B044',
                     'Estimated Damage': '#FF0000',
+                },
+                'pieLabels': {
+                    'Remaining Health': '',
+                    'Estimated Damage': damageTotal,
                 }
             };
             if (quest.content && quest.content.boss) {
@@ -4505,30 +4510,33 @@ h2 {
 }
 #DASHBOARD li {
     text-align: center;
-    width: 240px;
-    background-color: #fffbd0; /* yellow */
-    border: 1px;
     padding: 4px;
     margin-right: 4px;
     float: left;
     list-style-type: none;
+    width: 240px;
+}
+#DASHBOARD li.value-only {
+    width: 120px;
+    background-color: #fffbd0; /* yellow */
+    border: 1px;
+}
+#DASHBOARD li.value-only > div {
+    box-shadow: 1px 1px 1px 1px #666666;
 }
 #DASHBOARD li.showHideToggle {
     text-decoration: none;
     color: black;
 }
-#DASHBOARD li > div {
-    box-shadow: 1px 1px 1px 1px #666666;
-}
 #DASHBOARD .value, .c3-gauge-value {
-    font-size: 30.1px !important; /* needed to override element style from c3 */
+    font-size: 2em;
     font-weight: bold;
     padding: 2px;
 }
 #DASHBOARD .c3-target text { /* pie chart values */
     font-size: 2em;
-    font-weight: bold;
     padding: 2px;
+    font-weight: bold;
 }
 #DASHBOARD .label {
     font-size: 0.75em;
