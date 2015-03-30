@@ -93,6 +93,7 @@ var userId            = '';
 var apiToken          = '';
 
 /* TST - FOR TESTING:
+// Use this section if you do not have a local webserver and want to use the provided test data.
 // You can compose test data by doing things like:
 //     var userJson = JSON.parse(userJsonString);
 //     var habitsVeryManyJson = JSON.parse(habitsVeryManyJsonString);
@@ -114,6 +115,16 @@ $.mockjax({
   responseText: userJsonString,
 });
 $('body').css({'background-color':'#C4B4A4'});
+*/
+
+/* TST - FOR TESTING:
+// Use this section if you have a local webserver set up to handle the requests.
+$('body').css({'background-color':'#C4B4A4'});
+serverName        = 'localhost';
+serverUrl         = 'http://localhost';
+serverPathTavern  = '/cgi-bin/hrpg_tavern.pl';
+serverPathContent = '/cgi-bin/hrpg_content.pl';
+serverPathUser    = '/cgi-bin/hrpg_user.pl';
 apiToken          = 'null';
 userId            = 'test';
 $('#userApiDetailsForm #userId').val(userId);

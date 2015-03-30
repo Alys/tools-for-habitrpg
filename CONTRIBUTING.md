@@ -24,7 +24,7 @@ touch null.htm
 
 ### Uncomment TST sections of main page
 
-There are two TST sections on the main page. The first is a set of script tags which bring in:
+There are 3 TST sections on the main page. The first is a set of script tags which bring in:
 
 * A series of `<script>` tags
     * [jquery-mockjax](https://github.com/jakerella/jquery-mockjax)
@@ -39,4 +39,9 @@ There are two TST sections on the main page. The first is a set of script tags w
     * Here is where the actual mocking of ajax requests occurs, as well as the auto-fetch of user data (to avoid
       the need to log in).
     * The test data may be manipulated here to suit any particular test case.
+* Alternate webserver configurations
+    * Use these configurations if you have an alternate webserver already set up to serve the requests from the page.
 
+If you wish to use the mocks to avoid making remote requests for data, then uncomment the `<script>` and `JS Mocks` 
+sections. Otherwise, only uncomment the section for alternate webserver configuration to redirect any ajax calls to
+the new webserver.
