@@ -56,6 +56,15 @@ you'll find there.
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
 
+    <!-- TST
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mockjax/1.5.3/jquery.mockjax.min.js" type="text/javascript"></script>
+    <script src="testdata/content.js" type="text/javascript"></script>
+    <script src="testdata/habits-many.js" type="text/javascript"></script>
+    <script src="testdata/habits-very-many.js" type="text/javascript"></script>
+    <script src="testdata/tavern.js" type="text/javascript"></script>
+    <script src="testdata/user.js" type="text/javascript"></script>
+    -->
+
 
 
 <script type="text/javascript">
@@ -82,16 +91,29 @@ var userId            = '';
 var apiToken          = '';
 
 /* TST - FOR TESTING:
+// You can compose test data by doing things like:
+//     var userJson = JSON.parse(userJsonString);
+//     var habitsVeryManyJson = JSON.parse(habitsVeryManyJsonString);
+//     userJson.habits = habitsVeryManyJson;
+//     userJsonString = JSON.stringify(userJson);
+$.mockjax({
+  url: serverUrl + serverPathContent,
+  dataType: 'json',
+  responseText: contentJsonString,
+});
+$.mockjax({
+  url: serverUrl + serverPathTavern,
+  dataType: 'json',
+  responseText: tavernJsonString,
+});
+$.mockjax({
+  url: serverUrl + serverPathUser,
+  dataType: 'json',
+  responseText: userJsonString,
+});
 $('body').css({'background-color':'#C4B4A4'});
-serverName        = 'localhost';
-serverUrl         = 'http://localhost';
-serverPathTavern  = '/cgi-bin/hrpg_tavern.pl';
-serverPathContent = '/cgi-bin/hrpg_content.pl';
-serverPathUser    = '/cgi-bin/hrpg_user.pl';
 apiToken          = 'null';
 userId            = 'test';
-userId            = 'work';
-userId            = 'home';
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
@@ -1041,7 +1063,7 @@ function collateAndDisplayTaskData() {
             if (tempValue > 37.5) tempValue = 37.5;
             var checklistChance = 0 //(_.reduce(obj.checklist, (function(m, i) {
                         // return m + (i.completed ? 1 : 0);
-                      // }), 0) || 0); // XXX 
+                      // }), 0) || 0); // XXX
             var chance = tempValue / 150 + .02;
             chance *= obj.priority *
                       (1 + ((obj.streak || 0) / 100)) *
