@@ -447,10 +447,12 @@ function formatAndDisplayTOC() {
     var keys = [
             'HEADING Tasks',
                 'taskOverview', 'taskStatistics', 'untaggedTasks',
-                'habitHistory',
-            'HEADING',
-                'dailiesHistory', 'dailiesIncomplete', 'todosDated',
-                'todosCompleted',
+            'HEADING Habits',
+                'habitTrends', 'habitHistory',
+            'HEADING Dailies',
+                'dailiesHistory', 'dailiesIncomplete',
+            'HEADING To-Dos',
+                'todosDated', 'todosCompleted',
             'HEADING Drops, Quests, Damage', 'dropsToday',
                 'questProgress', 'damageDailies', 'statsAndStreaks',
             'HEADING Other',
@@ -487,7 +489,7 @@ function formatAndDisplayMAIN() {
     // elements are in the order that the sections would appear on the page
     // if they were all visible at once):
     var keys = ['taskOverview', 'taskStatistics', 'untaggedTasks',
-                'habitHistory', 'dailiesHistory', 'todosDated',
+                'habitTrends', 'habitHistory', 'dailiesHistory', 'todosDated',
                 'todosCompleted', 'dropsToday', 'questProgress',
                 'damageDailies','dailiesIncomplete',//keep in that order
                 'statsAndStreaks',
@@ -769,6 +771,7 @@ function collateAndDisplayTaskData() {
     taskOverview();
     taskStatistics();
     untaggedTasksSection();
+    habitTrends();
     habitHistory();
     damageFromDailies();
     dailiesIncomplete();
@@ -1423,9 +1426,9 @@ randomTodoHtml
         }
     }
 
-
-    function habitHistory() {
-        var html = '<p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks. <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. --> Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
+    function habitTrends() {
+        var html = '<p>The chart below provides a visual representation of the trends in your habits as reflected by the data recorded in HabitRPG. Here you can get an idea of which habits you are reinforcing, and which are being neglected. The data provided to this chart is the same as displayed in the Habit History section, limited to the last 500 entries. The Habit History section only records when a change occurs in a habit, while the trend chart includes the values for all habits every day, regardless if they changed.</p>';
+        html += '<p>This chart is interactive, and exposes multiple controls:<ul><li>Scroll inside the chart to <strong>zoom</strong></li><li>Click and drag (left/right) to <strong>slide</strong> along the time-axis when zoomed in</li><li><strong>Hover</strong> over a datapoint to see all the values for that day</li><li>Click the habits in the <strong>legend</strong> to toggle their display in the chart on/off</li></ul></p>';
 
         var habitNames = habits.reduce(function(names, item) {
              names.push(item.text);
@@ -1495,16 +1498,11 @@ randomTodoHtml
                 });
         }
 
-        $.each(habits, function(index, obj){
-            html += collateHistoryForOneHabit(obj);
-        });
-        html += '</ul>';
-        var id      = 'habitHistorySection';
-        var title   = 'Habit History';
-        var orderId = 'habitHistory';
+        var id      = 'habitTrendsSection';
+        var title   = 'Habit Trends';
+        var orderId = 'habitTrends';
         TOC[orderId]  = {'target': id, 'title':  title};
-        MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
-                         'html': html, 'function': createHabitChart};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html, 'function': createHabitChart};
 
         function extractHabitTimeData(limit) {
             var timeline = collectTimelineDays(habits);
@@ -1563,6 +1561,19 @@ randomTodoHtml
         function formatDayDate(historical_item) {
             return (new Date(historical_item.date)).toDateString()
         }
+    }
+
+    function habitHistory() {
+        var html = '<p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks. <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. --> Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p><ul>';
+        $.each(habits, function(index, obj){
+            html += collateHistoryForOneHabit(obj);
+        });
+        html += '</ul>';
+        var id      = 'habitHistorySection';
+        var title   = 'Habit History';
+        var orderId = 'habitHistory';
+        TOC[orderId]  = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'longContent': true, 'html': html};
 
         function collateHistoryForOneHabit(obj) {
             //// The commented out code below is only useful if ALL recent
@@ -4318,6 +4329,14 @@ ul#tableOfContents > li {
 }
 
 
+#habitTrendsSection .legend {
+    text-align: center;
+}
+#habitTrendsSection .legend-toggle {
+    opacity: .2;
+}
+
+
 #habitHistorySection .buttonUsed { /* which button (+ or -) was pressed */
     font-weight: bold;
 }
@@ -4334,12 +4353,6 @@ ul#tableOfContents > li {
     font-size:  .8em;
     font-style: italic;
     font-weight: normal;
-}
-#habitHistorySection .legend {
-    text-align: center;
-}
-#habitHistorySection .legend-toggle {
-    opacity: .2;
 }
 
 
