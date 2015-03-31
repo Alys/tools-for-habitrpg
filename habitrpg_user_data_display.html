@@ -1470,6 +1470,13 @@ randomTodoHtml
                             r: 4
                         }
                     }
+                },
+                tooltip: {
+                    format: {
+                        value: function (value, ratio, id, index) {
+                            return value.toFixed(2);
+                        }
+                    }
                 }
             });
             d3.select('.habit-chart-container').insert('div').attr('class', 'legend').selectAll('span')
