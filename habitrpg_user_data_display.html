@@ -68,7 +68,6 @@ you'll find there.
     -->
 
 
-
 <script type="text/javascript">
 $(function() { // wraps around all our code to not pollute global namespace
 
@@ -114,12 +113,10 @@ $.mockjax({
   dataType: 'json',
   responseText: userJsonString,
 });
-$('body').css({'background-color':'#C4B4A4'});
 */
 
 /* TST - FOR TESTING:
 // Use this section if you have a local webserver set up to handle the requests.
-$('body').css({'background-color':'#C4B4A4'});
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathTavern  = '/cgi-bin/hrpg_tavern.pl';
@@ -127,6 +124,12 @@ serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
 apiToken          = 'null';
 userId            = 'test';
+userId            = 'work';
+userId            = 'home';
+*/
+
+/* TST - FOR TESTING:
+$('body').css({'background-color':'#C4B4A4'});
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
