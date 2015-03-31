@@ -1561,7 +1561,13 @@ randomTodoHtml
                     return historical_item.value;
                 }
                 return task_value;
-            }, prev);
+            }, decayPreviousValue(prev));
+        }
+
+        // Habits which are not reinforced decay over time.
+        // Decay factor taken from HabitRPG common/script/index.coffee
+        function decayPreviousValue(prev) {
+            return Math.abs(prev) < 0.1 ? 0 : prev * 0.5;
         }
 
         // Use dateStrings to make filtering to a unique list easier later
