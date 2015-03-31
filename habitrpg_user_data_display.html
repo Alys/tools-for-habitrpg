@@ -1017,12 +1017,12 @@ function collateAndDisplayTaskData() {
 
     function modifyTaskProperties(obj) {
         obj.text = String(obj.text).replace(/\&nbsp;/g, ' ');
-        obj.text = marked(obj.text, {sanitize: true});
-        obj.text = String(obj.text).replace(/^<p>|<\/p>\n$/g, '');
+        obj.text = renderMarkdown(obj.text);
         obj.text = emoji(obj.text, 'js/emoji-images/pngs', 25);
         // obj.textShort = obj.text.replace(/(^.{80}).+/, "$1 ..."),
 
-        obj.attributePretty = obj.attribute.toUpperCase(),
+        obj.notes = renderMarkdown(obj.notes);
+        obj.attributePretty = obj.attribute.toUpperCase();
         obj.typePretty   = (obj.type == 'todo') ? 'to-do' : obj.type;
         obj.valueRounded = Math.round(obj.value * 100) / 100;
         obj.magnitude    = Math.abs(obj.valueRounded);
@@ -1059,6 +1059,12 @@ function collateAndDisplayTaskData() {
             obj.dropChance = Math.round(chance * 100) + '%';
                     // + ' (' + chanceBefore + ' %)'; // TST
             // drop chance is 0 for negative habits
+        }
+
+        function renderMarkdown(text) {
+            text = marked(text, {sanitize: true});
+            text = String(text).replace(/^<p>|<\/p>\n$/g, ''); // The bonus paragraph around every text snippet is unnecessary
+            return text;
         }
 
         function reformatDate(dateString) {
