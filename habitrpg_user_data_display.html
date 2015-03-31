@@ -1429,7 +1429,7 @@ randomTodoHtml
     function habitTrends() {
         var html = '<p>The chart below provides a visual representation of the trends in your habits as reflected by the data recorded in HabitRPG. Here you can get an idea of which habits you are reinforcing, and which are being neglected. The data provided to this chart is the same as displayed in the Habit History section, limited to the last 500 entries. The Habit History section only records when a change occurs in a habit, while the trend chart includes the values for all habits every day, regardless if they changed.</p>';
         html += '<p>This chart is interactive, and exposes multiple controls:<ul><li>Scroll inside the chart to <strong>zoom</strong></li><li>Click and drag (left/right) to <strong>slide</strong> along the time-axis when zoomed in</li><li><strong>Hover</strong> over a datapoint to see all the values for that day</li><li>Click the habits in the <strong>legend</strong> to toggle their display in the chart on/off</li></ul></p>';
-
+        html += '<button onclick="$(\'.legend-toggle\').length != 0 ? $(\'.legend-toggle\').click() : $(\'.legend span\').click();" title="This may take a few seconds with a large amount of data">Toggle All</button>';
         var habitNames = habits.reduce(function(names, item) {
              names.push(item.text);
              return names;
@@ -4333,9 +4333,11 @@ ul#tableOfContents > li {
     text-align: center;
 }
 #habitTrendsSection .legend-toggle {
-    opacity: .2;
+    opacity: .4;
 }
-
+#habitTrendsSection button {
+    border-radius: 7px;
+}
 
 #habitHistorySection .buttonUsed { /* which button (+ or -) was pressed */
     font-weight: bold;
