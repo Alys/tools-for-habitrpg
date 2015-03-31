@@ -1017,8 +1017,8 @@ function collateAndDisplayTaskData() {
 
     function modifyTaskProperties(obj) {
         obj.text = String(obj.text).replace(/\&nbsp;/g, ' ');
-        obj.text = obj.text.replace(/[&<>"'\/]/g,
-                        function(s) { return entityMap[s]; });
+        obj.text = marked(obj.text, {sanitize: true});
+        obj.text = String(obj.text).replace(/^<p>|<\/p>\n$/g, '');
         obj.text = emoji(obj.text, 'js/emoji-images/pngs', 25);
         // obj.textShort = obj.text.replace(/(^.{80}).+/, "$1 ..."),
 
@@ -1432,7 +1432,7 @@ randomTodoHtml
         html += '<p>This chart is interactive, and exposes multiple controls:<ul><li>Scroll inside the chart to <strong>zoom</strong></li><li>Click and drag (left/right) to <strong>slide</strong> along the time-axis when zoomed in</li><li><strong>Hover</strong> over a datapoint to see all the values for that day</li><li>Click the habits in the <strong>legend</strong> to toggle their display in the chart on/off</li></ul></p>';
         html += '<button onclick="$(\'.legend-toggle\').length != 0 ? $(\'.legend-toggle\').click() : $(\'.legend span\').click();" title="This may take a few seconds with a large amount of data">Toggle All</button>';
         var habitNames = habits.reduce(function(names, item) {
-             names.push(marked(item.text));
+             names.push(item.text);
              return names;
         }, []);
         // see reported issue for limit of ~500 elements prior to performance degradation
@@ -1520,7 +1520,7 @@ randomTodoHtml
                     habitRow.push(getValueOfTaskByDay(habit, date.toDateString(), habitRow[habitRow.length - 1] || 0));
                 });
                 habitRow.splice(0, habitRow.length - limit);
-                habitRow.unshift(marked(habit.text));
+                habitRow.unshift(habit.text);
                 habitRows.push(habitRow);
                 return habitRows;
             }, []);
@@ -4348,16 +4348,6 @@ ul#tableOfContents > li {
 }
 #habitTrendsSection .legend-toggle {
     opacity: .4;
-}
-#habitTrendsSection span {
-    padding: 0px .5em !important; /* important to override element style from library */
-}
-#habitTrendSection p {
-    display: inline;
-    overflow: hidden;
-    white-space: nowrap;
-    padding: 0;
-    margin: 0;
 }
 #habitTrendsSection button {
     border-radius: 7px;
