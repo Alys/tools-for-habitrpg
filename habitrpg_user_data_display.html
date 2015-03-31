@@ -55,6 +55,7 @@ you'll find there.
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script> <!-- https://github.com/chjj/marked -->
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
@@ -1431,7 +1432,7 @@ randomTodoHtml
         html += '<p>This chart is interactive, and exposes multiple controls:<ul><li>Scroll inside the chart to <strong>zoom</strong></li><li>Click and drag (left/right) to <strong>slide</strong> along the time-axis when zoomed in</li><li><strong>Hover</strong> over a datapoint to see all the values for that day</li><li>Click the habits in the <strong>legend</strong> to toggle their display in the chart on/off</li></ul></p>';
         html += '<button onclick="$(\'.legend-toggle\').length != 0 ? $(\'.legend-toggle\').click() : $(\'.legend span\').click();" title="This may take a few seconds with a large amount of data">Toggle All</button>';
         var habitNames = habits.reduce(function(names, item) {
-             names.push(item.text);
+             names.push(marked(item.text));
              return names;
         }, []);
         // see reported issue for limit of ~500 elements prior to performance degradation
@@ -1519,7 +1520,7 @@ randomTodoHtml
                     habitRow.push(getValueOfTaskByDay(habit, date.toDateString(), habitRow[habitRow.length - 1] || 0));
                 });
                 habitRow.splice(0, habitRow.length - limit);
-                habitRow.unshift(habit.text);
+                habitRow.unshift(marked(habit.text));
                 habitRows.push(habitRow);
                 return habitRows;
             }, []);
@@ -4347,6 +4348,16 @@ ul#tableOfContents > li {
 }
 #habitTrendsSection .legend-toggle {
     opacity: .4;
+}
+#habitTrendsSection span {
+    padding: 0px .5em !important; /* important to override element style from library */
+}
+#habitTrendSection p {
+    display: inline;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0;
+    margin: 0;
 }
 #habitTrendsSection button {
     border-radius: 7px;
