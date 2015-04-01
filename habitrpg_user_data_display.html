@@ -643,6 +643,7 @@ function renderMarkdown(text) {
 
 function userDataInHeader() {
     var displayName = renderMarkdown(user.profile.name);
+    displayName = emoji(displayName, 'js/emoji-images/pngs', 25);
     if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' || // AliceHarris
         userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
     ) {
