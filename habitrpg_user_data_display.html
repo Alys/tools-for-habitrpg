@@ -635,9 +635,14 @@ function upperCaseFirst(word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
+function renderMarkdown(text) {
+    text = marked(text, {sanitize: true});
+    text = String(text).replace(/^<p>|<\/p>\n$/g, ''); // The bonus paragraph around every text snippet is unnecessary
+    return text;
+}
 
 function userDataInHeader() {
-    var displayName = user.profile.name;
+    var displayName = renderMarkdown(user.profile.name);
     if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' || // AliceHarris
         userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
     ) {
@@ -1059,12 +1064,6 @@ function collateAndDisplayTaskData() {
             obj.dropChance = Math.round(chance * 100) + '%';
                     // + ' (' + chanceBefore + ' %)'; // TST
             // drop chance is 0 for negative habits
-        }
-
-        function renderMarkdown(text) {
-            text = marked(text, {sanitize: true});
-            text = String(text).replace(/^<p>|<\/p>\n$/g, ''); // The bonus paragraph around every text snippet is unnecessary
-            return text;
         }
 
         function reformatDate(dateString) {
