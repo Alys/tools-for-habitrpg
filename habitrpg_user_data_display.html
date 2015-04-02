@@ -458,32 +458,43 @@ function formatAndDisplayDASHBOARD() {
                 'todosDated', 'dropsToday', 'sleeping'];
     var html = '<ul>';
 
+    var dashItems = {'visualized': [], 'valueOnly': []}
     for (var i=0,ic=keys.length; i<ic; i++) {
         var data = DASHBOARD[keys[i]];
         if (! data) {
             continue;
         }
-        html += '<li ';
+        var visualized = useGauge(data) || usePie(data);
+        var dashItem = '<li ';
         if (data.id) {
             // id is needed only if other code will change tile background, or using a chart
-            html += 'id="' + data.id + '" ';
+            dashItem += 'id="' + data.id + '" ';
         }
-        html += 'title="' + data.hoverText + '" ';
+        dashItem += 'title="' + data.hoverText + '" ';
         var classes = [];
         classes.push((data.hidden) ? 'hide' : '');
-        classes.push((useGauge(data) || usePie(data)) ? '' : 'value-only');
-        html += data.target ?
+        classes.push(visualized ? '' : 'value-only');
+        dashItem += data.target ?
                 'data-target="' + data.target + '" data-closemainsections="true" data-forceopen="true" ' +
                     'class="showHideToggle ' + classes.join(' ') + '"' :
                 'class=' + classes.join(' ');
-        html += useGauge(data) || usePie(data) ?
+        dashItem += visualized ?
             '><div id="' + data.id + 'Chart"></div>' :
             '><div class="' + data.status + '"><div class="value">' + data.value + '</div>';
-        html += '<div class="label">' + data.label + '</div></div></li>';
+        dashItem += '<div class="label">' + data.label + '</div></div></li>';
+        visualized ?
+            dashItems.visualized.push(dashItem) :
+            dashItems.valueOnly.push(dashItem);
     }
-
-
-    html += '</ul><div class="clear"></div>';
+    html += '<li class="visualized"><ul>';
+    dashItems.visualized.forEach(function(dashItem) {
+        html += dashItem;
+    });
+    html += '</ul></li><li class="value-only"><ul>';
+    dashItems.valueOnly.forEach(function(dashItem) {
+        html += dashItem;
+    });
+    html += '</ul></li></ul><div class="clear"></div>';
     $('#DASHBOARD').html(html);
     $.each(DASHBOARD, function(key, data) {
         if (useGauge(data)) initGauge(data);
@@ -498,12 +509,11 @@ function formatAndDisplayDASHBOARD() {
     }
     function initGauge(data) {
         step = (data.max - data.min) * .3;
-        return c3.generate({
+
+        var gauge = c3.generate({
             bindto: '#' + data.id + 'Chart',
             data: {
-                columns: [
-                    [data.label, data.value]
-                ],
+                columns: [],
                 type: 'gauge',
             },
             gauge: {
@@ -529,12 +539,13 @@ function formatAndDisplayDASHBOARD() {
                 }
             }
         });
+        setTimeout(function () { gauge.load({columns: [[data.label, data.value]]});}, 750);
     }
     function initPie(data) {
-        return c3.generate({
+        var pie = c3.generate({
             bindto: '#' + data.id + 'Chart',
             data: {
-                columns: data.columns,
+                columns: [],
                 type: 'pie',
                 colors: data.colors,
             },
@@ -560,8 +571,14 @@ function formatAndDisplayDASHBOARD() {
                         return value;
                     }
                 }
+            },
+            transition: {
+                duration: 750
             }
         });
+        data.columns.forEach(function(column, index) {
+            setTimeout(function () { pie.load({columns: [column]});}, index * 1500);
+        })
     }
 }
 
@@ -4511,15 +4528,17 @@ h2 {
     float: left;
 }
 #DASHBOARD li {
-    text-align: center;
+    list-style-type: none;
+    margin-top: .5em;
+}
+#DASHBOARD li li {
+    float: left;
     padding: 4px;
     margin-right: 4px;
-    float: left;
-    list-style-type: none;
     width: 240px;
+    text-align: center;
 }
 #DASHBOARD li.value-only {
-    width: 120px;
     background-color: #fffbd0; /* yellow */
     border: 1px;
 }
@@ -4530,8 +4549,8 @@ h2 {
     text-decoration: none;
     color: black;
 }
-#DASHBOARD .value, .c3-gauge-value {
-    font-size: 2em;
+#DASHBOARD .value {
+    font-size: 1.25em;
     font-weight: bold;
     padding: 2px;
 }
@@ -4541,7 +4560,11 @@ h2 {
     font-weight: bold;
 }
 #DASHBOARD .label {
-    font-size: 0.75em;
+    font-size: 1.25em;
+    padding: 1px;
+}
+#DASHBOARD .value-only .label {
+    font-size: .75em;
     padding: 1px;
 }
 #DASHBOARD .dropCap {
