@@ -87,7 +87,7 @@ var content; // holds site-wide content (gear names and stats, quests, etc)
 var tavern;  // holds tavern data
 var party;   // holds party data
 var user;    // holds user's data
-
+var gauges = [];  // gauges in the dashboard (for refreshing)
 
 //////////////////////////////////////////////////////////////////////
 ////   Global Connection Variables      //////////////////////////////
@@ -540,6 +540,7 @@ function formatAndDisplayDASHBOARD() {
             }
         });
         setTimeout(function () { gauge.load({columns: [[data.label, data.value]]});}, 750);
+        gauges.push({'gauge': gauge, 'data': data});
     }
     function initPie(data) {
         var pie = c3.generate({
@@ -734,7 +735,13 @@ openRelatedSections = function() {
     }
     if ($('#dropsTodaySection').is(':visible')) {
         hideDropsInDashboard = false;
+        var gauge = gauges.filter(function(item) {
+            return item.data.target == 'dropsTodaySection';
+        })[0];
+        gauge.gauge.unload()
         $('#dropsTodayDashboard').show();
+        gauge.gauge.flush();
+        setTimeout(function () { gauge.gauge.load({columns: [[gauge.data.label, gauge.data.value]]});}, 200);
         // NOTE: We unhide the number of drops in the dashboard
         // only after the user has opened the main drops section,
         // because some users might prefer to not know (less
@@ -3063,15 +3070,14 @@ function dropCountAndCap() {
     }
 
     DASHBOARD[orderId] = {'id': 'dropsTodayDashboard',
-        'label': 'Drop Count / Cap',
+        'label': 'Drop Count',
         'hoverText': 'drops you have received so far today ' +
                      '(click for more information)',
         'target': id,
         'hidden': hideDropsInDashboard,
-        'value': ((user.items.lastDrop.count || 0) +
-                 '<span class="dropCap"> / ' + dropCap + '</span>'),
-        'status': ((user.items.lastDrop.count &&
-                    user.items.lastDrop.count >= dropCap) ? 'safe' : 'neutral')
+        'value': user.items.lastDrop.count || 0,
+        'min': 0,
+        'max': dropCap
         };
     TOC[orderId]  = {'target': id, 'title':  title};
     MAIN[orderId] = {'id': id, 'title': title, 'html': html};
