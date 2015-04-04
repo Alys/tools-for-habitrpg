@@ -1,105 +1,52 @@
-## Setting up for local development and testing
+## Setup for local development and testing
 
-These instructions were based around a Fedora 21 workstation, but may be adapted to anything with apache.
+### Unarchive page assets into project directory
 
-### Ensure httpd is installed and running
-```
-sudo systemctl status httpd
-```
+There are two archives containing assets used by the project. Using the
+[tar command](https://github.com/tldr-pages/tldr/blob/master/pages/common/tar.md), unarchive them both into the
+root of your project directory, with the javascript going into a directory named `js` and the equipment images
+going into a directory named `gear`.
 
-### Get sample data for testing
+Next, retrieve the emoji images from Henrik Joreteg's project,
+[emoji-images](https://github.com/HenrikJoreteg/emoji-images). Clone that repository of images into `js/emoji-images`.
 
-Download these files and place them in `/var/www/cgi-bin`. I also added outer braces and removed the comma at the end of these files so they were valid JSON. That way I could read them in as JSON files, then insert that test habit data into my user json:
+### Ensure page behaves normally with your API information
 
-* http://oldgods.net/habitrpg/habits-many.json
-* http://oldgods.net/habitrpg/habits-very-many.json
+Using your user id and api token, ensure the page loads correctly and behaves exactly like oldgods.net. Resolve any
+missing assets and ensure no errors exist in your browser's developer console.
 
-Get sample user, content, and tavern data and put them in `/var/www/cgi-bin` too. You can get that info from peaking at the requests made by oldgods.net with your browser's dev tools
-
-### Add cgi scripts.
-
-Here is what I used, where `user.json`, `content.json`, and `tavern.json` have the json responses from the corresponding requests on oldgods.net with my user info. These should be modified to your needs, and only serve as an example.
-
-#### /var/www/cgi-bin/hrpg_user.pl
-
-```perl
-#! /usr/bin/perl
-use CGI;
-use JSON;
-print CGI::header('application/json');
-{
-    local $/;
-    open( my $userFile, '<', 'user.json' );
-    $user_json = <$userFile>;
-    $user = decode_json( $user_json );
-    close($userFile);
-}
-{
-    local $/;
-    open( my $habitsFile, '<', 'habits-many.json' );
-    $habits_json = <$habitsFile>;
-    $habits = decode_json( $habits_json );
-    close($habitsFile);
-}
-$user->{habits} = $habits->{habits};  # Use the test habit data instead of your own
-print encode_json($user);
-```
-
-#### /var/www/cgi-bin/hrpg_content.pl
-
-```perl
-#! /usr/bin/perl
-use CGI;
-print CGI::header('application/json');
-$file = 'content.json';
-print `cat $file`;
-```
-
-#### /var/www/cgi-bin/hrpg_tavern.pl:
-
-```perl
-#! /usr/bin/perl
-use CGI;
-print CGI::header('application/json');
-$file = 'tavern.json';
-print `cat $file`;
-```
-
-### Make all files accessible by apache
-
-```sh
-cd /var/www/cgi-bin;  # assuming you're not already there
-sudo chmod apache.apache *
-sudo chcon -t httpd_sys_content_t *.json
-sudo chcon -t httpd_sys_script_exec_t *.pl
-ls -lhatZ
-```
-
-Check the ownership and SELinux labels to make sure it's all kosher.
-
-
-### Configure CORS in apache
-
-This way we needn't worry about our scripts phoning home instead of a real target.
-In `/etc/httpd/conf/httpd.conf`, add these Header configurations (I chose at the `/var/www` level).
+You may need to add a `null.htm` file, and you may doing so by simply creating an empty file named `null.htm` in
+the root of the project directory using:
 
 ```
-<Directory "/var/www">
-    ...
-    Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, x-api-user, x-api-key"
-    ...
-</Directory>
+touch null.htm
 ```
 
-For good measure, if you aren't using your httpd server for anything else then you probably
-want to disable it for everyone except yourself with this line in the `httpd.conf`:
+### Uncomment TST sections of main page
 
-```
-Listen 127.0.0.1:80
-```
+There are 4 TST sections on the main page. The first is a set of script tags which bring in:
 
-### Uncomment TST section of main page
+* A series of `<script>` tags
+    * [jquery-mockjax](https://github.com/jakerella/jquery-mockjax)
+        * A library for mocking ajax requests.
+        * Enables test data to be substituted in without actually communicating with HabitRPG.
+        * No login necessary for every refresh
+    * Testdata files
+        * Each file sets a variable containing a long JSON string
+        * These strings will inevitably fall out of date, and should be updated as changes are made to HabitRPG
+    * Contributors are encouraged to create their own testdata files which may be composed with the existing sets.
+* JS Mocks
+    * Here is where the actual mocking of ajax requests occurs, as well as the auto-fetch of user data (to avoid
+      the need to log in).
+    * The test data may be manipulated here to suit any particular test case.
+* Alternate webserver configurations
+    * Use these configurations if you have an alternate webserver already set up to serve the requests from the page.
+* Style and form auto-load
+      * This section provides a background style to make it obvious when working with test data
+      * It will also auto-load the login form to save a step on a reload
 
-Doing so will cause the subsequent requests to re-route to your local server, bypassing unneeded auth and enabling
-the use of test data!
+If you wish to use the mocks to avoid making remote requests for data, then uncomment the `<script>` and `JS Mocks` 
+sections. Otherwise, only uncomment the section for alternate webserver configuration to redirect any ajax calls to
+the new webserver.
+
+The final section with style and auto-load should always be uncommented for convenience with working with test data. 

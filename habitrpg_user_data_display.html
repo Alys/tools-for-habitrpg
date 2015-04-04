@@ -56,6 +56,16 @@ you'll find there.
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
 
+    <!-- TST - FOR TESTING
+    For more information on using jquery-mockjax for simulating ajax requests, see https://github.com/jakerella/jquery-mockjax
+    --><!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mockjax/1.5.3/jquery.mockjax.min.js" type="text/javascript"></script>
+    <script src="testdata/content.js" type="text/javascript"></script>
+    <script src="testdata/habits-many.js" type="text/javascript"></script>
+    <script src="testdata/habits-very-many.js" type="text/javascript"></script>
+    <script src="testdata/tavern.js" type="text/javascript"></script>
+    <script src="testdata/user.js" type="text/javascript"></script>
+    -->
 
 
 <script type="text/javascript">
@@ -82,7 +92,31 @@ var userId            = '';
 var apiToken          = '';
 
 /* TST - FOR TESTING:
-$('body').css({'background-color':'#C4B4A4'});
+// Use this section if you do not have a local webserver and want to use the provided test data.
+// You can compose test data by doing things like:
+//     var userJson = JSON.parse(userJsonString);
+//     var habitsVeryManyJson = JSON.parse(habitsVeryManyJsonString);
+//     userJson.habits = habitsVeryManyJson;
+//     userJsonString = JSON.stringify(userJson);
+$.mockjax({
+  url: serverUrl + serverPathContent,
+  dataType: 'json',
+  responseText: contentJsonString,
+});
+$.mockjax({
+  url: serverUrl + serverPathTavern,
+  dataType: 'json',
+  responseText: tavernJsonString,
+});
+$.mockjax({
+  url: serverUrl + serverPathUser,
+  dataType: 'json',
+  responseText: userJsonString,
+});
+*/
+
+/* TST - FOR TESTING:
+// Use this section if you have a local webserver set up to handle the requests.
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathTavern  = '/cgi-bin/hrpg_tavern.pl';
@@ -92,6 +126,10 @@ apiToken          = 'null';
 userId            = 'test';
 userId            = 'work';
 userId            = 'home';
+*/
+
+/* TST - FOR TESTING:
+$('body').css({'background-color':'#C4B4A4'});
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
@@ -1041,7 +1079,7 @@ function collateAndDisplayTaskData() {
             if (tempValue > 37.5) tempValue = 37.5;
             var checklistChance = 0 //(_.reduce(obj.checklist, (function(m, i) {
                         // return m + (i.completed ? 1 : 0);
-                      // }), 0) || 0); // XXX 
+                      // }), 0) || 0); // XXX
             var chance = tempValue / 150 + .02;
             chance *= obj.priority *
                       (1 + ((obj.streak || 0) / 100)) *
