@@ -22,6 +22,7 @@ Contributors:
     thepeopleseason (James Hsiao) https://github.com/thepeopleseason
     goldfndr (Richard Finegold) https://github.com/goldfndr
     Blade Barringer https://github.com/crookedneighbor
+    donoftime https://github.com/donoftime
 
 
 TO ADD A NEW SECTION TO THIS PAGE:
@@ -1098,9 +1099,9 @@ function collateAndDisplayTaskData() {
         else {
             var tempValue = Math.abs(obj.value - 21.27);
             if (tempValue > 37.5) tempValue = 37.5;
-            var checklistChance = 0 //(_.reduce(obj.checklist, (function(m, i) {
+            var checklistChance = 0; //(_.reduce(obj.checklist, (function(m, i) {
                         // return m + (i.completed ? 1 : 0);
-                      // }), 0) || 0); // XXX
+                      // }), 0) || 0); // XXX_SOON finish this
             var chance = tempValue / 150 + .02;
             chance *= obj.priority *
                       (1 + ((obj.streak || 0) / 100)) *
@@ -4764,7 +4765,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v3.7c)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v4.0)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4799,6 +4800,20 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>4.0 <span class="date">2015-04-05</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>A new <strong>Habit Trends</strong> section has been created by <a href="https://github.com/donoftime">donoftime</a> to provide a visual representation of the trends in your Habits. Use this to get an idea of which habits you are reinforcing, and which are being neglected.</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li><a href="https://github.com/donoftime">donoftime</a> has added a mock ajax framework to assist with local development and has placed instructions for using it in <a href="https://github.com/Alys/tools-for-habitrpg/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a>.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>3.7 <span class="date">2015-01-09</span></dt>
         <dd><ul>
             <li>Features:
@@ -4808,7 +4823,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.6.1 <span class="date">2014-12-22</span></dt>
         <dd><ul>
             <li>Code:
