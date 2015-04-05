@@ -1641,7 +1641,8 @@ randomTodoHtml
         var title   = 'Habit History';
         var orderId = 'habitHistory';
         TOC[orderId]  = {'target': id, 'title':  title};
-        MAIN[orderId] = {'id': id, 'title': title, 'longContent': true, 'html': html};
+        MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
+                         'html': html};
 
         function collateHistoryForOneHabit(obj) {
             //// The commented out code below is only useful if ALL recent
@@ -4407,6 +4408,7 @@ ul#tableOfContents > li {
     border-radius: 7px;
 }
 
+
 #habitHistorySection .buttonUsed { /* which button (+ or -) was pressed */
     font-weight: bold;
 }
@@ -4806,6 +4808,7 @@ ul#tableOfContents > li {
             <li>Features:
                 <ul>
                     <li>A new <strong>Habit Trends</strong> section has been created by <a href="https://github.com/donoftime">donoftime</a> to provide a visual representation of the trends in your Habits. Use this to get an idea of which habits you are reinforcing, and which are being neglected.</li>
+                    <li><strong>Markdown</strong> is now supported throughout the tool, also thanks to donoftime.</li>
                 </ul>
             </li>
             <li>Code:
