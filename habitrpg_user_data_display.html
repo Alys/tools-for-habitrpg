@@ -399,7 +399,9 @@ function parseData() {
         equippedKeys[key] = content.gear.flat[key];
     }
 
-    var computedStats = computeStats(); // computed CON, INT, etc
+    var computedStats        = computeStats(true);  // computed CON, INT, etc
+    var computedStatsNoBuffs = computeStats(false); // ... without buffs
+    // XXX_SOON god my computedStats code is just getting worse and worse
     var userIsOnCollectionQuest = false;
 
     // When calculating drop chance for a task, some of the user's stats
@@ -2326,7 +2328,7 @@ wiki('Tavern', 'resting in the inn') +
 
 
     function skillsAndBuffs() {
-        var conLink       = wiki('Constitution',  'CON');
+        var conLink       = wiki('Constitution', 'CON');
         var intLink       = wiki('Intelligence', 'INT');
         var perLink       = wiki('Perception',   'PER');
         var strLink       = wiki('Strength',     'STR');
@@ -2336,10 +2338,6 @@ wiki('Tavern', 'resting in the inn') +
         var title   = 'Skills and Buffs';
         var orderId = 'skillsAndBuffs';
         // sectionOpen = id; // TST
-        var html = '<p>This section is under maintenance. It will be back within 24 hours.</p>'; // TST
-        TOC[orderId]  = {'target': id, 'title':  title}; // TST
-        MAIN[orderId] = {'id': id, 'title': title, 'html': html}; // TST
-		return; // TST
 
         var html = '<p>This section describes the skills you ';
         var more = false;
@@ -2370,36 +2368,58 @@ wiki('Tavern', 'resting in the inn') +
         html += ' The wiki has more information about ' +
                 wiki('Skills', 'skills') + ' and ' +
                 wiki('Buff', 'buffs') + '.</p>';
+        html += '<p>Most of the skills can be made stronger by' +
+                ' increasing your attributes. Some skills are made stronger' +
+                ' by increasing only your <strong>unbuffed</strong>' +
+                ' attributes - i.e., your attributes gained from equipment' +
+                ' or attribute points. Buffs that you have already gained' +
+                ' will not make those skills stronger.</p>';
 
         var nowMP  = Math.round(user.stats.mp  * 10) / 10;
         var maxMP  = 2 * computedStats['int'] + 30;
         var cronMP = (maxMP > 100) ? maxMP/10 : 10;
+        // XXX add unbuffed stats, put into table, add attribute links
         html += '<p>Your current ' +
                 wiki('Character_Attributes', 'attributes') + ' and ' +
                 wiki('Mana Points', 'mana') + ' values are:</p>' +
                 '<ul class="attributes">' +
-                '<li><label>Constitution (CON):</label> ' +
-                     ((computedStats['con'] < 100) ? '&nbsp;&nbsp;' : '') +
-                       computedStats['con'] + '</li>' +
-                '<li><label>Intelligence (INT):</label> ' +
-                     ((computedStats['in'] < 100) ? '&nbsp;&nbsp;' : '') +
-                       computedStats['int'] + '</li>' +
-                '<li><label>Perception (PER):</label> '   +
-                     ((computedStats['per'] < 100) ? '&nbsp;&nbsp;' : '') +
-                       computedStats['per'] + '</li>' +
                 '<li><label>Strength (STR):</label> '     +
                      ((computedStats['str'] < 100) ? '&nbsp;&nbsp;' : '') +
-                       computedStats['str'] + '</li>' +
+                       computedStats['str'] + ' ' + '<span class="details">' +
+                       computedStats.detailsPretty['str'] + '</span></li>' +
+                '<li><label>Intelligence (INT):</label> ' +
+                     ((computedStats['int'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['int'] + ' ' + '<span class="details">' +
+                       computedStats.detailsPretty['int'] + '</span></li>' +
+                '<li><label>Constitution (CON):</label> ' +
+                     ((computedStats['con'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['con'] + ' ' + '<span class="details">' +
+                       computedStats.detailsPretty['con'] + '</span></li>' +
+                '<li><label>Perception (PER):</label> '   +
+                     ((computedStats['per'] < 100) ? '&nbsp;&nbsp;' : '') +
+                       computedStats['per'] + ' ' + '<span class="details">' +
+                       computedStats.detailsPretty['per'] + '</span></li>' +
                 '<li><label>maximum MP:</label> ' +
                      ((maxMP < 100) ? '&nbsp;&nbsp;' : '') +
                        maxMP + '</li>' +
                 '<li><label>MP gained at cron:</label> ' +
                      ((cronMP < 100) ? '&nbsp;&nbsp;' : '') +
-                       cronMP + '</li>' +
+                       cronMP +
+                       ' <span class="details">' +
+                       '(if all your due Dailies are completed!)' +
+                       '</span></li>' +
                 '<li><label>current MP:</label> ' +
                      ((nowMP < 100) ? '&nbsp;&nbsp;' : '') +
                        nowMP + '</li>' +
                 '</ul>';
+
+        html += '<p style="font-size:18px; color:orange; font-weight:bold">' +
+                'The information below is highly experimental and is' +
+                ' still undergoing testing. Do not rely upon it until this' +
+                ' message has been removed!' +
+                ' If you notice the skills behaving differently than' +
+                ' described here, please ' + tellMe
+                '.</p>';
 
         var conIncreaseDamageExplanation      = '';
         var conIncreaseDamageExplanationParty = '';
@@ -2424,43 +2444,27 @@ wiki('Tavern', 'resting in the inn') +
                        // How to increase effect of the skill (can be blank).
 
             'fireball': function() { // Mage - Burst of Flames
+                // XXX_SOON add effects of crit
                 var bluestTaskName = bluestTask.text;
                 var bluestTaskType = bluestTask.typePretty;
                 var currentValue   = bluestTask.value;
-                var bonus = computedStats.int;
-                var newValue = currentValue + diminishingReturns(bonus*.02, 4);
-/*
-XXX_SOON add effects of crit
-cast: (user, target) ->
-    # I seriously have no idea what I'm doing here. I'm just mashing buttons until numbers seem right-ish. Anyone know math?
-    bonus = user._statsComputed.int * user.fns.crit('per')
-    target.value += diminishingReturns(bonus*.02, 4)
-    bonus *= Math.ceil ((if target.value < 0 then 1 else target.value+1) *.075)
-    #console.log {bonus, expBonus:bonus,upBonus:bonus*.1}
-    user.stats.exp += diminishingReturns(bonus,75)
-    user.party.quest.progress.up += diminishingReturns(bonus*.1,50,30) if user.party.quest.key
-*/
-                var tempValue = (newValue < 0) ? 1 : newValue + 1;
-                bonus *= Math.ceil(tempValue * .075);
+                var tempValue = Math.ceil(
+                        ((currentValue < 0) ? 1 : currentValue + 1) * 0.75);
+                var bonus = computedStats.int * tempValue;
                 var xpIncrease = diminishingReturns(bonus, 75);
-                var questIncrease = diminishingReturns(bonus * .1, 50, 30);
+                var questIncrease = Math.ceil(computedStats.int * .1);
                 currentValue  = Math.round(currentValue  * 10) / 10;
-                newValue      = Math.round(newValue      * 10) / 10;
                 xpIncrease    = Math.round(xpIncrease * 10) / 10;
                 questIncrease = Math.round(questIncrease * 10) / 10;
                 var effects = 'This skill is best cast on your ' +
                               '<span class="taskName">' +
                               bluestTaskName + '</span> ' +
-                              bluestTaskType + '. The task\'s ' +
-                              taskValueLink + ' will change from ' +
-                              currentValue + ' to ' +
-                              newValue + '. You will gain ' +
+                              bluestTaskType + '. You will gain ' +
                               xpIncrease + ' XP.';
                 var additional = 'There is a 3% or greater chance of a ' +
                                  'critical hit which will increase your ' +
                                  'XP gained';
                 if ((quest.content && quest.content.boss) || tavernBoss) {
-                    var emStarted = false;
                     var more = '';
                     effects += ' You will do ' +
                                questIncrease + ' damage to ' +
@@ -2471,10 +2475,7 @@ cast: (user, target) ->
                         // more = ' If you were on a quest, you would do ' +
                                // questIncrease + ' damage to the quest boss.';
                 additional += ' by an amount based on your ' +
-                    perLink + '.<br />See also merfy\'s ' +
-                    '<a href="http://www.mediafire.com/download/' +
-                    'ehyh5xhm1k95ubt/Mage+Burst+of+Flames+calculations' +
-                    '_public.xlsx">Burst of Flames spreadsheet</a>.';
+                    perLink + '.';
                 var increase = 'To increase all effects of the skill, ' +
                                'increase your ' + intLink + before;
                 return ['your bluest task',
@@ -2483,8 +2484,8 @@ cast: (user, target) ->
                         increase]; },
 
             'mpheal': function() { // Mage - Ethereal Surge
-                var bonus = Math.ceil(computedStats['int'] * .1);
-                if (bonus > 25) { bonus = 25; }
+                var bonus = Math.ceil(
+                        diminishingReturns(computedStats['int'], 25, 125));
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + intLink + before;
                 return ['',
@@ -2500,9 +2501,10 @@ cast: (user, target) ->
                         increase]; },
 
             'earth': function() { // Mage - Earthquake
-                var buff = Math.ceil(computedStats['int'] * .05);
+                var buff = Math.ceil(
+                    diminishingReturns(computedStatsNoBuffs['int'], 30, 200));
                 var increase = 'To increase the effect of the skill, ' +
-                               'increase your ' + intLink + before;
+                               'increase your unbuffed ' + intLink + before;
                 return ['',
                         'Each of your party members will have their ' +
                         intLink + ' increased by ' +
@@ -2539,7 +2541,7 @@ cast: (user, target) ->
                         increase]; },
 
             'brightness': function() { // Healer - Searing Brightness
-                var inc = 1.5 * computedStats.int / (computedStats.int + 40);
+                var inc = 4 * computedStats.int / (computedStats.int + 40);
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + intLink + before;
                 return ['',
@@ -2564,10 +2566,11 @@ cast: (user, target) ->
                         increase]; },
 
             'protectAura': function() { // Healer - Protective Aura
-                var conInc = Math.ceil(computedStats.con * 0.15);
+                var conInc = Math.ceil(
+                    diminishingReturns(computedStatsNoBuffs['con'], 200, 200));
                 var con = computedStats.con + conInc;
                 var increase = 'To increase the effect of the skill, ' +
-                               'increase your ' + conLink + before;
+                               'increase your unbuffed ' + conLink + before;
                 return ['',
                         'The ' + conLink + ' of each party member, ' +
                         'including you, will be increased by ' +
@@ -2593,14 +2596,10 @@ cast: (user, target) ->
                         increase]; },
 
             'smash': function() { // Warrior - Brutal Smash
-/*
-XXX_SOON add effects of crit
-cast: (user, target) ->
-target.value += 2.5 * (user._statsComputed.str / (user._statsComputed.str + 50)) * user.fns.crit('con')
-user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.party.quest.key
-*/
-                var inc = 2.5 * computedStats.str / (computedStats.str + 50);
-                inc = Math.round(inc * 100) / 100;
+                // XXX_SOON add effects of crit
+                var bonus = computedStats.str;
+                var inc = Math.round(
+                        diminishingReturns(bonus, 2.5, 35) * 100) / 100;
                 var effects = 'Your task\'s ' + taskValueLink +
                               ' will be increased (made less red) by ' +
                               inc + ' points.';
@@ -2620,8 +2619,8 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                         'to-do.<br />The "Task Overview" section will show ' +
                         'you your reddest tasks (sort the table by value).';
                 if ((quest.content && quest.content.boss) || tavernBoss) {
-                    var questIncrease = Math.ceil(computedStats.str * 0.2);
-                    var emStarted = false;
+                    var questIncrease = Math.ceil(
+                            diminishingReturns(bonus, 55, 70));
                     var more = '';
                     effects += ' You will do ' +
                                questIncrease + ' damage to ' +
@@ -2646,19 +2645,21 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
 
             'defensiveStance': function() { // Warrior - Defensive Stance
                 var increase = 'To increase the effect of the skill, ' +
-                               'increase your ' + conLink + before;
+                               'increase your unbuffed ' + conLink + before;
+                var inc = Math.ceil(
+                        diminishingReturns(computedStatsNoBuffs.con, 40, 200));
                 return ['',
                         'Your ' + conLink + ' will increase from ' +
                         computedStats.con + ' to ' +
-                        (computedStats.con +
-                         Math.ceil(computedStats.con * .05)) + '.',
+                        (computedStats.con + inc) + '.',
                         conIncreaseDamageExplanation,
                         increase]; },
 
             'valorousPresence': function() { // Warrior - Valorous Presence
-                var inc = Math.ceil(computedStats.str * .05);
+                var inc = Math.ceil(
+                        diminishingReturns(computedStatsNoBuffs.str, 20, 200));
                 var increase = 'To increase the effect of the skill, ' +
-                               'increase your ' + strLink + before;
+                               'increase your unbuffed ' + strLink + before;
                 return ['',
                         'Each of your party members will have their ' +
                         strLink + ' increased by ' +
@@ -2669,9 +2670,11 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                         increase]; },
 
             'intimidate': function() { // Warrior - Intimidating Gaze
+                var inc = Math.ceil(
+                        diminishingReturns(computedStatsNoBuffs.con, 24, 200));
                 var inc = Math.ceil(computedStats.con * .03);
                 var increase = 'To increase the effect of the skill, ' +
-                               'increase your ' + conLink + before;
+                               'increase your unbuffed ' + conLink + before;
                 return ['',
                         'Each of your party members will have their ' +
                         conLink + ' increased by ' +
@@ -2685,10 +2688,9 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                 var bluestTaskName = bluestTask.text;
                 var bluestTaskType = bluestTask.typePretty;
                 var currentValue   = bluestTask.value;
-                var tempValue = (currentValue < 0) ? 1 : currentValue + 2;
-                var bonus = tempValue + computedStats.per * 0.5;
-                var inc = 25 * (bonus / (bonus + 75));
-                inc = Math.floor(inc * 100) / 100;
+                var bonus = calculateBonus(currentValue, computedStats.per);
+                var inc = Math.round(
+                        diminishingReturns(bonus, 25, 75) * 100) / 100;
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + perLink + before;
                 return ['your bluest task',
@@ -2701,38 +2703,24 @@ user.party.quest.progress.up += Math.ceil(user._statsComputed.str * .2) if user.
                         increase]; },
 
             'backStab': function() { // Rogue - Backstab
-/*
-XXX_SOON add effects of crit
-      cast: (user, target) ->
-        _crit = user.fns.crit('str', .3)
-        target.value += _crit * .03
-        bonus =  (if target.value < 0 then 1 else target.value+1) * _crit
-        user.stats.exp += bonus
-        user.stats.gp += bonus
-*/
+                // XXX_SOON add effects of crit
                 var bluestTaskName = bluestTask.text;
                 var bluestTaskType = bluestTask.typePretty;
                 var currentValue   = bluestTask.value;
-                var newValue = currentValue + .03;
-                var bonus = (newValue < 0) ? 1 : newValue + 1;
-                var xpBonus = Math.floor(bonus * 10) / 10;
-                var gpBonus = Math.floor(bonus * 100) / 100;
-                var increase = 'You cannot increase the effects of the ' +
-                               'skill by increasing your attributes unless ' +
-                               'you get a critical hit. To increase the ' +
-                               'chance and power of a critical hit, ' +
-                               'increase your ' + strLink + ' before casting ' +
-                               'the skill.';
+                var bonus = calculateBonus(currentValue, computedStats.str);
+                var xpBonus = Math.round(
+                        diminishingReturns(bonus, 75, 50) * 100) / 100;
+                var gpBonus = Math.round(
+                        diminishingReturns(bonus, 18, 75) * 100) / 100;
+                var increase = 'To increase the effect of the skill, ' +
+                               'increase your ' + strLink + before;
                 return ['your bluest task',
                         'This skill is best cast on your ' +
                         '<span class="taskName">' +
                         bluestTaskName + '</span> ' +
-                        bluestTaskType + '. The task\'s ' +
-                        taskValueLink + ' will be changed from ' +
-                        (Math.round(currentValue * 100)/100) + ' to ' +
-                        (Math.round(newValue * 100)/100) + '. You will gain ' +
-                        xpBonus + ' XP and ' +
-                        gpBonus + ' GP.',
+                        bluestTaskType + '. You will gain ' +
+                        gpBonus + ' GP and ' +
+                        xpBonus + ' XP.',
                         'There is a 30% or greater chance of a critical hit ' +
                         'which will increase your XP and GP ' +
                         'gained by an amount based on your ' +
@@ -2740,10 +2728,11 @@ XXX_SOON add effects of crit
                         increase]; },
 
             'toolsOfTrade': function() { // Rogue
-                var inc = Math.ceil(computedStats.per * 0.03);
+                var inc = Math.ceil(
+                        diminishingReturns(computedStatsNoBuffs.per, 100, 50));
                 var per = computedStats.per + inc;
                 var increase = 'To increase the effect of the skill, ' +
-                               'increase your ' + perLink + before;
+                               'increase your unbuffed ' + perLink + before;
                 return ['',
                         'The ' + perLink + ' of each party member, ' +
                         'including you, will be increased by ' +
@@ -2754,7 +2743,8 @@ XXX_SOON add effects of crit
 
             'stealth': function() { // Rogue - Stealth
                 var stealth = user.stats.buffs.stealth;
-                var avoid = Math.ceil(dailies.length * computedStats.per / 100);
+                var avoid = Math.ceil(diminishingReturns(
+                        computedStats.per, dailies.length * 0.64, 55));
                 var effects;
                 if (stealth) {
                     effects = 'You have already cast stealth today, ' +
@@ -2773,9 +2763,7 @@ XXX_SOON add effects of crit
                     wiki('Boss', 'boss') + ' ' +
                     wiki('Quests', 'quest') +
                     ', the dailies will not hurt your fellow quest' +
-                    ' participants. Note that stealth is used up by ' +
-                    wiki('Dailies#Grey_Dailies', 'Grey Dailies') +
-                    ' as well as by dailies due today!';
+                    ' participants.';
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + perLink + before;
                 return ['',
@@ -3923,7 +3911,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
             var obj = content.gear.flat[key];
             name = obj.text || key;
             if (options && options.nameOnly) {
-        return name;
+          return name;
             }
 
             if (name == 'Mustaine\'s Milestone Mashing Morning Star') {
@@ -3971,29 +3959,78 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
 }
 
 
-function computeStats() {
+function computeStats(withBuffs) {
+    // XXX make this be less hideously inefficient
     var computedStats = [];
-    computedStats['con'] = computeStat('con');
-    computedStats['int'] = computeStat('int');
-    computedStats['per'] = computeStat('per');
-    computedStats['str'] = computeStat('str');
+    computedStats['con'] = computeStat('con', withBuffs, false);
+    computedStats['int'] = computeStat('int', withBuffs, false);
+    computedStats['per'] = computeStat('per', withBuffs, false);
+    computedStats['str'] = computeStat('str', withBuffs, false);
+
+    computedStats['details'] = {};
+    computedStats.details['con'] = computeStat('con', withBuffs, true);
+    computedStats.details['int'] = computeStat('int', withBuffs, true);
+    computedStats.details['per'] = computeStat('per', withBuffs, true);
+    computedStats.details['str'] = computeStat('str', withBuffs, true);
+    computedStats.detailsPretty = {};
+
+    computedStats.detailsPretty['con'] = 
+            prettifyStats(computedStats.details['con']);
+    computedStats.detailsPretty['int'] =
+            prettifyStats(computedStats.details['int']);
+    computedStats.detailsPretty['per'] =
+            prettifyStats(computedStats.details['per']);
+    computedStats.detailsPretty['str'] =
+            prettifyStats(computedStats.details['str']);
+
     return computedStats;
 
-    function computeStat(stat) {
+    function computeStat(stat, withBuffs, wantDetails) {
+        var details = {};
         var level = (user.stats.lvl > 101) ? 101 : user.stats.lvl;
-        var computed = user.stats[stat]
-                     + user.stats.buffs[stat]
-                     + ((level - 1) / 2);
+        details['allocated'] = user.stats[stat];
+        if (withBuffs) {
+            details['buffs'] = user.stats.buffs[stat];
+        }
+        else {
+            details['buffs'] = 0;
+        }
+        details['level']     = ((level - 1) / 2);
+        var computed = details['allocated']
+                     + details['buffs']
+                     + details['level'];
         // get appropriate stat for each piece of Battle Gear:
+        details['equipment']  = 0;
+        details['classBonus'] = 0;
         for(var key in equippedKeys) {
             var obj = equippedKeys[key];
             var value = obj[stat];
+            details['equipment'] += value;
             if (obj.klass == userKlass || obj.specialClass == userKlass ) {
+                details['classBonus'] += value * 0.5;
                 value *= 1.5;
             }
             computed += value;
         }
-        return computed;
+        if (wantDetails) {
+            return details;
+        }
+        else {
+            return computed;
+        }
+    }
+
+    function prettifyStats(details) {
+        var pretty = '';
+        var items = ['level', 'equipment', 'classBonus', 'allocated', 'buffs'];
+        var names = ['Level', 'Equipment', 'Class Bonus', 'Allocated', 'Buffs'];
+        for (var i=0,ic=items.length; i<ic; i++) {
+            if (pretty) {
+                pretty += '; &nbsp;';
+            }
+            pretty += names[i] + ': ' + details[ items[i] ];
+        }
+        return '(' + pretty + ')';
     }
 }
 
@@ -4008,6 +4045,24 @@ function diminishingReturns(bonus, max, halfway) {
     }
     return max * bonus / (bonus + halfway);
 }
+
+
+function calculateBonus(value, stat, crit, stat_scale) {
+    if (! crit) {
+        crit = 1;
+    }
+    if (! stat_scale) {
+        stat_scale = 0.5;
+    }
+    if (value < 0) {
+        value = 1;
+    }
+    else {
+        value += 1;
+    }
+    return value + stat * stat_scale * crit;
+}
+
 } // end of parseData() and its nested functions
 });
 </script>
@@ -4551,6 +4606,9 @@ ul#tableOfContents > li {
     width: 4em;
     font-weight: normal;
 }
+#skillsAndBuffsSection ul li .details {
+    font-weight: normal;
+}
 #skillsAndBuffsSection ul.attributes li {
     margin-left: 5em;
     margin-bottom: 0.5em;
@@ -4772,7 +4830,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v4.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.0)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4807,6 +4865,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>5.0 <span class="date">2015-05-02</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>The <strong>Skills and Buffs</strong> section has been updated for the <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/Skills_Rebalancing_and_Other_Changes">new skills</a>. It might be unreliable! I am still testing it with various classes and attributes. Please tell me if you notice errors.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>4.1 <span class="date">2015-05-01</span></dt>
         <dd><ul>
             <li>Features:
@@ -4815,7 +4882,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>4.0 <span class="date">2015-04-05</span></dt>
         <dd><ul>
             <li>Features:
@@ -4835,7 +4901,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>3.7 <span class="date">2015-01-09</span></dt>
         <dd><ul>
             <li>Features:
