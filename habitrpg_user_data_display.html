@@ -2336,6 +2336,10 @@ wiki('Tavern', 'resting in the inn') +
         var title   = 'Skills and Buffs';
         var orderId = 'skillsAndBuffs';
         // sectionOpen = id; // TST
+        var html = '<p>This section is under maintenance. It will be back within 24 hours.</p>'; // TST
+        TOC[orderId]  = {'target': id, 'title':  title}; // TST
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html}; // TST
+		return; // TST
 
         var html = '<p>This section describes the skills you ';
         var more = false;
@@ -4768,7 +4772,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v4.0a)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v4.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4802,6 +4806,15 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>4.1 <span class="date">2015-05-01</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>The <strong>Skills and Buffs</strong> section has been temporarily removed while changes are made. It will be back within 24 hours.</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>4.0 <span class="date">2015-04-05</span></dt>
         <dd><ul>
