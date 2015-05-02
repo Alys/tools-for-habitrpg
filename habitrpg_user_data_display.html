@@ -921,11 +921,11 @@ function collateAndDisplayTaskData() {
             if (obj.repeat[today]) { // daily is due today
                 obj.dueToday = true;
             }
-            if (stealth > 0) { // user evades this daily
+
+            if (obj.dueToday && !obj.completed && stealth > 0) {
+                // user evades this daily
                 stealth--;
                 obj.stealthed = true;
-                // NB: HabitRPG's code uses up stealth on grey dailies as
-                // well as due dailies.
             }
 
             // calculate damage this daily will do:
@@ -4830,7 +4830,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.0)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4865,6 +4865,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>5.1 <span class="date">2015-05-02</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>The <strong>Dailies Incomplete</strong> section was reporting stealth Dailies incorrectly. It should be correct now.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>5.0 <span class="date">2015-05-02</span></dt>
         <dd><ul>
             <li>Features:
@@ -4873,7 +4882,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>4.1 <span class="date">2015-05-01</span></dt>
         <dd><ul>
             <li>Features:
