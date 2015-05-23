@@ -2375,8 +2375,9 @@ wiki('Tavern', 'resting in the inn') +
                 ' or attribute points. Buffs that you have already gained' +
                 ' will not make those skills stronger.</p>';
 
-        var nowMP  = Math.round(user.stats.mp  * 10) / 10;
-        var maxMP  = 2 * computedStats['int'] + 30;
+        var nowMP        = Math.round(user.stats.mp  * 10) / 10;
+        var maxMP        = 2 * computedStats['int'] + 30;
+        var maxMPNoBuffs = 2 * computedStatsNoBuffs['int'] + 30; // XXX add perfect day buff
         var cronMP = (maxMP > 100) ? maxMP/10 : 10;
         // XXX add unbuffed stats, put into table, add attribute links
         html += '<p>Your current ' +
@@ -2402,12 +2403,12 @@ wiki('Tavern', 'resting in the inn') +
                 '<li><label>maximum MP:</label> ' +
                      ((maxMP < 100) ? '&nbsp;&nbsp;' : '') +
                        maxMP + '</li>' +
-                '<li><label>MP gained at cron:</label> ' +
-                     ((cronMP < 100) ? '&nbsp;&nbsp;' : '') +
-                       cronMP +
-                       ' <span class="details">' +
-                       '(if all your due Dailies are completed!)' +
-                       '</span></li>' +
+                // '<li><label>MP gained at cron:</label> ' + // XXX uncomment when maxMPNoBuffs is fixed
+                     // ((cronMP < 100) ? '&nbsp;&nbsp;' : '') +
+                       // cronMP +
+                       // ' <span class="details">' +
+                       // '(if all your due Dailies are completed!)' +
+                       // '</span></li>' +
                 '<li><label>current MP:</label> ' +
                      ((nowMP < 100) ? '&nbsp;&nbsp;' : '') +
                        nowMP + '</li>' +
@@ -2449,7 +2450,7 @@ wiki('Tavern', 'resting in the inn') +
                 var bluestTaskType = bluestTask.typePretty;
                 var currentValue   = bluestTask.value;
                 var tempValue = Math.ceil(
-                        ((currentValue < 0) ? 1 : currentValue + 1) * 0.75);
+                        ((currentValue < 0) ? 1 : currentValue + 1) * 0.075);
                 var bonus = computedStats.int * tempValue;
                 var xpIncrease = diminishingReturns(bonus, 75);
                 var questIncrease = Math.ceil(computedStats.int * .1);
@@ -2528,9 +2529,8 @@ wiki('Tavern', 'resting in the inn') +
 
             'heal': function() { // Healer - Healing Light
                 var inc = (computedStats.con + computedStats.int + 5) * 0.075;
-                var health = Math.round((user.stats.hp + inc) * 10) / 10;
+                var health = user.stats.hp + inc;
                 if (health > 50) { health = 50; }
-                inc = Math.round(inc * 10) / 10;
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + conLink + ' or ' +
                                intLink + ' or both' + before;
@@ -2619,8 +2619,8 @@ wiki('Tavern', 'resting in the inn') +
                         'to-do.<br />The "Task Overview" section will show ' +
                         'you your reddest tasks (sort the table by value).';
                 if ((quest.content && quest.content.boss) || tavernBoss) {
-                    var questIncrease = Math.ceil(
-                            diminishingReturns(bonus, 55, 70));
+                    var questIncrease = Math.round(
+                            diminishingReturns(bonus, 55, 70) * 10) / 10;
                     var more = '';
                     effects += ' You will do ' +
                                questIncrease + ' damage to ' +
@@ -2672,7 +2672,6 @@ wiki('Tavern', 'resting in the inn') +
             'intimidate': function() { // Warrior - Intimidating Gaze
                 var inc = Math.ceil(
                         diminishingReturns(computedStatsNoBuffs.con, 24, 200));
-                var inc = Math.ceil(computedStats.con * .03);
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your unbuffed ' + conLink + before;
                 return ['',
@@ -2709,7 +2708,7 @@ wiki('Tavern', 'resting in the inn') +
                 var currentValue   = bluestTask.value;
                 var bonus = calculateBonus(currentValue, computedStats.str);
                 var xpBonus = Math.round(
-                        diminishingReturns(bonus, 75, 50) * 100) / 100;
+                        diminishingReturns(bonus, 75, 50) * 10) / 10;
                 var gpBonus = Math.round(
                         diminishingReturns(bonus, 18, 75) * 100) / 100;
                 var increase = 'To increase the effect of the skill, ' +
@@ -3987,7 +3986,7 @@ function computeStats(withBuffs) {
 
     function computeStat(stat, withBuffs, wantDetails) {
         var details = {};
-        var level = (user.stats.lvl > 101) ? 101 : user.stats.lvl;
+        var level = (user.stats.lvl > 100) ? 100 : user.stats.lvl;
         details['allocated'] = user.stats[stat];
         if (withBuffs) {
             details['buffs'] = user.stats.buffs[stat];
@@ -3995,7 +3994,7 @@ function computeStats(withBuffs) {
         else {
             details['buffs'] = 0;
         }
-        details['level']     = ((level - 1) / 2);
+        details['level']     = Math.floor(level / 2);
         var computed = details['allocated']
                      + details['buffs']
                      + details['level'];
@@ -4830,7 +4829,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.2)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4864,6 +4863,14 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+        <dt>5.2 <span class="date">2015-05-19</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>The <strong>Skills and Buffs</strong> section had a few errors. There might be more. Thanks very much to the people who have reported problems so far!</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>5.1 <span class="date">2015-05-02</span></dt>
         <dd><ul>
@@ -4873,7 +4880,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>5.0 <span class="date">2015-05-02</span></dt>
         <dd><ul>
             <li>Features:
