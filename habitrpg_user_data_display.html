@@ -2003,37 +2003,39 @@ randomTodoHtml
             var obj = dailies[i];
             obj['historyItems'] = {};
             var previousValue = null;
-            for (var j=0,jc=obj.history.length; j<jc; j++) {
-                // Get the date that is recorded in this history entry
-                // for this daily:
-                var historyDate = new Date(obj.history[j].date);
-                // Subtract one day from that date because the value assigned
-                // to this history entry comes from the action that was
-                // done to the daily on the PREVIOUS day -- i.e., if you
-                // tick off a daily, then after the cron time (i.e., on the
-                // NEXT day), the daily's value will be increased and that
-                // new value will be recorded with the new day's date:
-                historyDate.setHours(historyDate.getHours() - 24);
-                var formattedDate = myDateConverter(historyDate);
-                var value = obj.history[j].value;
-                var success = '-'; // default (grey daily or no data)
-                var status = 'neutral'; // default (grey daily or no data)
-                if ( (previousValue === null && value > 0) ||
-                     (previousValue !== null && value > previousValue) ) {
-                    success = '✓'; // user did the daily
-                    status = 'safe';
+            if (obj.history) {
+                for (var j=0,jc=obj.history.length; j<jc; j++) {
+                    // Get the date that is recorded in this history entry
+                    // for this daily:
+                    var historyDate = new Date(obj.history[j].date);
+                    // Subtract one day from that date because the value assigned
+                    // to this history entry comes from the action that was
+                    // done to the daily on the PREVIOUS day -- i.e., if you
+                    // tick off a daily, then after the cron time (i.e., on the
+                    // NEXT day), the daily's value will be increased and that
+                    // new value will be recorded with the new day's date:
+                    historyDate.setHours(historyDate.getHours() - 24);
+                    var formattedDate = myDateConverter(historyDate);
+                    var value = obj.history[j].value;
+                    var success = '-'; // default (grey daily or no data)
+                    var status = 'neutral'; // default (grey daily or no data)
+                    if ( (previousValue === null && value > 0) ||
+                         (previousValue !== null && value > previousValue) ) {
+                        success = '✓'; // user did the daily
+                        status = 'safe';
+                    }
+                    else if ((previousValue === null && value < 0) ||
+                             (previousValue !== null && value < previousValue)) {
+                        success = 'x'; // user did not do the daily
+                        status = 'danger';
+                    }
+                    obj['historyItems'][formattedDate] = [];
+                    obj['historyItems'][formattedDate]['value'] = success;
+                            // + '<br />' + (Math.round(value * 10) / 10); // TST
+                    obj['historyItems'][formattedDate]['status'] = status;
+                    allDates[formattedDate] = true;
+                    previousValue = value;
                 }
-                else if ( (previousValue === null && value < 0) ||
-                          (previousValue !== null && value < previousValue) ) {
-                    success = 'x'; // user did not do the daily
-                    status = 'danger';
-                }
-                obj['historyItems'][formattedDate] = [];
-                obj['historyItems'][formattedDate]['value'] = success;
-                        // + '<br />' + (Math.round(value * 10) / 10); // TST
-                obj['historyItems'][formattedDate]['status'] = status;
-                allDates[formattedDate] = true;
-                previousValue = value;
             }
         }
         var allDatesInOrder = Object.keys(allDates).sort().reverse();
@@ -2529,7 +2531,7 @@ wiki('Tavern', 'resting in the inn') +
 
             'heal': function() { // Healer - Healing Light
                 var inc = (computedStats.con + computedStats.int + 5) * 0.075;
-                var health = user.stats.hp + inc;
+                var health = Math.round((user.stats.hp + inc) * 10) / 10;
                 if (health > 50) { health = 50; }
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + conLink + ' or ' +
@@ -4829,7 +4831,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.2a)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4868,6 +4870,7 @@ ul#tableOfContents > li {
             <li>Bug fix:
                 <ul>
                     <li>The <strong>Skills and Buffs</strong> section had a few errors. There might be more. Thanks very much to the people who have reported problems so far!</li>
+                    <li>Version 5.2a: add rounding for health for Healing Light and allow Dailies' history entries to be null.</li>
                 </ul>
             </li>
         </ul></dd>
