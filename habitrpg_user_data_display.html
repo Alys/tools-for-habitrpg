@@ -451,7 +451,9 @@ function formatAndDisplayDASHBOARD() {
     var keys = ['currentHealth', 'dailiesIncomplete', 'damageToUser',
                 'damageToParty', 'questProgress', 'questProgressSecond',
                 'todosDated', 'dropsToday', 'sleeping'];
-    var html = '<ul>';
+    // var html = '<ul>';
+    var html = '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
+    html += '<ul>';
 
     for (var i=0,ic=keys.length; i<ic; i++) {
         var data = DASHBOARD[keys[i]];
@@ -1735,6 +1737,7 @@ randomTodoHtml
             }
         }
         else {
+            html += '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
             html += '<p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span id="damageDailiesExplanationToggle" class="showHideToggle" data-target="damageDailiesExplanation" data-linktext="explanation">show explanation</span></p><ul id="damageDailiesExplanation" class="padded hide"><li>These estimates have been accurate during testing but your usage of HabitRPG might involve factors that were not considered, and so this information cannot be guaranteed to be correct.</li><li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you will not die.</li><li>If you have not logged in to HabitRPG for more than a day, the damage that you (and your fellow quest participants) will take will be <span class="highlight">much greater</span> than shown here.</li><li class="showHideToggle lowlight" data-target="damageDailiesExplanation" data-resettoggletext="damageDailiesExplanationToggle" style="list-style-type: none; padding: 8px 0 20px 0">hide explanation</li></ul>';
             var damageToUser  = 0;
             var damageToParty = 0;
@@ -1865,6 +1868,7 @@ randomTodoHtml
             return;
         }
         var html = '';
+        html += '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
         if (dailiesIncomplete.length > 0) {
             html += '<p>The table below shows the dailies that are due ' +
                     'today and have not yet been completed. ';
@@ -4835,7 +4839,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.2b)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.3)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4869,6 +4873,12 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>5.3 <span class="date">2015-06-12</span></dt>
+        <dd><ul>
+            <li>Added warning message that this tool hasn't yet been modified for the new Dailies options, "Start Date" and "Every X Days".</li>
+        </ul></dd>
+
         <dt>5.2 <span class="date">2015-05-19</span></dt>
         <dd><ul>
             <li>Bug fix:
@@ -4879,7 +4889,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>5.1 <span class="date">2015-05-02</span></dt>
         <dd><ul>
             <li>Bug fix:
