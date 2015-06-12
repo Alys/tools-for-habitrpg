@@ -3732,50 +3732,52 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
             var allItems = []; // currently just for testing
             var equipmentObjs = [];
             $.each(equipmentKeys, function(index,key){
-                var obj = adjustEquipmentObject(key);
+                if (content.gear.flat[key]) {
+                    var obj = adjustEquipmentObject(key);
 
-                // identify equipment already being worn:
-                if (obj.beingWorn) {
-                    obj.text += ' *';
-                }
+                    // identify equipment already being worn:
+                    if (obj.beingWorn) {
+                        obj.text += ' *';
+                    }
 
-                // categorise the item's quality according to the stats it
-                // gives ('best', 'middling', 'stats-free'):
-                if ((obj.con + obj.int + obj.per + obj.str) == 0) {
-                    obj['quality'] = 'stats-free';
-                }
-                else {
-                    // Use item's stats to work out if it's the best we've
-                    // found so far for this type, and if so, record its data
-                    // (overwriting previously-found, less-good items).
-                    // Also check to see how many kinds of attributes it
-                    // gives - if more than two, we want it regardless of
-                    // whether any of the attributes are best (gear that gives
-                    // three or four attributes can be used for balanced stats).
-                    var attributeCount = 0;
-                    $.each(['con','int','per','str'], function(index, attr){
-                        // NB: the adjustment above from 'weapon' to
-                        // 'weaponTwoHanded' lets us capture the best gear
-                        // for both one-hand and two-hand weapons:
-                        if (obj[attr] > topEquipment[obj.type][attr]['stat']) {
-                            topEquipment[obj.type][attr]['stat'] = obj[attr];
-                            topEquipment[obj.type][attr]['key']  = key;
-                            topEquipment[obj.type][attr]['obj']  = obj;
-                        }
-                        if (obj[attr] > 0) {
-                            attributeCount++
-                        }
-                    });
-                    if (attributeCount > 2) { // boosts more than 2 attributes
-                        obj['quality'] = 'best';
+                    // categorise the item's quality according to the stats it
+                    // gives ('best', 'middling', 'stats-free'):
+                    if ((obj.con + obj.int + obj.per + obj.str) == 0) {
+                        obj['quality'] = 'stats-free';
                     }
                     else {
-                        obj['quality'] = 'middling'; // might be changed to
-                            // 'best' later when we have finished collating
-                            // topEquipment
+                        // Use item's stats to work out if it's the best we've
+                        // found so far for this type, and if so, record its data
+                        // (overwriting previously-found, less-good items).
+                        // Also check to see how many kinds of attributes it
+                        // gives - if more than two, we want it regardless of
+                        // whether any of the attributes are best (gear that gives
+                        // three or four attributes can be used for balanced stats).
+                        var attributeCount = 0;
+                        $.each(['con','int','per','str'], function(index, attr){
+                            // NB: the adjustment above from 'weapon' to
+                            // 'weaponTwoHanded' lets us capture the best gear
+                            // for both one-hand and two-hand weapons:
+                            if (obj[attr] > topEquipment[obj.type][attr]['stat']) {
+                                topEquipment[obj.type][attr]['stat'] = obj[attr];
+                                topEquipment[obj.type][attr]['key']  = key;
+                                topEquipment[obj.type][attr]['obj']  = obj;
+                            }
+                            if (obj[attr] > 0) {
+                                attributeCount++
+                            }
+                        });
+                        if (attributeCount > 2) { // boosts more than 2 attributes
+                            obj['quality'] = 'best';
+                        }
+                        else {
+                            obj['quality'] = 'middling'; // might be changed to
+                                // 'best' later when we have finished collating
+                                // topEquipment
+                        }
                     }
+                    equipmentObjs.push(obj);
                 }
-                equipmentObjs.push(obj);
             });
 
             // mark all top equipment as being of the 'best' quality:
@@ -3910,30 +3912,32 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
         var extra = '';  // e.g., for gear: klass and type (weapon/armor/etc)
         if (itemType == 'gear') {
             var obj = content.gear.flat[key];
-            name = obj.text || key;
-            if (options && options.nameOnly) {
-          return name;
-            }
+            if (obj) {
+                name = obj.text || key;
+                if (options && options.nameOnly) {
+              return name;
+                }
 
-            if (name == 'Mustaine\'s Milestone Mashing Morning Star') {
-                name = '<abbr title="' + name + '">Mashing Morning Star</a>';
-            }
-            if (name == 'Stephen Weber\'s Shaft of the Dragon') {
-                name = '<abbr title="' + name + '">Shaft of the Dragon</a>';
-            }
+                if (name == 'Mustaine\'s Milestone Mashing Morning Star') {
+                    name = '<abbr title="' + name + '">Mashing Morning Star</a>';
+                }
+                if (name == 'Stephen Weber\'s Shaft of the Dragon') {
+                    name = '<abbr title="' + name + '">Shaft of the Dragon</a>';
+                }
 
-            var type = obj.type;
-            if (type == 'head') { type = 'headwear'; }
-            extra = obj.klass;
-            if (obj.klass == 'special' && obj.specialClass) {
-                extra += " " + obj.specialClass;
-            }
-            extra += " " + type;
-            if (options && options.includeStats) {
-                extra += '; <span class="stats">'
-                       + prettyPrintStats(obj,
-                            {'includeGold':(options.includeGold || false)} )
-                       + '</span>';
+                var type = obj.type;
+                if (type == 'head') { type = 'headwear'; }
+                extra = obj.klass;
+                if (obj.klass == 'special' && obj.specialClass) {
+                    extra += " " + obj.specialClass;
+                }
+                extra += " " + type;
+                if (options && options.includeStats) {
+                    extra += '; <span class="stats">'
+                           + prettyPrintStats(obj,
+                                {'includeGold':(options.includeGold || false)} )
+                           + '</span>';
+                }
             }
         }
         var html = '<span class="item">' +
@@ -4831,7 +4835,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.2a)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.2b)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4871,6 +4875,7 @@ ul#tableOfContents > li {
                 <ul>
                     <li>The <strong>Skills and Buffs</strong> section had a few errors. There might be more. Thanks very much to the people who have reported problems so far!</li>
                     <li>Version 5.2a: add rounding for health for Healing Light and allow Dailies' history entries to be null.</li>
+                    <li>Version 5.2b: handle the case where the user has equipment that is not yet in production (e.g., staff testing new gear)</li>
                 </ul>
             </li>
         </ul></dd>
