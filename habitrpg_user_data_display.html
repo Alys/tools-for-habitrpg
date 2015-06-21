@@ -751,6 +751,7 @@ function collateAndDisplayTaskData() {
     var template = {'total':0, 'con':0, 'int':0, 'per':0, 'str':0};
     var countTasks = {
         'habits':          $.extend(true, {}, template),
+        'dailiesDue':      $.extend(true, {}, template),
         'dailies':         $.extend(true, {}, template),
         'todosIncomplete': $.extend(true, {}, template),
         'todosComplete':   $.extend(true, {}, template),
@@ -901,11 +902,17 @@ function collateAndDisplayTaskData() {
         var stealth = user.stats.buffs.stealth; // user avoids dailies' damage
         $.each(user.dailys, function(index, obj){
             fixDailiesDefaults(obj);
+            obj.dueToday = dailyIsDueToday(obj);
             modifyTaskProperties(obj);
+
             countTasks['dailies']['total']++;
             countTasks['dailies'][obj.attribute]++;
             countTasks['statsTotals'][obj.attribute]++;
             countTasks['statsTotals']['total']++;
+            if (obj.dueToday) {
+                countTasks['dailiesDue']['total']++;
+                countTasks['dailiesDue'][obj.attribute]++;
+            }
             if (! exampleFound) {
                 if (obj.attribute != 'str') {
                     exampleTaskType  = 'dailies';
@@ -919,7 +926,6 @@ function collateAndDisplayTaskData() {
             }
 
             obj.orderDailies = countTasks['dailies']['total'];
-            obj.dueToday = dailyIsDueToday(obj);
 
             if (obj.dueToday && !obj.completed && stealth > 0) {
                 // user evades this daily
@@ -1218,7 +1224,7 @@ function collateAndDisplayTaskData() {
                 var startDateDescription = '';
                 if (moment(obj.startDate).isAfter(todayUser)) {
                     startDateDescription = '<br style="line-height:150%;" />' +
-                            taskPartHTML(true, 'starts ' +
+                            taskPartHTML(obj.dueToday, 'starts ' +
                                 moment(obj.startDate).format('YYYY-MM-DD'),
                                 true);
                 }
@@ -1233,7 +1239,7 @@ function collateAndDisplayTaskData() {
                            startDateDescription;
                 }
                 else if (obj.frequency === 'daily') {
-                        return taskPartHTML(true,
+                        return taskPartHTML(obj.dueToday,
                                 'every ' + obj.everyX + ' days') +
                                 startDateDescription;
                 }
@@ -1465,7 +1471,8 @@ randomTodoHtml
         html += ' Note that attributes on tasks are only relevant if you ' +
             'have task-based ' + wiki('Automatic Allocation')
             + ' turned on.</p><table><tr>' +
-            '<th>Attribute</th><th>Habits</th><th>Dailies</th>' +
+            '<th>Attribute</th><th>Habits</th>' +
+            '<th>Dailies - Due</th><th>Dailies - All</th>' +
             '<th>To-Dos - Incomplete</th><th>To-Dos - Complete *</th>' +
             '<th>To-Dos - All</th><th>Total Tasks for each Attribute</th>' +
             '</tr>';
@@ -1476,8 +1483,9 @@ randomTodoHtml
                     ((attr.length==3) ? attr.toUpperCase()
                                       : upperCaseFirst(attr))
                     '</td>';
-            $.each(['habits','dailies','todosIncomplete','todosComplete',
-                    'todosAll','statsTotals'], function(index, type){
+            $.each(['habits','dailiesDue','dailies',
+                    'todosIncomplete','todosComplete','todosAll',
+                    'statsTotals'], function(index, type){
                 html += '<td>' + countTasks[type][attr] + '</td>';
             });
             html += '</tr>';
@@ -1486,8 +1494,8 @@ randomTodoHtml
             '<p class="lowlight"><strong>*</strong> Your completed to-dos ' +
             'are automatically archived after three days to improve ' +
             'HabitRPG\'s speed and so most of them cannot be seen in ' +
-            'HabitRPG. However, at least some of them can be exported ' +
-            'using the ' + wiki('Data Export', '"User Data" export option') +
+            'HabitRPG. However, they can be exported using the ' +
+            wiki('Data Export', '"User Data" export option') +
             '. This total number of completed ' +
             'to-dos includes those archived ones.</p>' +
             '<p style="margin-top:2em">You have <span class="highlight"> ' +
@@ -4951,6 +4959,7 @@ ul#tableOfContents > li {
                     <li>The <strong>XXX </strong> section 
 </li>
                     <li>In the <strong>Task Overview</strong> section, for Dailies, the "task" column now shows the value for the "Every X days" option and the start date if the Daily starts after today.</li>
+                    <li>The <strong>Task Statistics</strong> section now contains a column showing the number of Dailies due today.</li>
                 </ul>
             </li>
             <li>Code:
