@@ -53,6 +53,7 @@ you'll find there.
     <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css" rel="stylesheet" type="text/css" />
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
@@ -120,7 +121,6 @@ $.mockjax({
 });
 */
 
-/* TST - FOR TESTING:
 // Use this section if you have a local webserver set up to handle the requests.
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -131,13 +131,14 @@ apiToken          = 'null';
 userId            = 'test';
 userId            = 'work';
 userId            = 'home';
+/* TST - FOR TESTING:
 */
 
-/* TST - FOR TESTING:
 $('body').css({'background-color':'#C4B4A4'});
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
+/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -375,6 +376,8 @@ function parseData() {
         quest = $.extend({}, user.party.quest);
         quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
     }
+    var customDayStart = user.preferences.dayStart || 0; // CDS
+    var todayUser = moment().subtract(customDayStart, 'hours'); // XXX include timezone?
 
     var tavernBoss = tavern.quest && tavern.quest.active; // true/false
 
@@ -575,7 +578,7 @@ function formatAndDisplayMAIN() {
 }
 
 
-function myDateConverter(date, style) {
+function myDateConverter(date, style) { // XXX_SOON replace with moment
     if (typeof date === 'string' || typeof date === 'number') {
         date = new Date(date);
     }
@@ -893,15 +896,11 @@ function collateAndDisplayTaskData() {
         var dailies = [];
         var valueMin = -47.27; // task values are capped ...
         var valueMax =  21.27; // ... for some purposes
-        var today = new Date();
-        if (user.preferences.dayStart) { // Custom Day Start (CDS)
-            today.setHours(today.getHours() - user.preferences.dayStart);
-        }
-        today = ["su","m","t","w","th","f","s"][today.getDay()];
         var conBonus = 1 - (computedStats['con'] / 250);
         if (conBonus < 0.1) { conBonus = 0.1; }
         var stealth = user.stats.buffs.stealth; // user avoids dailies' damage
         $.each(user.dailys, function(index, obj){
+            fixDailiesDefaults(obj);
             modifyTaskProperties(obj);
             countTasks['dailies']['total']++;
             countTasks['dailies'][obj.attribute]++;
@@ -920,9 +919,7 @@ function collateAndDisplayTaskData() {
             }
 
             obj.orderDailies = countTasks['dailies']['total'];
-            if (obj.repeat[today]) { // daily is due today
-                obj.dueToday = true;
-            }
+            obj.dueToday = dailyIsDueToday(obj);
 
             if (obj.dueToday && !obj.completed && stealth > 0) {
                 // user evades this daily
@@ -988,6 +985,44 @@ function collateAndDisplayTaskData() {
         });
         return dailies;
 
+
+        function fixDailiesDefaults(task) {
+            // Ensure that all repeat options make sense. At least one bug
+            // can result in bad repeat options:
+            // github.com/HabitRPG/habitrpg/issues/2334#issuecomment-66168155
+
+            // If we find unexpected or missing repeat values, we set a flag
+            // that causes the Daily to be treated as due (safer than treating
+            // as not due - better to let the user think they will take more
+            // damage than they actually do).
+            task.forceDue = false;
+            if (!task.frequency ||
+                (task.frequency !== 'weekly' && task.frequency !== 'daily')) {
+                task.frequency = 'weekly';
+                task.forceDue = true;
+            }
+            if (task.frequency === 'weekly') { // Day of Week
+                if (!task.repeat) {
+                    task.repeat = { "su": true, "s": true, "f": true,
+                         "th": true, "w": true, "t": true, "m": true };
+                    task.forceDue = true;
+                }
+            }
+            else if (task.frequency === 'daily') { // Every X Days
+                if (typeof task.everyX === 'undefined') { // can be zero
+                    task.everyX = 1;
+                    task.forceDue = true;
+                }
+            }
+
+            if (!task.startDate) {
+                // Not an error condition. It's acceptable to have no start
+                // date. HabitRPG's code and ours treats it as starting today.
+                // Hence we don't set forceDue.
+                task.startDate = todayUser.toISOString();
+            }
+        }
+
         function describeChecklist(task) {
             // Takes a task object. Returns an object describing aspects of the
             // task object's checklist (including whether it exists or not).
@@ -1002,6 +1037,29 @@ function collateAndDisplayTaskData() {
                 'exists': true,
                 'proportionDone': (countDone / task.checklist.length),
                 };
+        }
+
+        function dailyIsDueToday(task) {
+            // returns true if the Daily is due, false otherwise
+            if (task.forceDue) {
+                return true;
+            }
+            var startDate = moment(task.startDate);
+            if (startDate > todayUser) { // XXX test in all cases
+                return false;
+            }
+
+            if (task.frequency === 'weekly') { // Day of Week
+                var dayname = ["su","m","t","w","th","f","s"][todayUser.day()];
+                return task.repeat[dayname];
+            }
+            else if (task.frequency === 'daily') { // Every X Days // XXX test
+                var daysSinceTaskStart = startDate.diff(todayUser, 'days'); // XXX use startOfDay function (in td file) for both?
+                // console.log("startDate: " + startDate.add(10, 'hours').format('YYYY MM DD, HH:mm')); // TST
+                // console.log("todayUser: " + todayUser.format('YYYY MM DD, HH:mm')); // TST
+                // console.log("daysSinceTaskStart: " + daysSinceTaskStart); // TST
+                return (daysSinceTaskStart % task.everyX == 0);
+            }
         }
     }
 
@@ -1157,16 +1215,27 @@ function collateAndDisplayTaskData() {
                        taskPartHTML(obj.down, '&ndash;');
             }
             else if (obj.type == 'daily') {
-                if (obj.repeat) {
-                    // a bug means that the repeat data might not be there
-                    // https://github.com/HabitRPG/habitrpg/issues/2334#issuecomment-66168155
+                var startDateDescription = '';
+                if (moment(obj.startDate).isAfter(todayUser)) {
+                    startDateDescription = '<br style="line-height:150%;" />' +
+                            taskPartHTML(true, 'starts ' +
+                                moment(obj.startDate).format('YYYY-MM-DD'),
+                                true);
+                }
+                if (obj.frequency === 'weekly') {
                     return taskPartHTML(obj.repeat['su'], 'Su') +
                            taskPartHTML(obj.repeat['m' ], 'Mo') +
                            taskPartHTML(obj.repeat['t' ], 'Tu') +
                            taskPartHTML(obj.repeat['w' ], 'We') +
                            taskPartHTML(obj.repeat['th'], 'Th') +
                            taskPartHTML(obj.repeat['f' ], 'Fr') +
-                           taskPartHTML(obj.repeat['s' ], 'Sa');
+                           taskPartHTML(obj.repeat['s' ], 'Sa') +
+                           startDateDescription;
+                }
+                else if (obj.frequency === 'daily') {
+                        return taskPartHTML(true,
+                                'every ' + obj.everyX + ' days') +
+                                startDateDescription;
                 }
             }
             else if (obj.type == 'todo') {
@@ -1842,6 +1911,7 @@ randomTodoHtml
         var id      = 'dailiesIncompleteSection';
         var title   = 'Dailies Incomplete';
         var orderId = 'dailiesIncomplete';
+        sectionOpen = id; // TST
 
         if (sleeping) {
             return; // can't do dailies while resting in inn
@@ -4839,7 +4909,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v5.3)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v6.0)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4874,11 +4944,27 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>6.0 <span class="date">2015-06-21</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>The <strong>XXX </strong> section 
+</li>
+                    <li>In the <strong>Task Overview</strong> section, for Dailies, the "task" column now shows the value for the "Every X days" option and the start date if the Daily starts after today.</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>Added moment.js</li>
+                    <li>Some small refactoring, mostly because of moment.js. (So much more needed.)</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>5.3 <span class="date">2015-06-12</span></dt>
         <dd><ul>
             <li>Added warning message that this tool hasn't yet been modified for the new Dailies options, "Start Date" and "Every X Days".</li>
         </ul></dd>
-
         <dt>5.2 <span class="date">2015-05-19</span></dt>
         <dd><ul>
             <li>Bug fix:
