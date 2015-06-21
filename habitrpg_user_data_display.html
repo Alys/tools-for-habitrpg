@@ -121,6 +121,7 @@ $.mockjax({
 });
 */
 
+/* TST - FOR TESTING:
 // Use this section if you have a local webserver set up to handle the requests.
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
@@ -131,14 +132,13 @@ apiToken          = 'null';
 userId            = 'test';
 userId            = 'work';
 userId            = 'home';
-/* TST - FOR TESTING:
 */
 
+/* TST - FOR TESTING:
 $('body').css({'background-color':'#C4B4A4'});
 $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
-/* TST - FOR TESTING:
 */
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
@@ -456,12 +456,12 @@ function formatAndDisplayDASHBOARD() {
                 'todosDated', 'dropsToday', 'sleeping'];
     // var html = '<ul>';
     var html;
-	if (customDayStart === 0) {
-		html = '<p><span style="font-size:18px; color:orange" font-weight:bold">NOTE:</span> Dailies using the new "Start Date" and "Every X Days" options should now be reported correctly as due / not due and the estimates of damage caused by incomplete Dailies should also be correct. However, please be cautious when using that information for a few days, until you are confident it is accurate for your account. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</p>';
-	}
-	else {
-		html = '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: You are using a <a href="habitrpg.wikia.com/wiki/Custom_Day_Start">Custom Day Start</a> which means that HabitRPG and this tool might not be correctly handling any Dailies that use the new "Every X Days" option or that have a "Start Date" of today or tomorrow. The Dailies might not be correctly shown as due / not due and the estimate of damage caused by them might not be correct. This will be fixed soon in HabitRPG and here. Until this message is removed, please be cautious about using the damage information below to prevent death.</li>';
-	}
+    if (customDayStart === 0) {
+        html = '<p><span style="font-size:18px; color:orange" font-weight:bold">NOTE:</span> Dailies using the new "Start Date" and "Every X Days" options should now be reported correctly as due / not due and the estimates of damage caused by incomplete Dailies should also be correct. However, please be cautious when using that information for a few days, until you are confident it is accurate for your account. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</p>';
+    }
+    else {
+        html = '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: You are using a <a href="habitrpg.wikia.com/wiki/Custom_Day_Start">Custom Day Start</a> which means that HabitRPG and this tool might not be correctly handling any Dailies that use the new "Every X Days" option or that have a "Start Date" of today or tomorrow. The Dailies might not be correctly shown as due / not due and the estimate of damage caused by them might not be correct. This will be fixed soon in HabitRPG and here. Until this message is removed, please be cautious about using the damage information below to prevent death.</li>';
+    }
     html += '<ul>';
 
     for (var i=0,ic=keys.length; i<ic; i++) {
@@ -1245,9 +1245,9 @@ function collateAndDisplayTaskData() {
                            startDateDescription;
                 }
                 else if (obj.frequency === 'daily') {
-                        return taskPartHTML(obj.dueToday,
-                                'every ' + obj.everyX + ' days') +
-                                startDateDescription;
+                    return taskPartHTML(obj.dueToday,
+                            'every ' + obj.everyX + ' days') +
+                            startDateDescription;
                 }
             }
             else if (obj.type == 'todo') {
@@ -1820,7 +1820,6 @@ randomTodoHtml
             }
         }
         else {
-            // html += '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
             html += '<p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span id="damageDailiesExplanationToggle" class="showHideToggle" data-target="damageDailiesExplanation" data-linktext="explanation">show explanation</span></p><ul id="damageDailiesExplanation" class="padded hide"><li>These estimates have been accurate during testing but your usage of HabitRPG might involve factors that were not considered, and so this information cannot be guaranteed to be correct.</li><li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you will not die.</li><li>If you have not logged in to HabitRPG for more than a day, the damage that you (and your fellow quest participants) will take will be <span class="highlight">much greater</span> than shown here.</li><li class="showHideToggle lowlight" data-target="damageDailiesExplanation" data-resettoggletext="damageDailiesExplanationToggle" style="list-style-type: none; padding: 8px 0 20px 0">hide explanation</li></ul>';
             var damageToUser  = 0;
             var damageToParty = 0;
@@ -1925,7 +1924,7 @@ randomTodoHtml
         var id      = 'dailiesIncompleteSection';
         var title   = 'Dailies Incomplete';
         var orderId = 'dailiesIncomplete';
-        sectionOpen = id; // TST
+        // sectionOpen = id; // TST
 
         if (sleeping) {
             return; // can't do dailies while resting in inn
@@ -2427,7 +2426,6 @@ wiki('Tavern', 'resting in the inn') +
         var id      = 'skillsAndBuffsSection';
         var title   = 'Skills and Buffs';
         var orderId = 'skillsAndBuffs';
-        // sectionOpen = id; // TST
 
         var html = '<p>This section describes the skills you ';
         var more = false;
