@@ -377,7 +377,7 @@ function parseData() {
         quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
     }
     var customDayStart = user.preferences.dayStart || 0; // CDS
-    var todayUser = moment().subtract(customDayStart, 'hours'); // XXX include timezone?
+    var todayUser = moment().subtract(customDayStart, 'hours');
 
     var tavernBoss = tavern.quest && tavern.quest.active; // true/false
 
@@ -455,7 +455,13 @@ function formatAndDisplayDASHBOARD() {
                 'damageToParty', 'questProgress', 'questProgressSecond',
                 'todosDated', 'dropsToday', 'sleeping'];
     // var html = '<ul>';
-    var html = '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
+    var html;
+	if (customDayStart === 0) {
+		html = '<p><span style="font-size:18px; color:orange" font-weight:bold">NOTE:</span> Dailies using the new "Start Date" and "Every X Days" options should now be reported correctly as due / not due and the estimates of damage caused by incomplete Dailies should also be correct. However, please be cautious when using that information for a few days, until you are confident it is accurate for your account. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</p>';
+	}
+	else {
+		html = '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: You are using a <a href="habitrpg.wikia.com/wiki/Custom_Day_Start">Custom Day Start</a> which means that HabitRPG and this tool might not be correctly handling any Dailies that use the new "Every X Days" option or that have a "Start Date" of today or tomorrow. The Dailies might not be correctly shown as due / not due and the estimate of damage caused by them might not be correct. This will be fixed soon in HabitRPG and here. Until this message is removed, please be cautious about using the damage information below to prevent death.</li>';
+	}
     html += '<ul>';
 
     for (var i=0,ic=keys.length; i<ic; i++) {
@@ -1051,7 +1057,7 @@ function collateAndDisplayTaskData() {
                 return true;
             }
             var startDate = moment(task.startDate);
-            if (startDate > todayUser) { // XXX test in all cases
+            if (startDate > todayUser) {
                 return false;
             }
 
@@ -1059,7 +1065,7 @@ function collateAndDisplayTaskData() {
                 var dayname = ["su","m","t","w","th","f","s"][todayUser.day()];
                 return task.repeat[dayname];
             }
-            else if (task.frequency === 'daily') { // Every X Days // XXX test
+            else if (task.frequency === 'daily') { // Every X Days
                 var daysSinceTaskStart = startDate.diff(todayUser, 'days'); // XXX use startOfDay function (in td file) for both?
                 // console.log("startDate: " + startDate.add(10, 'hours').format('YYYY MM DD, HH:mm')); // TST
                 // console.log("todayUser: " + todayUser.format('YYYY MM DD, HH:mm')); // TST
@@ -1814,7 +1820,7 @@ randomTodoHtml
             }
         }
         else {
-            html += '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
+            // html += '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
             html += '<p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span id="damageDailiesExplanationToggle" class="showHideToggle" data-target="damageDailiesExplanation" data-linktext="explanation">show explanation</span></p><ul id="damageDailiesExplanation" class="padded hide"><li>These estimates have been accurate during testing but your usage of HabitRPG might involve factors that were not considered, and so this information cannot be guaranteed to be correct.</li><li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you will not die.</li><li>If you have not logged in to HabitRPG for more than a day, the damage that you (and your fellow quest participants) will take will be <span class="highlight">much greater</span> than shown here.</li><li class="showHideToggle lowlight" data-target="damageDailiesExplanation" data-resettoggletext="damageDailiesExplanationToggle" style="list-style-type: none; padding: 8px 0 20px 0">hide explanation</li></ul>';
             var damageToUser  = 0;
             var damageToParty = 0;
@@ -1946,7 +1952,7 @@ randomTodoHtml
             return;
         }
         var html = '';
-        html += '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
+        // html += '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
         if (dailiesIncomplete.length > 0) {
             html += '<p>The table below shows the dailies that are due ' +
                     'today and have not yet been completed. ';
@@ -4956,9 +4962,10 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>The <strong>XXX </strong> section 
-</li>
-                    <li>In the <strong>Task Overview</strong> section, for Dailies, the "task" column now shows the value for the "Every X days" option and the start date if the Daily starts after today.</li>
+                    <li>For people who are <strong>NOT</strong> using a <a href="habitrpg.wikia.com/wiki/Custom_Day_Start">Custom Day Start (CDS)</a> (i.e., CDS is zero), Dailies using the new <strong>Every X Days</strong> repeat and/or the new <strong>Start Date</strong> feature should now be correctly reported as due or not due, and the estimates of damage caused by incomplete Dailies should be correct. However, please be cautious when using that information for a few days, until you are confident it is accurate for your account. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</li>
+                    <li>For people who are using a <strong>Custom Day Start that is not zero</strong>, Dailies using the new <strong>Every X Days</strong> repeat might not be reported correctly. Dailies of any kind with a <strong>Start Date</strong> of today or tomorrow might not be reported correctly. The estimate of damage caused by those Dailies might not be correct. You do not need to report these problems to me. There's a bug in HabitRPG itself that is causing Start Dates to not be handled correctly when a CDS is used, and we need to sort that out before the Data Display Tool can be accurate.</li>
+                    <li>In case you are not sure whether you are using a <strong>Custom Day Start</strong>, an orange message across the top of the page will tell you if you are and will warn you about the potential problems.</li>
+                    <li>In the <strong>Task Overview</strong> section, for Dailies, the "task" column now shows the value for the "Every X days" option. It shows the start date if the Daily starts after today.</li>
                     <li>The <strong>Task Statistics</strong> section now contains a column showing the number of Dailies due today.</li>
                 </ul>
             </li>
