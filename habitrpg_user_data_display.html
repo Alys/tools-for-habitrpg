@@ -3956,6 +3956,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
             url = 'gear/';
             var timeTraveller = key.match(/_(mystery_3014)(..)/);
             var mystery       = key.match(/_(mystery.*)/);
+            var armoire       = key.match(/_armoire_/);
             var grandGala = key.match(/_special_(winter|spring|summer|fall)/);
             if (timeTraveller) {
                 // e.g., 'shield_mystery_301405':
@@ -3967,6 +3968,11 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
                 // e.g.,                           'armor_mystery_201402':
                 // 'gear/events/mystery_201402/shop_armor_mystery_201402.png',
                 url += 'events' + '/' + mystery[1] + '/shop_' + key;
+            }
+            else if (armoire) {
+                // e.g.,                  'head_armoire_gladiatorHelm':
+                // 'gear/armoire/shop/shop_head_armoire_gladiatorHelm.png
+                url += 'armoire/shop/shop_' + key;
             }
             else if (grandGala) {
                 // e.g.,                      'armor_special_fallHealer':
