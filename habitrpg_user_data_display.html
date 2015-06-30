@@ -377,7 +377,17 @@ function parseData() {
         quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
     }
     var customDayStart = user.preferences.dayStart || 0; // CDS
+
+    // Find the correct date for "today". If the user has a CDS set, then
+    // we need to subtract the CDS hour from the current date and time to
+    // see if today is actually "yesterday". E.g., if the CDS is 5am, and
+    // the user is using this tool at 4am on Monday, then the actual
+    // "HabitRPG day" is Sunday (not Monday) because the CDS time has not
+    // yet been reached; subtracting 5 hours from the current date and time
+    // gives us yesterday's date. We then ignore the time portion of the
+    // date because from now on we're comparing only days, not hours.
     var todayUser = moment().subtract(customDayStart, 'hours');
+    todayUser = todayUser.startOf('day');
 
     var tavernBoss = tavern.quest && tavern.quest.active; // true/false
 
@@ -1003,35 +1013,45 @@ function collateAndDisplayTaskData() {
             // can result in bad repeat options:
             // github.com/HabitRPG/habitrpg/issues/2334#issuecomment-66168155
 
+            // EDIT: IGNORE THIS COMMENT FOR NOW:
             // If we find unexpected or missing repeat values, we set a flag
             // that causes the Daily to be treated as due (safer than treating
             // as not due - better to let the user think they will take more
             // damage than they actually do).
-            task.forceDue = false;
+            //
+            // EDIT: While the HabitRPG api.shouldDo code and this code are
+            // being tweaked, we use the same behaviour here for Dailies that
+            // have incorrect or missing options. I.e., we treat the Dailies
+            // as not due because that is what HabitRPG does.
+
+            // task.forceDue = false;
+            task.forceNotDue = false;
             if (!task.frequency ||
                 (task.frequency !== 'weekly' && task.frequency !== 'daily')) {
                 task.frequency = 'weekly';
-                task.forceDue = true;
+                // task.forceDue = true;
+                task.forceNotDue = true;
             }
             if (task.frequency === 'weekly') { // Day of Week
                 if (!task.repeat) {
                     task.repeat = { "su": true, "s": true, "f": true,
                          "th": true, "w": true, "t": true, "m": true };
-                    task.forceDue = true;
+                    // task.forceDue = true;
+                    task.forceNotDue = true;
                 }
             }
             else if (task.frequency === 'daily') { // Every X Days
                 if (typeof task.everyX === 'undefined') { // can be zero
                     task.everyX = 1;
-                    task.forceDue = true;
+                    // task.forceDue = true;
+                    task.forceNotDue = true;
                 }
             }
-
             if (!task.startDate) {
                 // Not an error condition. It's acceptable to have no start
-                // date. HabitRPG's code and ours treats it as starting today.
+                // date and we treat it as starting today.
                 // Hence we don't set forceDue.
-                task.startDate = todayUser.toISOString();
+                task.startDate = todayUser;
             }
         }
 
@@ -1056,7 +1076,10 @@ function collateAndDisplayTaskData() {
             if (task.forceDue) {
                 return true;
             }
-            var startDate = moment(task.startDate);
+            if (task.forceNotDue) {
+                return false;
+            }
+            var startDate = moment(task.startDate).startOf('day');
             if (startDate > todayUser) {
                 return false;
             }
@@ -1066,10 +1089,7 @@ function collateAndDisplayTaskData() {
                 return task.repeat[dayname];
             }
             else if (task.frequency === 'daily') { // Every X Days
-                var daysSinceTaskStart = startDate.diff(todayUser, 'days'); // XXX use startOfDay function (in td file) for both?
-                // console.log("startDate: " + startDate.add(10, 'hours').format('YYYY MM DD, HH:mm')); // TST
-                // console.log("todayUser: " + todayUser.format('YYYY MM DD, HH:mm')); // TST
-                // console.log("daysSinceTaskStart: " + daysSinceTaskStart); // TST
+                var daysSinceTaskStart = todayUser.diff(startDate, 'days');
                 return (daysSinceTaskStart % task.everyX == 0);
             }
         }
@@ -4071,7 +4091,7 @@ function computeStats(withBuffs) {
     computedStats.details['str'] = computeStat('str', withBuffs, true);
     computedStats.detailsPretty = {};
 
-    computedStats.detailsPretty['con'] = 
+    computedStats.detailsPretty['con'] =
             prettifyStats(computedStats.details['con']);
     computedStats.detailsPretty['int'] =
             prettifyStats(computedStats.details['int']);
@@ -4927,7 +4947,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v6.0)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v6.0a)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4961,6 +4981,15 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>6.0a <span class="date">2015-06-30</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Some improvements have been made to how the Dailies' <strong>Start Date</strong> and <strong>Every X Days</strong> options are handled, matching changes made in HabitRPG. However these might still not be handled correctly for some users (in both HabitRPG and this tool).</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>6.0 <span class="date">2015-06-21</span></dt>
         <dd><ul>
