@@ -2914,7 +2914,7 @@ wiki('Tavern', 'resting in the inn') +
                 continue;
             }
             klassDone[klassName] = true;
-            html += '<h3>' + makePrettyKlassName(klassName) + ' Skills</h3>';
+            html += '<h3>' + prettyPrintKlass(klassName) + ' Skills</h3>';
             for (var key in content.spells[klassName]) {
                 var obj = content.spells[klassName][key];
                 var skill = skills[obj.key]();
@@ -3274,10 +3274,10 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
                 return source.imgTag;
               }
             },
-            { 'mData' : 'text',       'sClass': 'center',
+            { 'mData' : 'text',        'sClass': 'center',
               'sTitle': 'name',
             },
-            { 'mData' : 'klass',      'sClass': 'center',
+            { 'mData' : 'klassPretty', 'sClass': 'center',
               'sTitle': 'class',
             },
             { 'sTitle': 'can buy?',    'sClass': 'center',
@@ -3372,7 +3372,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
 
         // collate appearance elements:
         var appearance = [ 'class: <span class="attributeValue">' +
-                         makePrettyKlassName(userKlass) + '</span>' ];
+                         prettyPrintKlass(userKlass) + '</span>' ];
         if (user.stats.buffs.snowball) {
             appearance.push('<span class="attributeValue">Snowball!</span>');
         }
@@ -3618,7 +3618,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
             { 'mData' : 'text',       'sClass': 'center',
               'sTitle': 'name',
             },
-            { 'mData' : 'klass',      'sClass': 'center',
+            { 'mData' : 'klassPretty','sClass': 'center',
               'sTitle': 'class',
             },
             { 'mData' : 'con',        'sClass': 'center',
@@ -3954,11 +3954,11 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
             obj['per'] *= 1.5;
             obj['str'] *= 1.5;
         }
-        if (obj.klass == 'none') {
+        if (obj.klass !== 'healer' && obj.klass !== 'rogue'  &&
+			obj.klass !== 'mage'   && obj.klass !== 'wizard' &&
+			obj.klass !== 'warrior'
+		) {
             obj.hasNoClass = true;
-        }
-        if (obj.klass == 'wizard') {
-            obj.klass = 'mage';
         }
 
         // adjust equipment names
@@ -4039,6 +4039,8 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
                      obj.plainText + ' (' +
                      obj.key + ')" />';
 
+		obj.klassPretty = prettyPrintKlass(obj.klass);
+
         return obj;
     }
 
@@ -4066,9 +4068,9 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
 
                 var type = obj.type;
                 if (type == 'head') { type = 'headwear'; }
-                extra = obj.klass;
+                extra = prettyPrintKlass(obj.klass);
                 if (obj.klass == 'special' && obj.specialClass) {
-                    extra += " " + obj.specialClass;
+                    extra += " " + prettyPrintKlass(obj.specialClass);
                 }
                 extra += " " + type;
                 if (options && options.includeStats) {
@@ -4178,8 +4180,19 @@ function computeStats(withBuffs) {
     }
 }
 
-function makePrettyKlassName(klass) {
-    return (klass == 'wizard') ? 'Mage' : upperCaseFirst(klass);
+
+function prettyPrintKlass(klass) {
+	var prettyKlass;
+	if (klass === 'wizard') {
+		prettyKlass = 'Mage';
+	}
+	else if (klass == 'healer' || klass == 'rogue' || klass == 'warrior') {
+		prettyKlass = upperCaseFirst(klass);
+	}
+	else {
+		prettyKlass = klass;
+	}
+	return prettyKlass;
 }
 
 
@@ -5024,7 +5037,7 @@ ul#tableOfContents > li {
             </li>
             <li>Documentation:
                 <ul>
-                    <li>Capitalised all (I hope) instances of "Habit", "Daily", "To-Do", and "Reward".</li>
+                    <li>Capitalised all (I hope) instances of "Habit", "Daily", "To-Do", and "Reward", and all class names (e.g., "Rogue").</li>
                 </ul>
             </li>
         </ul></dd>
