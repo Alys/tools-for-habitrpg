@@ -466,12 +466,13 @@ function formatAndDisplayDASHBOARD() {
                 'todosDated', 'dropsToday', 'sleeping'];
     // var html = '<ul>';
     var html;
-    if (customDayStart === 0) {
-        html = '<p><span style="font-size:18px; color:orange" font-weight:bold">NOTE:</span> Dailies using the new "Start Date" and "Every X Days" options should now be reported correctly as due / not due and the estimates of damage caused by incomplete Dailies should also be correct. However, please be cautious when using that information for a few days, until you are confident it is accurate for your account. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</p>';
-    }
-    else {
-        html = '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: You are using a <a href="habitrpg.wikia.com/wiki/Custom_Day_Start">Custom Day Start</a> which means that HabitRPG and this tool might not be correctly handling any Dailies that use the new "Every X Days" option or that have a "Start Date" of today or tomorrow. The Dailies might not be correctly shown as due / not due and the estimate of damage caused by them might not be correct. This will be fixed soon in HabitRPG and here. Until this message is removed, please be cautious about using the damage information below to prevent death.</li>';
-    }
+	html = '<p><span style="font-size:18px; color:orange" font-weight:bold">NOTE:</span> We have been making improvements to how HabitRPG and this tool handle Dailies using the new "Start Date" and "Every X Days" options, but we think there are still further improvements that are needed. If you use the Every X Days option on any of your Dailies, be cautious when using the damage estimates here untl this message is removed. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</p>';
+    // if (customDayStart === 0) {
+        // html = '<p><span style="font-size:18px; color:orange" font-weight:bold">NOTE:</span> Dailies using the new "Start Date" and "Every X Days" options should now be reported correctly as due / not due and the estimates of damage caused by incomplete Dailies should also be correct. However, please be cautious when using that information for a few days, until you are confident it is accurate for your account. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</p>';
+    // }
+    // else {
+        // html = '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: You are using a <a href="habitrpg.wikia.com/wiki/Custom_Day_Start">Custom Day Start</a> which means that HabitRPG and this tool might not be correctly handling any Dailies that use the new "Every X Days" option or that have a "Start Date" of today or tomorrow. The Dailies might not be correctly shown as due / not due and the estimate of damage caused by them might not be correct. This will be fixed soon in HabitRPG and here. Until this message is removed, please be cautious about using the damage information below to prevent death.</li>';
+    // }
     html += '<ul>';
 
     for (var i=0,ic=keys.length; i<ic; i++) {
@@ -979,7 +980,7 @@ function collateAndDisplayTaskData() {
                     obj.damageToPartyUnrounded = 0;
                 }
                 var hpMod = delta * conBonus * obj.priority * 2;
-                // priority is easy (1), medium (1.5), hard (2)
+                // priority is trivial (0.1), easy (1), medium (1.5), hard (2)
                 obj.damageToUser = Math.round(hpMod * 10) / 10;
             }
 
@@ -1235,7 +1236,8 @@ function collateAndDisplayTaskData() {
         }
 
         function chooseDifficulty(value) {
-            if      (value == 1  ){ return 'easy'; }
+            if      (value == 0.1){ return 'trivial'; }
+            else if (value == 1  ){ return 'easy'; }
             else if (value == 1.5){ return 'medium'; }
             else if (value == 2  ){ return 'hard'; }
             else                  { return 'unknown (' + value + ')'; }
@@ -4947,7 +4949,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v6.0a)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v6.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4982,6 +4984,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>6.1 <span class="date">2015-07-07</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>In the <strong>Task Overview</strong>, the new "trivial" difficulty is now displayed correctly.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>6.0a <span class="date">2015-06-30</span></dt>
         <dd><ul>
             <li>Code:
@@ -4990,7 +5001,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>6.0 <span class="date">2015-06-21</span></dt>
         <dd><ul>
             <li>Features:
