@@ -82,6 +82,7 @@ $(function() { // wraps around all our code to not pollute global namespace
 //////////////////////////////////////////////////////////////////////
 var content; // holds site-wide content (gear names and stats, quests, etc)
 var tavern;  // holds tavern data
+var party;  // holds party data
 var user;    // holds user's data
 
 
@@ -93,6 +94,7 @@ var serverUrl         = 'https://habitrpg.com:443/api/v2';
 // serverUrl         = 'https://habitrpg.herokuapp.com:443/api/v2';
 var serverPathContent = '/content?language=en';
 var serverPathTavern  = '/groups/habitrpg';
+var serverPathParty   = '/groups/party';
 var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
@@ -115,6 +117,11 @@ $.mockjax({
   responseText: tavernJsonString,
 });
 $.mockjax({
+  url: serverUrl + serverPathParty,
+  dataType: 'json',
+  responseText: partyJsonString,
+});
+$.mockjax({
   url: serverUrl + serverPathUser,
   dataType: 'json',
   responseText: userJsonString,
@@ -126,6 +133,7 @@ $.mockjax({
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathTavern  = '/cgi-bin/hrpg_tavern.pl';
+serverPathParty   = '/cgi-bin/hrpg_party.pl';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
 serverPathUser    = '/cgi-bin/hrpg_user.pl';
 apiToken          = 'null';
@@ -289,7 +297,7 @@ function fetchData() {
     $('#loading .good').show();
     $('#loading .bad' ).hide();
 
-    var ajaxRunningCount = 3; // drops to 0 when all calls have succeeded
+    var ajaxRunningCount = 4; // drops to 0 when all calls have succeeded
 
     // fetch the user's own content (tasks, gear owned, etc):
     $.ajax({
@@ -329,6 +337,20 @@ function fetchData() {
         error: fetchFailure,
     });
 
+    // fetch party-specific content
+    $.ajax({
+        url: serverUrl + serverPathParty,
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            },
+        success: fetchPartySuccess,
+        error: fetchFailure,
+    });
+
 
     function fetchFailure() {
         $('#loading .good').hide();
@@ -345,6 +367,13 @@ function fetchData() {
     }
     function fetchTavernSuccess(data) {
         tavern = data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
+    }
+    function fetchPartySuccess(data) {
+        party = data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -372,9 +401,9 @@ function parseData() {
     var userKlass = user.stats.class;
     var health = getCurrentHealth(); // also sets dashboard tile
     var quest = $.extend({}, user.party.quest);
-    if (user.party.quest.key) {
+    if (user.party.quest.key && party.quest && party.quest.active) {
         quest = $.extend({}, user.party.quest);
-        quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
+        quest.content = $.extend({}, content.quests[ party.quest.key ] );
     }
     var customDayStart = user.preferences.dayStart || 0; // CDS
     var timezoneOffset = user.preferences.timezoneOffset || 0;
@@ -4988,6 +5017,7 @@ ul#tableOfContents > li {
             <li>Bug fix:
                 <ul>
                     <li>Improvements to how the Dailies' "Start Date" and "Every X Days" features are handled, to match changes made in HabitRPG.</li>
+                    <li>A change to how HabitRPG indicates that a quest has started had been causing this tool to display quest information prematurely. This is now fixed.</li>
                 </ul>
             </li>
         </ul></dd>
