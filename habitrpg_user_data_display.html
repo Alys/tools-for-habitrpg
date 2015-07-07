@@ -377,6 +377,7 @@ function parseData() {
         quest.content = $.extend({}, content.quests[ user.party.quest.key ] );
     }
     var customDayStart = user.preferences.dayStart || 0; // CDS
+    var timezoneOffset = user.preferences.timezoneOffset || 0;
 
     // Find the correct date for "today". If the user has a CDS set, then
     // we need to subtract the CDS hour from the current date and time to
@@ -465,15 +466,7 @@ function formatAndDisplayDASHBOARD() {
                 'damageToParty', 'questProgress', 'questProgressSecond',
                 'todosDated', 'dropsToday', 'sleeping'];
     // var html = '<ul>';
-    var html;
-	html = '<p><span style="font-size:18px; color:orange" font-weight:bold">NOTE:</span> We have been making improvements to how HabitRPG and this tool handle Dailies using the new "Start Date" and "Every X Days" options, but we think there are still further improvements that are needed. If you use the Every X Days option on any of your Dailies, be cautious when using the damage estimates here untl this message is removed. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</p>';
-    // if (customDayStart === 0) {
-        // html = '<p><span style="font-size:18px; color:orange" font-weight:bold">NOTE:</span> Dailies using the new "Start Date" and "Every X Days" options should now be reported correctly as due / not due and the estimates of damage caused by incomplete Dailies should also be correct. However, please be cautious when using that information for a few days, until you are confident it is accurate for your account. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</p>';
-    // }
-    // else {
-        // html = '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: You are using a <a href="habitrpg.wikia.com/wiki/Custom_Day_Start">Custom Day Start</a> which means that HabitRPG and this tool might not be correctly handling any Dailies that use the new "Every X Days" option or that have a "Start Date" of today or tomorrow. The Dailies might not be correctly shown as due / not due and the estimate of damage caused by them might not be correct. This will be fixed soon in HabitRPG and here. Until this message is removed, please be cautious about using the damage information below to prevent death.</li>';
-    // }
-    html += '<ul>';
+    var html = '<p><strong>NOTE:</strong> We think we have now fixed all bugs related to the Dailies\' "Start Date" and "Every X Days" features, in both HabitRPG and this tool. However for the next few days, please still be cautious when using the damage estimates here, and <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</p><ul>';
 
     for (var i=0,ic=keys.length; i<ic; i++) {
         var data = DASHBOARD[keys[i]];
@@ -1049,9 +1042,10 @@ function collateAndDisplayTaskData() {
                 }
             }
             if (!task.startDate) {
-                // Not an error condition. It's acceptable to have no start
-                // date and we treat it as starting today.
-                // Hence we don't set forceDue.
+                // This should not happen, but if it does, HabitRPG's code
+                // treats it as starting on the day being examined (i.e., today
+                // for the purposes of showing due Dailies). Hence we do the
+                // same and we don't set forceDue.
                 task.startDate = todayUser;
             }
         }
@@ -1072,7 +1066,7 @@ function collateAndDisplayTaskData() {
                 };
         }
 
-        function dailyIsDueToday(task) {
+        function dailyIsDueToday(task) { // ref: api.shouldDo
             // returns true if the Daily is due, false otherwise
             if (task.forceDue) {
                 return true;
@@ -1080,7 +1074,7 @@ function collateAndDisplayTaskData() {
             if (task.forceNotDue) {
                 return false;
             }
-            var startDate = moment(task.startDate).startOf('day');
+            var startDate = moment(task.startDate).zone(timezoneOffset).startOf('day');
             if (startDate > todayUser) {
                 return false;
             }
@@ -4989,6 +4983,11 @@ ul#tableOfContents > li {
             <li>Features:
                 <ul>
                     <li>In the <strong>Task Overview</strong>, the new "trivial" difficulty is now displayed correctly.</li>
+                </ul>
+            </li>
+            <li>Bug fix:
+                <ul>
+                    <li>Improvements to how the Dailies' "Start Date" and "Every X Days" features are handled, to match changes made in HabitRPG.</li>
                 </ul>
             </li>
         </ul></dd>
