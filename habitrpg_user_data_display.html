@@ -706,6 +706,7 @@ function pluralise(word, number) {
             'this':  'these',
             'is':    'are',
             'daily': 'dailies',
+            'Daily': 'Dailies',
         };
         if   (pluralWords[lcWord]) { word = pluralWords[lcWord]; }
         else                       { word += 's';    }
@@ -785,7 +786,7 @@ function getCurrentHealth() {
 function collateAndDisplayTaskData() {
     // Set up data structures for storing task information:
     var taskOrder = 0; // default order of tasks in HabitRPG
-    var allTasks = []; // except completed to-dos
+    var allTasks = []; // except completed To-Dos
     var untaggedTasks = {'habits':[], 'dailies':[], 'todos':[], 'rewards':[]};
     var template = {'total':0, 'con':0, 'int':0, 'per':0, 'str':0};
     var countTasks = {
@@ -938,7 +939,7 @@ function collateAndDisplayTaskData() {
         var valueMax =  21.27; // ... for some purposes
         var conBonus = 1 - (computedStats['con'] / 250);
         if (conBonus < 0.1) { conBonus = 0.1; }
-        var stealth = user.stats.buffs.stealth; // user avoids dailies' damage
+        var stealth = user.stats.buffs.stealth; // user avoids Dailies' damage
         $.each(user.dailys, function(index, obj){
             fixDailiesDefaults(obj);
             obj.dueToday = dailyIsDueToday(obj);
@@ -1195,7 +1196,8 @@ function collateAndDisplayTaskData() {
         obj.text = renderFormattedText(obj.text);
         obj.notes = renderFormattedText(obj.notes);
         obj.attributePretty = obj.attribute.toUpperCase();
-        obj.typePretty   = (obj.type == 'todo') ? 'to-do' : obj.type;
+        obj.typePretty   = upperCaseFirst(
+				(obj.type == 'todo') ? 'To-Do' : obj.type );
         obj.valueRounded = Math.round(obj.value * 100) / 100;
         obj.magnitude    = Math.abs(obj.valueRounded);
         obj.order        = ++taskOrder;
@@ -1332,7 +1334,7 @@ function collateAndDisplayTaskData() {
 
 
     function taskOverview() { // Displays all tasks of all kinds.
-        // Also shows one random to-do:
+        // Also shows one random To-Do:
         var randomTodoHtml = '';
         if (todos.length > 0) {
             var randomTodo = todos[Math.floor(Math.random() * todos.length)];
@@ -1349,7 +1351,7 @@ function collateAndDisplayTaskData() {
                    'html':
 '<div id="taskOverviewExplanationToggle" class="showHideToggle" data-target="taskOverviewExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="taskOverviewExplanation" class="hide">' +
-'   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (habits, dailies, and to-dos), with their ' + wiki('Advanced Options', 'attributes') + ' and ' + wiki('Task Value', 'colours, values, and magnitudes') + ' (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in HabitRPG.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your to-do list. Re-fetch your data to see a different random to-do.</p>' +
+'   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (Habits, Dailies, and To-Dos), with their ' + wiki('Advanced Options', 'attributes') + ' and ' + wiki('Task Value', 'colours, values, and magnitudes') + ' (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in HabitRPG.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all Habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</p>' +
 '   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
 '</div>' +
 '<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs and dateCreated strings">toggle developer data</div>' +
@@ -1497,7 +1499,7 @@ randomTodoHtml
     function taskStatistics() {
         var title = 'Task Statistics';
         var html = '<p>This table shows the number of tasks you have ' +
-            'for each kind of task (habits, dailies, to-dos) ' +
+            'for each kind of task (Habits, Dailies, To-Dos) ' +
             'and the number of tasks assigned to each ' +
             wiki('Character Attributes', 'attribute') + '.';
         if (exampleTaskType && exampleAttribute) {
@@ -1542,16 +1544,16 @@ randomTodoHtml
             html += '</tr>';
         });
         html += '</table>' +
-            '<p class="lowlight"><strong>*</strong> Your completed to-dos ' +
+            '<p class="lowlight"><strong>*</strong> Your completed To-Dos ' +
             'are automatically archived after three days to improve ' +
             'HabitRPG\'s speed and so most of them cannot be seen in ' +
             'HabitRPG. However, they can be exported using the ' +
             wiki('Data Export', '"User Data" export option') +
             '. This total number of completed ' +
-            'to-dos includes those archived ones.</p>' +
+            'To-Dos includes those archived ones.</p>' +
             '<p style="margin-top:2em">You have <span class="highlight"> ' +
             countTasks['rewards']['total'] + ' ' +
-            pluralise('reward', countTasks['rewards']['total']) +
+            pluralise('Reward', countTasks['rewards']['total']) +
             '</span>.</p>';
 
         // Training Points:
@@ -1614,8 +1616,8 @@ randomTodoHtml
     }
 
     function habitTrends() {
-        var html = '<p>The chart below provides a visual representation of the trends in your habits as reflected by the data recorded in HabitRPG. Here you can get an idea of which habits you are reinforcing, and which are being neglected. The data provided to this chart is the same as displayed in the Habit History section, limited to the last 500 entries. The Habit History section only records when a change occurs in a habit, while the trend chart includes the values for all habits every day, regardless if they changed.</p>';
-        html += '<p>This chart is interactive, and exposes multiple controls:<ul><li>Scroll inside the chart to <strong>zoom</strong></li><li>Click and drag (left/right) to <strong>slide</strong> along the time-axis when zoomed in</li><li><strong>Hover</strong> over a datapoint to see all the values for that day</li><li>Click the habits in the <strong>legend</strong> to toggle their display in the chart on/off</li></ul></p>';
+        var html = '<p>The chart below provides a visual representation of the trends in your Habits as reflected by the data recorded in HabitRPG. Here you can get an idea of which Habits you are reinforcing, and which are being neglected. The data provided to this chart is the same as displayed in the Habit History section, limited to the last 500 entries. The Habit History section only records when a change occurs in a Habit, while the trend chart includes the values for all Habits every day, regardless if they changed.</p>';
+        html += '<p>This chart is interactive, and exposes multiple controls:<ul><li>Scroll inside the chart to <strong>zoom</strong></li><li>Click and drag (left/right) to <strong>slide</strong> along the time-axis when zoomed in</li><li><strong>Hover</strong> over a datapoint to see all the values for that day</li><li>Click the Habits in the <strong>legend</strong> to toggle their display in the chart on/off</li></ul></p>';
         html += '<button onclick="$(\'.legend-toggle\').length != 0 ? $(\'.legend-toggle\').click() : $(\'.legend span\').click();" title="This may take a few seconds with a large amount of data">Toggle All</button>';
         var habitNames = habits.reduce(function(names, item) {
              names.push(item.text);
@@ -1764,7 +1766,7 @@ randomTodoHtml
     }
 
     function habitHistory() {
-        var html = '<p class="narrowContent">This shows your habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks. <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. --> Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p><ul>';
+        var html = '<p class="narrowContent">This shows your Habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents HabitRPG from showing all of your clicks. <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down Habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. --> Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p><ul>';
         $.each(habits, function(index, obj){
             html += collateHistoryForOneHabit(obj);
         });
@@ -1854,13 +1856,13 @@ randomTodoHtml
             html += '<p>You are ' +
                     wiki('Tavern', 'resting in the inn') +
                     ' so you will not take any damage from your' +
-                    ' uncompleted dailies.</p>';
+                    ' uncompleted Dailies.</p>';
             if (quest.content && quest.content.boss) {
                 html += '<p> However, you are also on a ' +
                         wiki('Boss', 'boss') + ' ' +
                         wiki('Quests', 'quest') +
                         ' so you <span class="highlight">will</span> still' +
-                        ' take damage from the uncompleted dailies of other' +
+                        ' take damage from the uncompleted Dailies of other' +
                         ' quest participants.</p>';
             }
         }
@@ -1885,36 +1887,36 @@ randomTodoHtml
                         wiki('Quests', 'quest') +
                         ' participants will take an ' +
                         '<span class="highlight">estimated 0</span> damage ' +
-                        'from your own dailies.</p><p>However you ' +
+                        'from your own Dailies.</p><p>However you ' +
                         '<span class="highlight">will</span> still take ' +
-                        'damage from the uncompleted dailies of other quest ' +
+                        'damage from the uncompleted Dailies of other quest ' +
                         'participants.</p>';
                 }
                 else {
-                    html += '<p>If you do no more dailies today, you will ' +
+                    html += '<p>If you do no more Dailies today, you will ' +
                         'take an <span class="highlight">estimated ' +
                         damageToUser +
-                        '</span> damage from your dailies directly.</p>' +
+                        '</span> damage from your Dailies directly.</p>' +
                         '<p>In addition, you are on a ' +
                         wiki('Quests', 'quest') + ', so the ' +
                         wiki('Boss', 'boss') +
                         ' will inflict an <span class="highlight">estimated ' +
                         damageToParty +
                         '</span> damage to you and to your fellow quest ' +
-                        'participants because of your uncompleted dailies.' +
+                        'participants because of your uncompleted Dailies.' +
                         '</p><p>Thus your total damage due to your own ' +
-                        'uncompleted dailies will be ' +
+                        'uncompleted Dailies will be ' +
                         '<span class="highlight">approximately ' +
                         damageTotal + '</span>. ' +
                         'Your current health is <span class="highlight">' +
                         health +
                         '</span>.</p>' +
                         '<p>You will also take damage from the uncompleted' +
-                        ' dailies of other quest participants.</p>';
+                        ' Dailies of other quest participants.</p>';
                 }
             }
             else {
-                html += '<p>If you do no more dailies today, you will take ' +
+                html += '<p>If you do no more Dailies today, you will take ' +
                     'an <span class="highlight">estimated ' +
                     damageToUser +
                     '</span> damage. Your current health is ' +
@@ -1943,11 +1945,11 @@ randomTodoHtml
         }
         else {
             var questMsg = (quest.content && quest.content.boss) ?
-                           'AND from your quest boss due to those dailies ' :
+                           'AND from your quest boss due to those Dailies ' :
                            '';
             DASHBOARD.damageToUser = {'label': 'Est. Damage to You',
                 'hoverText': 'health loss you will take overnight from your ' +
-                         'uncompleted dailies ' +
+                         'uncompleted Dailies ' +
                          questMsg + '(click for more information)',
                 'target': id, 'value': damageTotal,
                 'status': ((damageToUser) ? 'danger' : 'safe')
@@ -1956,7 +1958,7 @@ randomTodoHtml
                 DASHBOARD.damageToParty = {'label': 'Est. Damage to Party',
                     'hoverText': 'health loss your party will take ' +
                          'overnight from your quest boss due to your own ' +
-                         'uncompleted dailies (click for more information)',
+                         'uncompleted Dailies (click for more information)',
                     'target': id, 'value': damageToParty,
                     'status': ((damageToParty) ? 'danger' : 'safe')
                     };
@@ -1972,7 +1974,7 @@ randomTodoHtml
         // sectionOpen = id; // TST
 
         if (sleeping) {
-            return; // can't do dailies while resting in inn
+            return; // can't do Dailies while resting in inn
         }
         var dailiesIncomplete     = [];
         var dailiesIncompleteGrey = [];
@@ -1981,7 +1983,7 @@ randomTodoHtml
             if (obj.completed) {
                 continue;
             }
-            if (obj.dueToday) { // daily is due today
+            if (obj.dueToday) { // Daily is due today
                 dailiesIncomplete.push(obj);
             }
             else {
@@ -1991,48 +1993,48 @@ randomTodoHtml
 
         if ((dailiesIncomplete.length + dailiesIncompleteGrey.length) == 0) {
             DASHBOARD[orderId] = {'label': title,
-                'hoverText': 'you have completed all dailies and grey dailies',
+                'hoverText': 'you have completed all Dailies and Grey Dailies',
                 'value': '0', 'status': 'safe'};
             return;
         }
         var html = '';
         // html += '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
         if (dailiesIncomplete.length > 0) {
-            html += '<p>The table below shows the dailies that are due ' +
+            html += '<p>The table below shows the Dailies that are due ' +
                     'today and have not yet been completed. ';
             var damageToYouText;
             if (quest.content && quest.content.boss) {
                 damageToYouText = 'damage to you alone';
-                html += 'For each daily, it tells you how much damage the' +
-                        ' daily will let the ' +
+                html += 'For each Daily, it tells you how much damage the' +
+                        ' Daily will let the ' +
                         wiki('Quests', 'quest') + ' ' +
                         wiki('Boss', 'boss') +
-                        ' do to all quest participants including you ("<strong>damage to party</strong>"); how much damage you alone will take from the daily - this is the damage you would take if you were not on a boss quest ("<strong>damage to you alone</strong>"), and the sum of the previous two values ("<strong>total damage to you</strong>").';
+                        ' do to all quest participants including you ("<strong>damage to party</strong>"); how much damage you alone will take from the Daily - this is the damage you would take if you were not on a boss quest ("<strong>damage to you alone</strong>"), and the sum of the previous two values ("<strong>total damage to you</strong>").';
             }
             else {
                 damageToYouText = 'damage to you';
                 html += 'It tells you the estimated damage you will take ' +
-                        'from each daily.';
+                        'from each Daily.';
             }
             html += ' Click on any column header to sort by that column; ' +
                     'for example; sort by "' + damageToYouText + '" ' +
                     'to find the most ' +
-                    'damaging dailies to action first if you won\'t have ' +
+                    'damaging Dailies to action first if you won\'t have ' +
                     'time to do them all. The damage estimates take into ' +
                     'account damage reduction from partially-completed ' +
                     wiki('Checklist#Dailies', 'checklists') +
                     ', so you might find it is better to do ' +
-                    'a blue daily instead of a mostly-completed red daily.' +
+                    'a blue Daily instead of a mostly-completed red Daily.' +
                     '</p><table></table>';
         }
         else {
-            html += '<p>You have completed all of the dailies due today.</p>';
+            html += '<p>You have completed all of the Dailies due today.</p>';
         }
         if (dailiesIncompleteGrey.length > 0) {
             html += '<h3>Grey Dailies</h3><p>' +
                     pluralise('This', dailiesIncompleteGrey.length) + ' ' +
                     wiki('Dailies#Grey_Dailies', 'Grey ' +
-                        pluralise('daily', dailiesIncompleteGrey.length)) +
+                        pluralise('Daily', dailiesIncompleteGrey.length)) + // XXX test
                     ' ' +
                     pluralise('is', dailiesIncompleteGrey.length) +
                     ' <span class="highlight">not</span> due today but' +
@@ -2043,7 +2045,7 @@ randomTodoHtml
                     '</li></ul>';
         }
         DASHBOARD[orderId] = {'label': title,
-            'hoverText': 'number of dailies you have not yet completed ' +
+            'hoverText': 'number of Dailies you have not yet completed ' +
                          '(click for more information)',
             'target': id,
             'value': dailiesIncomplete.length,
@@ -2126,9 +2128,9 @@ randomTodoHtml
         var title   = 'Dailies History';
         var orderId = 'dailiesHistory';
 
-        // preprocess the dailies to find all the dates on which data
+        // preprocess the Dailies to find all the dates on which data
         // exists, and to work out if each day was a success or fail
-        // or neither (e.g., grey daily) based on whether the day's value
+        // or neither (e.g., Grey Daily) based on whether the day's value
         // is higher or lower than the previous day's:
         var allDates = {};
         for (var i=0,ic=dailies.length; i<ic; i++) {
@@ -2138,27 +2140,27 @@ randomTodoHtml
             if (obj.history) {
                 for (var j=0,jc=obj.history.length; j<jc; j++) {
                     // Get the date that is recorded in this history entry
-                    // for this daily:
+                    // for this Daily:
                     var historyDate = new Date(obj.history[j].date);
                     // Subtract one day from that date because the value assigned
                     // to this history entry comes from the action that was
-                    // done to the daily on the PREVIOUS day -- i.e., if you
-                    // tick off a daily, then after the cron time (i.e., on the
-                    // NEXT day), the daily's value will be increased and that
+                    // done to the Daily on the PREVIOUS day -- i.e., if you
+                    // tick off a Daily, then after the cron time (i.e., on the
+                    // NEXT day), the Daily's value will be increased and that
                     // new value will be recorded with the new day's date:
                     historyDate.setHours(historyDate.getHours() - 24);
                     var formattedDate = myDateConverter(historyDate);
                     var value = obj.history[j].value;
-                    var success = '-'; // default (grey daily or no data)
-                    var status = 'neutral'; // default (grey daily or no data)
+                    var success = '-'; // default (Grey Daily or no data)
+                    var status = 'neutral'; // default (Grey Daily or no data)
                     if ( (previousValue === null && value > 0) ||
                          (previousValue !== null && value > previousValue) ) {
-                        success = '✓'; // user did the daily
+                        success = '✓'; // user did the Daily
                         status = 'safe';
                     }
                     else if ((previousValue === null && value < 0) ||
                              (previousValue !== null && value < previousValue)) {
-                        success = 'x'; // user did not do the daily
+                        success = 'x'; // user did not do the Daily
                         status = 'danger';
                     }
                     obj['historyItems'][formattedDate] = [];
@@ -2214,14 +2216,14 @@ randomTodoHtml
         var html =
 '<div id="dailiesHistoryExplanationToggle" class="showHideToggle" data-target="dailiesHistoryExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="dailiesHistoryExplanation" class="hide">' +
-'    <p>The table below shows historical data for your dailies. If you are a subscriber, you will see data for every day going back to the date on which you subscribed. If you are not a subscriber, you will see data for every day for the past week, but before that your data points start to be merged together (this is to save on expensive database storage space). In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the daily, even if it was a ' +
-wiki('Dailies#Grey_Dailies', 'grey daily') +
-'.</li><li><span class="danger">x</span> You did not tick off the daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the daily but you took no damage from it for several possible reasons (the daily was not due that day; you ticked off all of the ' +
+'    <p>The table below shows historical data for your Dailies. If you are a subscriber, you will see data for every day going back to the date on which you subscribed. If you are not a subscriber, you will see data for every day for the past week, but before that your data points start to be merged together (this is to save on expensive database storage space). In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the Daily, even if it was a ' +
+wiki('Dailies#Grey_Dailies', 'Grey Daily') +
+'.</li><li><span class="danger">x</span> You did not tick off the Daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the Daily but you took no damage from it for several possible reasons (the Daily was not due that day; you ticked off all of the ' +
 wiki('Checklist#Dailies', 'checklist') +
-' items under that daily, although not the daily itself; you evaded the daily with ' +
+' items under that Daily, although not the Daily itself; you evaded the Daily with ' +
 wiki('Rogue#Skills', 'Stealth') + '; you were ' +
 wiki('Tavern', 'resting in the inn') +
-'; you had not logged in to HabitRPG that day; the daily did not yet exist on that day). This symbol will also appear frequently for old data for non-subscribers because it is not possible to correctly determine the actions you took after your data has been merged.</li></ul><p>Vertical grey bars in the table indicate gaps in the historical record (e.g., periods of a day or more in which you were resting in the inn).</p>' +
+'; you had not logged in to HabitRPG that day; the Daily did not yet exist on that day). This symbol will also appear frequently for old data for non-subscribers because it is not possible to correctly determine the actions you took after your data has been merged.</li></ul><p>Vertical grey bars in the table indicate gaps in the historical record (e.g., periods of a day or more in which you were resting in the inn).</p>' +
 '   <div class="showHideToggle closer" data-target="dailiesHistoryExplanation" data-resettoggletext="dailiesHistoryExplanationToggle">hide explanation</div>' +
 '</div>' +
                    '<table>' +
@@ -2231,7 +2233,7 @@ wiki('Tavern', 'resting in the inn') +
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
 
-// LIST FORMAT FOR REASONS (INCOMPLETE): <li><span class="neutral">-</span> you did not tick off the daily but you took no damage from it for a reason such as:<ul><li>the daily was not due that day</li><li>you evaded the daily with <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth</a></li><li>you were <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a></li><li>you had not logged in to HabitRPG that day</li><li>the daily did not yet exist on that day</li></ul></li>      #dailiesHistorySection > ul ul { margin-left: 2em; }
+// LIST FORMAT FOR REASONS (INCOMPLETE): <li><span class="neutral">-</span> you did not tick off the Daily but you took no damage from it for a reason such as:<ul><li>the Daily was not due that day</li><li>you evaded the Daily with <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth</a></li><li>you were <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a></li><li>you had not logged in to HabitRPG that day</li><li>the Daily did not yet exist on that day</li></ul></li>      #dailiesHistorySection > ul ul { margin-left: 2em; }
     }
 
 
@@ -2251,7 +2253,7 @@ wiki('Tavern', 'resting in the inn') +
         for (var i=0,ic=todos.length; i<ic; i++) {
             var obj = todos[i];
             var challenge = (obj.challenge && obj.challenge.id)
-                          ? ' <span class="challenge">(challenge to-do)</span>'
+                          ? ' <span class="challenge">(challenge To-Do)</span>'
                           : '';
             var dateClass = 'notDue';
             var dateString = '';
@@ -2261,7 +2263,7 @@ wiki('Tavern', 'resting in the inn') +
                     dateClass = 'due';
                     countDue++;
                     if (! challenge || date > lastWeek) {
-                        // An overdue to-do is not dangerous if it is from a
+                        // An overdue To-Do is not dangerous if it is from a
                         // challenge and is more than a week old (because the
                         // user probably doesn't care about it).
                         dangerTodoFound = true;
@@ -2290,7 +2292,7 @@ wiki('Tavern', 'resting in the inn') +
                    '</ul>';
         if (countDue) {
             DASHBOARD[orderId] = {'label': 'To-Dos Due Today',
-                'hoverText': 'number of to-dos due today or overdue ' +
+                'hoverText': 'number of To-Dos due today or overdue ' +
                              '(click for more information)',
                 'target': id,
                 'value': countDue,
@@ -2305,7 +2307,7 @@ wiki('Tavern', 'resting in the inn') +
         var id      = 'todosCompletedSection';
         var title   = 'To-Dos Completed';
         var orderId = 'todosCompleted';
-        var html = '<p>This shows all of your completed to-dos that HabitRPG has in its archive (not necessarily all the to-dos that you have ever completed because HabitRPG keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitrpg.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p><table></table>';
+        var html = '<p>This shows all of your completed To-Dos that HabitRPG has in its archive (not necessarily all the To-Dos that you have ever completed because HabitRPG keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitrpg.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p><table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'function': createTodosCompletedTable,
@@ -2419,12 +2421,12 @@ wiki('Tavern', 'resting in the inn') +
             wiki('Death_Mechanics', 'die') +
             ' due to circumstances out of your' +
             ' control (e.g., if you lose internet access and can\'t tick' +
-            ' off your dailies). Your stats (Health, etc) can be restored' +
+            ' off your Dailies). Your stats (Health, etc) can be restored' +
             ' using "Fix Character Values" in the ' +
             wiki('Settings') +
-            ' page. Your dailies\' streaks can be reset using ' +
+            ' page. Your Dailies\' streaks can be reset using ' +
             wiki('Streaks', 'Restore Streak') +
-            ' in the Avanced Options for each daily.</p>' +
+            ' in the Avanced Options for each Daily.</p>' +
             '<p><span class="highlight">IMPORTANT!</span> If you have ' +
             'already died, this page <span class="highlight">cannot</span> ' +
             'tell you what your stats and streaks were before death; it\'s ' +
@@ -2559,12 +2561,12 @@ wiki('Tavern', 'resting in the inn') +
         var conIncreaseDamageExplanationParty = '';
         if (quest.content && quest.content.boss) {
             conIncreaseDamageExplanation = 'This will reduce the damage ' +
-                    'that you take from your negative habits and from ' +
-                    'your dailies directly. It will not reduce the damage ' +
+                    'that you take from your negative Habits and from ' +
+                    'your Dailies directly. It will not reduce the damage ' +
                     'that your quest boss does to you.';
             conIncreaseDamageExplanationParty = 'This will reduce the damage ' +
                     'that you and your party members will each take from ' +
-                    'your own negative habits and your own dailies directly. ' +
+                    'your own negative Habits and your own Dailies directly. ' +
                     'It will not reduce the damage that your quest boss ' +
                     'does to each of you.';
         }
@@ -2647,7 +2649,7 @@ wiki('Tavern', 'resting in the inn') +
                         increase]; },
 
             'frost': function() { // Mage - Chilling Frost
-                var msg = 'all your uncompleted dailies will not have ' +
+                var msg = 'all your uncompleted Dailies will not have ' +
                           'their streaks reset to zero overnight.';
                 var effects = (user.stats.buffs.streaks) ?
                               'You have already cast this today, so ' +
@@ -2741,15 +2743,15 @@ wiki('Tavern', 'resting in the inn') +
                         'task\'s value by an amount based on your ' +
                         conLink + '.' +
                         '<br />This skill is best cast on ' +
-                        'a red daily or habit that is hurting you ' +
+                        'a red Daily or Habit that is hurting you ' +
                         'often (e.g., your ' +
                         '<span class="taskName">' +
-                        reddestHabit.text + '</span> habit or your ' +
+                        reddestHabit.text + '</span> Habit or your ' +
                         '<span class="taskName">' +
-                        reddestDaily.text + '</span> daily). <br />' +
-                        'You can also cast it on a red to-do if you want ' +
+                        reddestDaily.text + '</span> Daily). <br />' +
+                        'You can also cast it on a red To-Do if you want ' +
                         'to receive smaller rewards when you complete that ' +
-                        'to-do.<br />The "Task Overview" section will show ' +
+                        'To-Do.<br />The "Task Overview" section will show ' +
                         'you your reddest tasks (sort the table by value).';
                 if ((quest.content && quest.content.boss) || tavernBoss) {
                     var questIncrease = Math.round(
@@ -2771,7 +2773,7 @@ wiki('Tavern', 'resting in the inn') +
                                // questIncrease + ' damage to the quest boss.';
                 var increase = 'To increase all effects of the skill, ' +
                                'increase your ' + strLink + before;
-                return ['a red habit or daily',
+                return ['a red Habit or Daily',
                         effects,
                         additional,
                         increase]; },
@@ -2881,20 +2883,20 @@ wiki('Tavern', 'resting in the inn') +
                 if (stealth) {
                     effects = 'You have already cast stealth today, ' +
                               'and so you will already avoid ' +
-                              stealth + ' dailies tonight. If you cast ' +
+                              stealth + ' Dailies tonight. If you cast ' +
                               'it again now, you will avoid an additional ' +
-                              avoid + ' dailies (' +
+                              avoid + ' Dailies (' +
                               (stealth + avoid) + ' in total).';
                 }
                 else {
                     effects = 'You will avoid ' +
-                              avoid + ' dailies tonight.';
+                              avoid + ' Dailies tonight.';
                 }
-                var additional = 'Those dailies will not cause damage and' +
+                var additional = 'Those Dailies will not cause damage and' +
                     ' their streaks will not reset. If you are on a ' +
                     wiki('Boss', 'boss') + ' ' +
                     wiki('Quests', 'quest') +
-                    ', the dailies will not hurt your fellow quest' +
+                    ', the Dailies will not hurt your fellow quest' +
                     ' participants.';
                 var increase = 'To increase the effect of the skill, ' +
                                'increase your ' + perLink + before;
@@ -5020,6 +5022,11 @@ ul#tableOfContents > li {
                     <li>A change to how HabitRPG indicates that a quest has started had been causing this tool to display quest information prematurely. This is now fixed.</li>
                 </ul>
             </li>
+            <li>Documentation:
+                <ul>
+                    <li>Capitalised all (I hope) instances of "Habit", "Daily", "To-Do", and "Reward".</li>
+                </ul>
+            </li>
         </ul></dd>
 
         <dt>6.0a <span class="date">2015-06-30</span></dt>
@@ -5814,18 +5821,18 @@ ul#tableOfContents > li {
     <div>
        <h2>What's On This Page?</h2>
        <ul>
-            <li><span class="subheading">Task Overview</span>: A table listing your habits, dailies, and to-dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed to-dos are not shown; completed dailies are. At the bottom of this section, you will find one randomly-selected item from your to-do list. Re-fetch your data to see a different random to-do.</li>
-            <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
-            <li><span class="subheading">Tasks Untagged</span>: If you have any habits, dailies, to-dos, or rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
-            <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
-            <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your dailies.</li>
-            <li><span class="subheading">Dailies Incomplete</span>: A list of dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
-            <li><span class="subheading">To-Dos with Dates</span>: A list of all to-dos that have been given due dates, sorted by date. If there are any to-dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
-            <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed to-dos that HabitRPG has in its archive. The to-dos' notes and completion dates are included.</li>
+            <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To-Dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</li>
+            <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To-Dos, and Rewards you have in total, and how many are assigned to each <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
+            <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To-Dos, or Rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
+            <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your Habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
+            <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your Dailies.</li>
+            <li><span class="subheading">Dailies Incomplete</span>: A list of Dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
+            <li><span class="subheading">To-Dos with Dates</span>: A list of all To-Dos that have been given due dates, sorted by date. If there are any To-Dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
+            <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed To-Dos that HabitRPG has in its archive. The To-Dos' notes and completion dates are included.</li>
             <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
             <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
-            <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
-            <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitrpg.wikia.com/wiki/Settings">restore your stats</a> and <a href="http://habitrpg.wikia.com/wiki/Streaks">your dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
+            <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
+            <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitrpg.wikia.com/wiki/Settings">restore your stats</a> and <a href="http://habitrpg.wikia.com/wiki/Streaks">your Dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
             <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
             <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
             <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
@@ -5854,7 +5861,7 @@ ul#tableOfContents > li {
             <li>For Habit History and Untagged Tasks, apply the "longContent" class if there are more than x number of items.</li>
             <li>Add <a href="http://medleyweb.com/web-dev/jquery-chart-and-graph-plugins/">Pie Charts</a> to Task Statistics: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a>
 <!--
-I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more habits then last week or: how many red/orange/yellow to-dos are done this month etc. --lightsaber
+I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more Habits then last week or: how many red/orange/yellow To-Dos are done this month etc. --lightsaber
 
 @lightsaber Now those are some interesting ideas! Some I could add to my tool (anything that uses current data, or very recent data - basically any data available from the [API](https://habitrpg.com/static/api) ). Others could be created with a tool that also reads [exported historical data](https://habitrpg.com/#/options/settings/export), although the level of detail that you might want might not be stored permanently in that data. If only I had unlimited time....
 -->
