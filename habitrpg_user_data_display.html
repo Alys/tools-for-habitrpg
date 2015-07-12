@@ -401,6 +401,7 @@ function parseData() {
     var userKlass = user.stats.class;
     var health = getCurrentHealth(); // also sets dashboard tile
     var quest = $.extend({}, user.party.quest);
+    // user.party.quest.key='vice3'; party.quest.active=true; // FOR TESTING
     if (user.party.quest.key && party.quest && party.quest.active) {
         quest = $.extend({}, user.party.quest);
         quest.content = $.extend({}, content.quests[ party.quest.key ] );
@@ -994,7 +995,12 @@ function collateAndDisplayTaskData() {
                 var delta = nextDelta; // Change this if we ever take
                                        // account of multiple missed days.
                 if (quest.content && quest.content.boss) {
-                    obj.damageToPartyUnrounded = delta*quest.content.boss.str;
+                    var bossDelta = delta;
+                    if (obj.priority < 1) {
+                        bossDelta *= obj.priority;
+                    }
+                    obj.damageToPartyUnrounded
+                            = bossDelta * quest.content.boss.str;
                     obj.damageToParty
                             = Math.round(obj.damageToPartyUnrounded * 10) / 10;
                 }
@@ -1197,7 +1203,7 @@ function collateAndDisplayTaskData() {
         obj.notes = renderFormattedText(obj.notes);
         obj.attributePretty = obj.attribute.toUpperCase();
         obj.typePretty   = upperCaseFirst(
-				(obj.type == 'todo') ? 'To-Do' : obj.type );
+                (obj.type == 'todo') ? 'To-Do' : obj.type );
         obj.valueRounded = Math.round(obj.value * 100) / 100;
         obj.magnitude    = Math.abs(obj.valueRounded);
         obj.order        = ++taskOrder;
@@ -3955,9 +3961,9 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
             obj['str'] *= 1.5;
         }
         if (obj.klass !== 'healer' && obj.klass !== 'rogue'  &&
-			obj.klass !== 'mage'   && obj.klass !== 'wizard' &&
-			obj.klass !== 'warrior'
-		) {
+            obj.klass !== 'mage'   && obj.klass !== 'wizard' &&
+            obj.klass !== 'warrior'
+        ) {
             obj.hasNoClass = true;
         }
 
@@ -4039,7 +4045,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
                      obj.plainText + ' (' +
                      obj.key + ')" />';
 
-		obj.klassPretty = prettyPrintKlass(obj.klass);
+        obj.klassPretty = prettyPrintKlass(obj.klass);
 
         return obj;
     }
@@ -4182,17 +4188,17 @@ function computeStats(withBuffs) {
 
 
 function prettyPrintKlass(klass) {
-	var prettyKlass;
-	if (klass === 'wizard') {
-		prettyKlass = 'Mage';
-	}
-	else if (klass == 'healer' || klass == 'rogue' || klass == 'warrior') {
-		prettyKlass = upperCaseFirst(klass);
-	}
-	else {
-		prettyKlass = klass;
-	}
-	return prettyKlass;
+    var prettyKlass;
+    if (klass === 'wizard') {
+        prettyKlass = 'Mage';
+    }
+    else if (klass == 'healer' || klass == 'rogue' || klass == 'warrior') {
+        prettyKlass = upperCaseFirst(klass);
+    }
+    else {
+        prettyKlass = klass;
+    }
+    return prettyKlass;
 }
 
 
@@ -4987,7 +4993,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Official User Data Display
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v6.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v6.2)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -5022,6 +5028,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>6.2 <span class="date">2015-07-12</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>In the <strong>Dailies Incomplete</strong> section and the damage dashboard tiles, the new "trivial" difficulty now causes less damage from a boss, matching a change that has just been made in HabitRPG.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>6.1 <span class="date">2015-07-07</span></dt>
         <dd><ul>
             <li>Features:
@@ -5041,7 +5056,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>6.0a <span class="date">2015-06-30</span></dt>
         <dd><ul>
             <li>Code:
