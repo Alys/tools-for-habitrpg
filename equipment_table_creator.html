@@ -188,7 +188,11 @@ var images = {
     'head_special_fallHealer' : 'Head_bandages.png',
     'shield_special_fallRogue' : 'Silver_stake_right.png',
     'shield_special_fallWarrior' : 'Potent_potion_of_science.png',
-    'shield_special_fallHealer' : 'Jeweled_shield.png'
+    'shield_special_fallHealer' : 'Jeweled_shield.png',
+    'armor_special_birthday2015' : 'Silly_Party_Robes.png',
+    'headAccessory_special_spring2015Mage' : 'HeadAccessory_special_springMage.png',
+    'eyewear_special_wondercon_black' : 'HeadAccessory_special_wondercon_black.png',
+    'eyewear_special_wondercon_red' : 'HeadAccessory_special_wondercon_red.png',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -368,20 +372,18 @@ function parseData() {
 
     // table header:
     html += '' +
-'\n{| class="sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
+'\n{| class="filterable sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
 '\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"' +
-'\n! Name' +
-'\n! class="unsortable" | Image' +
-'\n! Class' +
-'\n! Type' +
-'\n! Cost' +
-'\n! data-sort-type="number" | CON' +
-'\n! data-sort-type="number" | INT' +
-'\n! data-sort-type="number" | PER' +
-'\n! data-sort-type="number" | STR' +
-'\n! Best';
-// '\n! style="text-align:left;"| Gives<br />Stats';
-
+'\n! class="unfilterable" | Name' +
+'\n! class="unfilterable" | Image' +
+'\n! class="unsortable" | Class' +
+'\n! class="unsortable" | Type' +
+'\n! class="unfilterable" | Cost' +
+'\n! class="unfilterable" data-sort-type="number" | CON' +
+'\n! class="unfilterable" data-sort-type="number" | INT' +
+'\n! class="unfilterable" data-sort-type="number" | PER' +
+'\n! class="unfilterable" data-sort-type="number" | STR' +
+'\n! class="unsortable" | Quality';
 
     // table row for each piece of gear:
     var attribs = ['con', 'int', 'per', 'str'];
@@ -393,6 +395,7 @@ function parseData() {
                 // or weird items like weapon_special_3 which
                 // is only for Kickstarter backers and is
                 // similar to shield_special_goldenknight
+                // XXX probably do want to show that now
         }
 
         // if (obj.key == 'weapon_warrior_0' ||
@@ -404,12 +407,14 @@ function parseData() {
       // continue; // don't show "Training Sword", "Novice Rod", etc
         // }
 
-        if (obj.mystery) {
-      continue; // don't show monthly subscriber mystery items
-        }
+        // if (obj.mystery) {
+            // continue; // don't show monthly subscriber mystery items
+        // }
 
         var type = (obj.type == 'headAccessory') ? 'head<br />accessory' :
-                   (obj.type == 'head') ? 'head<br />gear' :
+                   (obj.type == 'back')          ? 'back<br />accessory' :
+                   (obj.type == 'body')          ? 'body<br />accessory' :
+                   (obj.type == 'head')          ? 'head<br />gear'      :
                    obj.type;
 
         if (obj.klass == 'special' && !obj.specialClass) {
@@ -447,7 +452,7 @@ function parseData() {
         }
 
         var stats = [];
-        var givesStats = 'no';
+        var givesStats = false;
         for (var j in attribs) {
             stat = attribs[j];
             var val = obj[stat];
@@ -455,22 +460,24 @@ function parseData() {
                 stats[stat] = '';
             }
             else {
-                givesStats = 'yes';
+                givesStats = true;
                 stats[stat] = 'data-sort-value="' + val + '"|' + 
                                             "'''" + val + "'''";
-                if (klass != 'special' && klass != 'base') { // class bonus
+                if (klass == 'healer' || klass == 'rogue' ||
+                    klass == 'mage' || klass == 'warrior') { // class bonus
                     stats[stat] += "<br /><sub>''" + (val*1.5) + "''</sub>";
                 }
             }
         }
 
-        var isBest = (obj.last) ? 'yes' :
-                     (klass == 'special') ? givesStats : // yes/no
-                     'no';
+        var isBest = (obj.last)                               ? 'best'   :
+                     (klass == 'special' && obj.value >= 100) ? 'best'   :
+                     (givesStats)                             ? 'medium' :
+                                                                'stats<br />free';
 
-        if (givesStats == 'no') {
-      continue; // do not include any stats-free gear
-        }
+        // if (givesStats == 'no') {
+            // continue; // do not include any stats-free gear
+        // }
 
         var image = images[obj.key] || '';
         if (image) {
@@ -497,8 +504,7 @@ function parseData() {
 '\n|' + stats.int +           // INT
 '\n|' + stats.per +           // PER
 '\n|' + stats.str +           // STR
-'\n|' + isBest    ;           // best (yes/no)
-// '\n|' + givesStats;           // gives stats (yes/no)
+'\n|' + isBest    ;           // quality
     }
 
     // table footer:
@@ -654,7 +660,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitrpg.com/">HabitRPG</a> Equipment Table Creator
-    <span>(v1.8.1)</span></h1><!-- VERSION -->
+    <span>(v2.0)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
