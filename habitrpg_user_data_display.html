@@ -495,8 +495,7 @@ function formatAndDisplayDASHBOARD() {
     var keys = ['currentHealth', 'dailiesIncomplete', 'damageToUser',
                 'damageToParty', 'questProgress', 'questProgressSecond',
                 'todosDated', 'dropsToday', 'sleeping'];
-    // var html = '<ul>';
-    var html = '<p><strong>NOTE:</strong> We think we have now fixed all bugs related to the Dailies\' "Start Date" and "Every X Days" features, in both Habitica and this tool. However for the next few days, please still be cautious when using the damage estimates here, and <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</p><ul>';
+    var html = '<ul>';
 
     for (var i=0,ic=keys.length; i<ic; i++) {
         var data = DASHBOARD[keys[i]];
@@ -5033,6 +5032,7 @@ ul#tableOfContents > li {
             <li>Features:
                 <ul>
                     <li>Changed "HabitRPG" to "Habitica" in all visible text (except the old version history notes). Changed habitrpg.com to habitica.com in all links.</li>
+                    <li>Removed warning about new Dailies repeat features since they seem to be bug-free now.</li>
                 </ul>
             </li>
         </ul></dd>
