@@ -666,7 +666,7 @@ function myDateConverter(date, style) { // XXX_SOON replace with moment
 function wiki(wikilink, pipelink) {
     // http://stackoverflow.com/a/1145525
     var wiki_link = wikilink.split(' ').join('_');
-    return '<a href="http://habitrpg.wikia.com/wiki/' + wiki_link + '">' +
+    return '<a href="http://habitica.wikia.com/wiki/' + wiki_link + '">' +
         ((typeof pipelink === "undefined") ? wikilink : pipelink) +
         '</a>';
 }
@@ -1248,7 +1248,7 @@ function collateAndDisplayTaskData() {
         }
 
         function chooseColour(value) {
-            // from http://habitrpg.wikia.com/wiki/Task_Value :
+            // from http://habitica.wikia.com/wiki/Task_Value :
             // Bright Blue  Greater than 10
             // Blue Grey    Between 5 and 10
             // Green        Between 1 and 5
@@ -2238,7 +2238,7 @@ wiki('Tavern', 'resting in the inn') +
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
 
-// LIST FORMAT FOR REASONS (INCOMPLETE): <li><span class="neutral">-</span> you did not tick off the Daily but you took no damage from it for a reason such as:<ul><li>the Daily was not due that day</li><li>you evaded the Daily with <a href="http://habitrpg.wikia.com/wiki/Rogue#Skills">Stealth</a></li><li>you were <a href="http://habitrpg.wikia.com/wiki/Tavern">resting in the inn</a></li><li>you had not logged in to Habitica that day</li><li>the Daily did not yet exist on that day</li></ul></li>      #dailiesHistorySection > ul ul { margin-left: 2em; }
+// LIST FORMAT FOR REASONS (INCOMPLETE): <li><span class="neutral">-</span> you did not tick off the Daily but you took no damage from it for a reason such as:<ul><li>the Daily was not due that day</li><li>you evaded the Daily with <a href="http://habitica.wikia.com/wiki/Rogue#Skills">Stealth</a></li><li>you were <a href="http://habitica.wikia.com/wiki/Tavern">resting in the inn</a></li><li>you had not logged in to Habitica that day</li><li>the Daily did not yet exist on that day</li></ul></li>      #dailiesHistorySection > ul ul { margin-left: 2em; }
     }
 
 
@@ -5031,7 +5031,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>Changed "HabitRPG" to "Habitica" in all visible text (except the old version history notes). Changed habitrpg.com to habitica.com in all links.</li>
+                    <li>Changed "HabitRPG" to "Habitica" in all visible text (except the old version history notes). Changed habitrpg.com to habitica.com in all links. Changed habitrpg.wikia.com to habitica.wikia.com throughout.</li>
                     <li>Removed warning about new Dailies repeat features since they seem to be bug-free now.</li>
                 </ul>
             </li>
@@ -5076,7 +5076,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>For people who are <strong>NOT</strong> using a <a href="habitrpg.wikia.com/wiki/Custom_Day_Start">Custom Day Start (CDS)</a> (i.e., CDS is zero), Dailies using the new <strong>Every X Days</strong> repeat and/or the new <strong>Start Date</strong> feature should now be correctly reported as due or not due, and the estimates of damage caused by incomplete Dailies should be correct. However, please be cautious when using that information for a few days, until you are confident it is accurate for your account. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</li>
+                    <li>For people who are <strong>NOT</strong> using a <a href="habitica.wikia.com/wiki/Custom_Day_Start">Custom Day Start (CDS)</a> (i.e., CDS is zero), Dailies using the new <strong>Every X Days</strong> repeat and/or the new <strong>Start Date</strong> feature should now be correctly reported as due or not due, and the estimates of damage caused by incomplete Dailies should be correct. However, please be cautious when using that information for a few days, until you are confident it is accurate for your account. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if you notice errors.</li>
                     <li>For people who are using a <strong>Custom Day Start that is not zero</strong>, Dailies using the new <strong>Every X Days</strong> repeat might not be reported correctly. Dailies of any kind with a <strong>Start Date</strong> of today or tomorrow might not be reported correctly. The estimate of damage caused by those Dailies might not be correct. You do not need to report these problems to me. There's a bug in HabitRPG itself that is causing Start Dates to not be handled correctly when a CDS is used, and we need to sort that out before the Data Display Tool can be accurate.</li>
                     <li>In case you are not sure whether you are using a <strong>Custom Day Start</strong>, an orange message across the top of the page will tell you if you are and will warn you about the potential problems.</li>
                     <li>In the <strong>Task Overview</strong> section, for Dailies, the "task" column now shows the value for the "Every X days" option. It shows the start date if the Daily starts after today.</li>
@@ -5090,7 +5090,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>5.3 <span class="date">2015-06-12</span></dt>
         <dd><ul>
             <li>Added warning message that this tool hasn't yet been modified for the new Dailies options, "Start Date" and "Every X Days".</li>
@@ -5117,7 +5116,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>The <strong>Skills and Buffs</strong> section has been updated for the <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/Skills_Rebalancing_and_Other_Changes">new skills</a>. It might be unreliable! I am still testing it with various classes and attributes. Please tell me if you notice errors.</li>
+                    <li>The <strong>Skills and Buffs</strong> section has been updated for the <a href="http://habitica.wikia.com/wiki/User_blog:LadyAlys/Skills_Rebalancing_and_Other_Changes">new skills</a>. It might be unreliable! I am still testing it with various classes and attributes. Please tell me if you notice errors.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -5171,7 +5170,7 @@ ul#tableOfContents > li {
             <li>Features created by <strong>goldfndr</strong>:
                 <ul>
                     <li>All links now open in a new window or tab.</li>
-                    <li>The <strong>Task Overview</strong> section now has a <strong>toggle developer data</strong> link for showing/hiding data about each task that might be useful to anyone who uses <a href="http://habitrpg.wikia.com/wiki/The_HabitRPG_Application_Programming_Interface">the API</a> for manipulating their tasks. The toggle will adjust the "task" and "added" columns for each task to add the unique ID and the exact "dateCreated" string.</li>
+                    <li>The <strong>Task Overview</strong> section now has a <strong>toggle developer data</strong> link for showing/hiding data about each task that might be useful to anyone who uses <a href="http://habitica.wikia.com/wiki/The_HabitRPG_Application_Programming_Interface">the API</a> for manipulating their tasks. The toggle will adjust the "task" and "added" columns for each task to add the unique ID and the exact "dateCreated" string.</li>
                 </ul>
             </li>
             <li>Code improvement by <strong>goldfndr</strong>:
@@ -5246,9 +5245,9 @@ ul#tableOfContents > li {
             <li>Features, all created by <strong>goldfndr</strong>:
                 <ul>
                     <li>The <strong>Task Overview</strong> section now has:<ul>
-                        <li>A <strong><a href="http://habitrpg.wikia.com/wiki/Difficulty">Difficulty</a></strong> column.</li>
+                        <li>A <strong><a href="http://habitica.wikia.com/wiki/Difficulty">Difficulty</a></strong> column.</li>
                         <li><strong>Habit directions</strong>: plus and minus buttons for Habits in the "task" column.</li>
-                        <li><strong>Daily repeat days</strong> in the "task" column to help you manage <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a>.</li>
+                        <li><strong>Daily repeat days</strong> in the "task" column to help you manage <a href="http://habitica.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a>.</li>
                         <li><strong>To-Do due dates</strong> in the "task" column.</li>
                     </ul></li>
                     <li>The <strong>To-Dos with Dates</strong> section now includes a separate sub-section for To-Dos without dates, in case you need to refer to your undated To-Dos while examining your dated ones. (This To-Dos with Dates section appears only if you have one or more dated To-Dos, but you can always see all To-Dos in the Task Overview, which provides sorting, searching, and filtering.)</li>
@@ -5413,7 +5412,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Code:
                 <ul>
-                    <li>Fixed (probably) a bug related to HabitRPG's <a href="http://habitrpg.wikia.com/wiki/Settings#Custom_Day_Start">Custom Day Start</a> (CDS) feature. If you use a CDS, then you would have found that after midnight, the <span class="subheading">Dailies Incomplete</span> and <span class="subheading">Damage from Dailies</span> sections were incorrect - they were ignoring your CDS. I think I have fixed this now. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if it still seems wrong! @It's Bailey, thanks for mentioning this.</li>
+                    <li>Fixed (probably) a bug related to HabitRPG's <a href="http://habitica.wikia.com/wiki/Settings#Custom_Day_Start">Custom Day Start</a> (CDS) feature. If you use a CDS, then you would have found that after midnight, the <span class="subheading">Dailies Incomplete</span> and <span class="subheading">Damage from Dailies</span> sections were incorrect - they were ignoring your CDS. I think I have fixed this now. Please <a href="mailto:lady_alys@oldgods.net">tell me</a> if it still seems wrong! @It's Bailey, thanks for mentioning this.</li>
                     <li>Fixed a bug in the <span class="subheading">Dailies History</span> section that caused each date to be one day later than it should have been. Thanks, @rami.sedhom, for letting me know!</li>
                 </ul>
             </li>
@@ -5537,7 +5536,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Emoji!</span> You should now find that <a href="http://habitrpg.wikia.com/wiki/Emoji">emoji</a> are represented properly. (<a href="http://habitrpg.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> is stil not supported.)</li>
+                    <li><span class="subheading">Emoji!</span> You should now find that <a href="http://habitica.wikia.com/wiki/Emoji">emoji</a> are represented properly. (<a href="http://habitica.wikia.com/wiki/Markdown_Cheat_Sheet">Markdown</a> is stil not supported.)</li>
                 </ul>
             </li>
             <li>Documentation / Layout:
@@ -5555,7 +5554,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>The <span class="subheading">Dailies Incomplete</span> section now shows the estimated damage each daily will do to you, and to your party members if you are on a <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a> <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>.</li>
+                    <li>The <span class="subheading">Dailies Incomplete</span> section now shows the estimated damage each daily will do to you, and to your party members if you are on a <a href="http://habitica.wikia.com/wiki/Boss">boss</a> <a href="http://habitica.wikia.com/wiki/Quests">quest</a>.</li>
                 </ul>
             </li>
             <li>Documentation / Layout:
@@ -5588,7 +5587,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
+                    <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitica.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitica.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
                     <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
                 </ul>
             </li>
@@ -5653,7 +5652,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Dailies Incomplete</span>: Lists the dailies scheduled for today that you have not yet completed. Also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed. This section won't appear if you have completed all of your dailies.</li>
+                    <li><span class="subheading">Dailies Incomplete</span>: Lists the dailies scheduled for today that you have not yet completed. Also has a separate list of <a href="http://habitica.wikia.com/wiki/Dailies#Grey_Dailies">grey dailies</a> that have not been completed. This section won't appear if you have completed all of your dailies.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -5661,7 +5660,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Current Appearance and Gear</span>: Lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
+                    <li><span class="subheading">Current Appearance and Gear</span>: Lists the <a href="http://habitica.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitica.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitica.wikia.com/wiki/Pets">pet</a> and <a href="http://habitica.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
                 </ul>
             </li>
             <li>Code:
@@ -5728,7 +5727,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">"show documentation and Fetch My Data form"</span> is back and the bug that prompted me to remove it has been fixed. Thanks to <a href="http://habitrpg.wikia.com/wiki/User:BrightBold">BrightBold</a> for <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display#comm-11596">explaining</a> that it was an important feature for people who use the tool a lot.</li>
+                    <li><span class="subheading">"show documentation and Fetch My Data form"</span> is back and the bug that prompted me to remove it has been fixed. Thanks to <a href="http://habitica.wikia.com/wiki/User:BrightBold">BrightBold</a> for <a href="http://habitica.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display#comm-11596">explaining</a> that it was an important feature for people who use the tool a lot.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -5736,7 +5735,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Habit History</span> now has bolding when there's no history, as they could be habits that you need a bit more encouragement to do - thanks to <a href="http://habitrpg.wikia.com/wiki/User:Malkin">Malkin</a> for the <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display#comm-11572">suggestion</a></li>
+                    <li><span class="subheading">Habit History</span> now has bolding when there's no history, as they could be habits that you need a bit more encouragement to do - thanks to <a href="http://habitica.wikia.com/wiki/User:Malkin">Malkin</a> for the <a href="http://habitica.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display#comm-11572">suggestion</a></li>
                 </ul>
             </li>
             <li>Documentation:
@@ -5856,20 +5855,20 @@ ul#tableOfContents > li {
     <div>
        <h2>What's On This Page?</h2>
        <ul>
-            <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To-Dos, with their <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitrpg.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</li>
-            <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To-Dos, and Rewards you have in total, and how many are assigned to each <a href="http://habitrpg.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
-            <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To-Dos, or Rewards that have not been <a href="http://habitrpg.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
+            <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To-Dos, with their <a href="http://habitica.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitica.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</li>
+            <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To-Dos, and Rewards you have in total, and how many are assigned to each <a href="http://habitica.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitica.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
+            <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To-Dos, or Rewards that have not been <a href="http://habitica.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
             <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your Habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
             <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your Dailies.</li>
-            <li><span class="subheading">Dailies Incomplete</span>: A list of Dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitrpg.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
+            <li><span class="subheading">Dailies Incomplete</span>: A list of Dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitica.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
             <li><span class="subheading">To-Dos with Dates</span>: A list of all To-Dos that have been given due dates, sorted by date. If there are any To-Dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
             <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed To-Dos that Habitica has in its archive. The To-Dos' notes and completion dates are included.</li>
-            <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitrpg.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitrpg.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
-            <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
-            <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitrpg.wikia.com/wiki/Quests">quest</a> <a href="http://habitrpg.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
-            <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitrpg.wikia.com/wiki/Settings">restore your stats</a> and <a href="http://habitrpg.wikia.com/wiki/Streaks">your Dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
-            <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitrpg.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
-            <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitrpg.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitrpg.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitrpg.wikia.com/wiki/Pets">pet</a> and <a href="http://habitrpg.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
+            <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitica.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitica.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
+            <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitica.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
+            <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitica.wikia.com/wiki/Quests">quest</a> <a href="http://habitica.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
+            <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitica.wikia.com/wiki/Settings">restore your stats</a> and <a href="http://habitica.wikia.com/wiki/Streaks">your Dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
+            <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitica.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
+            <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitica.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitica.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitica.wikia.com/wiki/Pets">pet</a> and <a href="http://habitica.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
             <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
             <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes.</li>
        </ul>
@@ -5881,7 +5880,7 @@ ul#tableOfContents > li {
             <li>For relevant Skills And Buffs, show how to increase the chance of a critical hit happening.</li>
             <li>Add percentages to Task Statistics.
 <!--
-<span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitrpg.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitrpg.wikia.com/wiki/Automatic_Allocation">links</a>)
+<span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitica.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitica.wikia.com/wiki/Automatic_Allocation">links</a>)
 -->
 </li>
             <li>Hide information about drops for any players who have not yet had drops enabled.</li>
@@ -5894,7 +5893,7 @@ ul#tableOfContents > li {
             <li>Modify the "Random To-Do" function to also display a random Daily from those that have not been completed.</li>
             <li>Create a "Random Task" button that displays a randomly-selected To-Do and Daily near the top of the page. Allow the button to be clicked to show different tasks without the whole page having to be refetched. Remove the random task currently shown at the bottom of the Task Overview section.</li>
             <li>For Habit History and Untagged Tasks, apply the "longContent" class if there are more than x number of items.</li>
-            <li>Add <a href="http://medleyweb.com/web-dev/jquery-chart-and-graph-plugins/">Pie Charts</a> to Task Statistics: <a href="http://habitrpg.wikia.com/wiki/Thread:11457">join the discussion</a>
+            <li>Add <a href="http://medleyweb.com/web-dev/jquery-chart-and-graph-plugins/">Pie Charts</a> to Task Statistics: <a href="http://habitica.wikia.com/wiki/Thread:11457">join the discussion</a>
 <!--
 I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more Habits then last week or: how many red/orange/yellow To-Dos are done this month etc. --lightsaber
 
@@ -5918,9 +5917,9 @@ I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-
        <p>Regardless of what bugs there might be, this page cannot damage your account. It does not contain any code that could result in any changes being made on Habitica.</p>
 
        <h2>Help and Contact Details</h2>
-       <p>This page has been created by <a href="http://habitrpg.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitrpg.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
+       <p>This page has been created by <a href="http://habitica.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitica.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
 
-        <p>If you have general questions about Habitica, post them to <a href="https://habitica.com/#/options/groups/tavern">Tavern Talk</a> or <a href="http://habitrpg.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
+        <p>If you have general questions about Habitica, post them to <a href="https://habitica.com/#/options/groups/tavern">Tavern Talk</a> or <a href="http://habitica.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
     </div>
 
     <div id="documentationAndFormClose" class="showHideToggle closer" data-target="documentationAndForm" data-resettoggletext="documentationAndFormToggle">hide documentation</div>
