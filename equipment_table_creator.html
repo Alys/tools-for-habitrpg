@@ -406,14 +406,14 @@ function parseData() {
 '\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"' +
 '\n! class="unfilterable" | Name' +
 '\n! class="unfilterable" | Image' +
-'\n! class="unsortable" | Class' +
-'\n! class="unsortable" | Type' +
+'\n! class="unsortable"   | Class' +
+'\n! class="unsortable"   | Type' +
 '\n! class="unfilterable" | Cost' +
 '\n! class="unfilterable" data-sort-type="number" | CON' +
 '\n! class="unfilterable" data-sort-type="number" | INT' +
 '\n! class="unfilterable" data-sort-type="number" | PER' +
 '\n! class="unfilterable" data-sort-type="number" | STR' +
-'\n! class="unsortable" | Quality';
+'\n! class="unsortable"   | Quality';
 
     armoireTable += '' +
 '\n{| class="sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
@@ -511,9 +511,22 @@ function parseData() {
             }
         }
 
-        var releaseDate = '';
+        var releaseDate       = '';
+        var releaseDatePretty = '';
         if (armoireGear) {
             releaseDate = releaseDates[obj.key] || thisMonth;
+            var myRegexp = /(.+)-0?(.+)/g; // year-month
+            var match = myRegexp.exec(releaseDate);
+            if (match) {
+                var months = ['zero','Jan','Feb','Mar','Apr','May','Jun',
+                                     'Jul','Aug','Sep','Oct','Nov','Dec'];
+                var monthNumber = match[2];
+                var month = months[match[2]] || match[2];
+                releaseDatePretty = month + '<br />' + match[1];//year
+            }
+            else {
+                releaseDatePretty = releaseDate;
+            }
         }
 
         var url = urls[obj.key] || '';
@@ -587,7 +600,7 @@ function parseData() {
 '\n|' + description +         // description
 '\n|' + set         +         // set
 '\n|' + type        +         // type (weapon, etc)
-'\n|' + releaseDate +         // release date
+'\n| data-sort-value="' + releaseDate + '" | ' + releaseDatePretty +
 '\n|' + stats.con   +         // CON
 '\n|' + stats.int   +         // INT
 '\n|' + stats.per   +         // PER
