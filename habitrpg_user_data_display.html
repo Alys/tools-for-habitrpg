@@ -544,7 +544,8 @@ function formatAndDisplayTOC() {
                 'questProgress', 'damageDailies', 'statsAndStreaks',
             'HEADING Other',
                 'missingEquipment',
-                'currentGear', 'equipmentRecommendations', 'skillsAndBuffs'];
+                'currentGear', 'equipmentRecommendations', 'skillsAndBuffs',
+                'partyOverview'];
     var html = '';
     for (var i=0,ic=keys.length; i<ic; i++) {
         if (keys[i].match(/^HEADING/)) { // new section in Table of Contents
@@ -581,7 +582,7 @@ function formatAndDisplayMAIN() {
                 'damageDailies','dailiesIncomplete',//keep in that order
                 'statsAndStreaks',
                 'missingEquipment', 'currentGear', 'equipmentRecommendations',
-                'skillsAndBuffs'];
+                'skillsAndBuffs', 'partyOverview'];
     var html = '';
     var functions = []; // functions to run after HTML code has been loaded
     for (var i=0,ic=keys.length; i<ic; i++) {
@@ -887,6 +888,7 @@ function collateAndDisplayTaskData() {
     todosCompletedTable();
     statsAndStreaks();
     skillsAndBuffs();
+    partyOverview();
 
     function collateHabitsData() {
         var habits = [];
@@ -2954,6 +2956,15 @@ wiki('Tavern', 'resting in the inn') +
             }
             return 1.5 + (.02 * computedStats[stat]);
         }
+    }
+
+    function partyOverview() {
+        var title = 'Party Overview';
+        var id = 'partyOverviewSection';
+        var orderId = 'partyOverview';
+        var html = '<p>Hello, world!</p>';
+        TOC[orderId] = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html};
     }
 }
 
