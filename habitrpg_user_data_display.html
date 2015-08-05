@@ -2962,7 +2962,14 @@ wiki('Tavern', 'resting in the inn') +
         var title = 'Party Overview';
         var id = 'partyOverviewSection';
         var orderId = 'partyOverview';
-        var html = JSON.stringify(party);
+        var i;
+        var html = '<table><thead><tr><th>User</th><th>HP</th></thead><tbody>';
+        for (i = 0; i < party.members.length; i++) {
+            html += '<tr><td>' + party.members[i].profile.name + '</td>';
+            html += '<td>' + party.members[i].stats.hp + '</td></tr>';
+        }
+        html += '</tbody></table>';
+
         TOC[orderId] = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'html': html};
     }
