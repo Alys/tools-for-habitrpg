@@ -98,6 +98,7 @@ var serverPathParty   = '/groups/party';
 var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
+var rememberMe        = false;
 
 /* TST - FOR TESTING:
 // Use this section if you do not have a local webserver and want to use the provided test data.
@@ -277,6 +278,14 @@ $('#userApiDetailsForm').submit(function(event){
     /* The user manually submitted the API connection form. */
     userId   = $('#userId').val();
     apiToken = $('#apiToken').val();
+    rememberMe = $('#rememberMe');
+    if (rememberMe[0].checked) {
+        localStorage.setItem('userId', userId);
+        localStorage.setItem('apiToken', apiToken);
+    } else {
+        localStorage.removeItem('userId');
+        localStorage.removeItem('apiToken');
+    }
     fetchData();
 });
 
@@ -4989,7 +4998,7 @@ ul#tableOfContents > li {
 
 </style>
 </head>
-<body><div id="innerBody">
+<body onload="document.getElementById('apiToken').value = localStorage.getItem('apiToken'); document.getElementById('userId').value = localStorage.getItem('userId'); if (localStorage.getItem('apiToken') === null) { document.getElementById('rememberMe').checked = false; } else { document.getElementById('rememberMe').checked = true; }"><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
     <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.0)</span></h1><!-- VERSION TOGGLE -->
@@ -5823,6 +5832,9 @@ ul#tableOfContents > li {
             </label>
             <label for="apiToken"><span>API Token</span>
                 <input type="password" name="apiToken" id="apiToken" />
+            </label>
+            <label for="rememberMe"><span>Remember me!</span>
+                <input type="checkbox" name="rememberMe" id="rememberMe"/>
             </label>
             <input type="submit" value="Fetch My Data" />
             <p class="highlight">Privacy and security notes:</p>
