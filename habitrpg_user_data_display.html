@@ -2962,7 +2962,7 @@ wiki('Tavern', 'resting in the inn') +
         var title = 'Party Overview';
         var id = 'partyOverviewSection';
         var orderId = 'partyOverview';
-        var html = '<p>Hello, world!</p>';
+        var html = JSON.stringify(party);
         TOC[orderId] = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'html': html};
     }
