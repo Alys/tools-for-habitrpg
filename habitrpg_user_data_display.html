@@ -3035,16 +3035,20 @@ function questProgress() {
     var alreadyHaveDashboardTile = false;
     if ((quest.content && quest.content.boss) || tavernBoss) {
         var progress = Math.floor(quest.progress.up * 10) / 10;
+        var hp = Math.ceil(party.quest.progress.hp * 10) / 10;
         // Round DOWN with floor so we don't let the user think they
         // have even slightly more progress than they really have.
         // Imagine if they missed ending a quest overnight by 0.1 health!
+        //
+        // Likewise, round the boss's HP remaining up.
         html += 'So far today you have done an estimated ' +
                '<span class="highlight">' +
                progress + '</span> points of damage to ';
         if (quest.content && quest.content.boss) {
             html += quest.content.boss.name || quest.content.key;
+            html += ', who has ' + '<span class="highlight">' + hp + '</span> HP remaining'
             if (tavernBoss) {
-                html += ' and to ';
+                html += ', and the same amount of damage to ';
             }
         }
         if (tavernBoss) {
