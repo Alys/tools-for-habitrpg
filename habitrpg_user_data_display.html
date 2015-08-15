@@ -160,48 +160,6 @@ var tellMe = '<a href="mailto:lady_alys@oldgods.net">tell me</a>';
 
 
 //////////////////////////////////////////////////////////////////////
-////   Set up equipment images    ////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-
-// Expects the "gear" subdirectory containing all images to be in the same
-// directory as this HTML file.
-// Obtain images from this file in Alys's github repository:
-// equipment-images-for-habitrpg_user_data_display.tar.gz
-
-var gearLookups = {
-    'back_special_wondercon_black': 'gear/events/wondercon/shop/shop_back_special_wondercon_black.png',
-    'back_special_wondercon_red': 'gear/events/wondercon/shop/shop_back_special_wondercon_red.png',
-    'body_special_wondercon_black': 'gear/events/wondercon/shop/shop_body_special_wondercon_black.png',
-    'body_special_wondercon_gold': 'gear/events/wondercon/shop/shop_body_special_wondercon_gold.png',
-    'body_special_wondercon_red': 'gear/events/wondercon/shop/shop_body_special_wondercon_red.png',
-    'eyewear_special_wondercon_black': 'gear/events/wondercon/shop/shop_eyewear_special_wondercon_black.png',
-    'eyewear_special_wondercon_red': 'gear/events/wondercon/shop/shop_eyewear_special_wondercon_red.png',
-    'armor_special_candycane': 'gear/events/winter/shop/shop_armor_special_candycane.png',
-    'armor_special_ski': 'gear/events/winter/shop/shop_armor_special_ski.png',
-    'armor_special_snowflake': 'gear/events/winter/shop/shop_armor_special_snowflake.png',
-    'armor_special_yeti': 'gear/events/winter/shop/shop_armor_special_yeti.png',
-    'head_special_candycane': 'gear/events/winter/shop/shop_head_special_candycane.png',
-    'head_special_nye': 'gear/events/winter/shop/shop_head_special_nye.png',
-    'head_special_nye2014': 'gear/events/winter/shop/shop_head_special_nye2014.png',
-    'head_special_ski': 'gear/events/winter/shop/shop_head_special_ski.png',
-    'head_special_snowflake': 'gear/events/winter/shop/shop_head_special_snowflake.png',
-    'head_special_yeti': 'gear/events/winter/shop/shop_head_special_yeti.png',
-    'shield_special_ski': 'gear/events/winter/shop/shop_shield_special_ski.png',
-    'shield_special_snowflake': 'gear/events/winter/shop/shop_shield_special_snowflake.png',
-    'shield_special_yeti': 'gear/events/winter/shop/shop_shield_special_yeti.png',
-    'weapon_special_candycane': 'gear/events/winter/shop/shop_weapon_special_candycane.png',
-    'weapon_special_ski': 'gear/events/winter/shop/shop_weapon_special_ski.png',
-    'weapon_special_snowflake': 'gear/events/winter/shop/shop_weapon_special_snowflake.png',
-    'weapon_special_yeti': 'gear/events/winter/shop/shop_weapon_special_yeti.png',
-    'armor_special_birthday': 'gear/events/birthday/shop_armor_special_birthday.png',
-    'armor_special_birthday2014': 'gear/events/birthday/shop_armor_special_birthday2015.png',
-    'armor_special_gaymerx': 'gear/events/gaymerx/shop_armor_special_gaymerx.png',
-    'head_special_gaymerx': 'gear/events/gaymerx/shop_head_special_gaymerx.png',
-    'weapon_special_critical': 'gear/weapon/shop/shop_weapon_special_critical.png',
-};
-
-
-//////////////////////////////////////////////////////////////////////
 ////   Allow Show/Hide Toggling to work    ///////////////////////////
 //////////////////////////////////////////////////////////////////////
 enableShowHideToggling(); // needed here to enable Version Changes link
@@ -4007,42 +3965,8 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
         obj.attributesString = attrs.join(' / ');
 
         // create an HTML img tag for the equipment's image:
-        var url = gearLookups[key] || '';
-        if (! url) {
-            url = 'gear/';
-            var timeTraveller = key.match(/_(mystery_3014)(..)/);
-            var mystery       = key.match(/_(mystery.*)/);
-            var armoire       = key.match(/_armoire_/);
-            var grandGala = key.match(/_special_(winter|spring|summer|fall)/);
-            if (timeTraveller) {
-                // e.g., 'shield_mystery_301405':
-                // 'gear/events/mystery_3014/mystery_301405/shield_mystery_301405.png
-                url += 'events' + '/' + timeTraveller[1] + '/' +
-                       timeTraveller[1] + timeTraveller[2] + '/shop_' + key;
-            }
-            else if (mystery) {
-                // e.g.,                           'armor_mystery_201402':
-                // 'gear/events/mystery_201402/shop_armor_mystery_201402.png',
-                url += 'events' + '/' + mystery[1] + '/shop_' + key;
-            }
-            else if (armoire) {
-                // e.g.,                  'head_armoire_gladiatorHelm':
-                // 'gear/armoire/shop/shop_head_armoire_gladiatorHelm.png
-                url += 'armoire/shop/shop_' + key;
-            }
-            else if (grandGala) {
-                // e.g.,                      'armor_special_fallHealer':
-                // 'gear/events/fall/shop/shop_armor_special_fallHealer',
-                url += 'events' + '/' + grandGala[1] + '/shop/shop_' + key;
-            }
-            else {
-                // For standard armor, head, shield, weapon.
-                // e.g.,                'armor_healer_1':
-                // 'gear/armor/shop/shop_armor_healer_1.png',
-                url += obj.origType + '/shop/shop_' + key;
-            }
-            url += '.png';
-        }
+        var url = 'https://habitica-assets.s3.amazonaws.com/mobileApp/images/' +
+                  'shop_' + key + '.png';
         obj.imgTag = '<img src="' +
                      url + '" title="' +
                      obj.plainText + ' (' +
@@ -5036,6 +4960,11 @@ ul#tableOfContents > li {
             <li>Features:
                 <ul>
                     <li>When you are on a boss quest, the Quest Progress section now tells you how much HP the boss has left. Thanks to <strong>me_and</strong> for this!</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>Equipment images are now taken from Habitica's Amazon bucket, instead of being stored locally.</li>
                 </ul>
             </li>
         </ul></dd>
