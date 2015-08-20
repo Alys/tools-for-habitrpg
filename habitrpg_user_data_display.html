@@ -2968,53 +2968,60 @@ wiki('Tavern', 'resting in the inn') +
                    '<p>Party leader: ' + party.leader.profile.name + '</p>' +
 
                    '<table border="1" width="100%"><thead><tr>' +
-                       '<th>User</th>' +
-                       '<th>Class</th>' +
-                       '<th>Level</th>' +
-                       '<th>Exp</th>' +
-                       '<th>GP</th>' +
-                       '<th>MP</th>' +
-                       '<th>Questing</th>' +
-                       '<th>Str</th>' +
-                       '<th>Str<br/>(unbuffed)</th>' +
-                       '<th>Int</th>' +
-                       '<th>Int<br/>(unbuffed)</th>' +
-                       '<th>Con</th>' +
-                       '<th>Con<br/>(unbuffed)</th>' +
-                       '<th>Per</th>' +
-                       '<th>Per<br/>(unbuffed)</th>' +
-                       '<th>HP</th>' +
-                   '</thead></tr>' +
-                   '<tbody>';
+
+                   '<th>User</th>' +
+                   '<th>Class</th>';
+
+        if (party.quest !== null) {
+            html += '<th>Questing</th>';
+        }
+
+        html += '<th>Level</th>' +
+                '<th>Exp</th>' +
+                '<th>GP</th>' +
+                '<th>MP</th>' +
+                '<th>Str</th>' +
+                '<th>Str<br/>(unbuffed)</th>' +
+                '<th>Int</th>' +
+                '<th>Int<br/>(unbuffed)</th>' +
+                '<th>Con</th>' +
+                '<th>Con<br/>(unbuffed)</th>' +
+                '<th>Per</th>' +
+                '<th>Per<br/>(unbuffed)</th>' +
+                '<th>HP</th>' +
+
+                '</thead></tr>' +
+                '<tbody>';
 
         for (i = 0; i < party.members.length; i++) {
             var member = party.members[i];
-            var questing;
-
-            if (party.quest.leader === member._id) {
-                questing = 'Leader';
-            } else if (party.quest.members[member._id] === true) {
-                questing = 'Yes';
-            } else {
-                questing = 'No';
-            }
 
             var fields = [member.profile.name,
-                          member.stats.class,
-                          member.stats.lvl,
-                          member.stats.exp.toFixed(0),
-                          member.stats.gp.toFixed(2),
-                          member.stats.mp.toFixed(0),
-                          questing,
-                          member.stats.str + member.stats.buffs.str,
-                          member.stats.str,
-                          member.stats.int + member.stats.buffs.int,
-                          member.stats.int,
-                          member.stats.con + member.stats.buffs.con,
-                          member.stats.con,
-                          member.stats.per + member.stats.buffs.per,
-                          member.stats.per,
-                          member.stats.hp.toFixed(0)];
+                          member.stats.class];
+
+            if (party.quest !== null) {
+                if (party.quest.leader === member._id) {
+                    fields.push('Leader');
+                } else if (party.quest.members[member._id] === true) {
+                    fields.push('Yes');
+                } else {
+                    fields.push('No');
+                }
+            }
+
+            fields = fields.concat([member.stats.lvl,
+                                    member.stats.exp.toFixed(0),
+                                    member.stats.gp.toFixed(2),
+                                    member.stats.mp.toFixed(0),
+                                    member.stats.str + member.stats.buffs.str,
+                                    member.stats.str,
+                                    member.stats.int + member.stats.buffs.int,
+                                    member.stats.int,
+                                    member.stats.con + member.stats.buffs.con,
+                                    member.stats.con,
+                                    member.stats.per + member.stats.buffs.per,
+                                    member.stats.per,
+                                    member.stats.hp.toFixed(0)]);
 
             html += '<tr>';
             for (j = 0; j < fields.length; j++) {
