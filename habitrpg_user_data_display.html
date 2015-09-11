@@ -508,8 +508,8 @@ function formatAndDisplayDASHBOARD() {
         return data.hasOwnProperty('columns') && data.hasOwnProperty('colors');
     }
     function initGauge(data) {
-        step = (data.max - data.min) * .3;
-
+        var step = (data.max - data.min) * .3;
+        var colors = data.hasOwnProperty('colors') ? data.colors : ['#FF0000', '#F97600', '#F6C600', '#60B044'];
         var gauge = c3.generate({
             bindto: '#' + data.id + 'Chart',
             data: {
@@ -533,7 +533,7 @@ function formatAndDisplayDASHBOARD() {
                 }
             },
             color: {
-                pattern: ['#FF0000', '#F97600', '#F6C600', '#60B044'],
+                pattern: colors,
                 threshold: {
                     values: [data.min + step, data.min + step * 2, data.min + step * 3, data.max]
                 }
@@ -2070,12 +2070,12 @@ randomTodoHtml
                 dailiesIncompleteGrey.push(obj.text);
             }
         }
-
+        var colors = ['#60B044', '#60B044', '#60B044', '#60B044'];
         if ((dailiesIncomplete.length + dailiesIncompleteGrey.length) == 0) {
             DASHBOARD[orderId] = {'label': title, 'id': id + 'Dashboard',
                 'hoverText': 'you have completed all Dailies and Grey Dailies',
                 'value': dailies.length, 'status': 'safe', 'min': 0, 'max': dailies.length,
-                'chartLabel': dailiesIncomplete.length};
+                'chartLabel': dailiesIncomplete.length, 'colors': colors};
             return;
         }
         var html = '';
@@ -2134,6 +2134,7 @@ randomTodoHtml
             'min': 0,
             'max': dailies.length,
             'chartLabel': dailiesIncomplete.length,
+            'colors': colors,
             };
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
