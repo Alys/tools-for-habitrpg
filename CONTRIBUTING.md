@@ -2,12 +2,11 @@
 
 ### Unarchive page assets into project directory
 
-There are two archives containing assets used by the project. Using the
-[tar command](https://github.com/tldr-pages/tldr/blob/master/pages/common/tar.md), unarchive them both into the
-root of your project directory, with the javascript going into a directory named `js` and the equipment images
-going into a directory named `gear`.
+Using the [tar command](https://github.com/tldr-pages/tldr/blob/master/pages/common/tar.md),
+unarchive the javascript asset archive into the root of your project directory. This places all of
+the javascript dependencies into a directory named `js`.
 
-Next, retrieve the emoji images from Henrik Joreteg's project,
+Next, replace the emoji-images directory with Henrik Joreteg's project,
 [emoji-images](https://github.com/HenrikJoreteg/emoji-images). Clone that repository of images into `js/emoji-images`.
 
 ### Ensure page behaves normally with your API information
