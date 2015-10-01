@@ -506,9 +506,8 @@ function parseData() {
         var set         = obj.notes.split(' Enchanted Armoire: ')[1];
         if (set && set.match(/Independent Item/i)) {
             // create some unofficial sets
-            var res = name.match(/Hairbow/i);
+            var res = name.match(/(Hairbow|Floppy<br \/>Hat)/i);
             if (res && res[0]) {
-                // set = res[0] + '&nbsp;<strong>*</strong>';
                 set = res[0] + '<br /><em>unofficial set</em>';
             }
             else {
@@ -791,7 +790,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(v3.0a)</span></h1><!-- VERSION -->
+    <span>(v3.1)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
