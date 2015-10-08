@@ -3049,7 +3049,7 @@ function questProgress() {
             }
         }
         if (tavernBoss) {
-            html += "the Abominable Stressbeast of Stoïkalm"; // XXX_LATER automate
+            html += "Burnout"; // XXX_LATER automate
         }
         html += '.';
         var dashboardTitle = 'Damage to ' + upperCaseFirst(bossesWord);
@@ -3100,9 +3100,9 @@ function questProgress() {
     html += '</p>';
 
     if (tavernBoss && tavern.quest.progress) {
-        var name = "Abominable Stressbeast of Stoïkalm"; // XXX_LATER automate!
+        var name = "Burnout"; // XXX_LATER automate!
         var hp = Math.round(tavern.quest.progress.hp);
-        var hpMax = 2750000; // XXX_LATER automate!
+        var hpMax = 11000000; // XXX_LATER automate!
         var hpPercent = Math.round(hp / hpMax * 1000) / 10;
         if (hp > 0 && hpPercent == 0) { // XXX_LATER do this better
             hpPercent = Math.round(hp / hpMax * 10000) / 100;
@@ -3121,7 +3121,7 @@ function questProgress() {
                  hp + ', down from ' + hpMax + ')';
         if (tavern.quest.progress.rage) {
             var rage = Math.round(tavern.quest.progress.rage);
-            var rageMax = 1450000; // XXX_LATER automate!
+            var rageMax = 1000000; // XXX_LATER automate!
             var ragePercent = Math.round(rage / rageMax * 1000) / 10;
             html += '<br />Stress: ' + ragePercent + '% (' +
                     rage + ' out of ' + rageMax + ')';
