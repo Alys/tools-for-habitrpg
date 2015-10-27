@@ -23,6 +23,7 @@ Contributors:
     goldfndr (Richard Finegold) https://github.com/goldfndr
     Blade Barringer https://github.com/crookedneighbor
     donoftime https://github.com/donoftime
+    me_and (Adam Dinwoodie) https://github.com/me-and
 
 
 TO ADD A NEW SECTION TO THIS PAGE:
@@ -156,48 +157,6 @@ var hideDropsInDashboard = true; // changes to false as soon as the user
                                  // looks at the drops section, then remains
                                  // false through all future re-fetches
 var tellMe = '<a href="mailto:lady_alys@oldgods.net">tell me</a>';
-
-
-//////////////////////////////////////////////////////////////////////
-////   Set up equipment images    ////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-
-// Expects the "gear" subdirectory containing all images to be in the same
-// directory as this HTML file.
-// Obtain images from this file in Alys's github repository:
-// equipment-images-for-habitrpg_user_data_display.tar.gz
-
-var gearLookups = {
-    'back_special_wondercon_black': 'gear/events/wondercon/shop/shop_back_special_wondercon_black.png',
-    'back_special_wondercon_red': 'gear/events/wondercon/shop/shop_back_special_wondercon_red.png',
-    'body_special_wondercon_black': 'gear/events/wondercon/shop/shop_body_special_wondercon_black.png',
-    'body_special_wondercon_gold': 'gear/events/wondercon/shop/shop_body_special_wondercon_gold.png',
-    'body_special_wondercon_red': 'gear/events/wondercon/shop/shop_body_special_wondercon_red.png',
-    'eyewear_special_wondercon_black': 'gear/events/wondercon/shop/shop_eyewear_special_wondercon_black.png',
-    'eyewear_special_wondercon_red': 'gear/events/wondercon/shop/shop_eyewear_special_wondercon_red.png',
-    'armor_special_candycane': 'gear/events/winter/shop/shop_armor_special_candycane.png',
-    'armor_special_ski': 'gear/events/winter/shop/shop_armor_special_ski.png',
-    'armor_special_snowflake': 'gear/events/winter/shop/shop_armor_special_snowflake.png',
-    'armor_special_yeti': 'gear/events/winter/shop/shop_armor_special_yeti.png',
-    'head_special_candycane': 'gear/events/winter/shop/shop_head_special_candycane.png',
-    'head_special_nye': 'gear/events/winter/shop/shop_head_special_nye.png',
-    'head_special_nye2014': 'gear/events/winter/shop/shop_head_special_nye2014.png',
-    'head_special_ski': 'gear/events/winter/shop/shop_head_special_ski.png',
-    'head_special_snowflake': 'gear/events/winter/shop/shop_head_special_snowflake.png',
-    'head_special_yeti': 'gear/events/winter/shop/shop_head_special_yeti.png',
-    'shield_special_ski': 'gear/events/winter/shop/shop_shield_special_ski.png',
-    'shield_special_snowflake': 'gear/events/winter/shop/shop_shield_special_snowflake.png',
-    'shield_special_yeti': 'gear/events/winter/shop/shop_shield_special_yeti.png',
-    'weapon_special_candycane': 'gear/events/winter/shop/shop_weapon_special_candycane.png',
-    'weapon_special_ski': 'gear/events/winter/shop/shop_weapon_special_ski.png',
-    'weapon_special_snowflake': 'gear/events/winter/shop/shop_weapon_special_snowflake.png',
-    'weapon_special_yeti': 'gear/events/winter/shop/shop_weapon_special_yeti.png',
-    'armor_special_birthday': 'gear/events/birthday/shop_armor_special_birthday.png',
-    'armor_special_birthday2014': 'gear/events/birthday/shop_armor_special_birthday2015.png',
-    'armor_special_gaymerx': 'gear/events/gaymerx/shop_armor_special_gaymerx.png',
-    'head_special_gaymerx': 'gear/events/gaymerx/shop_head_special_gaymerx.png',
-    'weapon_special_critical': 'gear/weapon/shop/shop_weapon_special_critical.png',
-};
 
 
 //////////////////////////////////////////////////////////////////////
@@ -4007,42 +3966,8 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
         obj.attributesString = attrs.join(' / ');
 
         // create an HTML img tag for the equipment's image:
-        var url = gearLookups[key] || '';
-        if (! url) {
-            url = 'gear/';
-            var timeTraveller = key.match(/_(mystery_3014)(..)/);
-            var mystery       = key.match(/_(mystery.*)/);
-            var armoire       = key.match(/_armoire_/);
-            var grandGala = key.match(/_special_(winter|spring|summer|fall)/);
-            if (timeTraveller) {
-                // e.g., 'shield_mystery_301405':
-                // 'gear/events/mystery_3014/mystery_301405/shield_mystery_301405.png
-                url += 'events' + '/' + timeTraveller[1] + '/' +
-                       timeTraveller[1] + timeTraveller[2] + '/shop_' + key;
-            }
-            else if (mystery) {
-                // e.g.,                           'armor_mystery_201402':
-                // 'gear/events/mystery_201402/shop_armor_mystery_201402.png',
-                url += 'events' + '/' + mystery[1] + '/shop_' + key;
-            }
-            else if (armoire) {
-                // e.g.,                  'head_armoire_gladiatorHelm':
-                // 'gear/armoire/shop/shop_head_armoire_gladiatorHelm.png
-                url += 'armoire/shop/shop_' + key;
-            }
-            else if (grandGala) {
-                // e.g.,                      'armor_special_fallHealer':
-                // 'gear/events/fall/shop/shop_armor_special_fallHealer',
-                url += 'events' + '/' + grandGala[1] + '/shop/shop_' + key;
-            }
-            else {
-                // For standard armor, head, shield, weapon.
-                // e.g.,                'armor_healer_1':
-                // 'gear/armor/shop/shop_armor_healer_1.png',
-                url += obj.origType + '/shop/shop_' + key;
-            }
-            url += '.png';
-        }
+        var url = 'https://habitica-assets.s3.amazonaws.com/mobileApp/images/' +
+                  'shop_' + key + '.png';
         obj.imgTag = '<img src="' +
                      url + '" title="' +
                      obj.plainText + ' (' +
@@ -4996,7 +4921,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.0)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -5031,6 +4956,20 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>7.1 <span class="date">2015-08-15</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>When you are on a boss quest, the Quest Progress section now tells you how much HP the boss has left. Thanks to <strong>me_and</strong> for this!</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>Equipment images are now taken from Habitica's Amazon bucket, instead of being stored locally.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>7.0 <span class="date">2015-07-31</span></dt>
         <dd><ul>
             <li>Features:
@@ -5041,7 +4980,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>6.2 <span class="date">2015-07-12</span></dt>
         <dd><ul>
             <li>Features:
@@ -5863,13 +5801,14 @@ ul#tableOfContents > li {
             <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To-Dos, with their <a href="http://habitica.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitica.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</li>
             <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To-Dos, and Rewards you have in total, and how many are assigned to each <a href="http://habitica.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitica.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
             <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To-Dos, or Rewards that have not been <a href="http://habitica.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
+            <li><span class="subheading">Habit Trends</span>: An interactive chart that provides a visual representation of the trends in your Habits. It gives you an idea of which Habits you are reinforcing, and which are being neglected.</li>
             <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your Habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
             <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your Dailies.</li>
             <li><span class="subheading">Dailies Incomplete</span>: A list of Dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitica.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
             <li><span class="subheading">To-Dos with Dates</span>: A list of all To-Dos that have been given due dates, sorted by date. If there are any To-Dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
             <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed To-Dos that Habitica has in its archive. The To-Dos' notes and completion dates are included.</li>
             <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitica.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitica.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
-            <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitica.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today.</li>
+            <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitica.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today, as well as the boss's HP (taken from your party's page, so this does not include any reduction from the damage you or other players have caused since the last time a party member's cron ran).</li>
             <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitica.wikia.com/wiki/Quests">quest</a> <a href="http://habitica.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
             <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitica.wikia.com/wiki/Settings">restore your stats</a> and <a href="http://habitica.wikia.com/wiki/Streaks">your Dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
             <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitica.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>

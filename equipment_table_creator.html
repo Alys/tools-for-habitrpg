@@ -310,6 +310,18 @@ var releaseDates = {
     'head_armoire_blueHairbow' : '2015-07',
     'armor_armoire_rancherRobes' : '2015-07',
     'head_armoire_royalCrown' : '2015-07',
+    'armor_armoire_goldenToga' : '2015-08',
+    'armor_armoire_hornedIronArmor' : '2015-08',
+    'head_armoire_goldenLaurels' : '2015-08',
+    'head_armoire_hornedIronHelm' : '2015-08',
+    'weapon_armoire_ironCrook' : '2015-08',
+    'weapon_armoire_mythmakerSword' : '2015-08',
+    'head_armoire_redFloppyHat' : '2015-09',
+    'weapon_armoire_goldWingStaff' : '2015-09',
+    'armor_armoire_plagueDoctorOvercoat' : '2015-09',
+    'head_armoire_yellowHairbow' : '2015-09',
+    'head_armoire_plagueDoctorHat' : '2015-09',
+    'eyewear_armoire_plagueDoctorMask' : '2015-09',
 };
 // get the current month's date in case the latest Enchanted Armoire
 // items haven't been added above yet:
@@ -432,6 +444,7 @@ function parseData() {
 
     // table row for each piece of gear:
     var attribs = ['con', 'int', 'per', 'str'];
+    var releaseDateNeeded = '';
     for (var i in allGear) {
         var obj = allGear[i];
 
@@ -493,9 +506,8 @@ function parseData() {
         var set         = obj.notes.split(' Enchanted Armoire: ')[1];
         if (set && set.match(/Independent Item/i)) {
             // create some unofficial sets
-            var res = name.match(/Hairbow/i);
+            var res = name.match(/(Hairbow|Floppy<br \/>Hat)/i);
             if (res && res[0]) {
-                // set = res[0] + '&nbsp;<strong>*</strong>';
                 set = res[0] + '<br /><em>unofficial set</em>';
             }
             else {
@@ -514,6 +526,9 @@ function parseData() {
         var releaseDate       = '';
         var releaseDatePretty = '';
         if (armoireGear) {
+            if (! releaseDates[obj.key]) {
+                releaseDateNeeded += "'" + obj.key + "' : '2015-09',<br />";
+            }
             releaseDate = releaseDates[obj.key] || thisMonth;
             var myRegexp = /(.+)-0?(.+)/g; // year-month
             var match = myRegexp.exec(releaseDate);
@@ -623,6 +638,9 @@ function parseData() {
     armoireTable += '</textarea>';
 
     var htmlEnd = '';
+    if (releaseDateNeeded) {
+        htmlEnd  += '<p>NEED RELEASE DATE:<br />' + releaseDateNeeded + '</p>';
+    }
     if (warnings) htmlEnd += '<p>WARNING:<br />' + warnings + '</p>';
     htmlEnd += "<p>The material below here is Habitica's JSON data that" +
             " was used to make the wikia code above. You can ignore it" +
@@ -772,7 +790,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(v3.0)</span></h1><!-- VERSION -->
+    <span>(v3.1)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
