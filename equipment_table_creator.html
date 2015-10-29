@@ -322,6 +322,10 @@ var releaseDates = {
     'head_armoire_yellowHairbow' : '2015-09',
     'head_armoire_plagueDoctorHat' : '2015-09',
     'eyewear_armoire_plagueDoctorMask' : '2015-09',
+    'weapon_armoire_batWand' : '2015-10',
+    'head_armoire_blackCat' : '2015-10',
+    'head_armoire_orangeCat' : '2015-10',
+    'shield_armoire_midnightShield' : '2015-10',
 };
 // get the current month's date in case the latest Enchanted Armoire
 // items haven't been added above yet:
@@ -527,7 +531,7 @@ function parseData() {
         var releaseDatePretty = '';
         if (armoireGear) {
             if (! releaseDates[obj.key]) {
-                releaseDateNeeded += "'" + obj.key + "' : '2015-09',<br />";
+                releaseDateNeeded += "'" + obj.key + "' : '2015-11',<br />"; // XXX make date automatic
             }
             releaseDate = releaseDates[obj.key] || thisMonth;
             var myRegexp = /(.+)-0?(.+)/g; // year-month
@@ -790,7 +794,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(v3.1)</span></h1><!-- VERSION -->
+    <span>(v3.2)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
