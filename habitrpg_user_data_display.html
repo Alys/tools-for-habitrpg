@@ -359,9 +359,9 @@ function parseData() {
     var sleeping = user.preferences.sleep; // true if resting in the inn
     var userKlass = user.stats.class;
     var health = getCurrentHealth(); // also sets dashboard tile
-    var quest = $.extend({}, user.party.quest);
+    var quest = {};
     // user.party.quest.key='vice3'; party.quest.active=true; // FOR TESTING
-    if (user.party.quest.key && party.quest && party.quest.active) {
+    if (user.party && user.party.quest && user.party.quest.key && party.quest && party.quest.active) {
         quest = $.extend({}, user.party.quest);
         quest.content = $.extend({}, content.quests[ party.quest.key ] );
     }
@@ -1919,7 +1919,13 @@ randomTodoHtml
                 'status': ((damageToUser) ? 'danger' : 'safe')
                 };
             if (quest.content && quest.content.boss) {
-                DASHBOARD.damageToParty = {'label': 'Est. Damage to Party',
+                var label = 'Est. Damage to Party';
+                if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' ||
+                    userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
+                ) {
+                    label = 'Est.Dam.2Part. :P';
+                }
+                DASHBOARD.damageToParty = {'label': label,
                     'hoverText': 'health loss your party will take ' +
                          'overnight from your quest boss due to your own ' +
                          'uncompleted Dailies (click for more information)',
@@ -2992,7 +2998,7 @@ function questProgress() {
     //
 
     var alreadyHaveDashboardTile = false;
-    if ((quest.content && quest.content.boss) || tavernBoss) {
+    if (quest && quest.progress && ((quest.content && quest.content.boss) || tavernBoss)) {
         var progress = Math.floor(quest.progress.up * 10) / 10;
         // Round DOWN with floor so we don't let the user think they
         // have even slightly more progress than they really have.
@@ -3011,7 +3017,7 @@ function questProgress() {
             }
         }
         if (tavernBoss) {
-            html += "the Abominable Stressbeast of Stoïkalm"; // XXX_LATER automate
+            html += "Burnout"; // XXX_LATER automate
         }
         html += '.';
         var dashboardTitle = 'Damage to ' + upperCaseFirst(bossesWord);
@@ -3062,9 +3068,9 @@ function questProgress() {
     html += '</p>';
 
     if (tavernBoss && tavern.quest.progress) {
-        var name = "Abominable Stressbeast of Stoïkalm"; // XXX_LATER automate!
+        var name = "Burnout"; // XXX_LATER automate!
         var hp = Math.round(tavern.quest.progress.hp);
-        var hpMax = 2750000; // XXX_LATER automate!
+        var hpMax = 11000000; // XXX_LATER automate!
         var hpPercent = Math.round(hp / hpMax * 1000) / 10;
         if (hp > 0 && hpPercent == 0) { // XXX_LATER do this better
             hpPercent = Math.round(hp / hpMax * 10000) / 100;
@@ -3083,7 +3089,7 @@ function questProgress() {
                  hp + ', down from ' + hpMax + ')';
         if (tavern.quest.progress.rage) {
             var rage = Math.round(tavern.quest.progress.rage);
-            var rageMax = 1450000; // XXX_LATER automate!
+            var rageMax = 1000000; // XXX_LATER automate!
             var ragePercent = Math.round(rage / rageMax * 1000) / 10;
             html += '<br />Stress: ' + ragePercent + '% (' +
                     rage + ' out of ' + rageMax + ')';
@@ -4083,6 +4089,7 @@ function computeStats(withBuffs) {
         details['equipment']  = 0;
         details['classBonus'] = 0;
         for(var key in equippedKeys) {
+            // console.log(key); // TST
             var obj = equippedKeys[key];
             var value = obj[stat];
             details['equipment'] += value;
