@@ -26,16 +26,12 @@ Contributors:
 
 <!-- XXX purge below to script tag -->
 
-    <link href="https://cdn.datatables.net/1.10.8/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
-    <link href="https://cdn.datatables.net/fixedheader/3.0.0/css/fixedHeader.dataTables.min.css" rel="stylesheet" type="text/css" />
-    <link href="https://cdn.datatables.net/fixedcolumns/3.1.0/css/fixedColumns.dataTables.min.css" rel="stylesheet" type="text/css" />
-    <!-- link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" / -->
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.8/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/fixedheader/3.0.0/js/dataTables.fixedHeader.min.js"></script>
-    <script src="https://cdn.datatables.net/fixedcolumns/3.1.0/js/dataTables.fixedColumns.min.js"></script>
-    <!-- script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script -->
+	<script type="text/javascript" src="/fixed-table-rows-cols-master/js/fixed_table_rc.js"></script>
+	<script type="text/javascript" src="/js/sorttable.js"></script>
+	<link rel="stylesheet" type="text/css" href="/fixed-table-rows-cols-master/css/fixed_table_rc.css" />
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script> <!-- https://github.com/chjj/marked -->
     <script src="js/emoji-images/emoji-images.js"></script>
 
@@ -433,17 +429,42 @@ function formatAndDisplayMAIN() {
         // data (except for sections that don't display the user's own data):
         $('#' + sectionOpen).show();
     }
-
-	// $(document).ready( function () { // XXX improve how this is linked to the associated code - pass in the name of the table(s) to do
-		// $('#taggerTable').DataTable({
-			// 'scrollX': true,
-			// 'scrollY': true,
-			// 'scrollCollapse': true,
-			// 'fixedHeader': true,
-			// 'fixedColumns': { 'leftColumns': 1 },
-			// 'paging': false,
-			// });
-	// } );
+		
+   $(document).ready(function() {
+	$("#taggerTable").fxdHdrCol({
+		fixedCols:  1,
+		width:     "100%",
+		height:    400,
+		colModal: [
+			   { width: 50, align: "center" },
+			   { width: 110, align: "center" },
+			   { width: 170, align: "left" },
+			   { width: 250, align: "left" },
+			   { width: 100, align: "left" },
+			   { width: 70, align: "left" },
+			   { width: 100, align: "left" },
+			   { width: 100, align: "center" },
+			   { width: 90, align: "left" },
+			   { width: 400, align: "left" },
+			   { width: 50, align: "center" },
+			   { width: 50, align: "center" },
+			   { width: 50, align: "center" },
+			   { width: 50, align: "center" },
+			   { width: 50, align: "center" },
+			   { width: 110, align: "center" },
+			   { width: 170, align: "left" },
+			   { width: 250, align: "left" },
+			   { width: 100, align: "left" },
+			   { width: 70, align: "left" },
+			   { width: 100, align: "left" },
+			   { width: 100, align: "center" },
+			   { width: 90, align: "left" },
+			   { width: 400, align: "left" },
+			   { width: 400, align: "left" },
+		],
+		sort: true
+	});
+   });
 }
 
 
@@ -988,7 +1009,9 @@ function collateAndDisplayTaskData() {
 							   renderFormattedText(tag.name) +
 							   '</th>';
 		});
-		var table = '<table id="TSTtaggerTable" class="TSTdisplay">' + // XXX id, class needed?
+		var table = '';
+		table += '<div class="dwrapper">';
+		table += '<table id="taggerTable" class="TSTdisplay">' + // XXX id, class needed?
 				    '<thead><tr>' +
             			'<th class="columnTask">task</th>' +
             			'<th class="columnType">type</th>' +
@@ -1010,6 +1033,7 @@ function collateAndDisplayTaskData() {
 			table += '</tr>';
 		});
 		table += '</tbody><table>';
+		table += '</div>';
 
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                    'html':
@@ -1025,6 +1049,8 @@ table
 }
 
 } // end of parseData() and its nested functions
+
+
 });
 </script>
 
