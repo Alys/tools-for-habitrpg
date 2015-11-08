@@ -326,6 +326,12 @@ var releaseDates = {
     'head_armoire_blackCat' : '2015-10',
     'head_armoire_orangeCat' : '2015-10',
     'shield_armoire_midnightShield' : '2015-10',
+    'weapon_armoire_shepherdsCrook' : '2015-11',
+    'armor_armoire_shepherdRobes' : '2015-11',
+    'armor_armoire_royalRobes' : '2015-11',
+    'head_armoire_blueFloppyHat' : '2015-11',
+    'head_armoire_shepherdHeaddress' : '2015-11',
+    'shield_armoire_royalCane' : '2015-11',
 };
 // get the current month's date in case the latest Enchanted Armoire
 // items haven't been added above yet:
@@ -510,7 +516,7 @@ function parseData() {
         var set         = obj.notes.split(' Enchanted Armoire: ')[1];
         if (set && set.match(/Independent Item/i)) {
             // create some unofficial sets
-            var res = name.match(/(Hairbow|Floppy<br \/>Hat)/i);
+            var res = name.match(/(Hairbow|Floppy<br \/>Hat|Cat<br \/>Hat)/i);
             if (res && res[0]) {
                 set = res[0] + '<br /><em>unofficial set</em>';
             }
@@ -531,7 +537,7 @@ function parseData() {
         var releaseDatePretty = '';
         if (armoireGear) {
             if (! releaseDates[obj.key]) {
-                releaseDateNeeded += "'" + obj.key + "' : '2015-11',<br />"; // XXX make date automatic
+                releaseDateNeeded += "'" + obj.key + "' : '" + thisMonth + "',<br />";
             }
             releaseDate = releaseDates[obj.key] || thisMonth;
             var myRegexp = /(.+)-0?(.+)/g; // year-month
@@ -794,7 +800,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(v3.2)</span></h1><!-- VERSION -->
+    <span>(v3.3)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
