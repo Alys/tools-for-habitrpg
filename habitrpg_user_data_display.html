@@ -2966,70 +2966,89 @@ wiki('Tavern', 'resting in the inn') +
 
         var html = '<p>Party name: ' + party.name + '</p>' +
                    '<p>Party leader: ' + party.leader.profile.name + '</p>' +
+                   '<table></table>';
 
-                   '<table border="1" width="100%"><thead><tr>' +
-
-                   '<th>User</th>' +
-                   '<th>Class</th>';
-
-        if (party.quest !== null) {
-            html += '<th>Questing</th>';
+        function createPartyOverviewTable() {
+            // Use DataTables to build the table (the table tag must be visible
+            // first for the layout to be correct):
+            $('#partyOverviewSection').show();
+            $('#partyOverviewSection table').dataTable({
+                'aaData': partyData, // TODO Need to build partyData array
+                'aoColumns': [
+                    { 'mData': 'user' },
+                    { 'mData': 'class' }
+                ],
+                'bDestroy': true,
+                'bDeferRender': true,
+            });
+            return;
         }
 
-        html += '<th>Level</th>' +
-                '<th>Exp</th>' +
-                '<th>GP</th>' +
-                '<th>MP</th>' +
-                '<th>Str</th>' +
-                '<th>Str<br/>(unbuffed)</th>' +
-                '<th>Int</th>' +
-                '<th>Int<br/>(unbuffed)</th>' +
-                '<th>Con</th>' +
-                '<th>Con<br/>(unbuffed)</th>' +
-                '<th>Per</th>' +
-                '<th>Per<br/>(unbuffed)</th>' +
-                '<th>HP</th>' +
 
-                '</thead></tr>' +
-                '<tbody>';
 
-        for (i = 0; i < party.members.length; i++) {
-            var member = party.members[i];
-
-            var fields = [member.profile.name,
-                          member.stats.class];
-
-            if (party.quest !== null) {
-                if (party.quest.leader === member._id) {
-                    fields.push('Leader');
-                } else if (party.quest.members[member._id] === true) {
-                    fields.push('Yes');
-                } else {
-                    fields.push('No');
-                }
-            }
-
-            fields = fields.concat([member.stats.lvl,
-                                    member.stats.exp.toFixed(0),
-                                    member.stats.gp.toFixed(2),
-                                    member.stats.mp.toFixed(0),
-                                    member.stats.str + member.stats.buffs.str,
-                                    member.stats.str,
-                                    member.stats.int + member.stats.buffs.int,
-                                    member.stats.int,
-                                    member.stats.con + member.stats.buffs.con,
-                                    member.stats.con,
-                                    member.stats.per + member.stats.buffs.per,
-                                    member.stats.per,
-                                    member.stats.hp.toFixed(0)]);
-
-            html += '<tr>';
-            for (j = 0; j < fields.length; j++) {
-                html += '<td>' + fields[j] + '</td>';
-            }
-            html += '</tr>'
-        }
-        html += '</tbody></table>';
+//                   '<table border="1" width="100%"><thead><tr>' +
+//
+//                   '<th>User</th>' +
+//                   '<th>Class</th>';
+//
+//        if (party.quest !== null) {
+//            html += '<th>Questing</th>';
+//        }
+//
+//        html += '<th>Level</th>' +
+//                '<th>Exp</th>' +
+//                '<th>GP</th>' +
+//                '<th>MP</th>' +
+//                '<th>Str</th>' +
+//                '<th>Str<br/>(unbuffed)</th>' +
+//                '<th>Int</th>' +
+//                '<th>Int<br/>(unbuffed)</th>' +
+//                '<th>Con</th>' +
+//                '<th>Con<br/>(unbuffed)</th>' +
+//                '<th>Per</th>' +
+//                '<th>Per<br/>(unbuffed)</th>' +
+//                '<th>HP</th>' +
+//
+//                '</thead></tr>' +
+//                '<tbody>';
+//
+//        for (i = 0; i < party.members.length; i++) {
+//            var member = party.members[i];
+//
+//            var fields = [member.profile.name,
+//                          member.stats.class];
+//
+//            if (party.quest !== null) {
+//                if (party.quest.leader === member._id) {
+//                    fields.push('Leader');
+//                } else if (party.quest.members[member._id] === true) {
+//                    fields.push('Yes');
+//                } else {
+//                    fields.push('No');
+//                }
+//            }
+//
+//            fields = fields.concat([member.stats.lvl,
+//                                    member.stats.exp.toFixed(0),
+//                                    member.stats.gp.toFixed(2),
+//                                    member.stats.mp.toFixed(0),
+//                                    member.stats.str + member.stats.buffs.str,
+//                                    member.stats.str,
+//                                    member.stats.int + member.stats.buffs.int,
+//                                    member.stats.int,
+//                                    member.stats.con + member.stats.buffs.con,
+//                                    member.stats.con,
+//                                    member.stats.per + member.stats.buffs.per,
+//                                    member.stats.per,
+//                                    member.stats.hp.toFixed(0)]);
+//
+//            html += '<tr>';
+//            for (j = 0; j < fields.length; j++) {
+//                html += '<td>' + fields[j] + '</td>';
+//            }
+//            html += '</tr>'
+//        }
+//        html += '</tbody></table>';
 
         TOC[orderId] = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'html': html};
