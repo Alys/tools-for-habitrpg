@@ -823,6 +823,7 @@ function collateAndDisplayTaskData() {
     var reddestHabit = {};
     var reddestDaily = {};
     var biggestTask  = {}; // task with greatest absolute magnitude
+    var everyXDaysInUse = false;
     var habits   = collateHabitsData();  // populates the...
     var dailies  = collateDailiesData(); // ... function's "global" variables...
     var todosAll = collateTodosData();   // ... defined above...
@@ -1078,6 +1079,9 @@ function collateAndDisplayTaskData() {
                 return task.repeat[dayname];
             }
             else if (task.frequency === 'daily') { // Every X Days
+                if (task.everyX > 1) { // bug not relevant if due EVERY day
+                    everyXDaysInUse = true;
+                }
                 var daysSinceTaskStart = todayUser.diff(startDate, 'days');
                 return (daysSinceTaskStart % task.everyX == 0);
             }
@@ -1999,6 +2003,10 @@ randomTodoHtml
         }
         else {
             html += '<p>You have completed all of the Dailies due today.</p>';
+        }
+        if (everyXDaysInUse) {
+            html += '<h3>Warning: "Every X Days" Dailies</h3>' +
+                    '<p>You have one or more Dailies that use the "Every X Days" repeat setting. If you live in a timezone where daylight savings is used for part of the year, then it is possible that these Dailies are being incorrectly reported here as due or not due. If Habitica is telling you that an "Every X Days" Daily is due, but the Data Display Tool is saying it isn\'t, then Habitica is likely to be correct. You can get around this problem by editing each of the affected Dailies to set the Start Date to a date that is more recent than the last daylight savings change in your region. A proper fix for this will be done soon.</p>';
         }
         if (dailiesIncompleteGrey.length > 0) {
             html += '<h3>Grey Dailies</h3><p>' +
