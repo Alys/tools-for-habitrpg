@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Habitica Wiki Quest Table Creator</title>
+
+<!--
+
+This page outputs the wikia code for creating the Quest Table
+in this page:
+    http://habitica.wikia.com/wiki/ XXX 
+
+This code is licenced under the same terms as Habitica:
+    https://raw2.github.com/HabitRPG/habitrpg/develop/LICENSE
+
+https://github.com/Alys/tools-for-habitrpg/blob/master/quest_table_creator.html
+
+https://oldgods.net/habitrpg/quest_table_creator.html
+
+Contributors:
+    Alys (Alice Harris), lady_alys@oldgods.net
+
+-->
+
+    <meta name="description" content="Habitica Wiki Quest Table Creator" />
+    <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
+
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+	<link href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
+
+
+<script type="text/javascript">
+$(function() { // wraps around all our code to not pollute global namespace
+
+var html = true; // false = wikia format
+var wikiaBaseUrl = 'http://habitica.wikia.com/wiki/';
+
+
+//////////////////////////////////////////////////////////////////////
+////   IMAGE FILE NAMES FOR EACH QUEST                 ///////////////
+////   XXX                                             ///////////////
+////                                                   ///////////////
+////   Add new entries here (in any order) when a new  ///////////////
+////   quest becomes available.                        ///////////////
+////   This is necessary only if the wiki image links  ///////////////
+////   do not match the file names from Habitica.      ///////////////
+//////////////////////////////////////////////////////////////////////
+var images = {
+    'armor_healer_1' : 'Acolyterobe.png',
+};
+
+//////////////////////////////////////////////////////////////////////
+////   XXX                                             ///////////////
+//////////////////////////////////////////////////////////////////////
+var questAvailability = {
+	'basilist': 'permanent<br />(invite to party)',
+	'egg': 'only during ' + make_url('Spring Fling'),
+	'evilsanta1': 'only during ' + make_url('Winter Wonderland'),
+	'evilsanta2': 'only during ' + make_url('Winter Wonderland'),
+	'burnout':'finished<br />('+ make_url('Fall Festival 2015','Fall_Festival') +')',
+	'stressbeast': 'finished',
+	'dilatory': 'finished',
+};
+
+//////////////////////////////////////////////////////////////////////
+////   WIKI LINKS FOR **SOME** QUESTS                  ///////////////
+////                                                   ///////////////
+////   Add new entries here (in any order) when        ///////////////
+////   a new quest becomes available.                  ///////////////
+////   This is necessary only if the wiki page         ///////////////
+////   filename does not match the filename that can   ///////////////
+////   be created automatically from the quest's name. ///////////////
+//////////////////////////////////////////////////////////////////////
+var questPageUrls = {
+    'atom1' : 'Dish_Disaster',
+    'moonstone1' : 'The_Moonstone_Chain',
+    'moonstone2' : 'Recidivate_the_Necromancer',
+    'moonstone3' : 'Recidivate_Transformed',
+    'dilatoryDistress1' : 'Message_in_a_Bottle',
+    'dilatoryDistress2' : 'Creatures_of_the_Crevasse',
+    'dilatoryDistress3' : 'Not_a_Mere_Maid',
+	// XXX 
+};
+
+//////////////////////////////////////////////////////////////////////
+////   LINKS FOR REWARDS (GEAR, ETC)                   ///////////////
+////                                                   ///////////////
+////   Add new entries here (in any order) when        ///////////////
+////   necessary.                                      ///////////////
+////   XXX explain                                     ///////////////
+//////////////////////////////////////////////////////////////////////
+var rewardPageUrls = {
+	'shield_special_goldenknight': 'Mustaine%27s_Milestone_Mashing_Morningstar',
+	'weapon_special_2': 'Stephen_Weber%27s_Shaft_of_the_Dragon',
+	'head_special_2': 'Nameless_Helm',
+	'armor_special_2': 'Jean Chalard%27s Noble Tunic',
+};
+
+//////////////////////////////////////////////////////////////////////
+////   RELEASE DATES FOR QUEST SCROLLS                 ///////////////
+//////////////////////////////////////////////////////////////////////
+// XXX 
+var releaseDates = {
+    'weapon_armoire_basicCrossbow' : '2015-06',
+};
+// get the current month's date in case the latest quest
+// hasn't been added above yet:
+var d = new Date();
+var month = d.getMonth() + 1;
+var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
+
+
+//////////////////////////////////////////////////////////////////////
+////   Global Variables                              /////////////////
+//////////////////////////////////////////////////////////////////////
+var content; // holds site-wide content (gear names and stats, quests, etc)
+
+
+//////////////////////////////////////////////////////////////////////
+////   Global Connection Variables      //////////////////////////////
+//////////////////////////////////////////////////////////////////////
+var serverName        = 'Habitica'; // used in "loading" message
+var serverUrl         = 'https://habitica.com:443/api/v2';
+var serverPathContent = '/content';
+var serverPathUser    = '/user';
+var userId            = '';
+var apiToken          = '';
+
+/* TST - FOR TESTING:
+$('body').css({'background-color':'#C4B4A4'});
+serverName        = 'localhost';
+serverUrl         = 'http://localhost';
+serverPathContent = '/cgi-bin/hrpg_content.pl';
+*/
+
+
+//////////////////////////////////////////////////////////////////////
+////   Data Fetch Function   /////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+fetchData();
+function fetchData() {
+    $('#loading #serverName').text(serverName);
+    $('#loading .good').show();
+    $('#loading .bad' ).hide();
+
+    // fetch the site-wide content (quest names and stats, etc):
+    $.ajax({
+        url: serverUrl + serverPathContent,
+        type: 'GET',
+        dataType: 'json',
+        cache: true,
+        success: fetchContentSuccess,
+        error: fetchFailure
+    });
+
+    function fetchFailure() {
+        $('#loading .good').hide();
+        $('#loading .bad' ).show();
+    }
+    function fetchContentSuccess(data) {
+        content = data;
+		parseData();
+    }
+}
+
+function parseData() {
+	// return '';
+    var allQuests = content.quests;
+
+    var warnings = '';
+
+	// XXX use wikiaBaseUrl in text below
+    var htmlStart = '';
+    ////// var htmlStart = '<p>This page outputs the wikia code for creating tables'
+        ////// + ' on the <a href="http://habitica.wikia.com/">Habitica wiki</a>.'
+        ////// + ' One table is for the [XXX finish this ... quest table pages ] '
+        // + ' <a href="http://habitica.wikia.com/wiki/Equipment_Table">'
+        // + 'Equipment Table</a> page, and the other is for the'
+        // + ' <a href="http://habitica.wikia.com/wiki/Enchanted_Armoire">'
+        // + 'Enchanted Armoire</a> page.</p>'
+        // + '<p>Copy everything inside each textarea below and paste it '
+        // + 'into the appropriate template pages: <a href="'
+        // + 'http://habitica.wikia.com/wiki/Template:Equipment_Table_Code'
+        // + '">Template:Equipment_Table_Code</a> and <a href="'
+        // + 'http://habitica.wikia.com/wiki/Template:Enchanted_Armoire_Table_Code'
+        // + '">Template:Enchanted_Armoire_Code</a>.'
+        ////// + '</p>';
+
+    var questTableAll = '';
+    // var questTableAll = '<textarea rows="20" cols="120" wrap="off">';
+    // var questTableXXX = '<textarea rows="20" cols="120" wrap="off">';
+
+    questTableAll += '<table id="myTable" border="1">';
+    questTableAll += '<thead>'; // XXX check, including tbody and closing tags
+    var headers = ['name', 'availability', 'cost', 'type', 'reward type', 'GP', 'XP', 'reward items', 'boss HP', 'boss strength', 'release date', 
+		'length', 'difficulty']; // 'length (detailed)', 
+	var includeQuestId = true;
+	var includeQuestId = false;
+	if (includeQuestId) { headers.push('quest ID'); }
+    questTableAll += convertRow(headers, 'th');
+    questTableAll += '</thead>';
+    questTableAll += '<tbody>';
+
+    // table header:
+    // questTableAll += '' +  // XXX 
+// '\n{| class="filterable sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
+// '\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"' +
+// '\n! class="unfilterable" | Name' +
+// '\n! class="unfilterable" | Image' +
+// '\n! Description' +
+// '\n! class="unfilterable" data-sort-type="number" | CON' +
+// '\n! data-sort-type="number" | INT' +
+// '\n! class="unsortable"   | Quality';
+
+    // table row for each quest:
+    var releaseDateNeeded = '';
+	var tableRows = [];
+	for (var questId in allQuests) {
+		var row = [];
+        var quest = allQuests[questId];
+		// for (var backgroundId in content.backgrounds[setId]) 
+		// content.backgrounds[setId][backgroundId].text;
+
+		row.push(make_url(quest.text, questPageUrls[questId] || ''));
+
+		var availability = questAvailability[questId] || 'permanent';
+		if (quest.lvl) {
+			availability += ' (level ' + quest.lvl + ')';
+		}
+		row.push(availability);
+
+		var cost = (quest.goldValue) ? quest.goldValue + ' GP' :
+		           (quest.value)     ? quest.value + ' gem' +
+										   ((quest.value > 1) ? 's' : '' ) :
+									   'N/A';
+		if (quest.category && quest.category === 'unlockable') {
+			if (quest.previous) {
+				cost = 'Previous part or ' + cost;
+			}
+			else if (quest.lvl) {
+				cost = 'Level ' + quest.lvl + ' or ' + cost;
+			}
+		}
+		row.push(cost);
+
+        var objectiveType =
+			(quest.category && quest.category === 'world') ? 'world boss' :
+            (quest.collect) ? 'collection' :
+            (quest.boss)    ? 'boss' :
+                              'unknown';
+		row.push(objectiveType);
+
+		var droppedGP = quest.drop.gp || 0;
+		var droppedXP = quest.drop.exp || 0;
+		delete quest.drop.gp;
+		delete quest.drop.exp;
+
+		// if (quest.drop.unlock) { console.log(quest.drop.unlock); } // TST
+		delete quest.drop.unlock;
+
+		var items = {};
+		if (quest.drop.items) {
+			for (var i in quest.drop.items) {
+				var obj = quest.drop.items[i];
+				if (!items[obj.type]) {
+					items[obj.type] = {}; // e.g., "eggs", "gear"
+				}
+				if (!items[obj.type][obj.key]) {
+					items[obj.type][obj.key] = {}; // e.g., Potatoe
+				}
+				items[obj.type][obj.key]['text'] = obj.text; // e.g., Potato
+				if (!items[obj.type][obj.key]['count']) {
+					items[obj.type][obj.key]['count'] = 0;
+				}
+				items[obj.type][obj.key]['count']++;
+				delete obj.type;
+				delete obj.key;
+				delete obj.text;
+				if (Object.keys(obj).length) { 
+					console.log('"obj" object has other contents:');
+					console.log(obj);
+				}
+			}
+		}
+		delete quest.drop.items;
+		if (Object.keys(quest.drop).length) { 
+			console.log('"quest.drop" object has other contents:');
+			console.log(quest.drop);
+		}
+
+		var itemsString = '';
+		for (var type in items) {
+			if (itemsString) {
+				itemsString += '<br />';
+			}
+			// if (type === 'food') {
+				// itemsString += type + ': ';
+			// }
+			var string = '';
+			for (var key in items[type]) {
+				if (string) {
+					string += ', ';
+				}
+				var text = items[type][key]['text']; 
+				if (rewardPageUrls[key]) {
+					text = make_url(text, rewardPageUrls[key]);
+				}
+				string += text;
+				// string += " -- " + key; // TST
+				if (items[type][key]['count'] > 1) {
+					string += ' x ' + items[type][key]['count'];
+				}
+			}
+			itemsString += string;
+		}
+		itemsString = itemsString || 'n/a';
+
+		var specialRewardType = 'unknown';
+		var etcPossible = false;
+		if (questId === 'basilist') {
+			specialRewardType = 'XP, GP';
+		}
+		if (items['gear']) {
+			specialRewardType = 'equipment';
+			etcPossible = true;
+			delete items['gear'];
+		}
+		if (items['quests']) {
+			specialRewardType = 'scroll';
+			etcPossible = true;
+			delete items['quests'];
+		}
+		if (etcPossible && Object.keys(items).length) {
+			specialRewardType += ', etc';
+		}
+        var rewardType = 
+			(!quest.category)                 ? specialRewardType :
+			(quest.category === 'world')      ? 'various' :
+			(quest.category === 'gold')       ? specialRewardType :
+			(quest.category === 'unlockable') ? specialRewardType :
+                            				    quest.category; // e.g., pet
+		row.push(rewardType);
+
+		row.push(droppedGP);
+		row.push(droppedXP);
+		row.push(itemsString);
+
+		var bossHP  = 'n/a';
+		var bossStr = 'n/a';
+		var questLength         = 'n/a';
+		var questLengthDetailed = 'n/a';
+		var questDifficulty     = 'n/a';
+		if (quest.boss && (!quest.category || quest.category !== 'world')) {
+			bossHP  = quest.boss.hp  || 0;
+			bossStr = quest.boss.str || 0;
+
+			if (bossHP > 999) {
+				questLength = 'long';
+			}
+			else if (bossHP > 499) {
+				questLength = 'medium';
+			}
+			else {
+				questLength = 'short';
+			}
+
+			if (bossHP > 1200) {
+				questLengthDetailed = '> 4 wk';
+			}
+			else if (bossHP > 1000) {
+				questLengthDetailed = '~ 4 wk';
+			}
+			else if (bossHP > 900) {
+				questLengthDetailed = '3-4 wk';
+			}
+			else if (bossHP > 799) {
+				questLengthDetailed = '~ 3 wk';
+			}
+			else if (bossHP > 500) {
+				questLengthDetailed = '2-3 wk';
+			}
+			else if (bossHP > 400) {
+				questLengthDetailed = '~ 2 wk';
+			}
+			else if (bossHP > 300) {
+				questLengthDetailed = '< 2 wk';
+			}
+			else {
+				questLengthDetailed = '~ 1 wk';
+			}
+			questLength = questLength + '<br />(' + questLengthDetailed + ')';
+
+			if (bossStr > 2.5) {
+				questDifficulty = 'very difficult';
+			}
+			else if (bossStr = 2.5) {
+				questDifficulty = 'hard';
+			}
+			else if (bossStr >= 2) {
+				questDifficulty = 'medium';
+			}
+			else if (bossStr >= 1.5) {
+				questDifficulty = 'easy';
+			}
+			else {
+				questDifficulty = 'trivial';
+			}
+
+			var divisor = 1000 * 1000;
+			if (bossHP > divisor) {
+				bossHP = bossHP / divisor;
+				bossHP += 'M';
+			}
+		}
+		row.push(bossHP);
+		row.push(bossStr);
+
+
+        var releaseDate       = '';
+        var releaseDatePretty = '';
+		if (! releaseDates[obj.key]) {
+			releaseDateNeeded += "'" + obj.key +"' : '"+ thisMonth + "',<br />";
+		}
+		releaseDate = releaseDates[obj.key] || thisMonth;
+		var myRegexp = /(.+)-0?(.+)/g; // year-month
+		var match = myRegexp.exec(releaseDate);
+		if (match) {
+			var months = ['zero','Jan','Feb','Mar','Apr','May','Jun',
+								 'Jul','Aug','Sep','Oct','Nov','Dec'];
+			var monthNumber = match[2];
+			var month = months[match[2]] || match[2];
+			releaseDatePretty = month + '<br />' + match[1];//year
+		}
+		else {
+			releaseDatePretty = releaseDate;
+		}
+		row.push("T.B.A."); // releaseDate);
+
+		row.push(questLength);
+		// row.push(questLengthDetailed);
+		row.push(questDifficulty);
+		if (includeQuestId) { row.push(questId); }
+	
+        questTableAll += convertRow(row);
+		tableRows.push(row);
+    }
+
+    questTableAll += '</tbody>';
+    questTableAll += '</table>';
+
+
+var columns = [];
+for (var i in headers) {
+	columns.push({'title': headers[i]});
+}
+
+$(document).ready(function() {
+    $('#theTable').DataTable( {
+        'data': tableRows,
+        'columns': columns,
+		'bPaginate': false,
+    } );
+} );
+
+
+    // table footer:
+    // questTableAll += '' +
+// '\n|- class="sortbottom"' +
+// '\n| colspan="10" style="height: 0px; border-bottom: 3px solid #284C6D;"|' +
+// '\n|}\n';
+
+    // questTableXXX += '' +
+// '\n|- class="sortbottom"' +
+// '\n| colspan="10" style="height: 0px; border-bottom: 3px solid #284C6D;"|' +
+
+    // questTableAll += '</textarea>';
+    // questTableXXX += '</textarea>';
+
+    var htmlEnd = '';
+    // if (releaseDateNeeded) {
+        // htmlEnd  += '<p>NEED RELEASE DATE:<br />' + releaseDateNeeded + '</p>';
+    // }
+    if (warnings) htmlEnd += '<p>WARNING:<br />' + warnings + '</p>';
+    htmlEnd += "<p>The material below here is Habitica's JSON data that" +
+            " was used to make the wikia code above. You can ignore it" +
+            " unless you are interested in it. You do not need to" +
+            " copy it to the wiki.</p>" +
+            "<pre>" + JSON.stringify(allQuests, null, 4) + "</pre>";
+    htmlEnd = ''; // TST
+
+
+    //////////////////////////////////////////////////////////////////////
+    ////   Display the HTML    ///////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    $('#loading .good').hide();
+    $('#output').html(htmlStart +
+                    '<h2>Notes:</h2>' +
+                    '<ul>' +
+                    '<li>This is an initial draft to show us what sort of information can be produced automatically for one or more wiki quest table pages.</li>' +
+                    '<li>This displays all possible columns that Alys has thought of. They don\'t all need to be included in the final pages. If you can think of other columns, they can be added.</li>' +
+                    '<li>Any information pulled straight from Habitica should be correct. Any information that Alys had to write code to calculate might be wrong (only the briefest of testing has been done so far). Any bugs can be easily fixed.</li>' +
+                    '<li>The "difficulty" and "length" columns won\'t be in the final tables. They are just there to show how the script will choose which quests will be on which pages.</li>' +
+                    // '<li></li>' +
+                    '<li>Quest scroll images aren\'t included yet but will be.</li>' + // XXX do that
+                    '<li>Some links will be broken (Alys will fix).</li>' +
+                    '<li>Release dates will be inserted later.</li>' +
+                    '<li>For the "reward type" column, we might want to change it where it says "..., etc".</li>' +
+                    '<li>When we have decided what columns we want to display on the wiki\'s quest pages, this script will be changed so that it produces code that can be pasted into those pages.</li>' +
+                    '</ul>' +
+                    // questTableAll +
+                    // + '<h2>XXX Quest Table:</h2>'
+                    // + questTableXXX
+                    htmlEnd);
+}
+
+function convertRow(rowArray, cellType) {
+	// return '';
+	cellType = 'td';
+	var row = (html) ? '<tr>' : '';
+	for (var i in rowArray) {
+		row += (html) ? '<' + cellType + '>' : '';
+		row += rowArray[i];
+		row += (html) ? '</' + cellType + '>' : '';
+		//            questTableAll += '' +
+		//    '\n|-' +
+		//    '\n|' + obj.text      +           // name
+		//    '\n|' + type      +           // type (weapon, etc)
+		//    '\n|' + cost      +           // cost (gems or gp)
+		//    '\n|' + stats.con +           // CON
+		//    '\n|' + stats.int +           // INT
+		//    '\n|' + stats.per +           // PER
+		//    '\n|' + stats.str +           // STR
+		//    '\n|' + isBest    ;           // quality
+		// '\n| data-sort-value="' + releaseDate + '" | ' + releaseDatePretty +
+	}
+	row += (html) ? '</tr>\n' : '';
+	return row;
+}
+
+
+function make_url(text, url) {
+	if (!url) {
+        url = text.replace(/ /g, '_');
+	}
+	if (url.indexOf('://') === -1) {
+		url = wikiaBaseUrl + url;
+	}
+	return (html) ? '<a href="' + url + '">' + text + '</a>' :
+					'[[' + url + '|' + text + ']]';
+}
+
+
+});
+</script>
+
+<style>
+/*********************************************************************
+****   Page-wide   ***************************************************
+*********************************************************************/
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    background-color: rgb(173, 208, 215);
+}
+#innerBody {
+    margin: 20px;
+    padding: 5px 20px 30px 20px;
+    background-color: rgb(242, 242, 230);
+}
+#loading {
+    margin-right: 30px;
+    margin-left: 30px;
+    color: orange;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+#loading ul {
+    font-size: 0.8em;
+}
+#loading ul a {
+    color: orange;
+}
+
+
+hr {
+    width: 95%;
+}
+hr.padded {
+    margin-top:    1em;
+    margin-bottom: 2em;
+}
+
+.show {
+    display: block;
+}
+.hide {
+    display: none;
+}
+.clear {
+    clear: both;
+}
+
+.subheading {
+    font-weight: bold;
+}
+.highlight {
+    font-weight: bold;
+}
+.lowlight { /* like highlight but less so */
+    font-style: italic;
+}
+.explanation {
+    font-style: italic;
+}
+abbr {
+    border-bottom: 1px dashed black;
+}
+img.emoji {
+    margin-bottom: -0.25em;
+}
+.forCopyPaste {
+    /* used to add blank lines that we want when copying text to clipboard,
+       but we don't want to see extra whitespace on the screen */
+    margin-top: -1em;
+}
+ul.padded > li {
+    padding: 3px 0;
+}
+
+.gearList .item .stats {
+    font-variant: small-caps;
+}
+.gearList .item .key {
+    display: none;
+}
+
+
+.coloured {
+    display: inline-block;
+    width: 5.5em;
+    height: 3em;
+    padding-top: .7em;
+}
+.colourBrightBlue { background-color: rgb(209,226,248); }
+.colourBlueGrey   { background-color: rgb(216,230,232); }
+.colourGreen      { background-color: rgb(222,237,219); }
+.colourYellow     { background-color: rgb(255,244,216); }
+.colourOrange     { background-color: rgb(254,234,216); }
+.colourRed        { background-color: rgb(250,214,214); }
+.colourDarkRed    { background-color: rgb(240,197,190); }
+
+.neutral {
+    background-color: #fffbd0; /* yellow */
+}
+.danger {
+    background-color: #ffcccc; /* red */
+}
+.safe {
+    background-color: #ccffcc; /* green */
+}
+
+
+/*********************************************************************
+****   Header   ******************************************************
+*********************************************************************/
+h1 {
+    float: left;
+}
+h1>a:first-child { /* "Habitica" link in header */
+    color: black;
+    text-decoration: none;
+}
+h1>a:first-child:hover { /* "Habitica" link in header */
+    text-decoration: underline;
+}
+h1 span {
+    font-size: 0.5em;
+}
+
+
+/*********************************************************************
+****   Header   ******************************************************
+*********************************************************************/
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+table, th, td {
+   border: 1px solid black;
+}
+
+
+</style>
+</head>
+<body><div id="innerBody">
+
+<h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Quest Table Creator
+    <span>(v0.1)</span></h1><!-- VERSION -->
+<hr class="clear" />
+
+<div id="loading">
+    <div class="good hide">
+        <p>Please wait. Fetching data from
+        <span id="serverName">Habitica</span>...</p>
+    </div>
+    <div class="bad hide">
+        <p>There was an error obtaining the data.</p>
+        <ul class="padded">
+            <li>Please reload the page (but perhaps wait half an hour first in case Habitica is under heavy load).</li>
+            <li>If you're using Internet Explorer, try another browser. <a href="https://www.google.com/intl/en/chrome/browser/">Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a> will be more reliable.</li>
+            <li>If neither of those help, <a href="mailto:lady_alys@oldgods.net">contact me</a>!</li>
+        </ul>
+    </div>
+</div>
+
+<div id="output">
+</div>
+
+
+<br />
+<table id="theTable"></table>
+
+</div><!-- end of div id="innerBody" -->
+</body>
+</html>
