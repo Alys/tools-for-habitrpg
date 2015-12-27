@@ -50,9 +50,9 @@ var wikiaBaseUrl = 'http://habitica.wikia.com/wiki/';
 //////////////////////////////////////////////////////////////////////
 var images = {
     'evilsanta':  'Inventory_quest_scroll_evilsanta.png',
-    'burnout':     'N/A',
-    'stressbeast': 'N/A',
-    'dilatory':    'N/A',
+    'burnout':     'n/a',
+    'stressbeast': 'n/a',
+    'dilatory':    'n/a',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ var rewardPageUrls = {
 	'shield_special_goldenknight': 'Mustaine%27s_Milestone_Mashing_Morningstar',
 	'weapon_special_2': 'Stephen_Weber%27s_Shaft_of_the_Dragon',
 	'head_special_2': 'Nameless_Helm',
-	'armor_special_2': 'Jean Chalard%27s Noble Tunic',
+	'armor_special_2': 'Jean_Chalard%27s_Noble_Tunic',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -263,17 +263,17 @@ function parseData() {
 					' class="unfilterable" | availability',
 					' class="unfilterable" | cost',
 					' class="unsortable"   | type',
-					' class="unsortable"   | reward type',
+					' class="unsortable"   | reward<br />type',
 					' class="unfilterable" | GP',
 					' class="unfilterable" | XP',
-					' class="unfilterable" | reward items',
-					' class="unfilterable" | boss HP',
-					' class="unfilterable" | boss strength'];
+					' class="unfilterable" | reward<br />items',
+					' class="unfilterable" | boss<br />HP',
+					' class="unfilterable" | boss<br />strength'];
 
     var headersHtml = ['name', 'scroll', 'availability', 'cost', 'type', 'reward type', 'GP', 'XP', 'reward items', 'boss HP', 'boss strength']; 
     headersHtml.push('<em>length</em>', '<em>difficulty</em>', '<em>release date</em>');
-	var includeQuestId = false;
 	var includeQuestId = true;
+	var includeQuestId = false;
 	if (includeQuestId) { headersHtml.push('<em>quest ID</em>'); }
     questTableAll += convertRow('wikia', headers, 'th');
 
@@ -309,7 +309,7 @@ function parseData() {
 		var cost = (quest.goldValue) ? quest.goldValue + ' GP' :
 		           (quest.value)     ? quest.value + ' gem' +
 										   ((quest.value > 1) ? 's' : '' ) :
-									   'N/A';
+									   'n/a';
 		if (quest.category && quest.category === 'unlockable') {
 			if (quest.previous) {
 				cost = 'Previous part or ' + cost;
@@ -395,7 +395,7 @@ function parseData() {
 		var specialRewardType = 'unknown';
 		var etcPossible = false;
 		if (questId === 'basilist') {
-			specialRewardType = 'XP, GP';
+			specialRewardType = 'XP, GP<br />only';
 		}
 		if (items['gear']) {
 			specialRewardType = 'equipment';
@@ -474,7 +474,7 @@ function parseData() {
 				if (bossStr > 2.5) {
 					questDifficulty = 'very difficult';
 				}
-				else if (bossStr = 2.5) {
+				else if (bossStr === 2.5) {
 					questDifficulty = 'hard';
 				}
 				else if (bossStr >= 2) {
@@ -629,18 +629,19 @@ function parseData() {
 					((includeQuestId) ? 
 						'<li>The <strong>quest ID</strong> column will not appear on the wiki. It is purely for Alys\'s benefit when setting up the data in the script.</li>' : '') +
 
-                    '<li>Quest scroll images will always look broken in the HTML table here, but will work on the wiki (although slight tweaking of the code might be needed to get the image names correct).</li>' +
-                    '<li>Sorting won\'t always work correctly in the HTML table here, but will work on the wiki (tweaking might be needed initially).</li>' +
+                    '<li>Quest scroll images will always look broken in the HTML table here, but will work on the wiki.</li>' +
+                    '<li>Sorting won\'t always work correctly in the HTML table here, but will work on the wiki.</li>' +
                     '<li>All links should now be correct (tell Alys if you happen to find any broken, but don\'t bother to test them all - Alys has and probably did it thoroughly).</li>' +
 
                     '<li>Any information pulled straight from Habitica should be correct. Any information that Alys had to write code to calculate might be wrong. Any bugs can be easily fixed.</li>' +
 
                     // '<li></li>' +
                     '</ul>' +
-                    '<h2>Wikia Code for the Table on a Page Showing All Quests:</h2>' +
-                    '<textarea rows="20" cols="120" wrap="off">' +
+                    '<p>This textarea contains code to produce a Wikia table showing all quests:</h2>' +
+                    '<textarea rows="10" cols="140" wrap="off">' +
                     questTableAll +
                     '</textarea>' +
+                    '<p>This is an HTML version of the same table (but with some differences):</h2>' +
                     htmlEnd);
 }
 
@@ -698,7 +699,7 @@ function make_image(image, hoverText) {
 	if (!image) {
         return '';
 	}
-	if (image === 'N/A') {
+	if (image === 'n/a') {
         return image;
 	}
 	hoverText = hoverText || '';
@@ -858,7 +859,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(v0.2)</span></h1><!-- VERSION -->
+    <span>(v0.3)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
