@@ -64,7 +64,7 @@ var images = {
 ////   "permanent".                                    ///////////////
 //////////////////////////////////////////////////////////////////////
 var questAvailability = {
-    'basilist': 'permanent<br />(invite to party)',
+    'basilist': 'invite to party',
     'egg': 'only during ' + make_url('Spring Fling'),
     'evilsanta': 'only during ' + make_url('Winter Wonderland'),
     'evilsanta2': 'only during ' + make_url('Winter Wonderland'),
@@ -261,7 +261,6 @@ function parseData() {
     var headers = [ ' class="unfilterable" | name',
                     ' class="unfilterable" | scroll',
                     ' class="unfilterable" | availability',
-                    ' class="unfilterable" | cost',
                     ' class="unsortable"   | type',
                     ' class="unsortable"   | rewards',
                     ' class="unfilterable" | GP',
@@ -269,7 +268,7 @@ function parseData() {
                     ' class="unfilterable" | boss<br />HP',
                     ' class="unfilterable" | boss<br />strength'];
 
-    var headersHtml = ['name', 'scroll', 'availability', 'cost', 'type', 'rewards', 'GP', 'XP', 'boss HP', 'boss strength'];
+    var headersHtml = ['name', 'scroll', 'availability', 'type', 'rewards', 'GP', 'XP', 'boss HP', 'boss strength'];
     headersHtml.push('<em>length</em>', '<em>difficulty</em>', '<em>release date</em>');
     var includeQuestId = true;
     var includeQuestId = false;
@@ -299,25 +298,53 @@ function parseData() {
                              questId),
                   'data-sort-value="' + questId + '"' ]);
 
-        var availability = questAvailability[questId] || 'permanent';
-        if (quest.lvl) {
-            availability += ' (level ' + quest.lvl + ')';
-        }
-        row.push(availability);
 
+
+
+        var availability = questAvailability[questId] || '';
+
+        if (quest.unlockCondition && quest.unlockCondition.condition &&
+            quest.unlockCondition.condition === 'party invite'
+           ) {
+            delete quest.value; // Habitica's config lies
+        }
         var cost = (quest.goldValue) ? quest.goldValue + ' GP' :
                    (quest.value)     ? quest.value + ' gem' +
                                            ((quest.value > 1) ? 's' : '' ) :
-                                       'n/a';
+                                       '';
+        var yes = false;
+        var yesyes = false;
         if (quest.category && quest.category === 'unlockable') {
             if (quest.previous) {
-                cost = 'Previous part or ' + cost;
+                availability = 'previous part';
+                yes = true;
+                if (quest.lvl) {
+                    yesyes = true;
+                    // availability += '<br />(level ' + quest.lvl + ')';
+                }
             }
             else if (quest.lvl) {
-                cost = 'Level ' + quest.lvl + ' or ' + cost;
+                availability = 'level ' + quest.lvl;
+                yes = true;
             }
         }
-        row.push(cost);
+        if (availability && cost && yes) {
+                availability += ' or<br />' + cost;
+                cost = '';
+        }
+        if (quest.lvl && yesyes) {
+            availability += '<br />(level ' + quest.lvl + ')';
+        }
+
+        if (cost && !availability) {
+            availability = cost;
+            cost = '';
+        }
+        else if (cost) {
+        availability = ".<br />" + cost + '<br />' + availability; // limited time stuff
+        }
+
+        row.push(availability);
 
         var objectiveType =
             (quest.category && quest.category === 'world') ? 'world boss' :
