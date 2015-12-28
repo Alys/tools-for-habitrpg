@@ -263,14 +263,13 @@ function parseData() {
 					' class="unfilterable" | availability',
 					' class="unfilterable" | cost',
 					' class="unsortable"   | type',
-					' class="unsortable"   | reward<br />type',
+					' class="unsortable"   | rewards',
 					' class="unfilterable" | GP',
 					' class="unfilterable" | XP',
-					' class="unfilterable" | reward<br />items',
 					' class="unfilterable" | boss<br />HP',
 					' class="unfilterable" | boss<br />strength'];
 
-    var headersHtml = ['name', 'scroll', 'availability', 'cost', 'type', 'reward type', 'GP', 'XP', 'reward items', 'boss HP', 'boss strength']; 
+    var headersHtml = ['name', 'scroll', 'availability', 'cost', 'type', 'rewards', 'GP', 'XP', 'boss HP', 'boss strength'];
     headersHtml.push('<em>length</em>', '<em>difficulty</em>', '<em>release date</em>');
 	var includeQuestId = true;
 	var includeQuestId = false;
@@ -368,29 +367,32 @@ function parseData() {
 		var itemsString = '';
 		for (var type in items) {
 			if (itemsString) {
-				itemsString += '<br />';
+				itemsString += ';<br />';
 			}
-			// if (type === 'food') {
-				// itemsString += type + ': ';
-			// }
 			var string = '';
-			for (var key in items[type]) {
-				if (string) {
-					string += ', ';
-				}
-				var text = items[type][key]['text']; 
-				if (rewardPageUrls[key]) {
-					text = make_url(text, rewardPageUrls[key]);
-				}
-				string += text;
-				// string += " -- " + key; // TST
-				if (items[type][key]['count'] > 1) {
-					string += ' x ' + items[type][key]['count'];
+			if (type === 'food' && quest.category === 'world') {
+				string = "one of each food";
+			}
+			else {
+				for (var key in items[type]) {
+					if (string) {
+						string += ', ';
+					}
+					var text = items[type][key]['text'];
+					if (type === 'gear') {
+						text = text.replace(/ \((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, '');
+					}
+					if (rewardPageUrls[key]) {
+						text = make_url(text, rewardPageUrls[key]);
+					}
+					string += text;
+					if (items[type][key]['count'] > 1) {
+						string += ' x ' + items[type][key]['count'];
+					}
 				}
 			}
 			itemsString += string;
 		}
-		itemsString = itemsString || 'n/a';
 
 		var specialRewardType = 'unknown';
 		var etcPossible = false;
@@ -416,11 +418,21 @@ function parseData() {
 			(quest.category === 'gold')       ? specialRewardType :
 			(quest.category === 'unlockable') ? specialRewardType :
                             				    quest.category; // e.g., pet
+
+		// add list of rewards to reward type, with some abbreviations:
+		if (rewardType === 'scroll') {
+			itemsString = itemsString.replace(/ \(Scroll\)/i, '');
+			itemsString = itemsString.replace(/ \(Quest Scroll\)/i, '');
+			itemsString = itemsString.replace(/.*Part [0-9]: /i, '');
+		}
+		if (itemsString) {
+			rewardType += ':<br />' + itemsString;
+		}
+
 		row.push(rewardType);
 
 		row.push(droppedGP);
 		row.push(droppedXP);
-		row.push(itemsString);
 
 		var bossHP     = 'n/a';
 		var bossHPSort = 0;
@@ -527,6 +539,7 @@ function parseData() {
 			var match = myRegexpImage.exec(value);
 			if (match) {
 				value = match[1] + '<img src="' + 'fake_broken_image' + '" />' + match[3]; // no image because it won't work anyway
+				// value = match[1] + '<img src="' + '' + '" />' + match[3]; // no image because it won't work anyway // TST
 			}
 
 			rowHtml.push(value);
@@ -637,11 +650,11 @@ function parseData() {
 
                     // '<li></li>' +
                     '</ul>' +
-                    '<p>This textarea contains code to produce a Wikia table showing all quests:</h2>' +
-                    '<textarea rows="10" cols="140" wrap="off">' +
+                    '<p>This textarea contains code to produce a Wikia table showing all quests:</p>' +
+                    '<textarea rows="5" cols="40" wrap="off">' +
                     questTableAll +
                     '</textarea>' +
-                    '<p>This is an HTML version of the same table (but with some differences):</h2>' +
+                    '<p>This is an HTML version of the same table (but with some differences):</p>' +
                     htmlEnd);
 }
 
