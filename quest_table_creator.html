@@ -64,13 +64,13 @@ var images = {
 ////   "permanent".                                    ///////////////
 //////////////////////////////////////////////////////////////////////
 var questAvailability = {
-    'basilist': 'invite to party',
-    'egg': 'only during ' + make_url('Spring Fling'),
-    'evilsanta': 'only during ' + make_url('Winter Wonderland'),
-    'evilsanta2': 'only during ' + make_url('Winter Wonderland'),
-    'burnout':'finished<br />('+ make_url('Fall Festival 2015','Fall_Festival') +')',
+    'basilist':    'invite to party',
+    'egg':         'only during ' + make_url('Spring Fling'),
+    'evilsanta':   'only during ' + make_url('Winter Wonderland'),
+    'evilsanta2':  'only during ' + make_url('Winter Wonderland'),
+    'burnout':     'finished<br />('+ make_url('Fall Festival 2015','Fall_Festival') +')',
     'stressbeast': 'finished',
-    'dilatory': 'finished',
+    'dilatory':    'finished',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -194,11 +194,11 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
+/* TST - FOR TESTING:
 $('body').css({'background-color':'#C4B4A4'});
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
-/* TST - FOR TESTING:
 */
 
 
@@ -298,11 +298,17 @@ function parseData() {
                              questId),
                   'data-sort-value="' + questId + '"' ]);
 
-
-
-
-        var availability = questAvailability[questId] || '';
-
+        var availability = '';
+        var displayLevelRestriction = false;
+        if (quest.category && quest.category === 'unlockable') {
+            if (quest.previous) {
+                availability = 'previous part';
+                displayLevelRestriction = quest.lvl; // true
+            }
+            else if (quest.lvl) {
+                availability = 'level ' + quest.lvl;
+            }
+        }
         if (quest.unlockCondition && quest.unlockCondition.condition &&
             quest.unlockCondition.condition === 'party invite'
            ) {
@@ -310,40 +316,23 @@ function parseData() {
         }
         var cost = (quest.goldValue) ? quest.goldValue + ' GP' :
                    (quest.value)     ? quest.value + ' gem' +
-                                           ((quest.value > 1) ? 's' : '' ) :
-                                       '';
-        var yes = false;
-        var yesyes = false;
-        if (quest.category && quest.category === 'unlockable') {
-            if (quest.previous) {
-                availability = 'previous part';
-                yes = true;
-                if (quest.lvl) {
-                    yesyes = true;
-                    // availability += '<br />(level ' + quest.lvl + ')';
-                }
+                                       ((quest.value > 1) ? 's' : '' )
+                                     : '';
+        if (cost) {
+            if (availability) {
+                availability += ' or<br />';
             }
-            else if (quest.lvl) {
-                availability = 'level ' + quest.lvl;
-                yes = true;
+            availability += cost;
+        }
+        if (questAvailability[questId]) {
+            if (availability) {
+                availability += '<br />';
             }
+            availability += questAvailability[questId];
         }
-        if (availability && cost && yes) {
-                availability += ' or<br />' + cost;
-                cost = '';
-        }
-        if (quest.lvl && yesyes) {
+        if (displayLevelRestriction) {
             availability += '<br />(level ' + quest.lvl + ')';
         }
-
-        if (cost && !availability) {
-            availability = cost;
-            cost = '';
-        }
-        else if (cost) {
-        availability = ".<br />" + cost + '<br />' + availability; // limited time stuff
-        }
-
         row.push(availability);
 
         var objectiveType =
