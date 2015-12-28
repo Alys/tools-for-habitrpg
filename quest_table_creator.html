@@ -389,6 +389,12 @@ function parseData() {
                         if (type === 'gear') {
                             text = text.replace(/ +\((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, '');
                         }
+                        else if (type === 'eggs') {
+                            text = text.replace(/\(Egg\)/i, '(egg)');
+                        }
+                        else if (type === 'hatchingPotions') {
+                            text = text.replace(/Hatching Potion/i, 'hatching potion');
+                        }
                         if (rewardPageUrls[key]) {
                             text = make_url(text, rewardPageUrls[key]);
                         }
@@ -407,15 +413,15 @@ function parseData() {
         }
 
         if (petName && mountName && petName === mountName) {
-            var pets = petName + ' (Pet &amp; Mount)';
+            var pets = petName + ' (pet &amp; mount)';
             other.unshift(pets);
         }
         else {
             if (petName) {
-                other.unshift(petName + ' (Pet)');
+                other.unshift(petName + ' (pet)');
             }
             if (mountName) {
-                other.unshift(mountName + ' (Mount)');
+                other.unshift(mountName + ' (mount)');
             }
         }
         var rewardItems = equipment.concat(other);
