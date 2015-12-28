@@ -365,33 +365,72 @@ function parseData() {
         }
 
         var itemsString = '';
+        var petName     = '';
+        var mountName   = '';
+        var separator   = ';<br />';
         for (var type in items) {
-            if (itemsString) {
-                itemsString += ';<br />';
-            }
             var string = '';
             if (type === 'food' && quest.category === 'world') {
                 string = "one of each food";
             }
             else {
                 for (var key in items[type]) {
-                    if (string) {
-                        string += ', ';
-                    }
                     var text = items[type][key]['text'];
-                    if (type === 'gear') {
-                        text = text.replace(/ \((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, '');
+                    if (type === 'pets') {
+                        // ASSUME this key doesn't appear in rewardPageUrls
+                        petName = text.replace(/ +\(Pet\)/i, '');
                     }
-                    if (rewardPageUrls[key]) {
-                        text = make_url(text, rewardPageUrls[key]);
+                    else if (type === 'mounts') {
+                        // ASSUME this key doesn't appear in rewardPageUrls
+                        mountName = text.replace(/ +\(Mount\)/i, '');
                     }
-                    string += text;
-                    if (items[type][key]['count'] > 1) {
-                        string += ' x ' + items[type][key]['count'];
+                    else {
+                        if (string) {
+                            string += ', ';
+                        }
+                        if (type === 'gear') {
+                            text = text.replace(/ +\((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, '');
+                        }
+                        if (rewardPageUrls[key]) {
+                            text = make_url(text, rewardPageUrls[key]);
+                        }
+                        string += text;
+                        if (items[type][key]['count'] > 1) {
+                            string += ' x ' + items[type][key]['count'];
+                        }
                     }
                 }
             }
+            if (string && itemsString) {
+                itemsString += separator;
+            }
             itemsString += string;
+        }
+        var pets = '';
+        if (petName && mountName && petName === mountName) {
+            pets = petName + ' (Pet &amp; Mount)';
+        }
+        else {
+            if (petName) {
+                if (pets) {
+                    pets += separator;
+                }
+                pets = petName + ' (Pet)';
+            }
+            if (mountName) {
+                if (pets) {
+                    pets += separator;
+                }
+                pets = mountName + ' (Mount)';
+            }
+        }
+        if (pets) {
+            if (itemsString) {
+                itemsString = pets + separator + itemsString;
+            }
+            else {
+                itemsString = pets;
+            }
         }
 
         var specialRewardType = 'unknown';
@@ -425,6 +464,7 @@ function parseData() {
             itemsString = itemsString.replace(/ \(Quest Scroll\)/i, '');
             itemsString = itemsString.replace(/.*Part [0-9]: /i, '');
         }
+
         if (itemsString) {
             rewardType += ':<br />' + itemsString;
         }
@@ -573,7 +613,7 @@ function parseData() {
         rowHtml.push(releaseDatePretty);
 
         if (includeQuestId) { rowHtml.push(questId); }
-    
+
         if (quest.category && quest.category === 'world') {
             // World Boss quests go at the end of the table
             tableRowsEnd.push( convertRow('wikia', row) );
