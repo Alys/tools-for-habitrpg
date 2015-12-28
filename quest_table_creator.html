@@ -8,7 +8,7 @@
 
 This page outputs the wikia code for creating the Quest Table
 in this page:
-    http://habitica.wikia.com/wiki/ XXX 
+    http://habitica.wikia.com/wiki/ XXX
 
 This code is licenced under the same terms as Habitica:
     https://raw2.github.com/HabitRPG/habitrpg/develop/LICENSE
@@ -28,7 +28,7 @@ Contributors:
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
-	<link href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
+    <link href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
 
 
 <script type="text/javascript">
@@ -64,13 +64,13 @@ var images = {
 ////   "permanent".                                    ///////////////
 //////////////////////////////////////////////////////////////////////
 var questAvailability = {
-	'basilist': 'permanent<br />(invite to party)',
-	'egg': 'only during ' + make_url('Spring Fling'),
-	'evilsanta': 'only during ' + make_url('Winter Wonderland'),
-	'evilsanta2': 'only during ' + make_url('Winter Wonderland'),
-	'burnout':'finished<br />('+ make_url('Fall Festival 2015','Fall_Festival') +')',
-	'stressbeast': 'finished',
-	'dilatory': 'finished',
+    'basilist': 'permanent<br />(invite to party)',
+    'egg': 'only during ' + make_url('Spring Fling'),
+    'evilsanta': 'only during ' + make_url('Winter Wonderland'),
+    'evilsanta2': 'only during ' + make_url('Winter Wonderland'),
+    'burnout':'finished<br />('+ make_url('Fall Festival 2015','Fall_Festival') +')',
+    'stressbeast': 'finished',
+    'dilatory': 'finished',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -113,10 +113,10 @@ var questPageUrls = {
 ////   DO NOT PUT SPACES IN THESE LINKS!               ///////////////
 //////////////////////////////////////////////////////////////////////
 var rewardPageUrls = {
-	'shield_special_goldenknight': 'Mustaine%27s_Milestone_Mashing_Morningstar',
-	'weapon_special_2': 'Stephen_Weber%27s_Shaft_of_the_Dragon',
-	'head_special_2': 'Nameless_Helm',
-	'armor_special_2': 'Jean_Chalard%27s_Noble_Tunic',
+    'shield_special_goldenknight': 'Mustaine%27s_Milestone_Mashing_Morningstar',
+    'weapon_special_2': 'Stephen_Weber%27s_Shaft_of_the_Dragon',
+    'head_special_2': 'Nameless_Helm',
+    'armor_special_2': 'Jean_Chalard%27s_Noble_Tunic',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -227,17 +227,17 @@ function fetchData() {
     }
     function fetchContentSuccess(data) {
         content = data;
-		parseData();
+        parseData();
     }
 }
 
 function parseData() {
-	// return '';
+    // return '';
     var allQuests = content.quests;
 
     var warnings = '';
 
-	// XXX use wikiaBaseUrl in text below
+    // XXX use wikiaBaseUrl in text below
     var htmlStart = '';
     ////// var htmlStart = '<p>This page outputs the wikia code for creating tables'
         ////// + ' on the <a href="http://habitica.wikia.com/">Habitica wiki</a>.'
@@ -259,335 +259,335 @@ function parseData() {
 '\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"';
 
     var headers = [ ' class="unfilterable" | name',
-					' class="unfilterable" | scroll',
-					' class="unfilterable" | availability',
-					' class="unfilterable" | cost',
-					' class="unsortable"   | type',
-					' class="unsortable"   | rewards',
-					' class="unfilterable" | GP',
-					' class="unfilterable" | XP',
-					' class="unfilterable" | boss<br />HP',
-					' class="unfilterable" | boss<br />strength'];
+                    ' class="unfilterable" | scroll',
+                    ' class="unfilterable" | availability',
+                    ' class="unfilterable" | cost',
+                    ' class="unsortable"   | type',
+                    ' class="unsortable"   | rewards',
+                    ' class="unfilterable" | GP',
+                    ' class="unfilterable" | XP',
+                    ' class="unfilterable" | boss<br />HP',
+                    ' class="unfilterable" | boss<br />strength'];
 
     var headersHtml = ['name', 'scroll', 'availability', 'cost', 'type', 'rewards', 'GP', 'XP', 'boss HP', 'boss strength'];
     headersHtml.push('<em>length</em>', '<em>difficulty</em>', '<em>release date</em>');
-	var includeQuestId = true;
-	var includeQuestId = false;
-	if (includeQuestId) { headersHtml.push('<em>quest ID</em>'); }
+    var includeQuestId = true;
+    var includeQuestId = false;
+    if (includeQuestId) { headersHtml.push('<em>quest ID</em>'); }
     questTableAll += convertRow('wikia', headers, 'th');
 
     // table row for each quest:
     var releaseDateNeeded = '';
-	var tableRows        = [];
-	var tableRowsEnd     = [];
-	var tableRowsHtml    = [];
-	var tableRowsHtmlEnd = [];
-	var devData = '';
-	for (var questId in allQuests) {
-		// devData += "    '" + questId + "': startOfTime,\n";
-		var row     = [];
+    var tableRows        = [];
+    var tableRowsEnd     = [];
+    var tableRowsHtml    = [];
+    var tableRowsHtmlEnd = [];
+    var devData = '';
+    for (var questId in allQuests) {
+        // devData += "    '" + questId + "': startOfTime,\n";
+        var row     = [];
         var quest = allQuests[questId];
-		// for (var backgroundId in content.backgrounds[setId]) 
-		// content.backgrounds[setId][backgroundId].text;
+        // for (var backgroundId in content.backgrounds[setId])
+        // content.backgrounds[setId][backgroundId].text;
 
-		var questName = quest.text.replace(/^The /, '');
-		row.push([ make_url(quest.text, questPageUrls[questId] || ''),
-				   'data-sort-value="' + questName + '"' ]);
+        var questName = quest.text.replace(/^The /, '');
+        row.push([ make_url(quest.text, questPageUrls[questId] || ''),
+                   'data-sort-value="' + questName + '"' ]);
 
-		row.push([ make_image(images[questId] ||
+        row.push([ make_image(images[questId] ||
                              'Inventory_quest_scroll_' + questId + '.png',
-				 			questId),
-				  'data-sort-value="' + questId + '"' ]);
+                             questId),
+                  'data-sort-value="' + questId + '"' ]);
 
-		var availability = questAvailability[questId] || 'permanent';
-		if (quest.lvl) {
-			availability += ' (level ' + quest.lvl + ')';
-		}
-		row.push(availability);
+        var availability = questAvailability[questId] || 'permanent';
+        if (quest.lvl) {
+            availability += ' (level ' + quest.lvl + ')';
+        }
+        row.push(availability);
 
-		var cost = (quest.goldValue) ? quest.goldValue + ' GP' :
-		           (quest.value)     ? quest.value + ' gem' +
-										   ((quest.value > 1) ? 's' : '' ) :
-									   'n/a';
-		if (quest.category && quest.category === 'unlockable') {
-			if (quest.previous) {
-				cost = 'Previous part or ' + cost;
-			}
-			else if (quest.lvl) {
-				cost = 'Level ' + quest.lvl + ' or ' + cost;
-			}
-		}
-		row.push(cost);
+        var cost = (quest.goldValue) ? quest.goldValue + ' GP' :
+                   (quest.value)     ? quest.value + ' gem' +
+                                           ((quest.value > 1) ? 's' : '' ) :
+                                       'n/a';
+        if (quest.category && quest.category === 'unlockable') {
+            if (quest.previous) {
+                cost = 'Previous part or ' + cost;
+            }
+            else if (quest.lvl) {
+                cost = 'Level ' + quest.lvl + ' or ' + cost;
+            }
+        }
+        row.push(cost);
 
         var objectiveType =
-			(quest.category && quest.category === 'world') ? 'world boss' :
+            (quest.category && quest.category === 'world') ? 'world boss' :
             (quest.collect) ? 'collection' :
             (quest.boss)    ? 'boss' :
                               'unknown';
-		row.push(objectiveType);
+        row.push(objectiveType);
 
-		var droppedGP = quest.drop.gp || 0;
-		var droppedXP = quest.drop.exp || 0;
-		delete quest.drop.gp;
-		delete quest.drop.exp;
+        var droppedGP = quest.drop.gp || 0;
+        var droppedXP = quest.drop.exp || 0;
+        delete quest.drop.gp;
+        delete quest.drop.exp;
 
-		// if (quest.drop.unlock) { console.log(quest.drop.unlock); } // TST
-		delete quest.drop.unlock;
+        // if (quest.drop.unlock) { console.log(quest.drop.unlock); } // TST
+        delete quest.drop.unlock;
 
-		var items = {};
-		if (quest.drop.items) {
-			for (var i in quest.drop.items) {
-				var obj = quest.drop.items[i];
-				if (!items[obj.type]) {
-					items[obj.type] = {}; // e.g., "eggs", "gear"
-				}
-				if (!items[obj.type][obj.key]) {
-					items[obj.type][obj.key] = {}; // e.g., Potatoe
-				}
-				items[obj.type][obj.key]['text'] = obj.text; // e.g., Potato
-				if (!items[obj.type][obj.key]['count']) {
-					items[obj.type][obj.key]['count'] = 0;
-				}
-				items[obj.type][obj.key]['count']++;
-				delete obj.type;
-				delete obj.key;
-				delete obj.text;
-				if (Object.keys(obj).length) { 
-					console.log('"obj" object has other contents:');
-					console.log(obj);
-				}
-			}
-		}
-		delete quest.drop.items;
-		if (Object.keys(quest.drop).length) { 
-			console.log('"quest.drop" object has other contents:');
-			console.log(quest.drop);
-		}
+        var items = {};
+        if (quest.drop.items) {
+            for (var i in quest.drop.items) {
+                var obj = quest.drop.items[i];
+                if (!items[obj.type]) {
+                    items[obj.type] = {}; // e.g., "eggs", "gear"
+                }
+                if (!items[obj.type][obj.key]) {
+                    items[obj.type][obj.key] = {}; // e.g., Potatoe
+                }
+                items[obj.type][obj.key]['text'] = obj.text; // e.g., Potato
+                if (!items[obj.type][obj.key]['count']) {
+                    items[obj.type][obj.key]['count'] = 0;
+                }
+                items[obj.type][obj.key]['count']++;
+                delete obj.type;
+                delete obj.key;
+                delete obj.text;
+                if (Object.keys(obj).length) {
+                    console.log('"obj" object has other contents:');
+                    console.log(obj);
+                }
+            }
+        }
+        delete quest.drop.items;
+        if (Object.keys(quest.drop).length) {
+            console.log('"quest.drop" object has other contents:');
+            console.log(quest.drop);
+        }
 
-		var itemsString = '';
-		for (var type in items) {
-			if (itemsString) {
-				itemsString += ';<br />';
-			}
-			var string = '';
-			if (type === 'food' && quest.category === 'world') {
-				string = "one of each food";
-			}
-			else {
-				for (var key in items[type]) {
-					if (string) {
-						string += ', ';
-					}
-					var text = items[type][key]['text'];
-					if (type === 'gear') {
-						text = text.replace(/ \((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, '');
-					}
-					if (rewardPageUrls[key]) {
-						text = make_url(text, rewardPageUrls[key]);
-					}
-					string += text;
-					if (items[type][key]['count'] > 1) {
-						string += ' x ' + items[type][key]['count'];
-					}
-				}
-			}
-			itemsString += string;
-		}
+        var itemsString = '';
+        for (var type in items) {
+            if (itemsString) {
+                itemsString += ';<br />';
+            }
+            var string = '';
+            if (type === 'food' && quest.category === 'world') {
+                string = "one of each food";
+            }
+            else {
+                for (var key in items[type]) {
+                    if (string) {
+                        string += ', ';
+                    }
+                    var text = items[type][key]['text'];
+                    if (type === 'gear') {
+                        text = text.replace(/ \((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, '');
+                    }
+                    if (rewardPageUrls[key]) {
+                        text = make_url(text, rewardPageUrls[key]);
+                    }
+                    string += text;
+                    if (items[type][key]['count'] > 1) {
+                        string += ' x ' + items[type][key]['count'];
+                    }
+                }
+            }
+            itemsString += string;
+        }
 
-		var specialRewardType = 'unknown';
-		var etcPossible = false;
-		if (questId === 'basilist') {
-			specialRewardType = 'XP, GP<br />only';
-		}
-		if (items['gear']) {
-			specialRewardType = 'equipment';
-			etcPossible = true;
-			delete items['gear'];
-		}
-		if (items['quests']) {
-			specialRewardType = 'scroll';
-			etcPossible = true;
-			delete items['quests'];
-		}
-		if (etcPossible && Object.keys(items).length) {
-			specialRewardType += ', etc';
-		}
-        var rewardType = 
-			(!quest.category)                 ? specialRewardType :
-			(quest.category === 'world')      ? 'various' :
-			(quest.category === 'gold')       ? specialRewardType :
-			(quest.category === 'unlockable') ? specialRewardType :
-                            				    quest.category; // e.g., pet
+        var specialRewardType = 'unknown';
+        var etcPossible = false;
+        if (questId === 'basilist') {
+            specialRewardType = 'XP, GP<br />only';
+        }
+        if (items['gear']) {
+            specialRewardType = 'equipment';
+            etcPossible = true;
+            delete items['gear'];
+        }
+        if (items['quests']) {
+            specialRewardType = 'scroll';
+            etcPossible = true;
+            delete items['quests'];
+        }
+        if (etcPossible && Object.keys(items).length) {
+            specialRewardType += ', etc';
+        }
+        var rewardType =
+            (!quest.category)                 ? specialRewardType :
+            (quest.category === 'world')      ? 'various' :
+            (quest.category === 'gold')       ? specialRewardType :
+            (quest.category === 'unlockable') ? specialRewardType :
+                                                quest.category; // e.g., pet
 
-		// add list of rewards to reward type, with some abbreviations:
-		if (rewardType === 'scroll') {
-			itemsString = itemsString.replace(/ \(Scroll\)/i, '');
-			itemsString = itemsString.replace(/ \(Quest Scroll\)/i, '');
-			itemsString = itemsString.replace(/.*Part [0-9]: /i, '');
-		}
-		if (itemsString) {
-			rewardType += ':<br />' + itemsString;
-		}
+        // add list of rewards to reward type, with some abbreviations:
+        if (rewardType === 'scroll') {
+            itemsString = itemsString.replace(/ \(Scroll\)/i, '');
+            itemsString = itemsString.replace(/ \(Quest Scroll\)/i, '');
+            itemsString = itemsString.replace(/.*Part [0-9]: /i, '');
+        }
+        if (itemsString) {
+            rewardType += ':<br />' + itemsString;
+        }
 
-		row.push(rewardType);
+        row.push(rewardType);
 
-		row.push(droppedGP);
-		row.push(droppedXP);
+        row.push(droppedGP);
+        row.push(droppedXP);
 
-		var bossHP     = 'n/a';
-		var bossHPSort = 0;
-		var bossStr    = 'n/a';
-		var bossRage   = '';
-		var questLength         = 'n/a';
-		var questLengthDetailed = 'n/a';
-		var questDifficulty     = 'n/a';
-		if (quest.boss) {
-			bossHP     = quest.boss.hp   || 0;
-			bossHPSort = bossHP;
-			bossStr  = quest.boss.str  || 0;
-			bossRage = (quest.boss.rage && quest.boss.rage.value) ? +quest.boss.rage.value : 0;
-			if ((!quest.category || quest.category !== 'world')) {
-				if (bossHP > 999) {
-					questLength = 'long';
-				}
-				else if (bossHP > 499) {
-					questLength = 'medium';
-				}
-				else {
-					questLength = 'short';
-				}
+        var bossHP     = 'n/a';
+        var bossHPSort = 0;
+        var bossStr    = 'n/a';
+        var bossRage   = '';
+        var questLength         = 'n/a';
+        var questLengthDetailed = 'n/a';
+        var questDifficulty     = 'n/a';
+        if (quest.boss) {
+            bossHP     = quest.boss.hp   || 0;
+            bossHPSort = bossHP;
+            bossStr  = quest.boss.str  || 0;
+            bossRage = (quest.boss.rage && quest.boss.rage.value) ? +quest.boss.rage.value : 0;
+            if ((!quest.category || quest.category !== 'world')) {
+                if (bossHP > 999) {
+                    questLength = 'long';
+                }
+                else if (bossHP > 499) {
+                    questLength = 'medium';
+                }
+                else {
+                    questLength = 'short';
+                }
 
-				if (bossHP > 1200) {
-					questLengthDetailed = '> 4 wk';
-				}
-				else if (bossHP > 1000) {
-					questLengthDetailed = '~ 4 wk';
-				}
-				else if (bossHP > 900) {
-					questLengthDetailed = '3-4 wk';
-				}
-				else if (bossHP > 799) {
-					questLengthDetailed = '~ 3 wk';
-				}
-				else if (bossHP > 500) {
-					questLengthDetailed = '2-3 wk';
-				}
-				else if (bossHP > 400) {
-					questLengthDetailed = '~ 2 wk';
-				}
-				else if (bossHP > 300) {
-					questLengthDetailed = '< 2 wk';
-				}
-				else {
-					questLengthDetailed = '~ 1 wk';
-				}
-				questLength = questLength + '<br />(' + questLengthDetailed + ')';
+                if (bossHP > 1200) {
+                    questLengthDetailed = '> 4 wk';
+                }
+                else if (bossHP > 1000) {
+                    questLengthDetailed = '~ 4 wk';
+                }
+                else if (bossHP > 900) {
+                    questLengthDetailed = '3-4 wk';
+                }
+                else if (bossHP > 799) {
+                    questLengthDetailed = '~ 3 wk';
+                }
+                else if (bossHP > 500) {
+                    questLengthDetailed = '2-3 wk';
+                }
+                else if (bossHP > 400) {
+                    questLengthDetailed = '~ 2 wk';
+                }
+                else if (bossHP > 300) {
+                    questLengthDetailed = '< 2 wk';
+                }
+                else {
+                    questLengthDetailed = '~ 1 wk';
+                }
+                questLength = questLength + '<br />(' + questLengthDetailed + ')';
 
-				if (bossStr > 2.5) {
-					questDifficulty = 'very difficult';
-				}
-				else if (bossStr === 2.5) {
-					questDifficulty = 'hard';
-				}
-				else if (bossStr >= 2) {
-					questDifficulty = 'medium';
-				}
-				else if (bossStr >= 1.5) {
-					questDifficulty = 'easy';
-				}
-				else {
-					questDifficulty = 'trivial';
-				}
-			}
+                if (bossStr > 2.5) {
+                    questDifficulty = 'very difficult';
+                }
+                else if (bossStr === 2.5) {
+                    questDifficulty = 'hard';
+                }
+                else if (bossStr >= 2) {
+                    questDifficulty = 'medium';
+                }
+                else if (bossStr >= 1.5) {
+                    questDifficulty = 'easy';
+                }
+                else {
+                    questDifficulty = 'trivial';
+                }
+            }
 
-			var divisor = 1000 * 1000;
-			if (bossHP > divisor) {
-				bossHP = bossHP / divisor;
-				bossHP += 'M';
-			}
-			if (bossRage && bossRage > divisor/10) {
-				bossRage = bossRage / divisor;
-				bossRage += 'M';
-			}
-		}
-		row.push([ bossHP + ((bossRage) ? '<br />rage:'+bossRage : ''),
-				   'data-sort-value="' + bossHPSort + '"' ]);
-		row.push(bossStr);
+            var divisor = 1000 * 1000;
+            if (bossHP > divisor) {
+                bossHP = bossHP / divisor;
+                bossHP += 'M';
+            }
+            if (bossRage && bossRage > divisor/10) {
+                bossRage = bossRage / divisor;
+                bossRage += 'M';
+            }
+        }
+        row.push([ bossHP + ((bossRage) ? '<br />rage:'+bossRage : ''),
+                   'data-sort-value="' + bossHPSort + '"' ]);
+        row.push(bossStr);
 
-		var myRegexpLink  = /(.*)\[(\S+) +([^\]]+)\](.*)/g;            // '[' + url + ' ' + text + ']';
-		var myRegexpImage = /(.*)\[\[File:([^\|]+)\|[^\]]+\]\](.*)/g;  // '[[File:' + image + '|' + hoverText + ']]';
+        var myRegexpLink  = /(.*)\[(\S+) +([^\]]+)\](.*)/g;            // '[' + url + ' ' + text + ']';
+        var myRegexpImage = /(.*)\[\[File:([^\|]+)\|[^\]]+\]\](.*)/g;  // '[[File:' + image + '|' + hoverText + ']]';
 
-		// So far, row contains the table cells for a Wikia table.
-		// We now create an HTML version, and then add more fields to that.
-		var rowHtml = [];
-		for (var i in row) {
-			var valueObj = row[i];
-			var value  = '';
-			if (Object.prototype.toString.call(valueObj) === '[object Array]') {
-				value  = valueObj[0];
-				// ignore second element which is a wikia table config string
-			}
-			else {
-				value = valueObj;
-			}
+        // So far, row contains the table cells for a Wikia table.
+        // We now create an HTML version, and then add more fields to that.
+        var rowHtml = [];
+        for (var i in row) {
+            var valueObj = row[i];
+            var value  = '';
+            if (Object.prototype.toString.call(valueObj) === '[object Array]') {
+                value  = valueObj[0];
+                // ignore second element which is a wikia table config string
+            }
+            else {
+                value = valueObj;
+            }
 
-			// replace Wikia links and images with HTML versions (we ASSUME there's at most ONE link and ONE image per table cell):
-			var match = myRegexpLink.exec(value);
-			if (match) {
-				value = match[1] + '<a href="' + match[2] + '">' + match[3] + '</a>' + match[4];
-			}
-			var match = myRegexpImage.exec(value);
-			if (match) {
-				value = match[1] + '<img src="' + 'fake_broken_image' + '" />' + match[3]; // no image because it won't work anyway
-				// value = match[1] + '<img src="' + '' + '" />' + match[3]; // no image because it won't work anyway // TST
-			}
+            // replace Wikia links and images with HTML versions (we ASSUME there's at most ONE link and ONE image per table cell):
+            var match = myRegexpLink.exec(value);
+            if (match) {
+                value = match[1] + '<a href="' + match[2] + '">' + match[3] + '</a>' + match[4];
+            }
+            var match = myRegexpImage.exec(value);
+            if (match) {
+                value = match[1] + '<img src="' + 'fake_broken_image' + '" />' + match[3]; // no image because it won't work anyway
+                // value = match[1] + '<img src="' + '' + '" />' + match[3]; // no image because it won't work anyway // TST
+            }
 
-			rowHtml.push(value);
-		}
+            rowHtml.push(value);
+        }
 
-		rowHtml.push(questLength);
-		rowHtml.push(questDifficulty);
+        rowHtml.push(questLength);
+        rowHtml.push(questDifficulty);
 
         var releaseDate       = '';
         var releaseDatePretty = '';
-		if (! releaseDates[questId]) {
-			releaseDateNeeded += "'" + questId +"' : '"+ thisMonth + "',<br />";
-		}
-		releaseDate = releaseDates[questId] || thisMonth;
-		// var myRegexp = /(.+)-0?(.+)/g; // year-month
-		// var match = myRegexp.exec(releaseDate);
-		if (releaseDate === startOfTime) {
-			// releaseDatePretty = 'before<br />Dec 2015';
-			releaseDatePretty = releaseDate + '<br />or earlier';
-		}
-		// else if (match) {
-			// var months = ['zero','Jan','Feb','Mar','Apr','May','Jun',
-								 // 'Jul','Aug','Sep','Oct','Nov','Dec'];
-			// var monthNumber = match[2];
-			// var month = months[match[2]] || match[2];
-			// releaseDatePretty = month + '<br />' + match[1];//year
-		// }
-		else {
-			releaseDatePretty = releaseDate;
-		}
-		rowHtml.push(releaseDatePretty);
+        if (! releaseDates[questId]) {
+            releaseDateNeeded += "'" + questId +"' : '"+ thisMonth + "',<br />";
+        }
+        releaseDate = releaseDates[questId] || thisMonth;
+        // var myRegexp = /(.+)-0?(.+)/g; // year-month
+        // var match = myRegexp.exec(releaseDate);
+        if (releaseDate === startOfTime) {
+            // releaseDatePretty = 'before<br />Dec 2015';
+            releaseDatePretty = releaseDate + '<br />or earlier';
+        }
+        // else if (match) {
+            // var months = ['zero','Jan','Feb','Mar','Apr','May','Jun',
+                                 // 'Jul','Aug','Sep','Oct','Nov','Dec'];
+            // var monthNumber = match[2];
+            // var month = months[match[2]] || match[2];
+            // releaseDatePretty = month + '<br />' + match[1];//year
+        // }
+        else {
+            releaseDatePretty = releaseDate;
+        }
+        rowHtml.push(releaseDatePretty);
 
-		if (includeQuestId) { rowHtml.push(questId); }
-	
-		if (quest.category && quest.category === 'world') {
-			// World Boss quests go at the end of the table
-			tableRowsEnd.push( convertRow('wikia', row) );
-			tableRowsHtmlEnd.push(rowHtml);
-		}
-		else {
-			tableRows.push( convertRow('wikia', row) );
-			tableRowsHtml.push(rowHtml);
-		}
+        if (includeQuestId) { rowHtml.push(questId); }
+    
+        if (quest.category && quest.category === 'world') {
+            // World Boss quests go at the end of the table
+            tableRowsEnd.push( convertRow('wikia', row) );
+            tableRowsHtmlEnd.push(rowHtml);
+        }
+        else {
+            tableRows.push( convertRow('wikia', row) );
+            tableRowsHtml.push(rowHtml);
+        }
     }
-	tableRows     = tableRows.concat(tableRowsEnd);
-	tableRowsHtml = tableRowsHtml.concat(tableRowsHtmlEnd);
+    tableRows     = tableRows.concat(tableRowsEnd);
+    tableRowsHtml = tableRowsHtml.concat(tableRowsHtmlEnd);
 
-	questTableAll += tableRows.join("");
+    questTableAll += tableRows.join("");
 
     // table footer:
     questTableAll += '' +
@@ -596,35 +596,35 @@ function parseData() {
 '\n|}\n';
 
 
-	// create HTML table showing production data and development data:
-	var columns = [];
-	for (var i in headersHtml) {
-		columns.push({'title': headersHtml[i]});
-	}
-	$(document).ready(function() {
-		$('#theTable').DataTable( {
-			'data': tableRowsHtml,
-			'columns': columns,
-			'bPaginate': false,
-			'aaSorting': [], // no default sorting
-		} );
-	} );
+    // create HTML table showing production data and development data:
+    var columns = [];
+    for (var i in headersHtml) {
+        columns.push({'title': headersHtml[i]});
+    }
+    $(document).ready(function() {
+        $('#theTable').DataTable( {
+            'data': tableRowsHtml,
+            'columns': columns,
+            'bPaginate': false,
+            'aaSorting': [], // no default sorting
+        } );
+    } );
 
     var htmlEnd = '';
     if (releaseDateNeeded) {
         htmlEnd  += '<p>NEED RELEASE DATE:<br />' + releaseDateNeeded + '</p>';
     }
     if (warnings) htmlEnd += '<p>WARNING:<br />' + warnings + '</p>';
-	if (false) {
-		htmlEnd += "<p>The material below here is Habitica's JSON data that" +
-				" was used to make the wikia code above. You can ignore it" +
-				" unless you are interested in it. You do not need to" +
-				" copy it to the wiki.</p>" +
-				"<pre>" + JSON.stringify(allQuests, null, 4) + "</pre>";
-	}
-	if (devData) {
-		htmlEnd += '<pre>' + devData + '</pre>';
-	}
+    if (false) {
+        htmlEnd += "<p>The material below here is Habitica's JSON data that" +
+                " was used to make the wikia code above. You can ignore it" +
+                " unless you are interested in it. You do not need to" +
+                " copy it to the wiki.</p>" +
+                "<pre>" + JSON.stringify(allQuests, null, 4) + "</pre>";
+    }
+    if (devData) {
+        htmlEnd += '<pre>' + devData + '</pre>';
+    }
 
 
     //////////////////////////////////////////////////////////////////////
@@ -639,8 +639,8 @@ function parseData() {
 
                     '<li>The <strong>length</strong> and <strong>difficulty</strong> columns will not appear on the wiki but are included here to help us categorise the quests into pages.</li>' +
                     '<li>The <strong>release date</strong> column will not appear on the wiki. It is used here only to help us work out which pages need to be updated when a new quest is released, and so exact release dates for most of the quests are not included.</li>' +
-					((includeQuestId) ? 
-						'<li>The <strong>quest ID</strong> column will not appear on the wiki. It is purely for Alys\'s benefit when setting up the data in the script.</li>' : '') +
+                    ((includeQuestId) ?
+                        '<li>The <strong>quest ID</strong> column will not appear on the wiki. It is purely for Alys\'s benefit when setting up the data in the script.</li>' : '') +
 
                     '<li>Quest scroll images will always look broken in the HTML table here, but will work on the wiki.</li>' +
                     '<li>Sorting won\'t always work correctly in the HTML table here, but will work on the wiki.</li>' +
@@ -660,67 +660,67 @@ function parseData() {
 
 
 function convertRow(format, rowArray, cellType) {
-	// format is 'html' or 'wikia'
-	var html = (format === 'html') ? true : false;
-	cellType = cellType || 'td'; // 'th' can be specified manually
-	if (!html) {
-		cellType = (cellType === 'td') ? '|' : '!'; // Wikia versions of td and th
-	}
+    // format is 'html' or 'wikia'
+    var html = (format === 'html') ? true : false;
+    cellType = cellType || 'td'; // 'th' can be specified manually
+    if (!html) {
+        cellType = (cellType === 'td') ? '|' : '!'; // Wikia versions of td and th
+    }
 
-	var row = (html) ? '<tr>' : ((cellType === '|') ? '\n|-' : '');
-	for (var i in rowArray) {
-		var valueObj = rowArray[i];
-		var value  = '';
-		var config = '';
-		if (Object.prototype.toString.call(valueObj) === '[object Array]') {
-			value  = valueObj[0];
-			config = valueObj[1] + ' | ';
-		}
-		else {
-			value = valueObj;
-		}
+    var row = (html) ? '<tr>' : ((cellType === '|') ? '\n|-' : '');
+    for (var i in rowArray) {
+        var valueObj = rowArray[i];
+        var value  = '';
+        var config = '';
+        if (Object.prototype.toString.call(valueObj) === '[object Array]') {
+            value  = valueObj[0];
+            config = valueObj[1] + ' | ';
+        }
+        else {
+            value = valueObj;
+        }
 
-		row += (html) ?
-			'<'  + cellType + '>' :
-			'\n' + cellType;
-		row += config + value;
-		row += (html) ?
-			'</' + cellType + '>' :
-			'';
-	}
-	row += (html) ? '</tr>\n' : '';
-	return row;
+        row += (html) ?
+            '<'  + cellType + '>' :
+            '\n' + cellType;
+        row += config + value;
+        row += (html) ?
+            '</' + cellType + '>' :
+            '';
+    }
+    row += (html) ? '</tr>\n' : '';
+    return row;
 }
 
 
 function make_url(text, url) {
-	if (!url) {
+    if (!url) {
         url = text.replace(/ /g, '_');
-	}
-	if (url.indexOf('://') === -1) {
-		url = wikiaBaseUrl + url;
-	}
-	return '[' + url + ' ' + text + ']';
-	// return [ '<a href="' + url + '">' + text + '</a>',
-		     // '[[' + url + '|' + text + ']]'           ];
-	// return (html) ? '<a href="' + url + '">' + text + '</a>' :
-					// '[[' + url + '|' + text + ']]';
+    }
+    if (url.indexOf('://') === -1) {
+        url = wikiaBaseUrl + url;
+    }
+    return '[' + url + ' ' + text + ']';
+    // return [ '<a href="' + url + '">' + text + '</a>',
+             // '[[' + url + '|' + text + ']]'           ];
+    // return (html) ? '<a href="' + url + '">' + text + '</a>' :
+                    // '[[' + url + '|' + text + ']]';
 }
 
 
 function make_image(image, hoverText) {
-	if (!image) {
+    if (!image) {
         return '';
-	}
-	if (image === 'n/a') {
+    }
+    if (image === 'n/a') {
         return image;
-	}
-	hoverText = hoverText || '';
-	return '[[File:' + image + '|' + hoverText + ']]';
-	// return [ '<img src="null" />',
-			 // '[[File:' + image + ']]' ];
-	// return (html) ? '<img src="null" />' :
-					// '[[File:' + image + ']]';
+    }
+    hoverText = hoverText || '';
+    return '[[File:' + image + '|' + hoverText + ']]';
+    // return [ '<img src="null" />',
+             // '[[File:' + image + ']]' ];
+    // return (html) ? '<img src="null" />' :
+                    // '[[File:' + image + ']]';
 }
 
 
@@ -863,7 +863,7 @@ table, th, td {
    border: 1px solid black;
 }
 th em {
-	font-weight: normal;
+    font-weight: normal;
 }
 
 
