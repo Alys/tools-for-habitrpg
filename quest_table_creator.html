@@ -194,11 +194,11 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 
-/* TST - FOR TESTING:
 $('body').css({'background-color':'#C4B4A4'});
 serverName        = 'localhost';
 serverUrl         = 'http://localhost';
 serverPathContent = '/cgi-bin/hrpg_content.pl';
+/* TST - FOR TESTING:
 */
 
 
@@ -364,74 +364,61 @@ function parseData() {
             console.log(quest.drop);
         }
 
-        var itemsString = '';
-        var petName     = '';
-        var mountName   = '';
-        var separator   = ';<br />';
+        var petName   = '';
+        var mountName = '';
+        var equipment = [];
+        var other     = [];
         for (var type in items) {
-            var string = '';
             if (type === 'food' && quest.category === 'world') {
-                string = "one of each food";
+                other.push("one of each food"); // ASSUME this happens for each world quest
             }
             else {
                 for (var key in items[type]) {
                     var text = items[type][key]['text'];
                     if (type === 'pets') {
                         // ASSUME this key doesn't appear in rewardPageUrls
+                        // ASSUME there's no more than one pet
                         petName = text.replace(/ +\(Pet\)/i, '');
                     }
                     else if (type === 'mounts') {
                         // ASSUME this key doesn't appear in rewardPageUrls
+                        // ASSUME there's no more than one mount
                         mountName = text.replace(/ +\(Mount\)/i, '');
                     }
                     else {
-                        if (string) {
-                            string += ', ';
-                        }
                         if (type === 'gear') {
                             text = text.replace(/ +\((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, '');
                         }
                         if (rewardPageUrls[key]) {
                             text = make_url(text, rewardPageUrls[key]);
                         }
-                        string += text;
                         if (items[type][key]['count'] > 1) {
-                            string += ' x ' + items[type][key]['count'];
+                            text += ' x ' + items[type][key]['count'];
+                        }
+                        if (type === 'gear') {
+                            equipment.push(text);
+                        }
+                        else {
+                            other.push(text);
                         }
                     }
                 }
             }
-            if (string && itemsString) {
-                itemsString += separator;
-            }
-            itemsString += string;
         }
-        var pets = '';
+
         if (petName && mountName && petName === mountName) {
-            pets = petName + ' (Pet &amp; Mount)';
+            var pets = petName + ' (Pet &amp; Mount)';
+            other.unshift(pets);
         }
         else {
             if (petName) {
-                if (pets) {
-                    pets += separator;
-                }
-                pets = petName + ' (Pet)';
+                other.unshift(petName + ' (Pet)');
             }
             if (mountName) {
-                if (pets) {
-                    pets += separator;
-                }
-                pets = mountName + ' (Mount)';
+                other.unshift(mountName + ' (Mount)');
             }
         }
-        if (pets) {
-            if (itemsString) {
-                itemsString = pets + separator + itemsString;
-            }
-            else {
-                itemsString = pets;
-            }
-        }
+        var rewardItems = equipment.concat(other);
 
         var specialRewardType = 'unknown';
         var etcPossible = false;
@@ -459,6 +446,7 @@ function parseData() {
                                                 quest.category; // e.g., pet
 
         // add list of rewards to reward type, with some abbreviations:
+        var itemsString = rewardItems.join(';<br />');
         if (rewardType === 'scroll') {
             itemsString = itemsString.replace(/ \(Scroll\)/i, '');
             itemsString = itemsString.replace(/ \(Quest Scroll\)/i, '');
