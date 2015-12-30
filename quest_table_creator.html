@@ -498,13 +498,13 @@ function parseData() {
             bossRage = (quest.boss.rage && quest.boss.rage.value) ? +quest.boss.rage.value : 0;
             if ((!quest.category || quest.category !== 'world')) {
                 if (bossHP > 999) {
-                    questLength = 'long';
+                    questLength = '3. long';
                 }
                 else if (bossHP > 499) {
-                    questLength = 'medium';
+                    questLength = '2. medium';
                 }
                 else {
-                    questLength = 'short';
+                    questLength = '1. short';
                 }
 
                 if (bossHP > 1200) {
@@ -534,19 +534,19 @@ function parseData() {
                 questLength = questLength + '<br />(' + questLengthDetailed + ')';
 
                 if (bossStr > 2.5) {
-                    questDifficulty = 'very difficult';
+                    questDifficulty = '5. very hard';
                 }
                 else if (bossStr === 2.5) {
-                    questDifficulty = 'hard';
+                    questDifficulty = '4. hard';
                 }
                 else if (bossStr >= 2) {
-                    questDifficulty = 'medium';
+                    questDifficulty = '3. medium';
                 }
                 else if (bossStr >= 1.5) {
-                    questDifficulty = 'easy';
+                    questDifficulty = '2. easy';
                 }
                 else {
-                    questDifficulty = 'trivial';
+                    questDifficulty = '1. trivial';
                 }
             }
 
@@ -922,7 +922,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(v0.4)</span></h1><!-- VERSION -->
+    <span>(v0.5)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
