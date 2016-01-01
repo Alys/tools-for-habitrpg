@@ -232,31 +232,24 @@ function fetchData() {
 }
 
 function parseData() {
-    // return '';
     var allQuests = content.quests;
 
+    // Get quest IDs and sort them in the desired display order
+    // (world bosses at end because of least interest):
+    var questIds    = [];
+    var questIdsEnd = [];
+    for (var questId in allQuests) {
+        var quest = allQuests[questId];
+        if (quest.category && quest.category === 'world') {
+            questIdsEnd.push(questId);
+        }
+        else {
+            questIds.push(questId);
+        }
+    }
+    questIds = questIds.concat(questIdsEnd);
+
     var warnings = '';
-
-    // XXX use wikiaBaseUrl in text below
-    var htmlStart = '';
-    ////// var htmlStart = '<p>This page outputs the wikia code for creating tables'
-        ////// + ' on the <a href="http://habitica.wikia.com/">Habitica wiki</a>.'
-        ////// + ' One table is for the [XXX finish this ... quest table pages ] '
-        // + ' <a href="http://habitica.wikia.com/wiki/Equipment_Table">'
-        // + 'Equipment Table</a> page, and the other is for the'
-        // + ' <a href="http://habitica.wikia.com/wiki/Enchanted_Armoire">'
-        // + 'Enchanted Armoire</a> page.</p>'
-        // + '<p>Copy everything inside each textarea below and paste it '
-        // + 'into the appropriate template pages: <a href="'
-        // + 'http://habitica.wikia.com/wiki/Template:Equipment_Table_Code'
-        // + '">Template:Equipment_Table_Code</a> and <a href="'
-        // + 'http://habitica.wikia.com/wiki/Template:Enchanted_Armoire_Table_Code'
-        // + '">Template:Enchanted_Armoire_Code</a>.'
-        ////// + '</p>';
-
-    var questTableAll = '' +
-'\n{| class="filterable sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
-'\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"';
 
     var headers = [ ' class="unfilterable" | name',
                     ' class="unfilterable" | scroll',
@@ -273,21 +266,20 @@ function parseData() {
     var includeQuestId = true;
     var includeQuestId = false;
     if (includeQuestId) { headersHtml.push('<em>quest ID</em>'); }
-    questTableAll += convertRow('wikia', headers, 'th');
 
     // table row for each quest:
     var releaseDateNeeded = '';
-    var tableRows        = [];
-    var tableRowsEnd     = [];
+    var tableRows    = { 'all':     [],
+                         'easyPet': [],
+                         'hard':    [],
+                       };
     var tableRowsHtml    = [];
-    var tableRowsHtmlEnd = [];
     var devData = '';
-    for (var questId in allQuests) {
+    for (var index = 0; index < questIds.length; index++) {
+        var questId = questIds[index];
+        var quest = allQuests[questId];
         // devData += "    '" + questId + "': startOfTime,\n";
         var row     = [];
-        var quest = allQuests[questId];
-        // for (var backgroundId in content.backgrounds[setId])
-        // content.backgrounds[setId][backgroundId].text;
 
         var questName = quest.text.replace(/^The /, '');
         row.push([ make_url(quest.text, questPageUrls[questId] || ''),
@@ -531,7 +523,6 @@ function parseData() {
                 else {
                     questLengthDetailed = '~ 1 wk';
                 }
-                questLength = questLength + '<br />(' + questLengthDetailed + ')';
 
                 if (bossStr > 2.5) {
                     questDifficulty = '5. very hard';
@@ -589,13 +580,12 @@ function parseData() {
             var match = myRegexpImage.exec(value);
             if (match) {
                 value = match[1] + '<img src="' + 'fake_broken_image' + '" />' + match[3]; // no image because it won't work anyway
-                // value = match[1] + '<img src="' + '' + '" />' + match[3]; // no image because it won't work anyway // TST
             }
 
             rowHtml.push(value);
         }
 
-        rowHtml.push(questLength);
+        rowHtml.push(questLength + '<br />(' + questLengthDetailed + ')');
         rowHtml.push(questDifficulty);
 
         var releaseDate       = '';
@@ -624,23 +614,34 @@ function parseData() {
 
         if (includeQuestId) { rowHtml.push(questId); }
 
-        if (quest.category && quest.category === 'world') {
-            // World Boss quests go at the end of the table
-            tableRowsEnd.push( convertRow('wikia', row) );
-            tableRowsHtmlEnd.push(rowHtml);
+        // We now have the `row` array which contains Wikia code for
+        // this quest, and the `rowHtml` array which contain HTML code.
+        // We save the `row` array into one or more collections of
+        // quests, depending on the parameters of this quest.
+        // For the HTML table, there is only one collection.
+
+        tableRowsHtml.push(rowHtml);
+        tableRows.all.push( convertRow('wikia', row) );
+        if (quest.category === 'pet' && (
+                 questDifficulty === '1. trivial' ||
+                (questDifficulty === '2. easy' && questLength === '1. short')
+           )) {
+            tableRows.easyPet.push( convertRow('wikia', row) );
         }
-        else {
-            tableRows.push( convertRow('wikia', row) );
-            tableRowsHtml.push(rowHtml);
+        if ((questDifficulty === '2. easy' && questLength > '1. short') ||
+             questDifficulty > '2. easy'
+           ) {
+            tableRows.hard.push( convertRow('wikia', row) );
         }
+
     }
-    tableRows     = tableRows.concat(tableRowsEnd);
-    tableRowsHtml = tableRowsHtml.concat(tableRowsHtmlEnd);
 
-    questTableAll += tableRows.join("");
+    var questTableHeader = '' +
+'\n{| class="filterable sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
+'\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"' +
+	convertRow('wikia', headers, 'th');
 
-    // table footer:
-    questTableAll += '' +
+    var questTableFooter = '' +
 '\n|- class="sortbottom"' +
 '\n| colspan="10" style="height: 0px; border-bottom: 3px solid #284C6D;"|' +
 '\n|}\n';
@@ -680,6 +681,24 @@ function parseData() {
     //////////////////////////////////////////////////////////////////////
     ////   Display the HTML    ///////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+
+    // XXX use wikiaBaseUrl in text below
+    var htmlStart = '';
+    ////// var htmlStart = '<p>This page outputs the wikia code for creating tables'
+        ////// + ' on the <a href="http://habitica.wikia.com/">Habitica wiki</a>.'
+        ////// + ' One table is for the [XXX finish this ... quest table pages ] '
+        // + ' <a href="http://habitica.wikia.com/wiki/Equipment_Table">'
+        // + 'Equipment Table</a> page, and the other is for the'
+        // + ' <a href="http://habitica.wikia.com/wiki/Enchanted_Armoire">'
+        // + 'Enchanted Armoire</a> page.</p>'
+        // + '<p>Copy everything inside each textarea below and paste it '
+        // + 'into the appropriate template pages: <a href="'
+        // + 'http://habitica.wikia.com/wiki/Template:Equipment_Table_Code'
+        // + '">Template:Equipment_Table_Code</a> and <a href="'
+        // + 'http://habitica.wikia.com/wiki/Template:Enchanted_Armoire_Table_Code'
+        // + '">Template:Enchanted_Armoire_Code</a>.'
+        ////// + '</p>';
+
     $('#loading .good').hide();
     $('#output').html(htmlStart +
                     '<h2>Notes:</h2>' +
@@ -700,11 +719,23 @@ function parseData() {
 
                     // '<li></li>' +
                     '</ul>' +
+
+                    '<p>This textarea contains code to produce a Wikia table showing only easy pet quests:</p>' +
+                    '<textarea rows="5" cols="40" wrap="off">' +
+                    questTableHeader +
+                    tableRows.easyPet.join("") +
+                    questTableFooter +
+                    '</textarea>' +
+
                     '<p>This textarea contains code to produce a Wikia table showing all quests:</p>' +
                     '<textarea rows="5" cols="40" wrap="off">' +
-                    questTableAll +
+                    questTableHeader +
+                    tableRows.all.join("") +
+                    questTableFooter +
                     '</textarea>' +
-                    '<p>This is an HTML version of the same table (but with some differences):</p>' +
+
+
+                    '<p>This is an HTML version of the table that shows all quests (but with some differences):</p>' +
                     htmlEnd);
 }
 
