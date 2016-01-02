@@ -269,10 +269,11 @@ function parseData() {
 
     // table row for each quest:
     var releaseDateNeeded = '';
-    var tableRows    = { 'all':    [],
-                         'easy':   [],
-                         'medium': [],
-                         'hard':   [],
+    var tableRows    = { 'all':        [],
+                         'easy':       [],
+                         'medium':     [],
+                         'hard':       [],
+                         'questLines': [],
                        };
     var tableRowsHtml    = [];
     var devData = '';
@@ -437,6 +438,7 @@ function parseData() {
 
         var specialRewardType = 'unknown';
         var etcPossible = false;
+        var dropsScroll = false;
         if (questId === 'basilist') {
             specialRewardType = 'XP, GP<br />only';
         }
@@ -446,6 +448,7 @@ function parseData() {
             delete items['gear'];
         }
         if (items['quests']) {
+            dropsScroll = true;
             specialRewardType = 'scroll';
             etcPossible = true;
             delete items['quests'];
@@ -553,51 +556,51 @@ function parseData() {
             }
         }
         else if (quest.collect) {
-			var count = 0;
-			for (var i in quest.collect) {
-				if (quest.collect[i].count) {
-					count += quest.collect[i].count;
-				}
-			}
+            var count = 0;
+            for (var i in quest.collect) {
+                if (quest.collect[i].count) {
+                    count += quest.collect[i].count;
+                }
+            }
 
-			if (count > 300) {
-				questDifficulty = '5. very hard';
-				questLength = '3. long';
-				questLengthDetailed = '';
-			}
-			else if (count > 100) {
-				questDifficulty = '4. hard';
-				questLength = '3. long';
-				questLengthDetailed = '';
-			}
-			else if (count > 30) {
-				questDifficulty = '3. medium';
-				questLength = '2. medium';
-				questLengthDetailed = '';
-			}
-			else {
-				questDifficulty = '2. easy';
-				questLength = '1. short';
-				questLengthDetailed = '';
-			}
-		}
+            if (count > 300) {
+                questDifficulty = '5. very hard';
+                questLength = '3. long';
+                questLengthDetailed = '';
+            }
+            else if (count > 100) {
+                questDifficulty = '4. hard';
+                questLength = '3. long';
+                questLengthDetailed = '';
+            }
+            else if (count > 30) {
+                questDifficulty = '3. medium';
+                questLength = '2. medium';
+                questLengthDetailed = '';
+            }
+            else {
+                questDifficulty = '2. easy';
+                questLength = '1. short';
+                questLengthDetailed = '';
+            }
+        }
 
-		var rating = 'unknown';
-		if (quest.category && quest.category === 'world') {
-			rating = '4. n/a';
-		}
-		else if ((questDifficulty === '1. trivial' ||
+        var rating = 'unknown';
+        if (quest.category && quest.category === 'world') {
+            rating = '4. n/a';
+        }
+        else if ((questDifficulty === '1. trivial' ||
              questDifficulty === '2. easy') && questLength === '1. short'
            ) {
-			rating = '1. easy';
+            rating = '1. easy';
         }
         else if ( questDifficulty >= '4. hard' ||
-				 (questDifficulty === '3. medium' && questLength === '3. long')
-				) {
-			rating = '3. hard';
+                 (questDifficulty === '3. medium' && questLength === '3. long')
+                ) {
+            rating = '3. hard';
         }
         else {
-			rating = '2. medium';
+            rating = '2. medium';
         }
 
         row.push([ bossHP + ((bossRage) ? '<br />rage:'+bossRage : ''),
@@ -635,7 +638,7 @@ function parseData() {
         }
 
         rowHtml.push(questLength + ((questLengthDetailed) ?
-					'<br />(' + questLengthDetailed + ')' : ''));
+                    '<br />(' + questLengthDetailed + ')' : ''));
         rowHtml.push(questDifficulty);
         rowHtml.push(rating);
 
@@ -671,6 +674,10 @@ function parseData() {
         // quests, depending on the parameters of this quest.
         // For the HTML table, there is only one collection.
 
+        if (quest.previous || dropsScroll || questId === 'evilsanta' || questId === 'dilatoryDistress1') {
+            tableRows.questLines.push( convertRow('wikia', row) );
+        }
+
         tableRowsHtml.push(rowHtml);
         tableRows.all.push( convertRow('wikia', row) );
 
@@ -689,7 +696,7 @@ function parseData() {
     var questTableHeader = '' +
 '\n{| class="filterable sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
 '\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"' +
-	convertRow('wikia', headers, 'th');
+    convertRow('wikia', headers, 'th');
 
     var questTableFooter = '' +
 '\n|- class="sortbottom"' +
@@ -789,6 +796,14 @@ function parseData() {
                     '<textarea rows="5" cols="40" wrap="off">' +
                     questTableHeader +
                     tableRows.hard.join("") +
+                    questTableFooter +
+                    '</textarea>' +
+
+                    '<h2>Quest Lines</h2>' +
+                    '<p>This textarea contains code to produce a Wikia table showing only quests that are in quest lines. Paste this code into the <a href="http://habitica.wikia.com/wiki/Template:Quest_Table_Quest_Lines">Quest Table Quest Lines</a> template.</p>' +
+                    '<textarea rows="5" cols="40" wrap="off">' +
+                    questTableHeader +
+                    tableRows.questLines.join("") +
                     questTableFooter +
                     '</textarea>' +
 
@@ -1018,7 +1033,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(v0.6)</span></h1><!-- VERSION -->
+    <span>(v0.7)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
@@ -1042,6 +1057,16 @@ th em {
 
 <br />
 <table id="theTable"></table>
+
+<!--
+== Table of All Quests in Quest Lines ==
+{{:Template:Quest_Table_Quest_Lines}}
+
+<noinclude>
+Do not edit this table by hand. Instead, use the "Quest Lines" section in the [https://oldgods.net/habitrpg/quest_table_creator.html Quest Table Creator], which will read the latest "content" data from Habitica and create all the required wikia code. Delete everything below this "noinclude" tag and replace it with that code.
+[[Category:Template Tables| ]][[Category:Habitica Templates]]
+</noinclude>
+-->
 
 </div><!-- end of div id="innerBody" -->
 </body>
