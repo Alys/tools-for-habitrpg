@@ -332,6 +332,14 @@ var releaseDates = {
     'head_armoire_blueFloppyHat' : '2015-11',
     'head_armoire_shepherdHeaddress' : '2015-11',
     'shield_armoire_royalCane' : '2015-11',
+    'weapon_armoire_crystalCrescentStaff' : '2015-12',
+    'weapon_armoire_blueLongbow' : '2015-12',
+    'armor_armoire_crystalCrescentRobes' : '2015-12',
+    'head_armoire_crystalCrescentHat' : '2015-12',
+    'armor_armoire_dragonTamerArmor' : '2016-01',
+    'head_armoire_dragonTamerHelm' : '2016-01',
+    'shield_armoire_dragonTamerShield' : '2016-01',
+    'weapon_armoire_glowingSpear' : '2016-01',
 };
 // get the current month's date in case the latest Enchanted Armoire
 // items haven't been added above yet:
@@ -388,8 +396,6 @@ function fetchData() {
     function fetchFailure() {
         $('#loading .good').hide();
         $('#loading .bad' ).show();
-        $('#documentationAndForm').show(); // in case user has done a re-fetch
-        $('#documentationAndFormClose').hide();
     }
     function fetchContentSuccess(data) {
         content = data;
@@ -800,7 +806,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(v3.3)</span></h1><!-- VERSION -->
+    <span>(v3.4)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
