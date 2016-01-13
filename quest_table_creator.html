@@ -277,6 +277,7 @@ function parseData() {
                        };
     var tableRowsHtml    = [];
     var devData = '';
+    var latestQuestUpdatesNeeded = '';
     for (var index = 0; index < questIds.length; index++) {
         var questId = questIds[index];
         var quest = allQuests[questId];
@@ -674,8 +675,13 @@ function parseData() {
         // quests, depending on the parameters of this quest.
         // For the HTML table, there is only one collection.
 
+        if (releaseDate === thisMonth) {
+            latestQuestUpdatesNeeded += "<strong>" + questName + "</strong> was released this month. Update the tables for: all quests";
+        }
+
         if (quest.previous || dropsScroll || questId === 'evilsanta' || questId === 'dilatoryDistress1') {
             tableRows.questLines.push( convertRow('wikia', row) );
+            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ", quest lines"; }
         }
 
         tableRowsHtml.push(rowHtml);
@@ -683,14 +689,17 @@ function parseData() {
 
         if (rating === '1. easy') {
             tableRows.easy.push( convertRow('wikia', row) );
+            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ", easy quests"; }
         }
         else if (rating === '2. medium') {
             tableRows.medium.push( convertRow('wikia', row) );
+            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ", medium quests"; }
         }
         else if (rating === '3. hard') {
             tableRows.hard.push( convertRow('wikia', row) );
+            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ", hard quests"; }
         }
-
+        if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ".<br />"; }
     }
 
     var questTableHeader = '' +
@@ -758,6 +767,7 @@ function parseData() {
 
     $('#loading .good').hide();
     $('#output').html(htmlStart +
+                    '<p>' + latestQuestUpdatesNeeded + '</p>' +
                     '<h2>Notes:</h2>' +
                     '<ul>' +
                     '<li>This is a close-to-final draft of information produced automatically for one or more wiki quest table pages.</li>' +
@@ -774,6 +784,22 @@ function parseData() {
                     '<li>Any information pulled straight from Habitica should be correct. Any information that Alys had to write code to calculate might be wrong. Any bugs can be easily fixed.</li>' +
 
                     '</ul>' +
+
+                    '<h2>All Quests</h2>' +
+                    '<p>This textarea contains code to produce a Wikia table showing all quests. It is not currently used on the wiki.</p>' +
+                    '<textarea rows="5" cols="40" wrap="off">' +
+                    questTableHeader +
+                    tableRows.all.join("") +
+                    questTableFooter +
+                    '</textarea>' +
+
+                    '<h2>Quest Lines</h2>' +
+                    '<p>This textarea contains code to produce a Wikia table showing only quests that are in quest lines. Paste this code into the <a href="http://habitica.wikia.com/wiki/Template:Quest_Table_Quest_Lines">Quest Table Quest Lines</a> template.</p>' +
+                    '<textarea rows="5" cols="40" wrap="off">' +
+                    questTableHeader +
+                    tableRows.questLines.join("") +
+                    questTableFooter +
+                    '</textarea>' +
 
                     '<h2>Easy Quests</h2>' +
                     '<p>This textarea contains code to produce a Wikia table showing only easy quests. Paste this code into the <a href="http://habitica.wikia.com/wiki/Template:Quest_Table_Easy">Quest Table Easy</a> template.</p>' +
@@ -796,22 +822,6 @@ function parseData() {
                     '<textarea rows="5" cols="40" wrap="off">' +
                     questTableHeader +
                     tableRows.hard.join("") +
-                    questTableFooter +
-                    '</textarea>' +
-
-                    '<h2>Quest Lines</h2>' +
-                    '<p>This textarea contains code to produce a Wikia table showing only quests that are in quest lines. Paste this code into the <a href="http://habitica.wikia.com/wiki/Template:Quest_Table_Quest_Lines">Quest Table Quest Lines</a> template.</p>' +
-                    '<textarea rows="5" cols="40" wrap="off">' +
-                    questTableHeader +
-                    tableRows.questLines.join("") +
-                    questTableFooter +
-                    '</textarea>' +
-
-                    '<h2>All Quests</h2>' +
-                    '<p>This textarea contains code to produce a Wikia table showing all quests. It is not currently used on the wiki.</p>' +
-                    '<textarea rows="5" cols="40" wrap="off">' +
-                    questTableHeader +
-                    tableRows.all.join("") +
                     questTableFooter +
                     '</textarea>' +
 
@@ -1033,7 +1043,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(v0.7)</span></h1><!-- VERSION -->
+    <span>(v0.8)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
