@@ -99,6 +99,7 @@ var serverPathParty   = '/groups/party';
 var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
+// var debug          = true;
 
 /* TST - FOR TESTING:
 // Use this section if you do not have a local webserver and want to use the provided test data.
@@ -149,6 +150,7 @@ $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
 */
+if (debug) console.log('debug 1');
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
                       // persists through re-fetch of data so we can
@@ -244,6 +246,7 @@ $('#userApiDetailsForm').submit(function(event){
 ////   Login and Data Fetch Functions   //////////////////////////////
 //////////////////////////////////////////////////////////////////////
 function fetchData() {
+    if (debug) console.log('debug 2');
     if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' || // AliceHarris
         userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
     ) {
@@ -269,7 +272,7 @@ function fetchData() {
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
         success: fetchUserSuccess,
-        error: fetchFailure
+        error: fetchFailureUser
     });
 
     // fetch the site-wide content (gear names and stats, etc):
@@ -311,13 +314,24 @@ function fetchData() {
     });
 
 
-    function fetchFailure() {
+    function fetchFailureUser() {
+        if (debug) console.log('debug fetchFailureUser start');
         $('#loading .good').hide();
         $('#loading .bad' ).show();
         $('#documentationAndForm').show(); // in case user has done a re-fetch
         $('#documentationAndFormClose').hide();
+        if (debug) console.log('debug fetchFailureUser end');
+    }
+    function fetchFailure() {
+        if (debug) console.log('debug fetchFailure start');
+        $('#loading .good').hide();
+        $('#loading .bad' ).show();
+        $('#documentationAndForm').show(); // in case user has done a re-fetch
+        $('#documentationAndFormClose').hide();
+        if (debug) console.log('debug fetchFailure end');
     }
     function fetchContentSuccess(data) {
+        if (debug) console.log('debug parseData Content success start');
         content = data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
@@ -325,6 +339,7 @@ function fetchData() {
         }
     }
     function fetchTavernSuccess(data) {
+        if (debug) console.log('debug parseData Tavern success start');
         tavern = data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
@@ -332,6 +347,7 @@ function fetchData() {
         }
     }
     function fetchPartySuccess(data) {
+        if (debug) console.log('debug parseData Party success start');
         party = data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
@@ -339,6 +355,7 @@ function fetchData() {
         }
     }
     function fetchUserSuccess(data) {
+        if (debug) console.log('debug parseData User success start');
         user = data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
@@ -347,6 +364,7 @@ function fetchData() {
     }
 }
 function parseData() {
+    if (debug) console.log('debug parseData start');
     // variables for storing the content:
     var MAIN = {}; // each element defines the HTML for one section on the page
     var TOC  = {}; // each element defines one Table of Contents entry
@@ -4170,6 +4188,7 @@ function calculateBonus(value, stat, crit, stat_scale) {
 }
 
 } // end of parseData() and its nested functions
+    if (debug) console.log('debug 99');
 });
 </script>
 
