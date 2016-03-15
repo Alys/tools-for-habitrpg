@@ -379,7 +379,7 @@ function parseData() {
     var health = getCurrentHealth(); // also sets dashboard tile
     var quest = {};
     // user.party.quest.key='vice3'; party.quest.active=true; // FOR TESTING
-    if (user.party && user.party.quest && user.party.quest.key && party.quest && party.quest.active) {
+    if (user.party && user.party.quest && user.party.quest.key && party && party.quest && party.quest.active) {
         quest = $.extend({}, user.party.quest);
         quest.content = $.extend({}, content.quests[ party.quest.key ] );
     }
@@ -4955,7 +4955,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.3)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4990,6 +4990,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>7.3 <span class="date">2016-03-13</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Fixed a bug that prevented anyone not in a party from using the tool!</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>7.2 <span class="date">2015-11-24</span></dt>
         <dd><ul>
             <li>Code:
@@ -4998,7 +5007,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>7.1 <span class="date">2015-08-15</span></dt>
         <dd><ul>
             <li>Features:
