@@ -35,6 +35,71 @@ Contributors:
 $(function() { // wraps around all our code to not pollute global namespace
 
 
+//////////////////////////////////////////////////////////////////////
+////   RELEASE DATES FOR ENCHANTED ARMOIRE ITEMS       ///////////////
+//////////////////////////////////////////////////////////////////////
+var releaseDates = {
+    'weapon_armoire_basicCrossbow' : '2015-06',
+    'weapon_armoire_lunarSceptre' : '2015-06',
+    'armor_armoire_lunarArmor' : '2015-06',
+    'armor_armoire_gladiatorArmor' : '2015-06',
+    'head_armoire_redHairbow' : '2015-06',
+    'head_armoire_violetFloppyHat' : '2015-06',
+    'head_armoire_gladiatorHelm' : '2015-06',
+    'head_armoire_rancherHat' : '2015-06',
+    'shield_armoire_gladiatorShield' : '2015-06',
+    'head_armoire_lunarCrown' : '2015-06',
+    'weapon_armoire_rancherLasso' : '2015-07',
+    'head_armoire_blueHairbow' : '2015-07',
+    'armor_armoire_rancherRobes' : '2015-07',
+    'head_armoire_royalCrown' : '2015-07',
+    'armor_armoire_goldenToga' : '2015-08',
+    'armor_armoire_hornedIronArmor' : '2015-08',
+    'head_armoire_goldenLaurels' : '2015-08',
+    'head_armoire_hornedIronHelm' : '2015-08',
+    'weapon_armoire_ironCrook' : '2015-08',
+    'weapon_armoire_mythmakerSword' : '2015-08',
+    'head_armoire_redFloppyHat' : '2015-09',
+    'weapon_armoire_goldWingStaff' : '2015-09',
+    'armor_armoire_plagueDoctorOvercoat' : '2015-09',
+    'head_armoire_yellowHairbow' : '2015-09',
+    'head_armoire_plagueDoctorHat' : '2015-09',
+    'eyewear_armoire_plagueDoctorMask' : '2015-09',
+    'weapon_armoire_batWand' : '2015-10',
+    'head_armoire_blackCat' : '2015-10',
+    'head_armoire_orangeCat' : '2015-10',
+    'shield_armoire_midnightShield' : '2015-10',
+    'weapon_armoire_shepherdsCrook' : '2015-11',
+    'armor_armoire_shepherdRobes' : '2015-11',
+    'armor_armoire_royalRobes' : '2015-11',
+    'head_armoire_blueFloppyHat' : '2015-11',
+    'head_armoire_shepherdHeaddress' : '2015-11',
+    'shield_armoire_royalCane' : '2015-11',
+    'weapon_armoire_crystalCrescentStaff' : '2015-12',
+    'weapon_armoire_blueLongbow' : '2015-12',
+    'armor_armoire_crystalCrescentRobes' : '2015-12',
+    'head_armoire_crystalCrescentHat' : '2015-12',
+    'armor_armoire_dragonTamerArmor' : '2016-01',
+    'head_armoire_dragonTamerHelm' : '2016-01',
+    'shield_armoire_dragonTamerShield' : '2016-01',
+    'weapon_armoire_glowingSpear' : '2016-01',
+    'weapon_armoire_barristerGavel' : '2016-02',
+    'weapon_armoire_jesterBaton' : '2016-02',
+    'armor_armoire_barristerRobes' : '2016-02',
+    'armor_armoire_jesterCostume' : '2016-02',
+    'head_armoire_barristerWig' : '2016-02',
+    'head_armoire_jesterCap' : '2016-02',
+    'weapon_armoire_miningPickax' : '2016-03',
+    'armor_armoire_minerOveralls' : '2016-03',
+    'head_armoire_minerHelmet' : '2016-03',
+    'shield_armoire_mysticLamp' : '2016-03',
+};
+// get the current month's date in case the latest Enchanted Armoire
+// items haven't been added above yet:
+var d = new Date();
+var month = d.getMonth() + 1;
+var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
+
 
 //////////////////////////////////////////////////////////////////////
 ////   IMAGE FILE NAMES FOR EACH EQUIPMENT PIECE       ///////////////
@@ -291,67 +356,6 @@ var urls = {
     'shield_special_fallWarrior' : 'Fall_Festival#Special_Class_Gear',
     'shield_special_fallHealer' : 'Fall_Festival#Special_Class_Gear'
 };
-
-//////////////////////////////////////////////////////////////////////
-////   RELEASE DATES FOR ENCHANTED ARMOIRE ITEMS       ///////////////
-//////////////////////////////////////////////////////////////////////
-var releaseDates = {
-    'weapon_armoire_basicCrossbow' : '2015-06',
-    'weapon_armoire_lunarSceptre' : '2015-06',
-    'armor_armoire_lunarArmor' : '2015-06',
-    'armor_armoire_gladiatorArmor' : '2015-06',
-    'head_armoire_redHairbow' : '2015-06',
-    'head_armoire_violetFloppyHat' : '2015-06',
-    'head_armoire_gladiatorHelm' : '2015-06',
-    'head_armoire_rancherHat' : '2015-06',
-    'shield_armoire_gladiatorShield' : '2015-06',
-    'head_armoire_lunarCrown' : '2015-06',
-    'weapon_armoire_rancherLasso' : '2015-07',
-    'head_armoire_blueHairbow' : '2015-07',
-    'armor_armoire_rancherRobes' : '2015-07',
-    'head_armoire_royalCrown' : '2015-07',
-    'armor_armoire_goldenToga' : '2015-08',
-    'armor_armoire_hornedIronArmor' : '2015-08',
-    'head_armoire_goldenLaurels' : '2015-08',
-    'head_armoire_hornedIronHelm' : '2015-08',
-    'weapon_armoire_ironCrook' : '2015-08',
-    'weapon_armoire_mythmakerSword' : '2015-08',
-    'head_armoire_redFloppyHat' : '2015-09',
-    'weapon_armoire_goldWingStaff' : '2015-09',
-    'armor_armoire_plagueDoctorOvercoat' : '2015-09',
-    'head_armoire_yellowHairbow' : '2015-09',
-    'head_armoire_plagueDoctorHat' : '2015-09',
-    'eyewear_armoire_plagueDoctorMask' : '2015-09',
-    'weapon_armoire_batWand' : '2015-10',
-    'head_armoire_blackCat' : '2015-10',
-    'head_armoire_orangeCat' : '2015-10',
-    'shield_armoire_midnightShield' : '2015-10',
-    'weapon_armoire_shepherdsCrook' : '2015-11',
-    'armor_armoire_shepherdRobes' : '2015-11',
-    'armor_armoire_royalRobes' : '2015-11',
-    'head_armoire_blueFloppyHat' : '2015-11',
-    'head_armoire_shepherdHeaddress' : '2015-11',
-    'shield_armoire_royalCane' : '2015-11',
-    'weapon_armoire_crystalCrescentStaff' : '2015-12',
-    'weapon_armoire_blueLongbow' : '2015-12',
-    'armor_armoire_crystalCrescentRobes' : '2015-12',
-    'head_armoire_crystalCrescentHat' : '2015-12',
-    'armor_armoire_dragonTamerArmor' : '2016-01',
-    'head_armoire_dragonTamerHelm' : '2016-01',
-    'shield_armoire_dragonTamerShield' : '2016-01',
-    'weapon_armoire_glowingSpear' : '2016-01',
-    'weapon_armoire_barristerGavel' : '2016-02',
-    'weapon_armoire_jesterBaton' : '2016-02',
-    'armor_armoire_barristerRobes' : '2016-02',
-    'armor_armoire_jesterCostume' : '2016-02',
-    'head_armoire_barristerWig' : '2016-02',
-    'head_armoire_jesterCap' : '2016-02',
-};
-// get the current month's date in case the latest Enchanted Armoire
-// items haven't been added above yet:
-var d = new Date();
-var month = d.getMonth() + 1;
-var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -812,7 +816,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(last updated 21 January 2016)</span></h1><!-- VERSION -->
+    <span>(last updated 20 March 2016)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
