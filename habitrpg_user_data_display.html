@@ -99,7 +99,7 @@ var serverPathParty   = '/groups/party';
 var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
-// var debug          = true;
+var debug             = false;
 
 /* TST - FOR TESTING:
 // Use this section if you do not have a local webserver and want to use the provided test data.
@@ -3061,13 +3061,18 @@ function questProgress() {
         var stuff = '';
         var uniqueItemsCount = 0;
         $.each(quest.progress.collect, function(tagId, value){
-            uniqueItemsCount++;
-            total += value;
-            var itemName = quest.content.collect[tagId].text || tagId;
-            if (uniqueItemsCount > 1) { // we have stuff already
-                stuff += ", ";
+            if (tagId) {
+                uniqueItemsCount++;
+                total += value;
+                var itemName = tagId;
+                if (quest.content.collect[tagId]) {
+                    itemName = quest.content.collect[tagId].text || tagId;
+                }
+                if (uniqueItemsCount > 1) { // we have stuff already
+                    stuff += ", ";
+                }
+                stuff += value + " " + itemName;
             }
-            stuff += value + " " + itemName;
         });
         var replaceStr = (uniqueItemsCount > 2) ? ", and" : " and";
         stuff = stuff.replace(/(.+),/, "$1" + replaceStr);
