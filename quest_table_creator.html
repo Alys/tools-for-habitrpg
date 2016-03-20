@@ -36,6 +36,67 @@ $(function() { // wraps around all our code to not pollute global namespace
 
 var wikiaBaseUrl = 'http://habitica.wikia.com/wiki/';
 
+//////////////////////////////////////////////////////////////////////
+////   RELEASE DATES FOR QUEST SCROLLS                 ///////////////
+//////////////////////////////////////////////////////////////////////
+var startOfTime = '2015-11';
+var releaseDates = {
+    'dilatory': startOfTime,
+    'stressbeast': startOfTime,
+    'burnout': startOfTime,
+    'evilsanta': startOfTime,
+    'evilsanta2': startOfTime,
+    'gryphon': startOfTime,
+    'hedgehog': startOfTime,
+    'ghost_stag': startOfTime,
+    'vice1': startOfTime,
+    'vice2': startOfTime,
+    'vice3': startOfTime,
+    'egg': startOfTime,
+    'rat': startOfTime,
+    'octopus': startOfTime,
+    'dilatory_derby': startOfTime,
+    'atom1': startOfTime,
+    'atom2': startOfTime,
+    'atom3': startOfTime,
+    'harpy': startOfTime,
+    'rooster': startOfTime,
+    'spider': startOfTime,
+    'moonstone1': startOfTime,
+    'moonstone2': startOfTime,
+    'moonstone3': startOfTime,
+    'goldenknight1': startOfTime,
+    'goldenknight2': startOfTime,
+    'goldenknight3': startOfTime,
+    'basilist': startOfTime,
+    'owl': startOfTime,
+    'penguin': startOfTime,
+    'trex': startOfTime,
+    'trex_undead': startOfTime,
+    'rock': startOfTime,
+    'bunny': startOfTime,
+    'slime': startOfTime,
+    'sheep': startOfTime,
+    'kraken': startOfTime,
+    'whale': startOfTime,
+    'dilatoryDistress1': startOfTime,
+    'dilatoryDistress2': startOfTime,
+    'dilatoryDistress3': startOfTime,
+    'cheetah': startOfTime,
+    'horse': startOfTime,
+    'frog': startOfTime,
+    'snake': startOfTime,
+    'unicorn': '2015-12',
+    'sabretooth' : '2016-01',
+    'monkey' : '2016-02',
+    'snail' : '2016-03',
+};
+// get the current month's date in case the latest quest
+// hasn't been added above yet:
+var d = new Date();
+var month = d.getMonth() + 1;
+var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
+
 
 //////////////////////////////////////////////////////////////////////
 ////   SCROLL IMAGE FILE NAMES FOR EACH QUEST          ///////////////
@@ -118,66 +179,6 @@ var rewardPageUrls = {
     'head_special_2': 'Nameless_Helm',
     'armor_special_2': 'Jean_Chalard%27s_Noble_Tunic',
 };
-
-//////////////////////////////////////////////////////////////////////
-////   RELEASE DATES FOR QUEST SCROLLS                 ///////////////
-//////////////////////////////////////////////////////////////////////
-var startOfTime = '2015-11';
-var releaseDates = {
-    'dilatory': startOfTime,
-    'stressbeast': startOfTime,
-    'burnout': startOfTime,
-    'evilsanta': startOfTime,
-    'evilsanta2': startOfTime,
-    'gryphon': startOfTime,
-    'hedgehog': startOfTime,
-    'ghost_stag': startOfTime,
-    'vice1': startOfTime,
-    'vice2': startOfTime,
-    'vice3': startOfTime,
-    'egg': startOfTime,
-    'rat': startOfTime,
-    'octopus': startOfTime,
-    'dilatory_derby': startOfTime,
-    'atom1': startOfTime,
-    'atom2': startOfTime,
-    'atom3': startOfTime,
-    'harpy': startOfTime,
-    'rooster': startOfTime,
-    'spider': startOfTime,
-    'moonstone1': startOfTime,
-    'moonstone2': startOfTime,
-    'moonstone3': startOfTime,
-    'goldenknight1': startOfTime,
-    'goldenknight2': startOfTime,
-    'goldenknight3': startOfTime,
-    'basilist': startOfTime,
-    'owl': startOfTime,
-    'penguin': startOfTime,
-    'trex': startOfTime,
-    'trex_undead': startOfTime,
-    'rock': startOfTime,
-    'bunny': startOfTime,
-    'slime': startOfTime,
-    'sheep': startOfTime,
-    'kraken': startOfTime,
-    'whale': startOfTime,
-    'dilatoryDistress1': startOfTime,
-    'dilatoryDistress2': startOfTime,
-    'dilatoryDistress3': startOfTime,
-    'cheetah': startOfTime,
-    'horse': startOfTime,
-    'frog': startOfTime,
-    'snake': startOfTime,
-    'unicorn': '2015-12',
-    'sabretooth' : '2016-01',
-    'monkey' : '2016-02',
-};
-// get the current month's date in case the latest quest
-// hasn't been added above yet:
-var d = new Date();
-var month = d.getMonth() + 1;
-var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -1045,7 +1046,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 21 January 2016)</span></h1><!-- VERSION -->
+    <span>(last updated 20 March 2016)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
