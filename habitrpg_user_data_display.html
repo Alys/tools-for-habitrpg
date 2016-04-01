@@ -3043,7 +3043,7 @@ function questProgress() {
             }
         }
         if (tavernBoss) {
-            html += "Burnout"; // XXX_LATER automate
+            html += "The Be-Wilder"; // XXX_LATER automate
         }
         html += '.';
         var dashboardTitle = 'Damage to ' + upperCaseFirst(bossesWord);
@@ -3099,9 +3099,9 @@ function questProgress() {
     html += '</p>';
 
     if (tavernBoss && tavern.quest.progress) {
-        var name = "Burnout"; // XXX_LATER automate!
+        var name = "The Be-Wilder"; // XXX_LATER automate!
         var hp = Math.round(tavern.quest.progress.hp);
-        var hpMax = 11000000; // XXX_LATER automate!
+        var hpMax = 20000000; // XXX_LATER automate!
         var hpPercent = Math.round(hp / hpMax * 1000) / 10;
         if (hp > 0 && hpPercent == 0) { // XXX_LATER do this better
             hpPercent = Math.round(hp / hpMax * 10000) / 100;
@@ -3115,14 +3115,14 @@ function questProgress() {
                 }
             }
         }
-        html += '<h3>Stats for the ' + name + '</h3>' +
+        html += '<h3>Stats for ' + name + '</h3>' +
                 '<p>Health: ' + hpPercent + '% (' +
                  hp + ', down from ' + hpMax + ')';
         if (tavern.quest.progress.rage) {
             var rage = Math.round(tavern.quest.progress.rage);
-            var rageMax = 1000000; // XXX_LATER automate!
+            var rageMax = 800000; // XXX_LATER automate!
             var ragePercent = Math.round(rage / rageMax * 1000) / 10;
-            html += '<br />Stress: ' + ragePercent + '% (' +
+            html += '<br />Beguilement: ' + ragePercent + '% (' + // XXX_LATER automate "Beguilement"
                     rage + ' out of ' + rageMax + ')';
         }
         html += '</p>';
@@ -4960,7 +4960,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.3)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.4)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4995,6 +4995,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>7.4 <span class="date">2016-04-01</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Updated for new world boss.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>7.3 <span class="date">2016-03-13</span></dt>
         <dd><ul>
             <li>Code:
@@ -5003,7 +5012,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>7.2 <span class="date">2015-11-24</span></dt>
         <dd><ul>
             <li>Code:
@@ -5025,7 +5033,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>7.0 <span class="date">2015-07-31</span></dt>
         <dd><ul>
             <li>Features:
