@@ -1,0 +1,1873 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Habitica Task Adjustor</title>
+    <base target="_blank">
+
+<!--
+
+This code is licenced under the same terms as Habitica:
+    https://raw.githubusercontent.com/HabitRPG/habitrpg/develop/LICENSE
+
+https://github.com/Alys/tools-for-habitrpg/blob/master/task_editor.html
+AND required JavaScript libraries: // XXX_SOON needed?
+https://github.com/Alys/tools-for-habitrpg/blob/master/js-for-task_editor.tar.gz
+
+https://oldgods.net/habitrpg/task_editor.html
+
+Contributors:
+    Alys (Alice Harris), lady_alys@oldgods.net https://github.com/Alys
+
+-->
+
+    <meta name="description" content="Habitica Task Adjustor" />
+    <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
+
+<!-- XXX_SOON purge -->
+    <link href="js/DataTables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
+    <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
+    <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
+    <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
+    <script src="js/emoji-images/emoji-images.js"></script>
+
+    <!-- TST - FOR TESTING
+    For more information on using jquery-mockjax for simulating ajax requests, see https://github.com/jakerella/jquery-mockjax
+    --><!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mockjax/1.5.3/jquery.mockjax.min.js" type="text/javascript"></script>
+    <script src="testdata/content.js" type="text/javascript"></script>
+    <script src="testdata/habits-many.js" type="text/javascript"></script>
+    <script src="testdata/habits-very-many.js" type="text/javascript"></script>
+    <script src="testdata/tavern.js" type="text/javascript"></script>
+    <script src="testdata/user.js" type="text/javascript"></script>
+    -->
+
+
+<script type="text/javascript">
+$(function() { // wraps around all our code to not pollute global namespace
+
+//////////////////////////////////////////////////////////////////////
+////   Global Variables                              /////////////////
+//////////////////////////////////////////////////////////////////////
+var user;    // holds user's data
+var customDayStart;
+var timezoneOffset;
+var todayUser;
+var todayUserPretty;
+var userSpecifiedDate;
+var tagsForTaskId = {};
+var tagsNames = {};
+
+
+//////////////////////////////////////////////////////////////////////
+////   Global Connection Variables      //////////////////////////////
+//////////////////////////////////////////////////////////////////////
+var serverName           = 'Habitica'; // used in "loading" message
+var serverUrl            = 'https://habitica.com:443/api/v2';
+var serverPathContent    = '/content?language=en';
+var serverPathUser       = '/user';
+var serverPathTaskUpdate = '/user/tasks';
+var userId               = '';
+var apiToken             = '';
+var debug                = false;
+
+/* TST - FOR TESTING:
+// Use this section if you do not have a local webserver and want to use the provided test data.
+// You can compose test data by doing things like:
+//     var userJson = JSON.parse(userJsonString);
+//     var habitsVeryManyJson = JSON.parse(habitsVeryManyJsonString);
+//     userJson.habits = habitsVeryManyJson;
+//     userJsonString = JSON.stringify(userJson);
+$.mockjax({
+  url: serverUrl + serverPathUser,
+  dataType: 'json',
+  responseText: userJsonString,
+});
+*/
+
+/* TST - FOR TESTING:
+// Use this section if you have a local webserver set up to handle the requests.
+serverName        = 'localhost';
+serverUrl         = 'http://localhost';
+serverPathUser    = '/cgi-bin/hrpg_user.pl';
+apiToken          = 'null';
+userId            = 'test';
+userId            = 'work';
+userId            = 'home';
+*/
+
+/* TST - FOR TESTING:
+serverUrl = 'http://localhost:3000/api/v2';
+userId    = '3e595299-3d8a-4a10-bfe0-88f555e4aa0c';
+apiToken  = ''; // TST - DO NOT LET THIS GO LIVE!
+$('body').css({'background-color':'#C4B4A4'});
+$('#userApiDetailsForm #userId').val(userId);
+$('#userApiDetailsForm #apiToken').val(apiToken);
+fetchData();
+*/
+if (debug) console.log('debug 1');
+
+
+//////////////////////////////////////////////////////////////////////
+////   This function decodes &nbsp; -> renders markdown   ////////////
+////   -> escapes HTML entities -> and renders emoji      ////////////
+//////////////////////////////////////////////////////////////////////
+function renderFormattedText(text) {
+    function renderMarkdown(text) {
+        // XXX_SOON implement with downloaded or online modules:
+        // text = marked(text, {sanitize: true});
+        // text = String(text).replace(/^<p>|<\/p>\n$/g, ''); // The bonus paragraph around every text snippet is unnecessary
+        return text;
+    }
+
+    function renderEmoji(text) {
+        return emoji(text, 'js/emoji-images/pngs', 25);
+    }
+
+    return renderEmoji(
+        renderMarkdown(
+            String(text).replace(/\&nbsp;/g, ' ')
+        )
+    );
+}
+
+
+//////////////////////////////////////////////////////////////////////
+////   Functions for working with tags    ////////////////////////////
+//////////////////////////////////////////////////////////////////////
+function countNumberOfTagsForTask(taskId) {
+    var count = 0;
+    $.each(tagsForTaskId[taskId], function(tagId) {
+        if (tagsForTaskId[taskId][tagId]) { // can be false
+            count ++;
+        }
+    });
+    return count;
+}
+function displayNumberOfTagsForTask(taskId) {
+    var count = countNumberOfTagsForTask(taskId);
+    if (count === 0) return '<em>no tags</em>';
+    if (count === 1) return '1 tag';
+    return count + ' tags';
+}
+
+function displayTagNamesForTask(taskId, opt) {
+    if (!opt.joiner) opt.joiner = '<br />';
+    // opt.showNotTagged -- default false
+    // opt.formatText    -- default false
+
+    var output = []
+    $.each(user.tags, function(index, tag) {
+        if (( opt.showNotTagged && !tagsForTaskId[taskId][tag.id]) ||
+            (!opt.showNotTagged &&  tagsForTaskId[taskId][tag.id])
+        ) {
+            var name = tagsNames[tag.id];
+            if (opt.formatText) name = renderFormattedText(name);
+            output.push(name);
+        }
+    });
+    return output.join(opt.joiner);
+}
+
+
+//////////////////////////////////////////////////////////////////////
+////   Allow Show/Hide Toggling to work    ///////////////////////////
+//////////////////////////////////////////////////////////////////////
+enableShowHideToggling(); // needed here to enable Version Changes link
+function enableShowHideToggling() {
+    // $('.showHideToggle').click(function(event)
+    $('body').on('click', '.paneCloser', function(event){
+        $(this).parent().hide();
+    });
+    $('body').on('click', '.showHideToggle', function(event){
+        var target = $(this).data("target");
+        var wantToShow = (! $('#' + target).is(':visible')
+                       || $(this).data("forceopen"));
+            // wantToShow is false if the target is already open
+            // (i.e., the user wants to close it)
+            // unless the toggle's attributes force it to always be
+            // opened (e.g., a link from the dashboard)
+        var linktext = $(this).data("linktext") || false;
+        if ($(this).data("closemainsections")) {
+            $('#MAIN > *').hide();
+        }
+        if (wantToShow) {
+            sectionOpen = target;
+            $('#' + target).show();
+            if (linktext) {
+                $(this).text('hide ' + linktext);
+            }
+        }
+        else {
+            $('#' + target).hide();
+            if (linktext) {
+                $(this).text('show ' + linktext);
+            }
+            if ($(this).data("scrolltotop")) {
+                window.scrollTo(0, 0);
+            }
+        }
+        var toggleTarget = $(this).data("resettoggletext") || false;
+        if (toggleTarget) {
+            $('#' + toggleTarget).text('show '
+                        + $('#' + toggleTarget).data("linktext"));
+        }
+    });
+    $('body').on('click', '.mainSectionClose', function(event){
+        $('#MAIN > *').hide();
+        window.scrollTo(0, 0);
+    });
+}
+
+
+//////////////////////////////////////////////////////////////////////
+////   Perform selected action    ////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+$('body').on('click', '.selector', function(event){
+    var taskId         = $(this).parent().data('task');
+    var field          = $(this).parent().data('field');
+    var fieldExtra     = $(this).parent().data('fieldextra');
+    var type           = $(this).parent().data('type');
+    var output         = $(this).parent().data('output');
+    var outputExtra    = $(this).parent().data('outputextra');
+    var newValue       = $(this).data('newvalue');
+    var newValueExtra  = $(this).data('newvalueextra');
+    var newValueFrom   = $(this).data('newvaluefrom');
+    var newValuePretty = $(this).data('newvaluepretty');
+    var newValueOutputExtra = '';
+    var data = {};
+    var dataAlreadyConstructed = false;
+
+    if (newValueFrom && ! newValue) {
+        newValue = $('#' + newValueFrom).val();
+    }
+
+    if (type === 'date') {
+        if (newValue === 'noDate') {
+            newValue = '';
+            newValuePretty = 'none';
+        }
+        else {
+            if (newValue === 'today') {
+                newValue = moment(todayUser);
+            }
+            else if (newValue === 'todayPlus') {
+                newValue = moment(todayUser).add(24 * newValueExtra, 'hours');
+            }
+            else if (newValue === 'nextDayOfWeek') {
+                if (todayUser.day() === newValueExtra) {
+                    newValueExtra = newValueExtra + 7; // NEXT day of week
+                }
+                newValue = moment(todayUser).day(newValueExtra);
+            }
+            else if (newValue === 'startOfMonth') {
+                newValue = moment(todayUser).startOf('month').add(1, 'month');
+            }
+            else if (newValue === 'userSpecifiedDate') {
+                // reuse a date we specified previously
+                newValue = moment(userSpecifiedDate);
+            }
+            else { // user-specified date
+                if(!/^\d{4}-\d{2}-\d{2}$/.test(newValue)) {
+                    $(this).siblings('.status').html(newValue +
+                        ' is<br / >wrong date format!<br />Use yyyy-mm-dd');
+                    $(this).siblings('.status').addClass('error');
+                    return;
+                }
+                userSpecifiedDate = newValue; // allow date to be reused
+                newValue = moment(newValue);
+
+                // enable the form that allows this date to be reused:
+                $(".userSpecifiedDate").text(userSpecifiedDate);
+                $(".userSpecifiedDate").removeClass('hide');
+            }
+            // Convert from user's timezone to server timezone (UTC+0) for
+            // storage, and add custom day start to deal with Daily start
+            // dates correctly:
+            // NB: timezoneOffset is, for example, -600 for GMT+10
+            newValue = moment(newValue).add(timezoneOffset, 'minutes').
+                                        add(customDayStart, 'hours');
+            // format stored in database:
+            newValue = moment(newValue).format('YYYY-MM-DDTHH:mm:SS.000') + 'Z';
+            // format for display in this tool:
+            newValuePretty = moment(newValue).format('YYYY-MM-DD');
+        }
+    }
+    else if (type === 'boolean') {
+        if (newValue === true) {
+            newValuePretty = 'yes';
+        }
+        else {
+            newValuePretty = 'no';
+        }
+    }
+    else if (type === 'tags') {
+        // For changing tags, newValue initially contains just the ID of the
+        // one tag to assign or unassign, not the full set of new data to be
+        // submitted.
+        var tagId = newValue;
+        // Now we make newValue hold the desired true/false value for that tag
+        // (toggle it depending on current tag assignment):
+        newValue = (tagsForTaskId[taskId][tagId]) ? false : true;
+        tagsForTaskId[taskId][tagId] = newValue;
+        data['tags'] = {};
+        data['tags'][tagId] = newValue;
+        dataAlreadyConstructed = true;
+        newValuePretty = displayNumberOfTagsForTask(taskId);
+        newValueOutputExtra = displayTagNamesForTask(taskId, {formatText:true});
+    }
+
+    // if (fieldExtra && fieldExtra === 'dateCompleted') {
+    //  if (newValue === true) {
+    //      data['dateCompleted'] = new Date();
+    //      // marked a To-Do completed
+    //  }
+    //  else {
+    //      // un-marked a To-Do that used to be completed
+    //      data['dateCompleted'] = null; // XXX_LATER delete completely
+    //  }
+    // }
+
+    if (!dataAlreadyConstructed) {
+        data[field] = newValue;
+    }
+
+    $(this).siblings('.status').text('updating...');
+    $.ajax({
+        url: serverUrl + serverPathTaskUpdate + '/' + taskId,
+        context: $(this),
+        type: 'PUT',
+        contentType: 'application/json', // needed for passing true/false
+        data: JSON.stringify(data),      // needed for passing true/false
+        dataType: 'json',
+        cache: false,
+        beforeSend: function(xhr) {
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            },
+        success: updateTaskSuccess,
+        error: updateTaskFailure,
+    });
+    function updateTaskSuccess() {
+        $('#' + output).html(newValuePretty || newValue);
+        if (outputExtra) {
+            $('#' + outputExtra).html(newValueOutputExtra);
+        }
+        $(this).siblings('.status').text('');
+        $(this).removeClass('error');
+        $(this).parent().hide();
+        var row = $(this).parents('tr').children('td');
+        row.removeClass('uncertain');
+        row.addClass('justChanged');
+        setTimeout(function(row) {
+            row.removeClass('justChanged');
+            row.addClass('uncertain');
+            }, 1000, row);
+    }
+    function updateTaskFailure() {
+        $(this).siblings('.status').text('Update failed! Try again.');
+        $(this).siblings('.status').addClass('error');
+    }
+});
+
+
+//////////////////////////////////////////////////////////////////////
+////   Get UUID from URL      ////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+var url_vars = getUrlVars();
+if (url_vars.uuid) {
+    $("#userId").val(url_vars.uuid);
+}
+function getUrlVars() {
+    // Function found at http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url#answer-4656873
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
+
+
+//////////////////////////////////////////////////////////////////////
+////   Login events      /////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+$('#userApiDetailsForm').submit(function(event){
+    /* The user manually submitted the API connection form. */
+    userId   = $('#userId').val();
+    apiToken = $('#apiToken').val();
+    fetchData();
+});
+
+
+//////////////////////////////////////////////////////////////////////
+////   Login and Data Fetch Functions   //////////////////////////////
+//////////////////////////////////////////////////////////////////////
+function fetchData() {
+    if (debug) console.log('debug 2');
+    $('#loading #serverName').text(serverName);
+    $('#loading .good').show();
+    $('#loading .bad' ).hide();
+
+    $.ajax({
+        url: serverUrl + serverPathUser,
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            },
+        success: fetchUserSuccess,
+        error: fetchFailureUser
+    });
+
+    function fetchFailureUser() {
+        if (debug) console.log('debug fetchFailureUser start');
+        $('#loading .good').hide();
+        $('#loading .bad' ).show();
+        $('#documentationAndForm').show(); // in case user has done a re-fetch
+        $('#documentationAndFormClose').hide();
+        if (debug) console.log('debug fetchFailureUser end');
+    }
+    function fetchUserSuccess(data) {
+        if (debug) console.log('debug parseData User success start');
+        user = data;
+        parseData();
+    }
+}
+
+
+function parseData() {
+    if (debug) console.log('debug parseData start');
+    // variables for storing the content:
+    var MAIN = {}; // XXX_SOON improve
+
+    // save the fetch time early:
+    var fetchtime = myDateConverter(new Date(), 'pretty');
+
+    // extract some commonly-used data:
+    customDayStart = user.preferences.dayStart || 0; // CDS
+    timezoneOffset = user.preferences.timezoneOffset || 0;
+
+    // Find the correct date for "today". If the user has a CDS set, then
+    // we need to subtract the CDS hour from the current date and time to
+    // see if today is actually "yesterday". E.g., if the CDS is 5am, and
+    // the user is using this tool at 4am on Monday, then the actual
+    // "Habitica day" is Sunday (not Monday) because the CDS time has not
+    // yet been reached; subtracting 5 hours from the current date and time
+    // gives us yesterday's date. We then ignore the time portion of the
+    // date because from now on we're comparing only days, not hours.
+    todayUser = moment().subtract(customDayStart, 'hours');
+    todayUser = todayUser.startOf('day');
+    todayUserPretty = moment(todayUser).format('YYYY-MM-DD');
+
+    userDataInHeader();
+
+    collateAndDisplayTaskData();
+
+
+    //////////////////////////////////////////////////////////////////////
+    ////   Display the HTML that the functions have created   ////////////
+    //////////////////////////////////////////////////////////////////////
+    $('#loading .good').hide();
+    $('#documentationAndFormClose').show();
+    $('#documentationAndForm').hide();
+    formatAndDisplayMAIN(); // XXX_SOON improve
+
+    // everything below here is functions used within this function
+
+
+function formatAndDisplayMAIN() { // XXX_SOON purge
+    var keys = ['taskOverview'];
+    var html = '';
+    var functions = []; // functions to run after HTML code has been loaded
+    for (var i=0,ic=keys.length; i<ic; i++) {
+        var data = MAIN[keys[i]];
+        if (! data) {
+            continue;
+        }
+        html += '<div id="' +
+                data.id     + '">' +
+                data.html   +
+                '</div>';
+        if (data['function']) {
+            functions.push(data['function']);
+        }
+    }
+    $('#MAIN').html(html);
+    // execute any functions that need to be run AFTER the bulk of the
+    // HTML has been created:
+    $.each(functions, function(index,fn){
+        fn();
+    });
+}
+
+
+function myDateConverter(date, style) { // XXX_SOON replace with moment
+    if (typeof date === 'string' || typeof date === 'number') {
+        date = new Date(date);
+    }
+    if (!date || isNaN(date.getTime())) {
+        // Either the object that was passed in is not a Date object,
+        // OR the date string that was passed in could not be converted
+        // to a Date object, presumably because it's in a non-standard
+        // format. We handle this by using today's date. It's a nasty
+        // hack, but it's unlikely to occur, and no one's paying for
+        // anything better.
+        date = new Date();
+    }
+
+    if (style === 'pretty') {
+        // Format date as (weekday date month) and hh:mm:ss;
+        // toDateString ordering might be locale-specific
+        // var dateStr = date.toDateString().split(' ').slice(0,3).join(' ') +
+        // ' ' + date.toTimeString().split(' ')[0];
+        var dateStr = date.toLocaleString(undefined,
+            { weekday: 'long', day: 'numeric', month: 'long',
+              hour: '2-digit', minute: '2-digit' });
+    }
+    else {
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        var d = date.getDate();
+        var H = date.getHours();
+        var M = date.getMinutes();
+        var S = date.getSeconds();
+        var dateStr = y +
+               '-' + (m<=9 ? '0'+m : m) +
+               '-' + (d<=9 ? '0'+d : d);
+        if (style === 'short') {
+            dateStr = dateStr.replace(/^20/, ""); // remove century
+        }
+        if (style === 'long') {
+            dateStr += ' ' + (H<=9 ? '0'+H : H) +
+                       ':' + (M<=9 ? '0'+M : M) +
+                       ':' + (S<=9 ? '0'+S : S);
+        }
+    }
+    return dateStr;
+}
+
+
+function pluralise(word, number) {
+    var lcWord = word.toLowerCase();
+    var needUpperCase = (lcWord == word) ? false : true;
+    if (number != 1) {
+        var pluralWords = {
+            'has':   'have',
+            'it':    'them',
+            'this':  'these',
+            'is':    'are',
+            'daily': 'dailies',
+            'Daily': 'Dailies',
+        };
+        if   (pluralWords[lcWord]) { word = pluralWords[lcWord]; }
+        else                       { word += 's';    }
+    }
+    if (needUpperCase) { // must improve this if ever need ALL upper case
+        word = upperCaseFirst(word);
+    }
+    return word;
+}
+
+
+function displayNumberWithPluralisation(number, word) {
+    return number + ' ' + pluralise(word, number);
+}
+
+
+function upperCaseFirst(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+
+function userDataInHeader() {
+    var displayName = renderFormattedText(user.profile.name);
+    $('#headerExtras').html('<div id="userNameDisplay">' +
+            displayName +
+            '</div>' +
+            '<div id="explanationAndClearLinks">' +
+            '<input id="refetch" type="submit" value="' +
+            'Re-Fetch Data (last fetched ' + fetchtime + ')" />' +
+            // '<span id="documentationAndFormToggle" class="showHideToggle" data-target="documentationAndForm" data-linktext="documentation" data-closemainsections="true">show documentation</span>' +
+            '</div>'
+    );
+    $('#refetch').click(function(event){
+        /* The user clicked on the Re-Fetch My Data button. */
+        fetchData();
+    });
+}
+
+
+function collateAndDisplayTaskData() {
+    // Set up data structures for storing task information:
+    var taskOrder = 0; // order of tasks in Habitica; acts as unique identifier
+    var allTasks = [];
+
+    // Define some static stuff:
+    var attributesPretty = {    'str': 'Physical (STR)',
+                                'int': 'Mental (INT)',
+                                'con': 'Social (CON)',
+                                'per': 'Other (PER)',
+                           };
+    var entityMap = {   "&": "&amp;",
+                        "<": "&lt;",
+                        ">": "&gt;",
+                        '"': '&quot;',
+                        "'": '&#39;',
+                        "/": '&#x2F;'
+                    };
+    var colours = { 1: {'order':1, 'name':'Bright Blue',
+                        'label':       '1) Bright Blue',
+                        'nameNoSpace':    'BrightBlue',
+                        'id':       'colourBrightBlue'
+                       },
+                    2: {'order':2, 'name':'Blue Grey',
+                        'label':       '2) Blue Grey',
+                        'nameNoSpace':    'BlueGrey',
+                        'id':       'colourBlueGrey'
+                       },
+                    3: {'order':3, 'name':'Green',
+                        'label':       '3) Green',
+                        'nameNoSpace':    'Green',
+                        'id':       'colourGreen'
+                       },
+                    4: {'order':4, 'name':'Yellow',
+                        'label':       '4) Yellow',
+                        'nameNoSpace':    'Yellow',
+                        'id':       'colourYellow'
+                       },
+                    5: {'order':5, 'name':'Orange',
+                        'label':       '5) Orange',
+                        'nameNoSpace':    'Orange',
+                        'id':       'colourOrange'
+                       },
+                    6: {'order':6, 'name':'Red',
+                        'label':       '6) Red',
+                        'nameNoSpace':    'Red',
+                        'id':       'colourRed'
+                       },
+                    7: {'order':7, 'name':'Dark Red',
+                        'label':       '8) Dark Red',
+                        'nameNoSpace':    'DarkRed',
+                        'id':       'colourDarkRed'
+                       }
+                  };
+
+    var everyXDaysInUse = false;
+    var habits   = collateHabitsData();  // populates the...
+    var dailies  = collateDailiesData(); // ... function's "global" variables...
+    var todosAll = collateTodosData();   // ... defined above...
+    var rewards  = collateRewardsData(); // ......
+    var todos          = todosAll[0];
+    var todosCompleted = todosAll[1];
+
+    if (allTasks.length > 50) {
+        var some = 'a few';
+        if (allTasks.length > 100) some = 'several';
+        if (allTasks.length > 200) some = 'many';
+        $('#taskNumberMessage').text('You have ' +
+            displayNumberWithPluralisation(habits.length,  'Habit') + ', ' +
+            displayNumberWithPluralisation(dailies.length, 'Daily') + ', ' +
+            displayNumberWithPluralisation(todos.length,   'To-Do') + ', and ' +
+            displayNumberWithPluralisation(rewards.length, 'Reward')+
+            '. It might take ' + some +
+            ' seconds before this page becomes responsive.');
+        $('#taskNumberMessage').removeClass('hide');
+        setTimeout(function() {
+            $('#taskNumberMessage').addClass('hide');
+            }, 20000);
+    }
+
+    // display task data:
+    taskOverview();
+
+    function collateHabitsData() {
+        var habits = [];
+        $.each(user.habits, function(index, obj){
+            modifyTaskProperties(obj);
+            habits.push(obj); // XXX_SOON do I need this and the other types?
+            allTasks.push(obj);
+        });
+        return habits;
+    }
+
+
+    function collateDailiesData() {
+        var dailies = [];
+        var valueMin = -47.27; // task values are capped ...
+        var valueMax =  21.27; // ... for some purposes
+        $.each(user.dailys, function(index, obj){
+            fixDailiesDefaults(obj);
+            obj.dueToday = dailyIsDueToday(obj);
+            modifyTaskProperties(obj);
+
+            dailies.push(obj);
+            allTasks.push(obj);
+        });
+        return dailies;
+
+
+        function fixDailiesDefaults(task) {
+            // Ensure that all repeat options make sense. At least one bug
+            // can result in bad repeat options:
+            // github.com/HabitRPG/habitrpg/issues/2334#issuecomment-66168155
+
+            // EDIT: IGNORE THIS COMMENT FOR NOW:
+            // If we find unexpected or missing repeat values, we set a flag
+            // that causes the Daily to be treated as due (safer than treating
+            // as not due - better to let the user think they will take more
+            // damage than they actually do).
+            //
+            // EDIT: While the Habitica api.shouldDo code and this code are
+            // being tweaked, we use the same behaviour here for Dailies that
+            // have incorrect or missing options. I.e., we treat the Dailies
+            // as not due because that is what Habitica does.
+
+            // task.forceDue = false;
+            task.forceNotDue = false;
+            if (!task.frequency ||
+                (task.frequency !== 'weekly' && task.frequency !== 'daily')) {
+                task.frequency = 'weekly';
+                // task.forceDue = true;
+                task.forceNotDue = true;
+            }
+            if (task.frequency === 'weekly') { // Day of Week
+                if (!task.repeat) {
+                    task.repeat = { "su": true, "s": true, "f": true,
+                         "th": true, "w": true, "t": true, "m": true };
+                    // task.forceDue = true;
+                    task.forceNotDue = true;
+                }
+            }
+            else if (task.frequency === 'daily') { // Every X Days
+                if (typeof task.everyX === 'undefined') { // can be zero
+                    task.everyX = 1;
+                    // task.forceDue = true;
+                    task.forceNotDue = true;
+                }
+            }
+            if (!task.startDate) {
+                // This should not happen, but if it does, Habitica's code
+                // treats it as starting on the day being examined (i.e., today
+                // for the purposes of showing due Dailies). Hence we do the
+                // same and we don't set forceDue.
+                task.startDate = todayUser;
+            }
+        }
+
+        function dailyIsDueToday(task) { // ref: api.shouldDo
+            // returns true if the Daily is due, false otherwise
+            if (task.forceDue) {
+                return true;
+            }
+            if (task.forceNotDue) {
+                return false;
+            }
+            var startDate = moment(task.startDate).zone(timezoneOffset).startOf('day');
+            if (startDate > todayUser) {
+                return false;
+            }
+
+            if (task.frequency === 'weekly') { // Day of Week
+                var dayname = ["su","m","t","w","th","f","s"][todayUser.day()];
+                return task.repeat[dayname];
+            }
+            else if (task.frequency === 'daily') { // Every X Days
+                if (task.everyX > 1) { // bug not relevant if due EVERY day
+                    everyXDaysInUse = true;
+                }
+                var daysSinceTaskStart = todayUser.diff(startDate, 'days');
+                return (daysSinceTaskStart % task.everyX == 0);
+            }
+        }
+    }
+
+
+    function collateTodosData() {
+        var todos = [];
+        var todosCompleted = [];
+        $.each(user.todos, function(index, obj){
+            modifyTaskProperties(obj);
+            obj.dueToday = (obj.date &&
+                moment(obj.date).zone(timezoneOffset).startOf('day') <=
+                todayUser) ? true : false;
+            if (obj.completed == true) {
+                todosCompleted.push(obj);
+            }
+            else {
+                todos.push(obj); // XXX_LATER do I need the separate collections for all task types?
+                allTasks.push(obj);
+            }
+        });
+        return [todos, todosCompleted];
+    }
+
+
+    function collateRewardsData() {
+        var rewards = [];
+        $.each(user.rewards, function(index, obj){
+            modifyTaskProperties(obj);
+            rewards.push(obj);
+            allTasks.push(obj);
+        });
+        return rewards;
+    }
+
+
+    function modifyTaskProperties(obj) { // XXX_SOON purge
+        obj.text = renderFormattedText(obj.text);
+        obj.notes = renderFormattedText(obj.notes);
+        obj.attributePretty = attributesPretty[obj.attribute];
+        obj.typePretty   = upperCaseFirst(
+                (obj.type == 'todo') ? 'To-Do' : obj.type );
+        if (obj.type === 'todo' && obj.completed === true) {
+            obj.typePretty += ' Done';
+        }
+        obj.metaType     = (obj.type === 'daily' || obj.type === 'todo') ?
+                'dated' : 'undated';
+        obj.valueRounded = Math.round(obj.value * 100) / 100;
+        obj.magnitude    = Math.abs(obj.valueRounded);
+        obj.order        = ++taskOrder;
+        obj.creation     = reformatDate(obj.dateCreated);
+        obj.completion   = (obj.dateCompleted) ?
+                           reformatDate(obj.dateCompleted) : {};
+        obj.colour       = chooseColour(obj.value);
+        obj.valueColourHtml = '<span class="coloured ' +
+                              obj.colour.id + '">' +
+                              obj.valueRounded + '<br />' +
+                              obj.colour.nameNoSpace + '</span>';
+        obj.difficulty = chooseDifficulty(obj.priority);
+        if (obj.type == 'daily') {
+            obj.startDatePretty = moment(obj.startDate).format('YYYY-MM-DD');
+        }
+        if (obj.type == 'todo') {
+            obj.datePretty =
+                (obj.date) ? moment(obj.date).format('YYYY-MM-DD') : 'none';
+        }
+        obj.attributesHTML = '<div class="taskAttributes ' + obj.type + '">' +
+                             attributesHTML() + '</div>';
+
+        // store tags for tasks in a separate structure because we won't
+        // always have easy access to the task's object:
+        tagsForTaskId[obj.id] = obj.tags || {};
+
+
+        function reformatDate(dateString) {
+            var formattedDate = myDateConverter(dateString, 'long');
+            var shortDate     = myDateConverter(dateString, 'short');
+            return { 'dateAndTime': formattedDate,
+                     'shortDate': shortDate };
+        }
+
+        function chooseColour(value) {
+            // from http://habitica.wikia.com/wiki/Task_Value :
+            // Bright Blue  Greater than 10
+            // Blue Grey    Between 5 and 10
+            // Green        Between 1 and 5
+            // Yellow       Between -1 and 1
+            // Orange       Between -10 and -1
+            // Red          Between -20 and -10
+            // Dark Red     Less than -20
+            if      (value < -20){ return colours[7]; }
+            else if (value < -10){ return colours[6]; }
+            else if (value <  -1){ return colours[5]; }
+            else if (value <   1){ return colours[4]; }
+            else if (value <   5){ return colours[3]; }
+            else if (value <  10){ return colours[2]; }
+            else                 { return colours[1]; }
+        }
+
+        function chooseDifficulty(value) {
+            if      (value == 0.1){ return 'trivial'; }
+            else if (value == 1  ){ return 'easy'; }
+            else if (value == 1.5){ return 'medium'; }
+            else if (value == 2  ){ return 'hard'; }
+            else                  { return 'unknown (' + value + ')'; }
+        }
+
+        function attributesHTML() {
+            if (obj.type == 'habit') {
+                return taskPartHTML(obj.up, '+') +
+                       taskPartHTML(obj.down, '&ndash;');
+            }
+            else if (obj.type == 'daily') {
+                var startDateDescription = '';
+                if (moment(obj.startDate).isAfter(todayUser)) {
+                    startDateDescription = '<br style="line-height:150%;" />' +
+                            taskPartHTML(obj.dueToday, 'starts ' +
+                                obj.startDatePretty,
+                                true);
+                }
+                if (obj.frequency === 'weekly') {
+                    return taskPartHTML(obj.repeat['su'], 'Su') +
+                           taskPartHTML(obj.repeat['m' ], 'Mo') +
+                           taskPartHTML(obj.repeat['t' ], 'Tu') +
+                           taskPartHTML(obj.repeat['w' ], 'We') +
+                           taskPartHTML(obj.repeat['th'], 'Th') +
+                           taskPartHTML(obj.repeat['f' ], 'Fr') +
+                           taskPartHTML(obj.repeat['s' ], 'Sa') +
+                           startDateDescription;
+                }
+                else if (obj.frequency === 'daily') {
+                    return taskPartHTML(obj.dueToday,
+                            'every ' + obj.everyX + ' days') +
+                            startDateDescription;
+                }
+            }
+            else if (obj.type == 'todo') {
+                return obj.date == null ?
+                       '<span class="attributeOff">(no date)</span>' :
+                       obj.date.substr(0, 10);
+            }
+            else {
+                return '';
+            }
+        }
+
+        function taskPartHTML(val, txt) {
+            return ' <span class="' +
+                   (val ? 'attributeOn' : 'attributeOff') + '">' +
+                   txt + '</span>';
+        }
+    }
+
+
+    function taskOverview() {
+        var title   = 'Task Overview';
+        var id      = 'taskOverviewSection';
+        var orderId =  'taskOverview';
+        sectionOpen = id; // XXX_SOON improve
+        MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
+                   'function': createTaskOverviewTable,
+                   'html':
+'<p><a id="taskOverviewExplanationToggle" class="showHideToggle" data-target="taskOverviewExplanation" data-linktext="explanation">show explanation</a></p>' +
+'<div id="taskOverviewExplanation" class="hide">' +
+'<p style="font-style: italic;"><span class="warning">WARNING: THIS TOOL IS IN BETA.</span> It might not work as intended. It is designed to modify your Habitica tasks so if there are any bugs, your tasks might be negatively affected. If this concerns you, do not use this tool. If you do use it, I recommend that first you export your data to a backup file using the Habitica website\'s <strong>Data > Export Data > User Data > JSON</strong> feature and then afterwards, check that your changes are correct in Habitica. If any problems occur, email <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> for help.<br /></p>' +
+'<p>The table below shows your tasks (Habits, Dailies, To-Dos, and Rewards) with some of their settings.</p>' +
+'<p>Click on any setting that is <span class="showHideToggleClass deemphasised" style="cursor:auto">underlined like this</span> to see buttons for changing it. <strong>As soon as you have clicked on a button, the change will be sent to Habitica.</strong></p>' +
+'<p>When a task has been changed, <span class="uncertain">its background will change to this colour</span>. This indicates that the other information presented for that task might now be <strong>incorrect</strong>. For example, if you change the Start Date for a Daily, the "due today" field will probably be incorrect. Filtering will also not use the new information. To see correct data, use the "Re-Fetch Data" button at the top of the page. However, you don\'t <strong>have</strong> to fetch data immediately - you can first edit other fields for that task.</p>' +
+'<p><span class="subheading">Dates:</span> When typing a date, use the format <strong>yyyy-mm-dd</strong>. In future, there will probably be a calendar picker.</p>' +
+'<p><span class="subheading">Completed status:</span> For each Daily, you can change whether it is marked as completed <strong>BUT</strong> this does not adjust your gold, experience, mana, or drops, and does not change the Daily\'s streak, colour, or value. If you have actually completed the actions associated with the Daily, you should mark it completed from within Habitica, not in this tool. Changing the completion status in this tool can be used if your Dailies did not reset overnight and you want to mark them as uncompleted for use today without losing gold, etc. It can also be used to mark a Daily as completed if you need to skip it today without being punished for it (or you can use the "start / due date" column to set the date to a future day). You can use the "due today" drop-down filter menu to quicky find all Dailies (and To-Dos) due today.</p>' + // See "Suggested Uses" below for why this feature can be useful.
+'<p><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in Habitica.</p>' +
+'<p><span class="subheading">Filtering:</span> Use the drop-down menus to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</p>' +
+'<p style="margin-bottom:0.3em"><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul style="margin-top:0"><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all Habits that contain the word "balloon".</li></ul></p>' +
+// "<h2>Suggested Uses</h2><dl>" +
+// "<dt>Resetting Dailies</dt>" +
+// "<dd>If your Dailies did not reset due to a bug or international travel, use the buttons in the \"completed\" column make them uncompleted without losing gold, experience, etc.</dd>" +
+// "<dt>Unable to Action Dailies</dt>" +
+// "<dd>If an emergency occurs and you can't complete some Dailies through no fault of your own, use the buttons in the \"completed\" column to mark the Dailies as done. This allows you to avoid punishment while not gaining gold, experience, etc. Alternatively, use the buttons in the \"start date\" column to change their start dates to tomorrow. Don't let yourself use these features when you don't need because being damaged by incomplete Dailies is an important part of Habitica's motivation!</dd>" +
+// "<dt>Consistent Tagging</dt>" +
+// "<dd>If you have tags for, for example, high, medium, and low priority, you can use this tool to ensure that all of your tasks are tagged with one of those. In the \"tasks not tagged with...\" drop-down menu, select all three of those tags at once. That will show you all tasks that do not have at least one of those tags. Then use the \"tags\" column to tag them!</dd>" +
+// '</dl>' +
+'   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
+'</div>' +
+'<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs and dateCreated strings">toggle developer data</div>' +
+'<table></table>'
+};
+
+function createTaskOverviewTable() {
+    // Use DataTables to build the table (the table tag must be
+    // visible first for layout to be correct):
+    var notApplicable = '<span class="notApplicable">n/a</span>';
+
+    var tagsSelectorButtons = '';
+    $.each(user.tags, function(index, tag) {
+        tagsNames[tag.id] = tag.name;
+        tagsSelectorButtons += '<button class="selector"' +
+        ' data-newvalue="' + tag.id + '"' +
+        '>' + renderFormattedText(tag.name) + '</button><br />\n';
+    });
+
+    $('#taskOverviewSection').show();
+    $('#taskOverviewSection table').dataTable({
+        'aaData': allTasks,
+        'aoColumns': [
+    { 'sTitle': 'order in Habitica', 'sClass': 'center', 'sWidth':'10%',
+      'mData' : 'order', 'bVisible': false,
+    },
+
+    { 'mData' : 'typePretty', 'sClass': 'center',
+      'sTitle': 'type',       'sWidth': '10%',
+    },
+
+    { 'sTitle': 'attribute', 'sClass': 'center', 'sWidth': '10%',
+      'mData': function ( source, type, val ) {
+            if (type === 'set') {
+              return;
+            }
+            else if (type === 'display') {
+                if (source.type === 'reward') {
+                    return notApplicable;
+                }
+                var tid = source.order; // temporary task ID
+                return '<div>' +
+                    '<span id="attributeToggle' + tid +
+                        '" class="showHideToggle deemphasised"' +
+                        ' data-target="attribute' + tid + '">' +
+                        source.attributePretty +
+                    '</span>' +
+                    '<div id="attribute' + tid + '" class="pane hide"' +
+                        ' data-task="' + source.id + '"' +
+                        ' data-field="attribute"' +
+                        ' data-output="attributeToggle' + tid + '"' +
+                    '>' +
+                        '<a class="paneCloser">x</a>' +
+                        '<div class="status"></div>' +
+                        '<button class="selector"' +
+                            ' data-newvalue="str"' +
+                            ' data-newvaluepretty="' + attributesPretty['str'] +
+                            '">' + attributesPretty['str'] + '</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="int"' +
+                            ' data-newvaluepretty="' + attributesPretty['int'] +
+                            '">' + attributesPretty['int'] + '</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="con"' +
+                            ' data-newvaluepretty="' + attributesPretty['con'] +
+                            '">' + attributesPretty['con'] + '</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="per"' +
+                            ' data-newvaluepretty="' + attributesPretty['per'] +
+                            '">' + attributesPretty['per'] + '</button><br />' +
+                        ((user.preferences.automaticAllocation && user.preferences.allocationMode === 'taskbased') ? '' : '<span>Task attributes have no effect in Habitica unless you go to <a href="https://habitica.com/#/options/profile/stats">User &gt; Avatar Stats</a> and select "Automatic Allocation" and "Distribute points based on task activity".</span>') +
+                    '</div>' +
+                    '</div>';
+            }
+            else {
+                return source.attributePretty;
+            }
+      }
+    },
+
+    { 'sTitle': 'difficulty', 'sClass': 'center', 'sWidth': '10%',
+      'mData': function ( source, type, val ) {
+            //NB: previous column does drop-down filtering for difficulty
+            if (type === 'set') {
+              return;
+            }
+            else if (type === 'display') {
+                if (source.type === 'reward') {
+                    return notApplicable;
+                }
+                var tid = source.order; // temporary task ID
+                return '<div>' +
+                    '<span id="priorityToggle' + tid +
+                        '" class="showHideToggle deemphasised"' +
+                        ' data-target="priority' + tid + '">' +
+                        source.difficulty +
+                    '</span>' +
+                    '<div id="priority' + tid + '" class="pane hide"' +
+                        ' data-task="' + source.id + '"' +
+                        ' data-field="priority"' +
+                        ' data-output="priorityToggle' + tid + '"' +
+                    '>' +
+                        '<a class="paneCloser">x</a>' +
+                        '<div class="status"></div>' +
+                        '<button class="selector"' +
+                            ' data-newvalue="0.1"' +
+                            ' data-newvaluepretty="trivial"' +
+                            '>trivial</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="1"' +
+                            ' data-newvaluepretty="easy"' +
+                            '>easy</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="1.5"' +
+                            ' data-newvaluepretty="medium"' +
+                            '>medium</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="2"' +
+                            ' data-newvaluepretty="hard"' +
+                            '>hard</button><br />' +
+                    '</div>' +
+                    '</div>';
+            }
+            else {
+                if (source.type === 'reward') {
+                    return '';
+                }
+                return source.priority + ') ' + source.difficulty;
+            }
+      }
+    },
+
+    { 'sTitle': 'completed',  'sClass': 'center', 'sWidth': '10%',
+      'mData' : function ( source, type, val ) {
+            if (type === 'set') {
+              return;
+            }
+            else if (type === 'display') {
+                if (source.metaType === 'undated') {
+                    return notApplicable;
+                }
+                var tid = source.order; // temporary task ID
+                if (source.type === 'todo') {
+                    return (source.completed ? 'yes' : 'no');
+                }
+                return '<div>' +
+                    '<span id="completedToggle' + tid +
+                        '" class="showHideToggle deemphasised"' +
+                        ' data-target="completed' + tid + '">' +
+                        (source.completed ? 'yes' : 'no') +
+                    '</span>' +
+                    '<div id="completed' + tid + '" class="pane hide"' +
+                        ' data-task="' + source.id + '"' +
+                        ' data-field="completed"' +
+                        //  ((source.type === 'todo') ?
+                        //     'data-fieldextra="dateCompleted"' : '') +
+                        ' data-type="boolean"' +
+                        ' data-output="completedToggle' + tid + '"' +
+                    '>' +
+                        '<a class="paneCloser">x</a>' +
+                        '<div class="status"></div>' +
+                        '<button class="selector"' +
+                            ' data-newvalue="true"' +
+                            '>yes</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="false"' +
+                            '>no</button><br />' +
+                    '</div>' +
+                    '</div>';
+            }
+            else {
+                if (source.metaType === 'undated') {
+                    return '';
+                }
+                return source.completed ? 'yes' : 'no';
+            }
+       }
+    },
+
+    { 'sTitle': 'due today',  'sClass': 'center', 'sWidth': '10%',
+      'mData' : function ( source, type, val ) {
+            if (type === 'set') {
+              return;
+            }
+            else if (type === 'display') {
+                if (source.metaType === 'undated') {
+                    return notApplicable;
+                }
+                return source.dueToday ? 'yes' : 'no';
+            }
+            else {
+                if (source.metaType === 'undated') {
+                    return 'n/a';
+                }
+                return source.dueToday ? 'yes' : 'no';
+            }
+       }
+    },
+
+    { 'sTitle': 'start / due date',
+      'sClass': 'center', 'sWidth': '15%',
+      'mData' : function ( source, type, val ) {
+            var dataField = (source.type === 'daily') ? 'startDate' : 'date';
+            if (type === 'set') {
+              return;
+            }
+            else if (type === 'display') {
+                if (source.metaType === 'undated') {
+                    return notApplicable;
+                }
+                var tid = source.order; // temporary task ID
+                var initialDate = source[dataField + 'Pretty'];
+                var initialDateSuggestion = (initialDate === 'none' ||
+                        initialDate === 'Invalid date') ?
+                            todayUserPretty : initialDate;
+                return '<div>' +
+                    '<span id="startOrDueDateToggle' + tid +
+                        '" class="showHideToggle deemphasised"' +
+                        ' data-target="startOrDueDate' + tid + '">' +
+                        initialDate +
+                    '</span>' +
+                    '<div id="startOrDueDate' + tid + '" class="pane hide"' +
+                        ' data-task="' + source.id + '"' +
+                        ' data-field="' + dataField + '"' +
+                        ' data-type="date"' +
+                        ' data-output="startOrDueDateToggle' + tid + '"' +
+                    '>' +
+                        '<a class="paneCloser">x</a>' +
+                        '<div class="status"></div>' +
+                        ( (source.type === 'todo') ?
+                            '<button class="selector"' +
+                            ' data-newvalue="noDate"' +
+                            '>none</button>' +
+                            '<br />':
+                            '') +
+                        '<button class="selector"' +
+                            ' data-newvalue="today"' +
+                            '>today</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="todayPlus"' +
+                            ' data-newvalueExtra="1"' +
+                            '>tomorrow</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="nextDayOfWeek"' +
+                            ' data-newvalueExtra="6"' +
+                            '>next Saturday</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="nextDayOfWeek"' +
+                            ' data-newvalueExtra="0"' +
+                            '>next Sunday</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="nextDayOfWeek"' +
+                            ' data-newvalueExtra="1"' +
+                            '>next Monday</button><br />' +
+                        '<button class="selector"' +
+                            ' data-newvalue="startOfMonth"' +
+                            '>next month</button><br />' +
+                        ( (source.type === 'daily' &&
+                           source.frequency === 'daily' && source.everyX > 1) ?
+                            '<button class="selector"' +
+                            ' data-newvalue="todayPlus"' +
+                            ' data-newvalueextra="' + source.everyX + '"' +
+                            '>today + ' + source.everyX + ' days</button>' +
+                            '<br />':
+                            '') +
+
+                        '<input style="width:7em" id="typedStartOrDueDate' +
+                            tid + '"' +
+                            ' value="' + initialDateSuggestion + '"' +
+                            ' />' +
+                        '<button class="selector"' +
+                            ' data-newvaluefrom="typedStartOrDueDate' + tid +
+                             '">set</button><br />' +
+
+                        // this button becomes visible only when the user has
+                        // already used the previous form for specifying an
+                        // exact date:
+                        '<button class="selector userSpecifiedDate hide"' +
+                            ' data-newvalue="userSpecifiedDate"' +
+                            '>userSpecifiedDate</button><br />' +
+
+                    '</div>' +
+                    '</div>';
+            }
+            else {
+                if (source.metaType === 'undated') {
+                    return '';
+                }
+                return source[dataField + 'Pretty'];
+            }
+       }
+    },
+
+    { 'sTitle': 'tagged / untagged', 'bVisible' : false,
+      'mData' : function ( source, type, val ) {
+        // for filtering only
+        return (countNumberOfTagsForTask(source.id)) ? 'tagged' : 'untagged';
+       }
+    },
+
+    { 'sTitle': 'tags',  'sClass': 'center', 'sWidth': '10%',
+      'mData' : function ( source, type, val ) {
+            var tagsInfo = tagsForTaskId[source.id];
+            if (type === 'set') {
+                return;
+            }
+            else if (type === 'display') {
+                var tid = source.order;
+                return '<div>' +
+                    '<span id="tagsToggle' + tid +
+                        '" class="showHideToggle deemphasised"' +
+                        ' data-target="tags' + tid + '">' +
+                        displayNumberOfTagsForTask(source.id) +
+                    '</span>' +
+                    '<div id="tags' + tid + '" class="pane hide"' +
+                        ' data-task="' + source.id + '"' +
+                        ' data-field="tags"' +
+                        ' data-type="tags"' +
+                        ' data-output="tagsToggle' + tid + '"' +
+                        ' data-outputextra="tagsAssigned' + tid + '"' +
+                    '>' +
+                        '<a class="paneCloser">x</a>' +
+                        '<span id="tagsAssigned' + tid + '">' +
+                        '<span class="subHead">current tags:</span>' +
+                        (displayTagNamesForTask(source.id,
+                                {formatText:true}) || 'none') +
+                        '</span>' +
+                        '<div class="status"></div>' +
+                        '<span class="subHead">click tag to toggle on/off:</span>' +
+                        tagsSelectorButtons +
+                    '</div>' +
+                    '</div>';
+            }
+            else {
+                // enable filtering for the assigned tags:
+                return displayTagNamesForTask(source.id, {joiner: ' /// '});
+            }
+       }
+    },
+
+    { 'sTitle': 'tasks not tagged with...',  'bVisible': false,
+      'mData' : function ( source, type, val ) {
+        // for filtering only
+        return displayTagNamesForTask(source.id,
+            {joiner: ' /// ', showNotTagged: true });
+       }
+    },
+
+    { 'sTitle': 'task',       'sWidth': '*',
+      'mData': function ( source, type, val ) {
+        if (type === 'set') {
+          return;
+        }
+        else if (type === 'display') {
+          return source.text +
+                 '<span class="developerData"><br />' +
+                 source.id + '</span>' +
+                 source.attributesHTML;
+        }
+        else if (type === 'filter') {
+          return source.text;
+        }
+        return source.text;
+        // this routine made a lot more sense when I was
+        // experimenting with different text for
+        // display, filter, sort
+      }
+    },
+
+        ],
+        'sDom': 'W<"clear"><"top"if>rt<"bottom"><"clear">',
+        'bAutoWidth': false,
+        'bPaginate': false,
+        'bDeferRender': true,
+        "sScrollX": "100%",
+        "bDestroy": true, // allows table to recreate on refetch
+        'oColumnFilterWidgets': {
+            'aiExclude': [ 0, 10 ],
+            "sSeparator": "\\s*///\\s*",
+        }
+    });
+    // Hide developer data
+    $('#taskOverviewSection .developerData').hide();
+    $('#taskOverviewSection .showHideToggleClass').on('click', function (e) {
+        e.preventDefault();
+        $('#taskOverviewSection .developerData').toggle();
+    });
+    return;
+}
+
+    }
+}
+
+} // end of parseData() and its nested functions
+    if (debug) console.log('debug 99');
+});
+</script>
+
+<!-- XXX_SOON purge -->
+<style>
+
+/*********************************************************************
+****   Page-wide   ***************************************************
+*********************************************************************/
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    background-color: rgb(173, 208, 215);
+}
+#innerBody {
+    margin: 20px;
+    padding: 5px 20px 30px 20px;
+    background-color: rgb(242, 242, 230);
+}
+#loading {
+    margin-right: 30px;
+    margin-left: 30px;
+    color: orange;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+#loading ul {
+    font-size: 0.8em;
+}
+#loading ul a {
+    color: orange;
+}
+
+.warning {
+    color: orange;
+    font-weight: bold;
+}
+
+.notApplicable {
+    color: grey;
+    font-style: italic;
+}
+
+.narrowContent {      /* The data should be as wide as the user's window   */
+    max-width: 500px; /* but some explanatory paragraphs should be narrow. */
+}
+
+
+hr {
+    width: 95%;
+}
+hr.padded {
+    margin-top:    1em;
+    margin-bottom: 2em;
+}
+
+.show {
+    display: block;
+}
+.hide {
+    display: none;
+}
+.clear {
+    clear: both;
+}
+
+.subheading {
+    font-weight: bold;
+}
+.highlight {
+    font-weight: bold;
+}
+.lowlight { /* like highlight but less so */
+    font-style: italic;
+}
+.explanation {
+    font-style: italic;
+}
+abbr {
+    border-bottom: 1px dashed black;
+}
+img.emoji {
+    margin-bottom: -0.25em;
+}
+.forCopyPaste {
+    /* used to add blank lines that we want when copying text to clipboard,
+       but we don't want to see extra whitespace on the screen */
+    margin-top: -1em;
+}
+ul.padded > li {
+    padding: 3px 0;
+}
+
+.gearList .item .stats {
+    font-variant: small-caps;
+}
+.gearList .item .key {
+    display: none;
+}
+
+
+.coloured {
+    display: inline-block;
+    width: 5.5em;
+    height: 3em;
+    padding-top: .7em;
+}
+.colourBrightBlue { background-color: rgb(209,226,248); }
+.colourBlueGrey   { background-color: rgb(216,230,232); }
+.colourGreen      { background-color: rgb(222,237,219); }
+.colourYellow     { background-color: rgb(255,244,216); }
+.colourOrange     { background-color: rgb(254,234,216); }
+.colourRed        { background-color: rgb(250,214,214); }
+.colourDarkRed    { background-color: rgb(240,197,190); }
+
+.neutral {
+    background-color: #fffbd0; /* yellow */
+}
+.danger {
+    background-color: #ffcccc; /* red */
+    /* background-color: #F5A9A9; */ /* darker red */
+}
+.safe {
+    background-color: #bdd8fc; /* blue */
+    /* green+red and green+yellow are not good for colour-blind people */
+}
+
+
+/*********************************************************************
+****   Page-wide Show/Hide Toggling   ********************************
+*********************************************************************/
+.mainSectionClose,
+.showHideToggle,     /* for toggling by id */
+.showHideToggleClass /* for toggling by class */
+{
+    cursor: pointer;
+    text-decoration: underline;
+    color: purple;
+}
+.deemphasised {
+    color: black;
+    text-decoration-style: dotted;
+    text-decoration-color: blue;
+}
+
+.closer { /* as in "a thing that closes", not "nearer" */
+    margin-top: 30px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+.closer:hover {
+    border: 1px dashed lightgrey;
+}
+.developerData {
+    font-family: monospace;
+}
+
+
+/*********************************************************************
+****   Header   ******************************************************
+*********************************************************************/
+h1 {
+    float: left;
+}
+h1>a:first-child { /* "Habitica" link in header */
+    color: black;
+    text-decoration: none;
+}
+h1>a:first-child:hover { /* "Habitica" link in header */
+    text-decoration: underline;
+}
+h1 span {
+    font-size: 0.5em;
+}
+h2 {
+    margin-top: 30px;
+}
+
+#headerExtras .showHideToggle {
+    white-space: nowrap;
+}
+#userNameDisplay {
+    text-align: right;
+    font-weight: bold;
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+#explanationAndClearLinks {
+    text-align: right;
+}
+#explanationAndClearLinks span {
+    padding-left: 10px;
+}
+
+
+/*********************************************************************
+****   Version History   *********************************************
+*********************************************************************/
+
+#versionChanges dl {
+    margin-left: 30px;
+}
+#versionChanges dl dt {
+    font-size: 1.15em;
+    font-weight: bold;
+}
+#versionChanges dl dt .date {
+    padding-left: 10px;
+    font-size: 0.8em;
+    font-weight: normal;
+}
+#versionChanges .showHideToggle {
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+}
+
+
+/*********************************************************************
+****   API Form and Documentation   **********************************
+*********************************************************************/
+
+#documentationAndForm > div {
+    max-width: 700px;
+}
+#documentationAndForm #documentationAndFormClose {
+    display: none;
+    max-width: 100%;
+}
+#documentationAndForm div h2 {
+    font-size: 1.3em;
+}
+#documentationAndForm li {
+    margin-bottom: 10px;
+}
+
+#userApiDetailsForm {
+    margin: 30px;
+}
+#userApiDetailsForm fieldset {
+    max-width: 40em;
+}
+#userApiDetailsForm fieldset label,
+#userApiDetailsForm fieldset input[type="submit"] {
+    display: block;
+    float: left;
+    clear: left;
+    margin: 10px 0;
+}
+#userApiDetailsForm fieldset label span {
+    display: block;
+    float: left;
+    width: 6em;
+}
+#userApiDetailsForm fieldset label input {
+    float: left;
+    width: 30em;
+}
+#userApiDetailsForm fieldset p {
+    clear: both;
+}
+#userApiDetailsForm legend .highlight {
+    font-size: 1.3em;
+}
+#userApiDetailsForm fieldset li {
+    margin-bottom: 7px;
+}
+
+
+/*********************************************************************
+****   Specific Sections   *******************************************
+*********************************************************************/
+#taskOverviewSection #taskOverviewExplanationToggle {
+    font-size: 1.5em;
+}
+#taskOverviewSection .showHideToggle {
+    margin-bottom: 1em;
+}
+#taskOverviewDeveloperDataToggle {
+    float: right;
+}
+#taskOverviewSection table {
+    width: 100%;
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+#taskOverviewSection table .sorting_1,
+#taskOverviewSection table .sorting_2,
+#taskOverviewSection table .sorting_3,
+#taskOverviewSection table .even {
+    background-color: #FAF9F9;
+}
+#taskOverviewSection table .odd  {
+    background-color: #FEFEFF;
+}
+#taskOverviewSection input {
+    width: 300px;
+}
+#taskOverviewSection table tr th:nth-child(3),
+#taskOverviewSection table tr td:nth-child(3) {
+    max-width: 60px !important;
+}
+#taskOverviewSection h3 {
+    margin-top: 3em;
+}
+#taskOverviewSection .taskAttributes {
+    float: right;
+}
+#taskOverviewSection .taskAttributes .attributeOn {
+    opacity: 1;
+}
+#taskOverviewSection .taskAttributes .attributeOff {
+    opacity: 0.4;
+}
+#taskOverviewSection .taskAttributes.habit span,
+#taskOverviewSection .taskAttributes.daily span {
+    border: solid 1px;
+}
+#taskOverviewSection .taskAttributes.habit span {
+    padding: 0 4px;
+}
+#taskOverviewSection .taskAttributes.daily span {
+    padding: 0 1px;
+}
+
+
+/*********************************************************************
+****   Editing Controls   ********************************************
+*********************************************************************/
+.pane {
+    position: relative;
+    width: 200px;
+    background: white;
+    border: 1px black solid;
+    padding: 5px;
+}
+.pane button {
+    padding-bottom: 5px;
+}
+.pane .subHead {
+    display: block;
+    padding-top: 10px;
+    font-weight: bold;
+    text-align: left;
+}
+
+.paneCloser {
+    display: block;
+    text-align: right;
+    text-decoration: underline;
+}
+.status {
+    font-style: italic;
+    color: orange;
+}
+.status.error {
+    font-weight: bold;
+    color: red;
+}
+
+.justChanged {
+    background-color: #ffff00;
+    -moz-transition: all 1s ease-in;
+    -o-transition: all 1s ease-in;
+    -webkit-transition: all 1s ease-in;
+    transition: all 1s ease-in;
+}
+.uncertain {
+    background-color: #ffffdd !important;
+    -moz-transition: all 1s ease-in;
+    -o-transition: all 1s ease-in;
+    -webkit-transition: all 1s ease-in;
+    transition: all 1s ease-in;
+}
+
+</style>
+</head>
+<body><div id="innerBody">
+
+<h1><a href="https://habitica.com/">Habitica</a> Task Adjustor
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.1 <strong class="warning">EXPERIMENTAL BETA VERSION</strong>)</span></h1><!-- VERSION TOGGLE -->
+<div id="headerExtras"></div>
+<hr class="clear" />
+
+<div id="loading">
+    <div class="good hide">
+        <p>Please wait. Fetching data from
+        <span id="serverName">Habitica</span>...</p>
+    </div>
+    <div class="bad hide">
+        <p>There was an error obtaining your data.</p>
+        <ul class="padded">
+            <li>Please reload the page and then check that your <a href="https://habitica.com/#/options/settings/api">User ID and API Token</a> are correct.</li>
+            <li>If you're using Internet Explorer, try another browser. <a href="https://www.google.com/intl/en/chrome/browser/">Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a> will be more reliable.</li>
+            <li>If the page's URL starts with "http://" change it to start with "https://" (or just use <a href="https://oldgods.net/habitrpg/habitrpg_user_data_display.html">this correct link</a>).</li>
+            <li>If neither of those help, contact me! See <strong>"Help and Contact Details"</strong> at the bottom of this page.</li>
+        </ul>
+    </div>
+</div>
+
+<div id="versionChanges" class="hide"><!-- VERSION SECTION -->
+    <h2>Version History</h2>
+    <dl>
+
+        <dt>0.1 <span class="date">2016-04-10</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Several, all experimental.</li>
+                </ul>
+            </li>
+        </ul></dd>
+    </dl>
+    <div class="showHideToggle closer" data-target="versionChanges" data-scrolltotop="true">close version history <span class="lowlight">(or click the version number again to close)</span></div>
+    <hr />
+</div><!-- end of div id="versionChanges" -->
+
+<p id="taskNumberMessage" class="warning hide"></p>
+
+<div id="MAIN"></div>
+
+<div id="documentationAndForm">
+    <p>This page displays your <a href="https://habitica.com/">Habitica</a>
+    tasks and allows you to modify some of their settings.
+    It's intended for when you want to make similar changes to several
+    tasks at once.
+    <br />
+    <br />
+    <strong>IMPORTANT: This is still under development and if there
+    are any bugs I don't know about, it could damage your tasks!</strong>
+    <br />
+    For example, it could cause your Dailies to be due on unexpected days.
+    It's safe for you to log in to see what it can do, but if you using any
+    of the editing features, check afterwards in Habitica that the new
+    settings are correct.
+    <br />
+    I recommend that before using this tool, you export your data to a
+    backup file using the Habitica website's <strong>Data > Export Data >
+    User Data > JSON</strong> feature.
+    <br />
+    If any problems occur, email me for help at
+    <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a>.
+    <br />
+    <br />After logging in, click on the "<strong>show explanation</strong>"
+    link to learn how to use the features.
+    Some of them work in ways that aren't obvious!
+    <br />
+    <br />If you have a lot of tasks, the page might not become responsive
+    until a few seconds after login.
+    </p>
+
+    <iframe src="null.htm" id="formPasswdSaveFix" name="formPasswdSaveFix" style="display:none"></iframe><!-- DAMN YOU CHROME!! DAMN YOU!!!! http://stackoverflow.com/a/9116737 -->
+    <form id="userApiDetailsForm" method="POST" action="" target="formPasswdSaveFix">
+        <fieldset>
+            <legend><span class="highlight">Enter your Habitica API details</span>
+            (from the <a href="https://habitica.com/#/options/settings/api">Settings
+             -&gt; API page</a>)
+            </legend>
+            <label for="userId"><span>User ID</span>
+                <input type="text" name="userId" id="userId" />
+            </label>
+            <label for="apiToken"><span>API Token</span>
+                <input type="password" name="apiToken" id="apiToken" />
+            </label>
+            <input type="submit" value="Fetch My Data" />
+            <p class="highlight">Privacy and security notes:</p>
+            <ul>
+            <li><strong>If you modify your information on this page,
+            your changes will be saved to your Habitica account.</strong>
+            <!-- Be aware that if this page contains bugs, then the data in your Habitica account might be damaged or deleted. I recommend that before using this page, you export your data to a backup file using the Habitica website's <strong>Data > Export Data > User Data > JSON</strong> feature. If any problems occur, email <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> for help.--></li>
+            <!-- <li>If you access this page from the Data menu on the Habitica website, your User ID will be automatically added to the form above.</li> -->
+            <li>Your API Token is a password - do not share it with anyone,
+            not even the maintainer of this page if you are seeking help.</li>
+            <li>When you enter your User ID and API Token here and click
+            "Fetch My Data", your ID and Token are sent to Habitica's servers.
+            They are not sent anywhere else.
+            To confirm that, you can ask someone who knows the JavaScript
+            programming language to examine the source of this page.</li>
+            <li>This page does not save your User ID and API Token to any
+            location, but your browser might, if it has been configured to
+            save form and password information. If you are using this page
+            on a shared computer, you should clear any data that the browser
+            has saved.</li>
+            <li>You cannot view anyone else's data by using this page.</li>
+            <li>To clear your data, close or reload the page.</li>
+            </ul>
+        </fieldset>
+    </form>
+
+
+    <div>
+       <h2>Help and Contact Details</h2>
+       <p>This page has been created by <a href="http://habitica.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me.</p>
+
+        <p>If you have general questions about Habitica, post them to <a href="https://habitica.com/#/options/groups/guilds/5481ccf3-5d2d-48a9-a871-70a7380cee5a">the Newbies guild</a> (it's not just for new users!)</p>
+    </div>
+
+    <div id="documentationAndFormClose" class="showHideToggle closer" data-target="documentationAndForm" data-resettoggletext="documentationAndFormToggle">hide documentation</div>
+</div><!-- end of div id="documentationAndForm" -->
+
+
+</div><!-- end of div id="innerBody" -->
+</body>
+</html>
+
