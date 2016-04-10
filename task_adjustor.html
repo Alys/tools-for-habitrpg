@@ -956,7 +956,7 @@ function collateAndDisplayTaskData() {
 '<div id="taskOverviewExplanation" class="hide">' +
 '<p style="font-style: italic;"><span class="warning">WARNING: THIS TOOL IS IN BETA.</span> It might not work as intended. It is designed to modify your Habitica tasks so if there are any bugs, your tasks might be negatively affected. If this concerns you, do not use this tool. If you do use it, I recommend that first you export your data to a backup file using the Habitica website\'s <strong>Data > Export Data > User Data > JSON</strong> feature and then afterwards, check that your changes are correct in Habitica. If any problems occur, email <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> for help.<br /></p>' +
 '<p>The table below shows your tasks (Habits, Dailies, To-Dos, and Rewards) with some of their settings.</p>' +
-'<p>Click on any setting that is <span class="showHideToggleClass deemphasised" style="cursor:auto">underlined like this</span> to see buttons for changing it. <strong>As soon as you have clicked on a button, the change will be sent to Habitica.</strong></p>' +
+'<p>Click on any setting that is <span class="showHideToggleClass deemphasised" style="cursor:auto">underlined like this</span> to see buttons for changing it. <strong>As soon as you have clicked on a button, the change will be sent to Habitica. For challenge tasks, most settings can\'t be changed.</strong></p>' +
 '<p>When a task has been changed, <span class="uncertain">its background will change to this colour</span>. This indicates that the other information presented for that task might now be <strong>incorrect</strong>. For example, if you change the Start Date for a Daily, the "due today" field will probably be incorrect. Filtering will also not use the new information. To see correct data, use the "Re-Fetch Data" button at the top of the page. However, you don\'t <strong>have</strong> to fetch data immediately - you can first edit other fields for that task.</p>' +
 '<p><span class="subheading">Dates:</span> When typing a date, use the format <strong>yyyy-mm-dd</strong>. In future, there will probably be a calendar picker.</p>' +
 '<p><span class="subheading">Completed status:</span> For each Daily, you can change whether it is marked as completed <strong>BUT</strong> this does not adjust your gold, experience, mana, or drops, and does not change the Daily\'s streak, colour, or value. If you have actually completed the actions associated with the Daily, you should mark it completed from within Habitica, not in this tool. Changing the completion status in this tool can be used if your Dailies did not reset overnight and you want to mark them as uncompleted for use today without losing gold, etc. It can also be used to mark a Daily as completed if you need to skip it today without being punished for it (or you can use the "start / due date" column to set the date to a future day). You can use the "due today" drop-down filter menu to quicky find all Dailies (and To-Dos) due today.</p>' + // See "Suggested Uses" below for why this feature can be useful.
@@ -1011,6 +1011,9 @@ function createTaskOverviewTable() {
                 if (source.type === 'reward') {
                     return notApplicable;
                 }
+                if (source.challenge && source.challenge.id) {
+                    return source.attributePretty;
+                }
                 var tid = source.order; // temporary task ID
                 return '<div>' +
                     '<span id="attributeToggle' + tid +
@@ -1060,6 +1063,9 @@ function createTaskOverviewTable() {
             else if (type === 'display') {
                 if (source.type === 'reward') {
                     return notApplicable;
+                }
+                if (source.challenge && source.challenge.id) {
+                    return source.difficulty;
                 }
                 var tid = source.order; // temporary task ID
                 return '<div>' +
@@ -1181,11 +1187,14 @@ function createTaskOverviewTable() {
                 if (source.metaType === 'undated') {
                     return notApplicable;
                 }
-                var tid = source.order; // temporary task ID
                 var initialDate = source[dataField + 'Pretty'];
+                if (source.challenge && source.challenge.id) {
+                    return initialDate;
+                }
                 var initialDateSuggestion = (initialDate === 'none' ||
                         initialDate === 'Invalid date') ?
                             todayUserPretty : initialDate;
+                var tid = source.order; // temporary task ID
                 return '<div>' +
                     '<span id="startOrDueDateToggle' + tid +
                         '" class="showHideToggle deemphasised"' +
@@ -1236,7 +1245,6 @@ function createTaskOverviewTable() {
                             '>today + ' + source.everyX + ' days</button>' +
                             '<br />':
                             '') +
-
                         '<input style="width:7em" id="typedStartOrDueDate' +
                             tid + '"' +
                             ' value="' + initialDateSuggestion + '"' +
@@ -1244,7 +1252,6 @@ function createTaskOverviewTable() {
                         '<button class="selector"' +
                             ' data-newvaluefrom="typedStartOrDueDate' + tid +
                              '">set</button><br />' +
-
                         // this button becomes visible only when the user has
                         // already used the previous form for specifying an
                         // exact date:
@@ -1746,7 +1753,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Task Adjustor
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.1 <strong class="warning">EXPERIMENTAL BETA VERSION</strong>)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.2 <strong class="warning">EXPERIMENTAL BETA VERSION</strong>)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -1769,6 +1776,15 @@ h2 {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>0.2 <span class="date">2016-04-11</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>Prevented challenge tasks being edited to change their attribute, difficulty, and start/due date. Completion status (Dailies only) and tags can still be changed. (Thanks, cTheDragons!)</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>0.1 <span class="date">2016-04-10</span></dt>
         <dd><ul>
