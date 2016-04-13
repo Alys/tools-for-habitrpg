@@ -378,10 +378,17 @@ function parseData() {
     var userKlass = user.stats.class;
     var health = getCurrentHealth(); // also sets dashboard tile
     var quest = {};
+    var questProgressUp = 0;
     // user.party.quest.key='vice3'; party.quest.active=true; // FOR TESTING
-    if (user.party && user.party.quest && user.party.quest.key && party && party.quest && party.quest.active) {
-        quest = $.extend({}, user.party.quest);
-        quest.content = $.extend({}, content.quests[ party.quest.key ] );
+    if (user.party && user.party.quest) {
+        if (user.party.quest.key && party && party.quest && party.quest.active) {
+            quest = $.extend({}, user.party.quest);
+            quest.content = $.extend({}, content.quests[ party.quest.key ] );
+        }
+        if (user.party.quest.progress && user.party.quest.progress.up) {
+            // might not be in a quest but want to know damage done to world boss
+            questProgressUp = user.party.quest.progress.up;
+        }
     }
     var customDayStart = user.preferences.dayStart || 0; // CDS
     var timezoneOffset = user.preferences.timezoneOffset || 0;
@@ -3024,8 +3031,8 @@ function questProgress() {
     //
 
     var alreadyHaveDashboardTile = false;
-    if (quest && quest.progress && ((quest.content && quest.content.boss) || tavernBoss)) {
-        var progress = Math.floor(quest.progress.up * 10) / 10;
+    if (tavernBoss || (quest.content && quest.content.boss)) {
+        var progress = Math.floor(questProgressUp * 10) / 10;
         // Round DOWN with floor so we don't let the user think they
         // have even slightly more progress than they really have.
         // Imagine if they missed ending a quest overnight by 0.1 health!
@@ -4960,7 +4967,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.4)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.5)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -4995,6 +5002,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>7.5 <span class="date">2016-04-05</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Now shows your damage to the world boss when you aren't in a party quest.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>7.4 <span class="date">2016-04-01</span></dt>
         <dd><ul>
             <li>Features:
@@ -5003,7 +5019,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>7.3 <span class="date">2016-03-13</span></dt>
         <dd><ul>
             <li>Code:
