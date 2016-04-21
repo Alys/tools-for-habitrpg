@@ -58,7 +58,7 @@ you'll find there.
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script> <!-- https://github.com/chjj/marked -->
+    <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script --> <!-- https://github.com/chjj/marked -->
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
@@ -709,7 +709,7 @@ function upperCaseFirst(word) {
 // This function decodes &nbsp; -> renders markdown -> escapes HTML entities -> and renders emoji
 function renderFormattedText(text) {
     function renderMarkdown(text) {
-        text = marked(text, {sanitize: true});
+        // text = marked(text, {sanitize: true});
         text = String(text).replace(/^<p>|<\/p>\n$/g, ''); // The bonus paragraph around every text snippet is unnecessary
         return text;
     }
@@ -4967,7 +4967,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.5)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.6)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -5002,6 +5002,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>7.6 <span class="date">2016-04-22</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Temporarily turned off markdown support due to a bug. It will be back on in a couple of days.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>7.5 <span class="date">2016-04-05</span></dt>
         <dd><ul>
             <li>Features:
@@ -5010,7 +5019,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>7.4 <span class="date">2016-04-01</span></dt>
         <dd><ul>
             <li>Features:
