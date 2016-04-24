@@ -119,7 +119,12 @@ if (debug) console.log('debug 1');
 ////   This function decodes &nbsp; -> renders markdown   ////////////
 ////   -> escapes HTML entities -> and renders emoji      ////////////
 //////////////////////////////////////////////////////////////////////
-var md = new Remarkable({'html': true}); // markdown parser
+var md = new Remarkable({
+	'html': false,
+	'linkify': true,
+	'linkTarget': '_blank',
+}); // markdown parser
+
 function renderFormattedText(text) {
     function renderMarkdown(text) {
         text = md.render(text);
