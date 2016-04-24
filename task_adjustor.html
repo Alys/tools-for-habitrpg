@@ -958,7 +958,7 @@ function collateAndDisplayTaskData() {
                    'html':
 '<p><a id="taskOverviewExplanationToggle" class="showHideToggle" data-target="taskOverviewExplanation" data-linktext="explanation">show explanation</a></p>' +
 '<div id="taskOverviewExplanation" class="hide">' +
-'<p style="font-style: italic;"><span class="warning">WARNING: THIS TOOL IS IN BETA.</span> It might not work as intended. It is designed to modify your Habitica tasks so if there are any bugs, your tasks might be negatively affected. If this concerns you, do not use this tool. If you do use it, I recommend that first you export your data to a backup file using the Habitica website\'s <strong>Data > Export Data > User Data > JSON</strong> feature and then afterwards, check that your changes are correct in Habitica. If any problems occur, email <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> for help.<br /></p>' +
+'<p style="font-style: italic;">Before using this tool, it\'s recommended to first you export your data to a backup file using the Habitica website\'s <strong>Data > Export Data > User Data > JSON</strong> feature and then afterwards, check that your changes are correct in Habitica. If any problems occur, email <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> for help.<br /></p>' +
 '<p>The table below shows your tasks (Habits, Dailies, To-Dos, and Rewards) with some of their settings.</p>' +
 '<p>Click on any setting that is <span class="showHideToggleClass deemphasised" style="cursor:auto">underlined like this</span> to see buttons for changing it. <strong>As soon as you have clicked on a button, the change will be sent to Habitica. For challenge tasks, most settings can\'t be changed.</strong></p>' +
 '<p>When a task has been changed, <span class="uncertain">its background will change to this colour</span>. This indicates that the other information presented for that task might now be <strong>incorrect</strong>. For example, if you change the Start Date for a Daily, the "due today" field will probably be incorrect. Filtering will also not use the new information. To see correct data, use the "Re-Fetch Data" button at the top of the page. However, you don\'t <strong>have</strong> to fetch data immediately - you can first edit other fields for that task.</p>' +
@@ -1014,9 +1014,6 @@ function createTaskOverviewTable() {
             else if (type === 'display') {
                 if (source.type === 'reward') {
                     return notApplicable;
-                }
-                if (source.challenge && source.challenge.id) {
-                    return source.attributePretty;
                 }
                 var tid = source.order; // temporary task ID
                 return '<div>' +
@@ -1761,7 +1758,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Task Adjustor
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.3 <strong class="warning">EXPERIMENTAL BETA VERSION</strong>)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.4)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -1785,6 +1782,20 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
+        <dt>0.4 <span class="date">2016-04-24</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>Allow challenge tasks to have their attributes changed (STR, PER, etc).</li>
+                </ul>
+            </li>
+            <li>Documentation:
+                <ul>
+                    <li>Removed most of the warnings about how this tool might damage your data. It's been safe for all the time I've been using it.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>0.3 <span class="date">2016-04-23</span></dt>
         <dd><ul>
             <li>Feature:
@@ -1798,7 +1809,7 @@ h2 {
         <dd><ul>
             <li>Bug fix:
                 <ul>
-                    <li>Prevented challenge tasks being edited to change their attribute, difficulty, and start/due date. Completion status (Dailies only) and tags can still be changed. (Thanks, cTheDragons!)</li>
+                    <li>Prevented challenge tasks being edited to change their attribute, difficulty, and start/due date. Completion status (Dailies only) and tags can still be changed.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -1825,22 +1836,6 @@ h2 {
     tasks and allows you to modify some of their settings.
     It's intended for when you want to make similar changes to several
     tasks at once.
-    <br />
-    <br />
-    <strong>IMPORTANT: This is still under development and if there
-    are any bugs I don't know about, it could damage your tasks!</strong>
-    <br />
-    For example, it could cause your Dailies to be due on unexpected days.
-    It's safe for you to log in to see what it can do, but if you using any
-    of the editing features, check afterwards in Habitica that the new
-    settings are correct.
-    <br />
-    I recommend that before using this tool, you export your data to a
-    backup file using the Habitica website's <strong>Data > Export Data >
-    User Data > JSON</strong> feature.
-    <br />
-    If any problems occur, email me for help at
-    <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a>.
     <br />
     <br />After logging in, click on the "<strong>show explanation</strong>"
     link to learn how to use the features.
