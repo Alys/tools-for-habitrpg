@@ -58,7 +58,7 @@ you'll find there.
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
-    <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script --> <!-- https://github.com/chjj/marked -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/1.6.2/remarkable.min.js"></script>
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
@@ -100,6 +100,12 @@ var serverPathUser    = '/user';
 var userId            = '';
 var apiToken          = '';
 var debug             = false;
+
+var markdown = new Remarkable({
+    'html':       false,
+    'linkify':    true,
+    'linkTarget': '_blank',
+});
 
 /* TST - FOR TESTING:
 // Use this section if you do not have a local webserver and want to use the provided test data.
@@ -706,11 +712,16 @@ function upperCaseFirst(word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-// This function decodes &nbsp; -> renders markdown -> escapes HTML entities -> and renders emoji
-function renderFormattedText(text) {
+function renderFormattedText(text, options) {
     function renderMarkdown(text) {
-        // text = marked(text, {sanitize: true});
-        text = String(text).replace(/^<p>|<\/p>\n$/g, ''); // The bonus paragraph around every text snippet is unnecessary
+        text = markdown.render(text);
+        if (options && options.removeParaTags) {
+            text = String(text).replace(/^<p>|<\/p>\n$/g, '');
+        }
+        else if (options && options.setParaClass) {
+            text = String(text).replace(/<p>/g,
+                       '<p class="' + options.setParaClass + '">');
+        }
         return text;
     }
 
@@ -726,7 +737,8 @@ function renderFormattedText(text) {
 }
 
 function userDataInHeader() {
-    var displayName = renderFormattedText(user.profile.name);
+    var displayName =
+            renderFormattedText(user.profile.name, {'removeParaTags':true});
     if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' || // AliceHarris
         userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
     ) {
@@ -1186,8 +1198,8 @@ function collateAndDisplayTaskData() {
 
 
     function modifyTaskProperties(obj) {
-        obj.text = renderFormattedText(obj.text);
-        obj.notes = renderFormattedText(obj.notes);
+        obj.text  = renderFormattedText(obj.text, {'setParaClass':'taskName'});
+        obj.notes = renderFormattedText(obj.notes,{'setParaClass':'taskNote'});
         obj.attributePretty = obj.attribute.toUpperCase();
         obj.typePretty   = upperCaseFirst(
                 (obj.type == 'todo') ? 'To-Do' : obj.type );
@@ -4284,6 +4296,11 @@ ul.padded > li {
     padding: 3px 0;
 }
 
+p.taskName, p.taskNote {
+    margin-top:    0.1em;
+    margin-bottom: 0;
+}
+
 .gearList .item .stats {
     font-variant: small-caps;
 }
@@ -4690,6 +4707,9 @@ ul#tableOfContents > li {
     font-style: italic;
     font-variant: small-caps;
 }
+#todosDatedSection li p.taskName {
+    display: inline;
+}
 
 
 #questProgressSection h3 {
@@ -4709,6 +4729,9 @@ ul#tableOfContents > li {
 #statsAndStreaksSection li span {
     display: inline-block;
     width: 4em;
+}
+#statsAndStreaksSection li p.taskName {
+    display: inline;
 }
 
 
@@ -4765,6 +4788,9 @@ ul#tableOfContents > li {
 #skillsAndBuffsSection span.taskName {
     font-weight: normal;
     font-style: italic;
+}
+#skillsAndBuffsSection li p.taskName {
+    display: inline;
 }
 
 
@@ -4967,7 +4993,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.6)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.7)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -5002,6 +5028,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>7.7 <span class="date">2016-04-25</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Reenabled markdown support.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>7.6 <span class="date">2016-04-22</span></dt>
         <dd><ul>
             <li>Features:
@@ -5010,7 +5045,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>7.5 <span class="date">2016-04-05</span></dt>
         <dd><ul>
             <li>Features:
