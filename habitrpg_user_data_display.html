@@ -1218,6 +1218,11 @@ function collateAndDisplayTaskData() {
         obj.attributesHTML = '<div class="taskAttributes ' + obj.type + '">' +
                              attributesHTML() + '</div>';
 
+        // compensate for bad history fields in Habits:
+        if (obj.type === 'habit' && ! obj.history) {
+            obj.history = [];
+        }
+
         // calculate drop chance:
         if (obj.type === 'habit' && obj.up === false) {
             obj.dropChance = 0; // no drops from habits with + button disabled
@@ -4993,7 +4998,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.7)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.7a)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -5033,6 +5038,11 @@ ul#tableOfContents > li {
             <li>Features:
                 <ul>
                     <li>Reenabled markdown support.</li>
+                </ul>
+            </li>
+            <li>Bug fix (version 7.7a):
+                <ul>
+                    <li>Compensate for missing Habit history arrays that would cause the tool to not work.</li>
                 </ul>
             </li>
         </ul></dd>
