@@ -81,25 +81,28 @@ $(function() { // wraps around all our code to not pollute global namespace
 //////////////////////////////////////////////////////////////////////
 ////   Global Variables                              /////////////////
 //////////////////////////////////////////////////////////////////////
-var content; // holds site-wide content (gear names and stats, quests, etc)
-var tavern;  // holds tavern data
-var party;   // holds party data
-var user;    // holds user's data
+var content;  // holds site-wide content (gear names and stats, quests, etc)
+var tavern;   // holds tavern data
+var party;    // holds party data
+var user;     // holds user's data
+var tasksFromDb;          // holds user's tasks except for ...
+var completedTodosFromDb; // completed To-Dos
 
 
 //////////////////////////////////////////////////////////////////////
 ////   Global Connection Variables      //////////////////////////////
 //////////////////////////////////////////////////////////////////////
-var serverName        = 'Habitica'; // used in "loading" message
-var serverUrl         = 'https://habitica.com:443/api/v2';
-// serverUrl         = 'https://habitrpg.herokuapp.com:443/api/v2';
-var serverPathContent = '/content?language=en';
-var serverPathTavern  = '/groups/habitrpg';
-var serverPathParty   = '/groups/party';
-var serverPathUser    = '/user';
-var userId            = '';
-var apiToken          = '';
-var debug             = false;
+var serverName               = 'Habitica'; // used in "loading" message
+var serverUrl                = 'https://v3.habitica.com/api/v3';
+var serverPathContent        = '/content?language=en';
+var serverPathTavern         = '/groups/habitrpg';
+var serverPathParty          = '/groups/party';
+var serverPathUser           = '/user';
+var serverPathTasks          = '/tasks/user';
+var serverPathCompletedTodos = '/tasks/user?type=completedTodos';
+var userId                   = '';
+var apiToken                 = '';
+var debug                    = false;
 
 var markdown = new Remarkable({
     'html':       false,
@@ -134,20 +137,32 @@ $.mockjax({
   dataType: 'json',
   responseText: userJsonString,
 });
+$.mockjax({
+  url: serverUrl + serverPathTasks,
+  dataType: 'json',
+  responseText: tasksJsonString,
+});
+$.mockjax({
+  url: serverUrl + serverPathCompletedTodos,
+  dataType: 'json',
+  responseText: completedTodosJsonString,
+});
 */
 
 /* TST - FOR TESTING:
 // Use this section if you have a local webserver set up to handle the requests.
-serverName        = 'localhost';
-serverUrl         = 'http://localhost';
-serverPathTavern  = '/cgi-bin/hrpg_tavern.pl';
-serverPathParty   = '/cgi-bin/hrpg_party.pl';
-serverPathContent = '/cgi-bin/hrpg_content.pl';
-serverPathUser    = '/cgi-bin/hrpg_user.pl';
-apiToken          = 'null';
-userId            = 'test';
-userId            = 'work';
-userId            = 'home';
+serverName               = 'localhost';
+serverUrl                = 'http://localhost';
+serverPathTavern         = '/cgi-bin/hrpg_tavern.pl';
+serverPathParty          = '/cgi-bin/hrpg_party.pl';
+serverPathContent        = '/cgi-bin/hrpg_content.pl';
+serverPathUser           = '/cgi-bin/hrpg_user.pl';
+serverPathTasks          = '/cgi-bin/XXX.pl';
+serverPathTodosCompleted = '/cgi-bin/XXX.pl';
+apiToken                 = 'null';
+userId                   = 'test';
+userId                   = 'work';
+userId                   = 'home';
 */
 
 /* TST - FOR TESTING:
@@ -265,9 +280,9 @@ function fetchData() {
     $('#loading .good').show();
     $('#loading .bad' ).hide();
 
-    var ajaxRunningCount = 4; // drops to 0 when all calls have succeeded
+    var ajaxRunningCount = 6; // drops to 0 when all calls have succeeded
 
-    // fetch the user's own content (tasks, gear owned, etc):
+    // fetch the user's own content (gear owned, etc):
     $.ajax({
         url: serverUrl + serverPathUser,
         type: 'GET',
@@ -278,7 +293,35 @@ function fetchData() {
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
         success: fetchUserSuccess,
-        error: fetchFailureUser
+        error: fetchFailure
+    });
+
+    // fetch the user's tasks (except completed To-Dos):
+    $.ajax({
+        url: serverUrl + serverPathTasks,
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            },
+        success: fetchTasksSuccess,
+        error: fetchFailure
+    });
+
+    // fetch the user's completed To-Dos:
+    $.ajax({
+        url: serverUrl + serverPathCompletedTodos,
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            },
+        success: fetchCompletedTodosSuccess,
+        error: fetchFailure
     });
 
     // fetch the site-wide content (gear names and stats, etc):
@@ -319,15 +362,6 @@ function fetchData() {
         error: fetchFailure,
     });
 
-
-    function fetchFailureUser() {
-        if (debug) console.log('debug fetchFailureUser start');
-        $('#loading .good').hide();
-        $('#loading .bad' ).show();
-        $('#documentationAndForm').show(); // in case user has done a re-fetch
-        $('#documentationAndFormClose').hide();
-        if (debug) console.log('debug fetchFailureUser end');
-    }
     function fetchFailure() {
         if (debug) console.log('debug fetchFailure start');
         $('#loading .good').hide();
@@ -338,7 +372,7 @@ function fetchData() {
     }
     function fetchContentSuccess(data) {
         if (debug) console.log('debug parseData Content success start');
-        content = data;
+        content = data.data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -346,7 +380,7 @@ function fetchData() {
     }
     function fetchTavernSuccess(data) {
         if (debug) console.log('debug parseData Tavern success start');
-        tavern = data;
+        tavern = data.data; // XXX_LATER test for world boss
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -354,7 +388,7 @@ function fetchData() {
     }
     function fetchPartySuccess(data) {
         if (debug) console.log('debug parseData Party success start');
-        party = data;
+        party = data.data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -362,7 +396,23 @@ function fetchData() {
     }
     function fetchUserSuccess(data) {
         if (debug) console.log('debug parseData User success start');
-        user = data;
+        user = data.data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
+    }
+    function fetchTasksSuccess(data) {
+        if (debug) console.log('debug parseData Tasks success start');
+        tasksFromDb = data.data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
+    }
+    function fetchCompletedTodosSuccess(data) {
+        if (debug) console.log('debug parseData CompletedTodos success start');
+        completedTodosFromDb = data.data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -375,6 +425,8 @@ function parseData() {
     var MAIN = {}; // each element defines the HTML for one section on the page
     var TOC  = {}; // each element defines one Table of Contents entry
     var DASHBOARD = {}; // each element defines the HTML for one dashboard tile
+
+    convertTasksToApiV2Format();
 
     // save the fetch time early:
     var fetchtime = myDateConverter(new Date(), 'pretty');
@@ -1328,11 +1380,7 @@ function collateAndDisplayTaskData() {
     function taskIsTagged(tagObj) { // returns true if tagged, false otherwise
         tagFound = false; // we have not yet found any valid tags for this task
         if (tagObj) {
-            $.each(tagObj, function(tagId, value){
-                if (value === false) {
-                    // this tag was once applied to the task, but no longer
-                    return true; // go to next iteration
-                }
+            $.each(tagObj, function(index, tagId){
                 if ($.inArray(tagId, knownTags) >= 0) {
                     tagFound = true;
                     return false; // break out of the loop
@@ -1459,7 +1507,10 @@ randomTodoHtml
                 else if (type === 'display') {
                   return source.text +
                          '<span class="developerData"><br />' +
-                         source.id + '</span>' +
+                         source._id +
+                         (source.legacyId ? '<br />legacyId: ' +
+                          source.legacyId : '') +
+                         '</span>' +
                          source.attributesHTML;
                 }
                 else if (type === 'filter') {
@@ -1533,7 +1584,9 @@ randomTodoHtml
         }
         html += ' Note that attributes on tasks are only relevant if you ' +
             'have task-based ' + wiki('Automatic Allocation')
-            + ' turned on.</p><table><tr>' +
+            + ' turned on.</p>' +
+            '<p style="color:orange"><strong>NOTE: Currently, only 30 completed To-Dos are counted, even when you have more. This will be fixed by another change to Habitica\'s API in the next day or two.</strong></p>' +
+            '<table><tr>' +
             '<th>Attribute</th><th>Habits</th>' +
             '<th>Dailies - Due</th><th>Dailies - All</th>' +
             '<th>To-Dos - Incomplete</th><th>To-Dos - Complete *</th>' +
@@ -2327,7 +2380,9 @@ wiki('Tavern', 'resting in the inn') +
         var id      = 'todosCompletedSection';
         var title   = 'To-Dos Completed';
         var orderId = 'todosCompleted';
-        var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p><table></table>';
+        var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
+        '<p style="color:orange"><strong>NOTE: Currently, only 30 completed To-Dos are shown. This will be fixed by another change to Habitica\'s API in the next day or two. In the meantime, you can see all your completed To-Dos from Habitica\'s Data > Data Export > json feature.</strong></p>' +
+        '<table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'function': createTodosCompletedTable,
@@ -4217,6 +4272,63 @@ function calculateBonus(value, stat, crit, stat_scale) {
     return value + stat * stat_scale * crit;
 }
 
+
+function convertTasksToApiV2Format() {
+    // In Habitica's API v2, the tasks were stored as part of the user's
+    // document, and everything in this tool was written based on that.
+    // In API v3, they are stored separately, which is definitely better
+    // but moving them back to the old format is the easiest way to
+    // adapt this tool.
+    // XXX_LATER Adapt this tool properly.
+
+    var allV3Tasks = {};
+    $.each(tasksFromDb, function(index, obj){
+        allV3Tasks[obj._id] = obj;
+    });
+
+    user.habits = [];
+    $.each(user.tasksOrder.habits, function(index, id){
+        if (allV3Tasks[id]) {
+            user.habits.push(allV3Tasks[id]);
+        }
+        else {
+            console.log("missing Habit", id);
+        }
+    });
+
+    user.dailys = [];
+    $.each(user.tasksOrder.dailys, function(index, id){
+        if (allV3Tasks[id]) {
+            user.dailys.push(allV3Tasks[id]);
+        }
+        else {
+            console.log("missing Daily", id);
+        }
+    });
+
+    user.todos = [];
+    $.each(user.tasksOrder.todos, function(index, id){
+        if (allV3Tasks[id]) {
+            user.todos.push(allV3Tasks[id]);
+        }
+        else {
+            console.log("missing To-Do", id);
+        }
+    });
+    $.each(completedTodosFromDb, function(index, obj){
+        user.todos.push(obj);
+    });
+
+    user.rewards = [];
+    $.each(user.tasksOrder.rewards, function(index, id){
+        if (allV3Tasks[id]) {
+            user.rewards.push(allV3Tasks[id]);
+        }
+        else {
+            console.log("missing Reward", id);
+        }
+    });
+}
 } // end of parseData() and its nested functions
     if (debug) console.log('debug 99');
 });
@@ -4999,7 +5111,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.7a)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.0)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -5034,6 +5146,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>8.0 <span class="date">2016-05-22</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Adjusted for Habitica's API v3.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>7.7 <span class="date">2016-04-25</span></dt>
         <dd><ul>
             <li>Features:
@@ -5047,7 +5168,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>7.6 <span class="date">2016-04-22</span></dt>
         <dd><ul>
             <li>Features:
