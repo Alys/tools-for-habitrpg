@@ -673,7 +673,7 @@ function myDateConverter(date, style) { // XXX_SOON replace with moment
         date = new Date();
     }
 
-    if (style === 'pretty') {
+    if (style === 'XXX pretty') {
         // Format date as (weekday date month) and hh:mm:ss;
         // toDateString ordering might be locale-specific
         // var dateStr = date.toDateString().split(' ').slice(0,3).join(' ') +
@@ -1258,7 +1258,7 @@ function collateAndDisplayTaskData() {
         obj.valueRounded = Math.round(obj.value * 100) / 100;
         obj.magnitude    = Math.abs(obj.valueRounded);
         obj.order        = ++taskOrder;
-        obj.creation     = reformatDate(obj.dateCreated);
+        obj.creation     = reformatDate(obj.createdAt);
         obj.completion   = (obj.dateCompleted) ?
                            reformatDate(obj.dateCompleted) : {};
         obj.colour       = chooseColour(obj.value);
@@ -1412,7 +1412,7 @@ function collateAndDisplayTaskData() {
 '   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (Habits, Dailies, and To-Dos), with their ' + wiki('Advanced Options', 'attributes') + ' and ' + wiki('Task Value', 'colours, values, and magnitudes') + ' (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in Habitica.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all Habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</p>' +
 '   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
 '</div>' +
-'<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs and dateCreated strings">toggle developer data</div>' +
+'<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs and createdAt strings">toggle developer data</div>' +
 '<table></table>' +
 randomTodoHtml
 };
@@ -1491,7 +1491,7 @@ randomTodoHtml
                          source.creation.dateAndTime + '">' +
                          source.creation.shortDate +
                          '</abbr><span class="developerData"><br />' +
-                         source.dateCreated + '</span>';
+                         source.createdAt + '</span>';
                 }
                 else if (type === 'filter') {
                   return source.creation.dateAndTime;
