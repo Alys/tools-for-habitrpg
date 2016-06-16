@@ -52,21 +52,21 @@ you'll find there.
 
     <link href="js/DataTables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css" />
     <link href="js/DataTables/extras/ColumnFilterWidgets/media/css/ColumnFilterWidgets.css" rel="stylesheet" type="text/css" />
-    <link href="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css" rel="stylesheet" type="text/css" />
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/remarkable/1.6.2/remarkable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/1.6.2/remarkable.min.js"></script>
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
 
     <!-- TST - FOR TESTING
     For more information on using jquery-mockjax for simulating ajax requests, see https://github.com/jakerella/jquery-mockjax
-    --><!--
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-mockjax/1.5.3/jquery.mockjax.min.js" type="text/javascript"></script>
+    --><!--  The testdata files have not been updated for API v3. If you'd like to update and use them, you're welcome to submit a PR for them!
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mockjax/1.5.3/jquery.mockjax.min.js" type="text/javascript"></script>
     <script src="testdata/content.js" type="text/javascript"></script>
     <script src="testdata/habits-many.js" type="text/javascript"></script>
     <script src="testdata/habits-very-many.js" type="text/javascript"></script>
@@ -93,7 +93,7 @@ var completedTodosFromDb; // completed To-Dos
 ////   Global Connection Variables      //////////////////////////////
 //////////////////////////////////////////////////////////////////////
 var serverName               = 'Habitica'; // used in "loading" message
-var serverUrl                = 'https://v3.habitica.com/api/v3';
+var serverUrl                = 'https://habitica.com/api/v3';
 var serverPathContent        = '/content?language=en';
 var serverPathTavern         = '/groups/habitrpg';
 var serverPathParty          = '/groups/party';
@@ -437,15 +437,22 @@ function parseData() {
     var health = getCurrentHealth(); // also sets dashboard tile
     var quest = {};
     var questProgressUp = 0;
-    // user.party.quest.key='vice3'; party.quest.active=true; // FOR TESTING
+    var questProgressCollect = 0;
+    var userIsOnBossQuest = false;
+    var userIsOnCollectionQuest = false;
     if (user.party && user.party.quest) {
-        if (user.party.quest.key && party && party.quest && party.quest.active) {
+        if (party && party.quest && party.quest.active && party.quest.key && party.quest.members[userId]) {
             quest = $.extend({}, user.party.quest);
             quest.content = $.extend({}, content.quests[ party.quest.key ] );
+            if  (quest.content.collect) userIsOnCollectionQuest = true;
+            if (!quest.content.collect) userIsOnBossQuest = true;
         }
         if (user.party.quest.progress && user.party.quest.progress.up) {
             // might not be in a quest but want to know damage done to world boss
             questProgressUp = user.party.quest.progress.up;
+        }
+        if (user.party.quest.progress && user.party.quest.progress.collectedItems) {
+            questProgressCollect = user.party.quest.progress.collectedItems;
         }
     }
     var customDayStart = user.preferences.dayStart || 0; // CDS
@@ -466,7 +473,7 @@ function parseData() {
 
     var bossesLabel = '';
     var bossesWord  = 'boss';
-    if (quest.content && quest.content.boss) {
+    if (userIsOnBossQuest) {
         bossesLabel = 'your quest boss';
         if (tavernBoss) {
             bossesLabel += ' and ';
@@ -488,7 +495,6 @@ function parseData() {
     var computedStats        = computeStats(true);  // computed CON, INT, etc
     var computedStatsNoBuffs = computeStats(false); // ... without buffs
     // XXX_SOON god my computedStats code is just getting worse and worse
-    var userIsOnCollectionQuest = false;
 
     // When calculating drop chance for a task, some of the user's stats
     // are used. We calculate those parts of the drop chance here since
@@ -1585,7 +1591,7 @@ randomTodoHtml
         html += ' Note that attributes on tasks are only relevant if you ' +
             'have task-based ' + wiki('Automatic Allocation')
             + ' turned on.</p>' +
-            '<p style="color:orange"><strong>NOTE: Currently, only 30 completed To-Dos are counted, even when you have more. This will be fixed by another change to Habitica\'s API in the next day or two.</strong></p>' +
+            '<p style="color:orange"><strong>NOTE: Currently, only 30 completed To-Dos are counted, even when you have more. This will be fixed in future by a change to Habitica\'s API (refer to <a href="https://github.com/HabitRPG/habitrpg/issues/7301">issue 7301</a> for details).</strong></p>' +
             '<table><tr>' +
             '<th>Attribute</th><th>Habits</th>' +
             '<th>Dailies - Due</th><th>Dailies - All</th>' +
@@ -2107,7 +2113,7 @@ randomTodoHtml
             html += '<h3>Grey Dailies</h3><p>' +
                     pluralise('This', dailiesIncompleteGrey.length) + ' ' +
                     wiki('Dailies#Grey_Dailies', 'Grey ' +
-                        pluralise('Daily', dailiesIncompleteGrey.length)) + // XXX test
+                        pluralise('Daily', dailiesIncompleteGrey.length)) +
                     ' ' +
                     pluralise('is', dailiesIncompleteGrey.length) +
                     ' <span class="highlight">not</span> due today but' +
@@ -2381,7 +2387,7 @@ wiki('Tavern', 'resting in the inn') +
         var title   = 'To-Dos Completed';
         var orderId = 'todosCompleted';
         var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
-        '<p style="color:orange"><strong>NOTE: Currently, only 30 completed To-Dos are shown. This will be fixed by another change to Habitica\'s API in the next day or two. In the meantime, you can see all your completed To-Dos from Habitica\'s Data > Data Export > json feature.</strong></p>' +
+        '<p style="color:orange"><strong>NOTE: Currently, only 30 completed To-Dos are shown. This will be fixed in future by a change to Habitica\'s API (refer to <a href="https://github.com/HabitRPG/habitrpg/issues/7301">issue 7301</a> for details). In the meantime, you can see all your completed To-Dos from Habitica\'s Data > Data Export > json feature.</strong></p>' +
         '<table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
@@ -2625,11 +2631,12 @@ wiki('Tavern', 'resting in the inn') +
                 '</ul>';
 
         html += '<p style="font-size:18px; color:orange; font-weight:bold">' +
-                'The information below is highly experimental and is' +
-                ' still undergoing testing. Do not rely upon it until this' +
-                ' message has been removed!' +
-                ' If you notice the skills behaving differently than' +
-                ' described here, please ' + tellMe
+                'The information below is only an approximation.' +
+                // 'The information below is highly experimental and is' +
+                // ' still undergoing testing. Do not rely upon it until this' +
+                // ' message has been removed!' +
+                // ' If you notice the skills behaving differently than' +
+                // ' described here, please ' + tellMe
                 '.</p>';
 
         var conIncreaseDamageExplanation      = '';
@@ -2789,7 +2796,7 @@ wiki('Tavern', 'resting in the inn') +
                         conIncreaseDamageExplanationParty,
                         increase]; },
 
-            'heallAll': function() { // Healer - Blessing
+            'healAll': function() { // Healer - Blessing
                 var inc = (computedStats.con + computedStats.int + 5) * 0.04;
                 var health = Math.round((user.stats.hp + inc) * 10) / 10;
                 if (health > 50) { health = 50; }
@@ -3083,25 +3090,6 @@ function questProgress() {
     var orderId       = 'questProgress';
     var orderIdSecond = 'questProgressSecond';
     var html = '<p>';
-    // on a quest:
-    // "quest":{"completed":null,"key":"ghost_stag",
-    //          "progress":{"collect":{},"down":0,"up":13.780066986139815}},
-    //
-    // on a collection quest but found nothing yet:
-    // "quest":{"completed":null,"key":"vice2","progress":{"collect":
-    //          {"lightCrystal":0},"down":0,"up":0}},
-    //
-    // on a collection quest and found stuff:
-    // "quest":{"completed":null,"key":"vice2","progress":{"collect":
-    //          {"lightCrystal":2},"down":0,"up":2.4434153558001794}},
-    //
-    // not on a quest:
-    // "quest":{"progress":{"collect":{},"down":0,"up":0}},
-    //
-    // before the user has ever joined a party or started a quest:
-    // "party":{"current":null,"invitation":null,"quest":
-    // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
-    //
 
     var alreadyHaveDashboardTile = false;
     if (tavernBoss || (quest.content && quest.content.boss)) {
@@ -3135,38 +3123,18 @@ function questProgress() {
         alreadyHaveDashboardTile = true;
     }
 
-    if (quest.content && quest.content.collect) { // collection quest
-        userIsOnCollectionQuest = true;
-        var total = 0;
-        var stuff = '';
-        var uniqueItemsCount = 0;
-        $.each(quest.progress.collect, function(tagId, value){
-            if (tagId) {
-                uniqueItemsCount++;
-                total += value;
-                var itemName = tagId;
-                if (quest.content.collect[tagId]) {
-                    itemName = quest.content.collect[tagId].text || tagId;
-                }
-                if (uniqueItemsCount > 1) { // we have stuff already
-                    stuff += ", ";
-                }
-                stuff += value + " " + itemName;
-            }
-        });
-        var replaceStr = (uniqueItemsCount > 2) ? ", and" : " and";
-        stuff = stuff.replace(/(.+),/, "$1" + replaceStr);
+    if (userIsOnCollectionQuest) {
         if (tavernBoss) {
             html += '<br />';
         }
         html += 'So far today you have found ' + '<span class="highlight">';
-        if (total == 0) {
-            html += 'no items';
+        if (questProgressCollect === 0) {
+            html += 'no';
         }
         else {
-            html += stuff;
+            html += questProgressCollect;
         }
-        html += '</span> for the ' +
+        html += ' items</span> for the ' +
                 (quest.content.text || quest.content.key) + ' quest.';
 
         var orderId1 = (alreadyHaveDashboardTile) ? orderIdSecond : orderId;
@@ -3174,7 +3142,7 @@ function questProgress() {
         DASHBOARD[orderId1] = {'label': dashboardTitle,
             'hoverText': 'number of items you have found today for your ' +
                          'collection quest (click for more information)',
-            'target': id, 'value': total, 'status': 'neutral'};
+            'target': id, 'value': questProgressCollect, 'status': 'neutral'};
     }
     html += '</p>';
 
@@ -5146,7 +5114,7 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
-        <dt>8.0 <span class="date">2016-05-22</span></dt>
+        <dt>8.0 <span class="date">2016-06-06</span></dt>
         <dd><ul>
             <li>Code:
                 <ul>
@@ -5155,6 +5123,14 @@ ul#tableOfContents > li {
             </li>
         </ul></dd>
 
+        <dt>7.8 <span class="date">2016-06-05</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Adjust handling of collection quests for upcoming change in Habitica.</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>7.7 <span class="date">2016-04-25</span></dt>
         <dd><ul>
             <li>Features:
