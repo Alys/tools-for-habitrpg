@@ -359,7 +359,13 @@ function fetchData() {
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
         success: fetchPartySuccess,
-        error: fetchFailure,
+        error: function() { // assume no party
+            party = {}; // no party
+            ajaxRunningCount--;
+            if (ajaxRunningCount === 0) { // all ajax calls have finished
+                parseData();
+            }
+        },
     });
 
     function fetchFailure() {
@@ -440,8 +446,8 @@ function parseData() {
     var questProgressCollect = 0;
     var userIsOnBossQuest = false;
     var userIsOnCollectionQuest = false;
-    if (user.party && user.party.quest) {
-        if (party && party.quest && party.quest.active && party.quest.key && party.quest.members[userId]) {
+    if (party && user.party && user.party.quest) {
+        if (party.quest && party.quest.active && party.quest.key && party.quest.members[userId]) {
             quest = $.extend({}, user.party.quest);
             quest.content = $.extend({}, content.quests[ party.quest.key ] );
             if  (quest.content.collect) userIsOnCollectionQuest = true;
@@ -5119,6 +5125,11 @@ ul#tableOfContents > li {
             <li>Code:
                 <ul>
                     <li>Adjusted for Habitica's API v3.</li>
+                </ul>
+            </li>
+            <li>Bug fix (version 8.0a):
+                <ul>
+                    <li>Fixed a bug that was preventing people who aren't in a party from using the tool.</li>
                 </ul>
             </li>
         </ul></dd>
