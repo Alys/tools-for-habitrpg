@@ -99,7 +99,7 @@ var serverPathTavern         = '/groups/habitrpg';
 var serverPathParty          = '/groups/party';
 var serverPathUser           = '/user';
 var serverPathTasks          = '/tasks/user';
-var serverPathCompletedTodos = '/tasks/user?type=completedTodos';
+var serverPathCompletedTodos = '/tasks/user?type=_allCompletedTodos';
 var userId                   = '';
 var apiToken                 = '';
 var debug                    = false;
@@ -1597,7 +1597,6 @@ randomTodoHtml
         html += ' Note that attributes on tasks are only relevant if you ' +
             'have task-based ' + wiki('Automatic Allocation')
             + ' turned on.</p>' +
-            '<p style="color:orange"><strong>NOTE: Currently, only 30 completed To-Dos are counted, even when you have more. This will be fixed in future by a change to Habitica\'s API (refer to <a href="https://github.com/HabitRPG/habitrpg/issues/7301">issue 7301</a> for details).</strong></p>' +
             '<table><tr>' +
             '<th>Attribute</th><th>Habits</th>' +
             '<th>Dailies - Due</th><th>Dailies - All</th>' +
@@ -2393,7 +2392,6 @@ wiki('Tavern', 'resting in the inn') +
         var title   = 'To-Dos Completed';
         var orderId = 'todosCompleted';
         var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
-        '<p style="color:orange"><strong>NOTE: Currently, only 30 completed To-Dos are shown. This will be fixed in future by a change to Habitica\'s API (refer to <a href="https://github.com/HabitRPG/habitrpg/issues/7301">issue 7301</a> for details). In the meantime, you can see all your completed To-Dos from Habitica\'s Data > Data Export > json feature.</strong></p>' +
         '<table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
@@ -5085,7 +5083,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.0)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -5119,6 +5117,15 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>8.1 <span class="date">2016-07-14</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>The completed To-Dos section now shows all completed To-Dos. This might result in the tool being slower for some people. If it causes significant problems, <a href="mailto:lady_alys@oldgods.net">email Alys</a>.</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>8.0 <span class="date">2016-06-06</span></dt>
         <dd><ul>
