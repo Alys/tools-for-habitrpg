@@ -932,6 +932,26 @@ function collateAndDisplayTaskData() {
     var todos          = todosAll[0];
     var todosCompleted = todosAll[1];
 
+    // in case where the user has no tasks, or no tasks of a specific type:
+    var nullTask = {text:'none', value:0, type:'habit', typePretty:'Habit'};
+    if (typeof bluestTask.value === "undefined") {
+        bluestTask   = $.extend({}, nullTask);
+    }
+    if (typeof reddestTask.value === "undefined") {
+        reddestTask  = $.extend({}, nullTask);
+    }
+    if (typeof reddestHabit.value === "undefined") {
+        reddestHabit = $.extend({}, nullTask);
+    }
+    if (typeof reddestDaily.value === "undefined") {
+        reddestDaily = $.extend({}, nullTask);
+        reddestDaily['type'] = 'daily';
+        reddestDaily['typePretty'] = 'Daily';
+    }
+    if (typeof biggestTask.value === "undefined") {
+        biggestTask  = $.extend({}, nullTask);
+    }
+
     // TO ADD NEW SECTION: if the section is related specifically to tasks,
     // here is probably where you want to put its function.
 
@@ -973,21 +993,23 @@ function collateAndDisplayTaskData() {
                 untaggedTasks['habits'].push(obj);
             }
 
-            if (typeof reddestHabit.value === "undefined" ||
-                obj.value < reddestHabit.value) {
-                reddestHabit = obj;
-            }
-            if (typeof reddestTask.value === "undefined" ||
-                obj.value < reddestTask.value) {
-                reddestTask = obj;
-            }
-            if (typeof bluestTask.value === "undefined" ||
-                obj.value > bluestTask.value) {
-                bluestTask = obj;
-            }
-            if (typeof biggestTask.value === "undefined" ||
-                Math.abs(obj.value) > Math.abs(biggestTask.value)) {
-                biggestTask = obj;
+            if (!obj.challenge || !obj.challenge.id) {
+                if (typeof reddestHabit.value === "undefined" ||
+                    obj.value < reddestHabit.value) {
+                    reddestHabit = obj;
+                }
+                if (typeof reddestTask.value === "undefined" ||
+                    obj.value < reddestTask.value) {
+                    reddestTask = obj;
+                }
+                if (typeof bluestTask.value === "undefined" ||
+                    obj.value > bluestTask.value) {
+                    bluestTask = obj;
+                }
+                if (typeof biggestTask.value === "undefined" ||
+                    Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+                    biggestTask = obj;
+                }
             }
         });
         return habits;
@@ -1078,21 +1100,23 @@ function collateAndDisplayTaskData() {
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['dailies'].push(obj);
             }
-            if (typeof reddestDaily.value === "undefined" ||
-                obj.value < reddestDaily.value) {
-                reddestDaily = obj;
-            }
-            if (typeof reddestTask.value === "undefined" ||
-                obj.value < reddestTask.value) {
-                reddestTask = obj;
-            }
-            if (typeof bluestTask.value === "undefined" ||
-                obj.value > bluestTask.value) {
-                bluestTask = obj;
-            }
-            if (typeof biggestTask.value === "undefined" ||
+            if (!obj.challenge || !obj.challenge.id) {
+                if (typeof reddestDaily.value === "undefined" ||
+                    obj.value < reddestDaily.value) {
+                    reddestDaily = obj;
+                }
+                if (typeof reddestTask.value === "undefined" ||
+                    obj.value < reddestTask.value) {
+                    reddestTask = obj;
+                }
+                if (typeof bluestTask.value === "undefined" ||
+                    obj.value > bluestTask.value) {
+                    bluestTask = obj;
+                }
+                if (typeof biggestTask.value === "undefined" ||
                 Math.abs(obj.value) > Math.abs(biggestTask.value)) {
-                biggestTask = obj;
+                    biggestTask = obj;
+                }
             }
         });
         return dailies;
@@ -1228,18 +1252,20 @@ function collateAndDisplayTaskData() {
                     untaggedTasks['todos'].push(obj);
                 }
             }
-            if (obj.completed == false) {
-                if (typeof reddestTask.value === "undefined" ||
-                    obj.value < reddestTask.value) {
-                    reddestTask = obj;
-                }
-                if (typeof bluestTask.value === "undefined" ||
-                    obj.value > bluestTask.value) {
-                    bluestTask = obj;
-                }
-                if (typeof biggestTask.value === "undefined" ||
-                    Math.abs(obj.value) > Math.abs(biggestTask.value)) {
-                    biggestTask = obj;
+            if (!obj.challenge || !obj.challenge.id) {
+                if (obj.completed == false) {
+                    if (typeof reddestTask.value === "undefined" ||
+                        obj.value < reddestTask.value) {
+                        reddestTask = obj;
+                    }
+                    if (typeof bluestTask.value === "undefined" ||
+                        obj.value > bluestTask.value) {
+                        bluestTask = obj;
+                    }
+                    if (typeof biggestTask.value === "undefined" ||
+                        Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+                        biggestTask = obj;
+                    }
                 }
             }
         });
@@ -2769,14 +2795,14 @@ wiki('Tavern', 'resting in the inn') +
                         'The ' + taskValueLink + ' of each of your tasks ' +
                         'will be increased (made more blue) by ' +
                         (Math.round(inc * 100) / 100) + '.',
-                        'For example, your bluest task (the ' +
+                        'For example, your bluest non-challenge task (the ' +
                         '<span class="taskName">' +
                         bluestTask.text + '</span> ' +
                         bluestTask.typePretty +
                         ') will have its value changed from ' +
                         (Math.round(bluestTask.value * 100) / 100) + ' to ' +
                         (Math.round((bluestTask.value + inc) * 100) / 100) +
-                        '. Your reddest task (the '+
+                        '. Your reddest non-challenge task (the '+
                         '<span class="taskName">' +
                         reddestTask.text + '</span> ' +
                         reddestTask.typePretty +
@@ -5083,7 +5109,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.2)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -5118,6 +5144,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>8.2 <span class="date">2016-07-23</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>The task suggestions for skills now no longer include challenge tasks (skills cannot be cast on challenge tasks).</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>8.1 <span class="date">2016-07-14</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5126,7 +5161,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>8.0 <span class="date">2016-06-06</span></dt>
         <dd><ul>
             <li>Code:
