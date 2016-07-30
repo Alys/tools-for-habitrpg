@@ -38,17 +38,6 @@ Contributors:
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
 
-    <!-- TST - FOR TESTING
-    For more information on using jquery-mockjax for simulating ajax requests, see https://github.com/jakerella/jquery-mockjax
-    --><!--
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mockjax/1.5.3/jquery.mockjax.min.js" type="text/javascript"></script>
-    <script src="testdata/content.js" type="text/javascript"></script>
-    <script src="testdata/habits-many.js" type="text/javascript"></script>
-    <script src="testdata/habits-very-many.js" type="text/javascript"></script>
-    <script src="testdata/tavern.js" type="text/javascript"></script>
-    <script src="testdata/user.js" type="text/javascript"></script>
-    -->
-
 
 <script type="text/javascript">
 $(function() { // wraps around all our code to not pollute global namespace
@@ -56,7 +45,8 @@ $(function() { // wraps around all our code to not pollute global namespace
 //////////////////////////////////////////////////////////////////////
 ////   Global Variables                              /////////////////
 //////////////////////////////////////////////////////////////////////
-var user;    // holds user's data
+var user;    // holds user's non-task data
+var tasks;   // holds user's tasks
 var customDayStart;
 var timezoneOffset;
 var todayUser;
@@ -64,47 +54,24 @@ var todayUserPretty;
 var userSpecifiedDate;
 var tagsForTaskId = {};
 var tagsNames = {};
+var tagsSelectorButtons;
 
+// variables for recording task order and for finding errors in task ordering:
+var nextTaskOrder; // counter to set order of Tasks in Habitica; also acts as unique identifier
+var orderForTask; // populated from user.tasksOrder - key is a task ID, value is that task's order from the nextTaskOrder counter.
+var taskIdsFoundInTasksOrder; // initially is populated with all task IDs that are in the user.tasksOrder arrays. Later, tasks IDs are removed from it as the actual tasks are found, leaving only IDs for tasks that don't exist
+var tasksWithNoOrder; // contains IDs of tasks we find that aren't in the user.tasksOrder arrays
 
 //////////////////////////////////////////////////////////////////////
 ////   Global Connection Variables      //////////////////////////////
 //////////////////////////////////////////////////////////////////////
 var serverName           = 'Habitica'; // used in "loading" message
-var serverUrl            = 'https://habitica.com:443/api/v2';
-var serverPathContent    = '/content?language=en';
-var serverPathUser       = '/user';
-var serverPathTaskUpdate = '/user/tasks';
+var serverUrl            = 'https://habitica.com:443/api/v3';
 var userId               = '';
 var apiToken             = '';
 var debug                = false;
 
 /* TST - FOR TESTING:
-// Use this section if you do not have a local webserver and want to use the provided test data.
-// You can compose test data by doing things like:
-//     var userJson = JSON.parse(userJsonString);
-//     var habitsVeryManyJson = JSON.parse(habitsVeryManyJsonString);
-//     userJson.habits = habitsVeryManyJson;
-//     userJsonString = JSON.stringify(userJson);
-$.mockjax({
-  url: serverUrl + serverPathUser,
-  dataType: 'json',
-  responseText: userJsonString,
-});
-*/
-
-/* TST - FOR TESTING:
-// Use this section if you have a local webserver set up to handle the requests.
-serverName        = 'localhost';
-serverUrl         = 'http://localhost';
-serverPathUser    = '/cgi-bin/hrpg_user.pl';
-apiToken          = 'null';
-userId            = 'test';
-userId            = 'work';
-userId            = 'home';
-*/
-
-/* TST - FOR TESTING:
-serverUrl = 'http://localhost:3000/api/v2';
 userId    = '3e595299-3d8a-4a10-bfe0-88f555e4aa0c';
 apiToken  = ''; // TST - DO NOT LET THIS GO LIVE!
 $('body').css({'background-color':'#C4B4A4'});
@@ -120,9 +87,9 @@ if (debug) console.log('debug 1');
 ////   -> escapes HTML entities -> and renders emoji      ////////////
 //////////////////////////////////////////////////////////////////////
 var md = new Remarkable({
-	'html': false,
-	'linkify': true,
-	'linkTarget': '_blank',
+    'html': false,
+    'linkify': true,
+    'linkTarget': '_blank',
 }); // markdown parser
 
 function renderFormattedText(text) {
@@ -147,13 +114,7 @@ function renderFormattedText(text) {
 ////   Functions for working with tags    ////////////////////////////
 //////////////////////////////////////////////////////////////////////
 function countNumberOfTagsForTask(taskId) {
-    var count = 0;
-    $.each(tagsForTaskId[taskId], function(tagId) {
-        if (tagsForTaskId[taskId][tagId]) { // can be false
-            count ++;
-        }
-    });
-    return count;
+    return tagsForTaskId[taskId] ? tagsForTaskId[taskId].length : 0;
 }
 function displayNumberOfTagsForTask(taskId) {
     var count = countNumberOfTagsForTask(taskId);
@@ -169,8 +130,9 @@ function displayTagNamesForTask(taskId, opt) {
 
     var output = []
     $.each(user.tags, function(index, tag) {
-        if (( opt.showNotTagged && !tagsForTaskId[taskId][tag.id]) ||
-            (!opt.showNotTagged &&  tagsForTaskId[taskId][tag.id])
+        var taskContainsTag = tagsForTaskId[taskId].indexOf(tag.id) > -1;
+        if (( opt.showNotTagged && !taskContainsTag) ||
+            (!opt.showNotTagged &&  taskContainsTag)
         ) {
             var name = tagsNames[tag.id];
             if (opt.formatText) name = renderFormattedText(name);
@@ -247,7 +209,6 @@ $('body').on('click', '.selector', function(event){
     var newValuePretty = $(this).data('newvaluepretty');
     var newValueOutputExtra = '';
     var data = {};
-    var dataAlreadyConstructed = false;
 
     if (newValueFrom && ! newValue) {
         newValue = $('#' + newValueFrom).val();
@@ -317,35 +278,28 @@ $('body').on('click', '.selector', function(event){
         // one tag to assign or unassign, not the full set of new data to be
         // submitted.
         var tagId = newValue;
-        // Now we make newValue hold the desired true/false value for that tag
-        // (toggle it depending on current tag assignment):
-        newValue = (tagsForTaskId[taskId][tagId]) ? false : true;
-        tagsForTaskId[taskId][tagId] = newValue;
-        data['tags'] = {};
-        data['tags'][tagId] = newValue;
-        dataAlreadyConstructed = true;
+        // Now we make newValue hold the full set of tags for that task:
+        newValue = tagsForTaskId[taskId];
+        var index = newValue.indexOf(tagId);
+        if (index === -1) {
+            // task does not currently have this tag - we are adding it
+            newValue.push(tagId);
+        }
+        else {
+            // we are removing the tag
+            newValue.splice(index, 1);
+        }
+        tagsForTaskId[taskId] = newValue;
+
         newValuePretty = displayNumberOfTagsForTask(taskId);
         newValueOutputExtra = displayTagNamesForTask(taskId, {formatText:true});
     }
 
-    // if (fieldExtra && fieldExtra === 'dateCompleted') {
-    //  if (newValue === true) {
-    //      data['dateCompleted'] = new Date();
-    //      // marked a To-Do completed
-    //  }
-    //  else {
-    //      // un-marked a To-Do that used to be completed
-    //      data['dateCompleted'] = null; // XXX_LATER delete completely
-    //  }
-    // }
-
-    if (!dataAlreadyConstructed) {
-        data[field] = newValue;
-    }
+    data[field] = newValue;
 
     $(this).siblings('.status').text('updating...');
     $.ajax({
-        url: serverUrl + serverPathTaskUpdate + '/' + taskId,
+        url: serverUrl + '/tasks/' + taskId,
         context: $(this),
         type: 'PUT',
         contentType: 'application/json', // needed for passing true/false
@@ -375,8 +329,8 @@ $('body').on('click', '.selector', function(event){
             row.addClass('uncertain');
             }, 1000, row);
     }
-    function updateTaskFailure() {
-        $(this).siblings('.status').text('Update failed! Try again.');
+    function updateTaskFailure(data) {
+        $(this).siblings('.status').text('Update failed! Try again. ' + taskId);
         $(this).siblings('.status').addClass('error');
     }
 });
@@ -418,13 +372,14 @@ $('#userApiDetailsForm').submit(function(event){
 ////   Login and Data Fetch Functions   //////////////////////////////
 //////////////////////////////////////////////////////////////////////
 function fetchData() {
+    var ajaxRunningCount = 2; // drops to 0 when all calls have succeeded
     if (debug) console.log('debug 2');
     $('#loading #serverName').text(serverName);
     $('#loading .good').show();
     $('#loading .bad' ).hide();
 
     $.ajax({
-        url: serverUrl + serverPathUser,
+        url: serverUrl + '/user',
         type: 'GET',
         dataType: 'json',
         cache: false,
@@ -433,10 +388,23 @@ function fetchData() {
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
         success: fetchUserSuccess,
-        error: fetchFailureUser
+        error: fetchFailure
     });
 
-    function fetchFailureUser() {
+    $.ajax({
+        url: serverUrl + '/tasks/user',
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            },
+        success: fetchTasksSuccess,
+        error: fetchFailure
+    });
+
+    function fetchFailure() {
         if (debug) console.log('debug fetchFailureUser start');
         $('#loading .good').hide();
         $('#loading .bad' ).show();
@@ -446,8 +414,19 @@ function fetchData() {
     }
     function fetchUserSuccess(data) {
         if (debug) console.log('debug parseData User success start');
-        user = data;
-        parseData();
+        user = data.data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
+    }
+    function fetchTasksSuccess(data) {
+        if (debug) console.log('debug parseData Tasks success start');
+        tasks = data.data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
     }
 }
 
@@ -475,6 +454,15 @@ function parseData() {
     todayUser = moment().subtract(customDayStart, 'hours');
     todayUser = todayUser.startOf('day');
     todayUserPretty = moment(todayUser).format('YYYY-MM-DD');
+
+    tagsSelectorButtons = ''; // needed in case we're re-fetching data now
+    tagsNames = {};           // needed in case we're re-fetching data now
+    $.each(user.tags, function(index, tag) {
+        tagsNames[tag.id] = tag.name;
+        tagsSelectorButtons += '<button class="selector"' +
+        ' data-newvalue="' + tag.id + '"' +
+        '>' + renderFormattedText(tag.name) + '</button><br />\n';
+    });
 
     userDataInHeader();
 
@@ -616,8 +604,10 @@ function userDataInHeader() {
 
 function collateAndDisplayTaskData() {
     // Set up data structures for storing task information:
-    var taskOrder = 0; // order of tasks in Habitica; acts as unique identifier
     var allTasks = [];
+    var count = {'habit':0, 'daily':0, 'todo':0, 'reward':0};
+    // var valueMin = -47.27; // task values are capped ...
+    // var valueMax =  21.27; // ... for some purposes
 
     // Define some static stuff:
     var attributesPretty = {    'str': 'Physical (STR)',
@@ -669,23 +659,61 @@ function collateAndDisplayTaskData() {
                        }
                   };
 
+    // find the order the tasks are in - first initialise some variables (needed in case we're re-fetching data now):
+    nextTaskOrder = 0;
+    orderForTask = {};
+    taskIdsFoundInTasksOrder = {'habit':[], 'daily':[], 'todo':[], 'reward':[]};
+    tasksWithNoOrder = {'habit':[], 'daily':[], 'todo':[], 'reward':[]};
+    $.each(user.tasksOrder.habits, function(index, taskId){
+        orderForTask[taskId] = nextTaskOrder;
+        nextTaskOrder++;
+        taskIdsFoundInTasksOrder['habit'].push(taskId);
+    });
+    $.each(user.tasksOrder.dailys, function(index, taskId){
+        orderForTask[taskId] = nextTaskOrder;
+        nextTaskOrder++;
+        taskIdsFoundInTasksOrder['daily'].push(taskId);
+    });
+    $.each(user.tasksOrder.todos, function(index, taskId){
+        orderForTask[taskId] = nextTaskOrder;
+        nextTaskOrder++;
+        taskIdsFoundInTasksOrder['todo'].push(taskId);
+    });
+    $.each(user.tasksOrder.rewards, function(index, taskId){
+        orderForTask[taskId] = nextTaskOrder;
+        nextTaskOrder++;
+        taskIdsFoundInTasksOrder['reward'].push(taskId);
+    });
+
     var everyXDaysInUse = false;
-    var habits   = collateHabitsData();  // populates the...
-    var dailies  = collateDailiesData(); // ... function's "global" variables...
-    var todosAll = collateTodosData();   // ... defined above...
-    var rewards  = collateRewardsData(); // ......
-    var todos          = todosAll[0];
-    var todosCompleted = todosAll[1];
+    collateTasksData(); // populates the function's "global" variables defined above
+
+    // Report any tasksOrder errors:
+    var taskOrderErrors = '';
+    $.each(['habit', 'daily', 'todo', 'reward'], function(index, type) {
+        if (taskIdsFoundInTasksOrder[type].length) {
+            taskOrderErrors += '* ' + type + ' tasksOrder entries with no matching tasks: "' +
+                    taskIdsFoundInTasksOrder[type].join('", "') + '"' + '<br />';
+        }
+        if (tasksWithNoOrder[type].length) {
+            taskOrderErrors += '* ' + type + ' tasks with no tasksOrder: "' +
+                    tasksWithNoOrder[type].join('", "') + '"' + '<br />';
+        }
+    });
+    if (taskOrderErrors) {
+        $('#taskOrderErrorsMessage').html("Your account has a minor problem that might prevent you from sorting your tasks correctly. An admin can fix this for you. Paste the following message into the <a href=\"https://habitica.com/#/options/groups/guilds/a29da26b-37de-4a71-b0c6-48e72a900dac\">Report a Bug</a> guild:<br /><br />" + taskOrderErrors);
+        $('#taskOrderErrorsMessage').removeClass('hide');
+    }
 
     if (allTasks.length > 50) {
         var some = 'a few';
         if (allTasks.length > 100) some = 'several';
         if (allTasks.length > 200) some = 'many';
         $('#taskNumberMessage').text('You have ' +
-            displayNumberWithPluralisation(habits.length,  'Habit') + ', ' +
-            displayNumberWithPluralisation(dailies.length, 'Daily') + ', ' +
-            displayNumberWithPluralisation(todos.length,   'To-Do') + ', and ' +
-            displayNumberWithPluralisation(rewards.length, 'Reward')+
+            displayNumberWithPluralisation(count['habit'],  'Habit') + ', ' +
+            displayNumberWithPluralisation(count['daily'],  'Daily') + ', ' +
+            displayNumberWithPluralisation(count['todo'],   'To-Do') + ', and ' +
+            displayNumberWithPluralisation(count['reward'], 'Reward')+
             '. It might take ' + some +
             ' seconds before this page becomes responsive.');
         $('#taskNumberMessage').removeClass('hide');
@@ -697,31 +725,24 @@ function collateAndDisplayTaskData() {
     // display task data:
     taskOverview();
 
-    function collateHabitsData() {
-        var habits = [];
-        $.each(user.habits, function(index, obj){
+    function collateTasksData() {
+        tagsForTaskId = {}; // needed in case we're re-fetching data now
+        $.each(tasks, function(index, obj){
+            // if (obj.text === 'copy weekly delabora backup') { // TST - FOR TESTING
+            count[obj.type]++;
+            if (obj.type === 'daily') {
+                fixDailiesDefaults(obj);
+                obj.dueToday = dailyIsDueToday(obj);
+            }
+            else if (obj.type === 'todo') {
+                obj.dueToday = (obj.date &&
+                    moment(obj.date).zone(timezoneOffset).startOf('day') <=
+                    todayUser) ? true : false;
+            }
             modifyTaskProperties(obj);
-            habits.push(obj); // XXX_SOON do I need this and the other types?
             allTasks.push(obj);
+        // }
         });
-        return habits;
-    }
-
-
-    function collateDailiesData() {
-        var dailies = [];
-        var valueMin = -47.27; // task values are capped ...
-        var valueMax =  21.27; // ... for some purposes
-        $.each(user.dailys, function(index, obj){
-            fixDailiesDefaults(obj);
-            obj.dueToday = dailyIsDueToday(obj);
-            modifyTaskProperties(obj);
-
-            dailies.push(obj);
-            allTasks.push(obj);
-        });
-        return dailies;
-
 
         function fixDailiesDefaults(task) {
             // Ensure that all repeat options make sense. At least one bug
@@ -799,37 +820,6 @@ function collateAndDisplayTaskData() {
     }
 
 
-    function collateTodosData() {
-        var todos = [];
-        var todosCompleted = [];
-        $.each(user.todos, function(index, obj){
-            modifyTaskProperties(obj);
-            obj.dueToday = (obj.date &&
-                moment(obj.date).zone(timezoneOffset).startOf('day') <=
-                todayUser) ? true : false;
-            if (obj.completed == true) {
-                todosCompleted.push(obj);
-            }
-            else {
-                todos.push(obj); // XXX_LATER do I need the separate collections for all task types?
-                allTasks.push(obj);
-            }
-        });
-        return [todos, todosCompleted];
-    }
-
-
-    function collateRewardsData() {
-        var rewards = [];
-        $.each(user.rewards, function(index, obj){
-            modifyTaskProperties(obj);
-            rewards.push(obj);
-            allTasks.push(obj);
-        });
-        return rewards;
-    }
-
-
     function modifyTaskProperties(obj) { // XXX_SOON purge
         obj.text = renderFormattedText(obj.text);
         obj.notes = renderFormattedText(obj.notes);
@@ -843,7 +833,6 @@ function collateAndDisplayTaskData() {
                 'dated' : 'undated';
         obj.valueRounded = Math.round(obj.value * 100) / 100;
         obj.magnitude    = Math.abs(obj.valueRounded);
-        obj.order        = ++taskOrder;
         obj.creation     = reformatDate(obj.dateCreated);
         obj.completion   = (obj.dateCompleted) ?
                            reformatDate(obj.dateCompleted) : {};
@@ -863,10 +852,30 @@ function collateAndDisplayTaskData() {
         obj.attributesHTML = '<div class="taskAttributes ' + obj.type + '">' +
                              attributesHTML() + '</div>';
 
+        // remove tags that don't exist:
+        var knownTags = [];
+        $.each(obj.tags, function(index, tagId) {
+            if (tagsNames[tagId]) knownTags.push(tagId);
+        });
+        obj.tags = knownTags;
+
         // store tags for tasks in a separate structure because we won't
         // always have easy access to the task's object:
-        tagsForTaskId[obj.id] = obj.tags || {};
+        tagsForTaskId[obj.id] = obj.tags || [];
 
+        // set task order and warn about bad order configs:
+        if (typeof orderForTask[obj.id] !== 'undefined') {
+            obj.order = orderForTask[obj.id];
+            var index = taskIdsFoundInTasksOrder[obj.type].indexOf(obj.id);
+            if (index > -1) {
+                taskIdsFoundInTasksOrder[obj.type].splice(index, 1);
+            }
+        }
+        else {
+            tasksWithNoOrder[obj.type].push(obj.id);
+            obj.order = nextTaskOrder;
+            nextTaskOrder++;
+        }
 
         function reformatDate(dateString) {
             var formattedDate = myDateConverter(dateString, 'long');
@@ -956,44 +965,15 @@ function collateAndDisplayTaskData() {
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                    'function': createTaskOverviewTable,
                    'html':
-'<p><a id="taskOverviewExplanationToggle" class="showHideToggle" data-target="taskOverviewExplanation" data-linktext="explanation">show explanation</a></p>' +
-'<div id="taskOverviewExplanation" class="hide">' +
-'<p style="font-style: italic;">Before using this tool, it\'s recommended to first you export your data to a backup file using the Habitica website\'s <strong>Data > Export Data > User Data > JSON</strong> feature and then afterwards, check that your changes are correct in Habitica. If any problems occur, email <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> for help.<br /></p>' +
-'<p>The table below shows your tasks (Habits, Dailies, To-Dos, and Rewards) with some of their settings.</p>' +
-'<p>Click on any setting that is <span class="showHideToggleClass deemphasised" style="cursor:auto">underlined like this</span> to see buttons for changing it. <strong>As soon as you have clicked on a button, the change will be sent to Habitica. For challenge tasks, most settings can\'t be changed.</strong></p>' +
-'<p>When a task has been changed, <span class="uncertain">its background will change to this colour</span>. This indicates that the other information presented for that task might now be <strong>incorrect</strong>. For example, if you change the Start Date for a Daily, the "due today" field will probably be incorrect. Filtering will also not use the new information. To see correct data, use the "Re-Fetch Data" button at the top of the page. However, you don\'t <strong>have</strong> to fetch data immediately - you can first edit other fields for that task.</p>' +
-'<p><span class="subheading">Dates:</span> When typing a date, use the format <strong>yyyy-mm-dd</strong>. In future, there will probably be a calendar picker.</p>' +
-'<p><span class="subheading">Completed status:</span> For each Daily, you can change whether it is marked as completed <strong>BUT</strong> this does not adjust your gold, experience, mana, or drops, and does not change the Daily\'s streak, colour, or value. If you have actually completed the actions associated with the Daily, you should mark it completed from within Habitica, not in this tool. Changing the completion status in this tool can be used if your Dailies did not reset overnight and you want to mark them as uncompleted for use today without losing gold, etc. It can also be used to mark a Daily as completed if you need to skip it today without being punished for it (or you can use the "start / due date" column to set the date to a future day). You can use the "due today" drop-down filter menu to quicky find all Dailies (and To-Dos) due today.</p>' + // See "Suggested Uses" below for why this feature can be useful.
-'<p><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in Habitica.</p>' +
-'<p><span class="subheading">Filtering:</span> Use the drop-down menus to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</p>' +
-'<p style="margin-bottom:0.3em"><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul style="margin-top:0"><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all Habits that contain the word "balloon".</li></ul></p>' +
-// "<h2>Suggested Uses</h2><dl>" +
-// "<dt>Resetting Dailies</dt>" +
-// "<dd>If your Dailies did not reset due to a bug or international travel, use the buttons in the \"completed\" column make them uncompleted without losing gold, experience, etc.</dd>" +
-// "<dt>Unable to Action Dailies</dt>" +
-// "<dd>If an emergency occurs and you can't complete some Dailies through no fault of your own, use the buttons in the \"completed\" column to mark the Dailies as done. This allows you to avoid punishment while not gaining gold, experience, etc. Alternatively, use the buttons in the \"start date\" column to change their start dates to tomorrow. Don't let yourself use these features when you don't need because being damaged by incomplete Dailies is an important part of Habitica's motivation!</dd>" +
-// "<dt>Consistent Tagging</dt>" +
-// "<dd>If you have tags for, for example, high, medium, and low priority, you can use this tool to ensure that all of your tasks are tagged with one of those. In the \"tasks not tagged with...\" drop-down menu, select all three of those tags at once. That will show you all tasks that do not have at least one of those tags. Then use the \"tags\" column to tag them!</dd>" +
-// '</dl>' +
-'   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
-'</div>' +
 '<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs and dateCreated strings">toggle developer data</div>' +
 '<table></table>'
 };
 
 function createTaskOverviewTable() {
-    // Use DataTables to build the table (the table tag must be
-    // visible first for layout to be correct):
     var notApplicable = '<span class="notApplicable">n/a</span>';
 
-    var tagsSelectorButtons = '';
-    $.each(user.tags, function(index, tag) {
-        tagsNames[tag.id] = tag.name;
-        tagsSelectorButtons += '<button class="selector"' +
-        ' data-newvalue="' + tag.id + '"' +
-        '>' + renderFormattedText(tag.name) + '</button><br />\n';
-    });
-
+    // Use DataTables to build the table (the table tag must be
+    // visible first for layout to be correct):
     $('#taskOverviewSection').show();
     $('#taskOverviewSection table').dataTable({
         'aaData': allTasks,
@@ -1116,44 +1096,57 @@ function createTaskOverviewTable() {
               return;
             }
             else if (type === 'display') {
-                if (source.metaType === 'undated') {
+                if (source.type === 'habit' || source.type === 'reward') {
                     return notApplicable;
-                }
-                var tid = source.order; // temporary task ID
-                if (source.type === 'todo') {
-                    return (source.completed ? 'yes' : 'no');
-                }
-                return '<div>' +
-                    '<span id="completedToggle' + tid +
-                        '" class="showHideToggle deemphasised"' +
-                        ' data-target="completed' + tid + '">' +
-                        (source.completed ? 'yes' : 'no') +
-                    '</span>' +
-                    '<div id="completed' + tid + '" class="pane hide"' +
-                        ' data-task="' + source.id + '"' +
-                        ' data-field="completed"' +
-                        //  ((source.type === 'todo') ?
-                        //     'data-fieldextra="dateCompleted"' : '') +
-                        ' data-type="boolean"' +
-                        ' data-output="completedToggle' + tid + '"' +
-                    '>' +
-                        '<a class="paneCloser">x</a>' +
-                        '<div class="status"></div>' +
-                        '<button class="selector"' +
-                            ' data-newvalue="true"' +
-                            '>yes</button><br />' +
-                        '<button class="selector"' +
-                            ' data-newvalue="false"' +
-                            '>no</button><br />' +
-                    '</div>' +
-                    '</div>';
-            }
-            else {
-                if (source.metaType === 'undated') {
-                    return '';
                 }
                 return source.completed ? 'yes' : 'no';
             }
+            else {
+                if (source.type === 'habit' || source.type === 'reward') {
+                    return notApplicable;
+                }
+                return source.completed ? 'yes' : 'no';
+            }
+
+            // else if (type === 'display') {
+            //  if (source.metaType === 'undated') {
+            //      return notApplicable;
+            //  }
+            //  var tid = source.order; // temporary task ID
+            //  if (source.type === 'todo') {
+            //      return (source.completed ? 'yes' : 'no');
+            //  }
+            //  return '<div>' +
+            //      '<span id="completedToggle' + tid +
+            //          '" class="showHideToggle deemphasised"' +
+            //          ' data-target="completed' + tid + '">' +
+            //          (source.completed ? 'yes' : 'no') +
+            //      '</span>' +
+            //      '<div id="completed' + tid + '" class="pane hide"' +
+            //          ' data-task="' + source.id + '"' +
+            //          ' data-field="completed"' +
+            //          //  ((source.type === 'todo') ?
+            //          //     'data-fieldextra="dateCompleted"' : '') +
+            //          ' data-type="boolean"' +
+            //          ' data-output="completedToggle' + tid + '"' +
+            //      '>' +
+            //          '<a class="paneCloser">x</a>' +
+            //          '<div class="status"></div>' +
+            //          '<button class="selector"' +
+            //              ' data-newvalue="true"' +
+            //              '>yes</button><br />' +
+            //          '<button class="selector"' +
+            //              ' data-newvalue="false"' +
+            //              '>no</button><br />' +
+            //      '</div>' +
+            //      '</div>';
+            // }
+            // else {
+            //  if (source.metaType === 'undated') {
+            //      return '';
+            //  }
+            //  return source.completed ? 'yes' : 'no';
+            // }
        }
     },
 
@@ -1281,7 +1274,6 @@ function createTaskOverviewTable() {
 
     { 'sTitle': 'tags',  'sClass': 'center', 'sWidth': '10%',
       'mData' : function ( source, type, val ) {
-            var tagsInfo = tagsForTaskId[source.id];
             if (type === 'set') {
                 return;
             }
@@ -1292,6 +1284,7 @@ function createTaskOverviewTable() {
                         '" class="showHideToggle deemphasised"' +
                         ' data-target="tags' + tid + '">' +
                         displayNumberOfTagsForTask(source.id) +
+                        // (displayTagNamesForTask(source.id, {formatText:true}) || 'none') + // TST
                     '</span>' +
                     '<div id="tags' + tid + '" class="pane hide"' +
                         ' data-task="' + source.id + '"' +
@@ -1415,10 +1408,6 @@ body {
 .notApplicable {
     color: grey;
     font-style: italic;
-}
-
-.narrowContent {      /* The data should be as wide as the user's window   */
-    max-width: 500px; /* but some explanatory paragraphs should be narrow. */
 }
 
 
@@ -1677,8 +1666,8 @@ h2 {
     max-width: 60px !important;
 }
 #taskOverviewSection table td p {
-	margin-top: 0.2em;
-	margin-bottom: 0.4em;
+    margin-top: 0.2em;
+    margin-bottom: 0.4em;
 }
 #taskOverviewSection h3 {
     margin-top: 3em;
@@ -1758,7 +1747,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Task Adjustor
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.4)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.5)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -1782,6 +1771,25 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
+        <dt>0.5 <span class="date">2016-04-24</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>Added a notification that tells you when a bug might be affecting sorting in your account (<a href="http://i.imgur.com/goNbot4.png">example message</a>). If the bug doesn't affect you, you won't see any part of that message.</li>
+                </ul>
+            </li>
+            <li>Bug:
+                <ul>
+                    <li>Fixed (I think) a bug that was totally messing up tags on your task when you changed a tag with this tool.</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>Updated for API v3.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>0.4 <span class="date">2016-04-24</span></dt>
         <dd><ul>
             <li>Bug fix:
@@ -1795,7 +1803,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>0.3 <span class="date">2016-04-23</span></dt>
         <dd><ul>
             <li>Feature:
@@ -1804,7 +1811,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>0.2 <span class="date">2016-04-11</span></dt>
         <dd><ul>
             <li>Bug fix:
@@ -1813,7 +1819,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>0.1 <span class="date">2016-04-10</span></dt>
         <dd><ul>
             <li>Features:
@@ -1828,6 +1833,21 @@ h2 {
 </div><!-- end of div id="versionChanges" -->
 
 <p id="taskNumberMessage" class="warning hide"></p>
+
+<p><a id="taskOverviewExplanationToggle" class="showHideToggle" data-target="taskOverviewExplanation" data-linktext="explanation">show explanation</a></p>
+<div id="taskOverviewExplanation" class="hide">
+<p style="font-style: italic;">Before using this tool, it's recommended to first you export your data to a backup file using the Habitica website's <strong>Data > Export Data > User Data > JSON</strong> feature and then afterwards, check that your changes are correct in Habitica. If any problems occur, email <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> for help.<br /></p>
+<p>The table below shows your tasks (Habits, Dailies, To-Dos, and Rewards) with some of their settings.</p>
+<p>Click on any setting that is <span class="showHideToggleClass deemphasised" style="cursor:auto">underlined like this</span> to see buttons for changing it. <strong>As soon as you have clicked on a button, the change will be sent to Habitica. For challenge tasks, most settings can't be changed.</strong></p>
+<p>When a task has been changed, <span class="uncertain">its background will change to this colour</span>. This indicates that the other information presented for that task might now be <strong>incorrect</strong>. For example, if you change the Start Date for a Daily, the "due today" field will probably be incorrect. Filtering will also not use the new information. To see correct data, use the "Re-Fetch Data" button at the top of the page. However, you don't <strong>have</strong> to fetch data immediately - you can first edit other fields for that task.</p>
+<p><span class="subheading">Dates:</span> When typing a date, use the format <strong>yyyy-mm-dd</strong>. In future, there will probably be a calendar picker.</p>
+<p><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in Habitica.</p>
+<p><span class="subheading">Filtering:</span> Use the drop-down menus to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you'll see after you've chosen a filter to remove that filter.</p>
+<p style="margin-bottom:0.3em"><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul style="margin-top:0"><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all Habits that contain the word "balloon".</li></ul></p>
+   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>
+</div>
+
+<div id="taskOrderErrorsMessage" class="warning hide"></div>
 
 <div id="MAIN"></div>
 
