@@ -388,24 +388,7 @@ var urls = {
 ////   Global Variables                              /////////////////
 //////////////////////////////////////////////////////////////////////
 var content; // holds site-wide content (gear names and stats, quests, etc)
-
-
-//////////////////////////////////////////////////////////////////////
-////   Global Connection Variables      //////////////////////////////
-//////////////////////////////////////////////////////////////////////
-var serverName        = 'Habitica'; // used in "loading" message
-var serverUrl         = 'https://habitica.com:443/api/v2';
-var serverPathContent = '/content';
-var serverPathUser    = '/user';
-var userId            = '';
-var apiToken          = '';
-
-/* TST - FOR TESTING:
-$('body').css({'background-color':'#C4B4A4'});
-serverName        = 'localhost';
-serverUrl         = 'http://localhost';
-serverPathContent = '/cgi-bin/hrpg_content.pl';
-*/
+var serverUrl = 'https://habitica.com:443/api/v3';
 
 
 //////////////////////////////////////////////////////////////////////
@@ -413,7 +396,6 @@ serverPathContent = '/cgi-bin/hrpg_content.pl';
 //////////////////////////////////////////////////////////////////////
 fetchData();
 function fetchData() {
-    $('#loading #serverName').text(serverName);
     $('#loading .good').show();
     $('#loading .bad' ).hide();
 
@@ -421,7 +403,7 @@ function fetchData() {
 
     // fetch the site-wide content (gear names and stats, etc):
     $.ajax({
-        url: serverUrl + serverPathContent,
+        url: serverUrl + '/content',
         type: 'GET',
         dataType: 'json',
         cache: true,
@@ -434,7 +416,7 @@ function fetchData() {
         $('#loading .bad' ).show();
     }
     function fetchContentSuccess(data) {
-        content = data;
+        content = data.data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -838,13 +820,12 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(last updated 1 August 2016)</span></h1><!-- VERSION -->
+    <span>(last updated 2 August 2016)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
     <div class="good hide">
-        <p>Please wait. Fetching data from
-        <span id="serverName">Habitica</span>...</p>
+        <p>Please wait. Fetching data from Habitica...</p>
     </div>
     <div class="bad hide">
         <p>There was an error obtaining the data.</p>
