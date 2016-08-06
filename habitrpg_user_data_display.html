@@ -2328,7 +2328,11 @@ randomTodoHtml
 '<div id="dailiesHistoryExplanation" class="hide">' +
 '    <p>The table below shows historical data for your Dailies. If you are a subscriber, you will see data for every day going back to the date on which you subscribed. If you are not a subscriber, you will see data for every day for the past week, but before that your data points start to be merged together (this is to save on expensive database storage space). In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the Daily, even if it was a ' +
 wiki('Dailies#Grey_Dailies', 'Grey Daily') +
-'.</li><li><span class="danger">x</span> You did not tick off the Daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the Daily but you took no damage from it for several possible reasons (the Daily was not due that day; you ticked off all of the ' +
+', or you left the Daily incomplete but cast ' +
+wiki('Healer#Skills', 'Searing Brightness') +
+' or ' +
+wiki('Warrior#Skills', 'Brutal Smash') +
+' on it.</li><li><span class="danger">x</span> You did not tick off the Daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the Daily but you took no damage from it for several possible reasons (the Daily was not due that day; you ticked off all of the ' +
 wiki('Checklist#Dailies', 'checklist') +
 ' items under that Daily, although not the Daily itself; you evaded the Daily with ' +
 wiki('Rogue#Skills', 'Stealth') + '; you were ' +
@@ -5109,16 +5113,14 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.3)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
 <p style="font-size:18px; color:orange"><strong>If you are unable to use Habitica, please try with this alternative URL: <a href="https://habitrpg.herokuapp.com/">https://habitrpg.herokuapp.com/</a></strong></p>
-
 <p><i>The usual website is down because the Domain Registrar company that we use is having problems.</i></p>
 <hr class="clear" />
 -->
-
 <div id="loading">
     <div class="good hide">
         <p>Please wait. Fetching data from
@@ -5139,10 +5141,18 @@ ul#tableOfContents > li {
         </ul>
     </div>
 </div>
-
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>8.3 <span class="date">2016-08-07</span></dt>
+        <dd><ul>
+            <li>Documentation:
+                <ul>
+                    <li>Added a note to the explanation in the Dailies History section to explain that a Daily can appear to have been completed on a day when it wasn't if a skill had been used to increase the task's value.</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>8.2 <span class="date">2016-07-23</span></dt>
         <dd><ul>
@@ -5152,7 +5162,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>8.1 <span class="date">2016-07-14</span></dt>
         <dd><ul>
             <li>Feature:
