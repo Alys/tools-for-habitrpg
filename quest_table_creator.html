@@ -36,6 +36,72 @@ $(function() { // wraps around all our code to not pollute global namespace
 
 var wikiaBaseUrl = 'http://habitica.wikia.com/wiki/';
 
+//////////////////////////////////////////////////////////////////////
+////   RELEASE DATES FOR QUEST SCROLLS                 ///////////////
+//////////////////////////////////////////////////////////////////////
+var startOfTime = '2015-11';
+var releaseDates = {
+    'dilatory': startOfTime,
+    'stressbeast': startOfTime,
+    'burnout': startOfTime,
+    'evilsanta': startOfTime,
+    'evilsanta2': startOfTime,
+    'gryphon': startOfTime,
+    'hedgehog': startOfTime,
+    'ghost_stag': startOfTime,
+    'vice1': startOfTime,
+    'vice2': startOfTime,
+    'vice3': startOfTime,
+    'egg': startOfTime,
+    'rat': startOfTime,
+    'octopus': startOfTime,
+    'dilatory_derby': startOfTime,
+    'atom1': startOfTime,
+    'atom2': startOfTime,
+    'atom3': startOfTime,
+    'harpy': startOfTime,
+    'rooster': startOfTime,
+    'spider': startOfTime,
+    'moonstone1': startOfTime,
+    'moonstone2': startOfTime,
+    'moonstone3': startOfTime,
+    'goldenknight1': startOfTime,
+    'goldenknight2': startOfTime,
+    'goldenknight3': startOfTime,
+    'basilist': startOfTime,
+    'owl': startOfTime,
+    'penguin': startOfTime,
+    'trex': startOfTime,
+    'trex_undead': startOfTime,
+    'rock': startOfTime,
+    'bunny': startOfTime,
+    'slime': startOfTime,
+    'sheep': startOfTime,
+    'kraken': startOfTime,
+    'whale': startOfTime,
+    'dilatoryDistress1': startOfTime,
+    'dilatoryDistress2': startOfTime,
+    'dilatoryDistress3': startOfTime,
+    'cheetah': startOfTime,
+    'horse': startOfTime,
+    'frog': startOfTime,
+    'snake': startOfTime,
+    'unicorn': '2015-12',
+    'sabretooth' : '2016-01',
+    'monkey' : '2016-02',
+    'snail' : '2016-03',
+    'falcon' : '2016-04',
+    'bewilder' : '2016-04',
+    'treeling' : '2016-05',
+    'axolotl' : '2016-06',
+    'turtle' : '2016-07',
+};
+// get the current month's date in case the latest quest
+// hasn't been added above yet:
+var d = new Date();
+var month = d.getMonth() + 1;
+var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
+
 
 //////////////////////////////////////////////////////////////////////
 ////   SCROLL IMAGE FILE NAMES FOR EACH QUEST          ///////////////
@@ -119,88 +185,12 @@ var rewardPageUrls = {
     'armor_special_2': 'Jean_Chalard%27s_Noble_Tunic',
 };
 
-//////////////////////////////////////////////////////////////////////
-////   RELEASE DATES FOR QUEST SCROLLS                 ///////////////
-//////////////////////////////////////////////////////////////////////
-var startOfTime = '2015-11';
-var releaseDates = {
-    'dilatory': startOfTime,
-    'stressbeast': startOfTime,
-    'burnout': startOfTime,
-    'evilsanta': startOfTime,
-    'evilsanta2': startOfTime,
-    'gryphon': startOfTime,
-    'hedgehog': startOfTime,
-    'ghost_stag': startOfTime,
-    'vice1': startOfTime,
-    'vice2': startOfTime,
-    'vice3': startOfTime,
-    'egg': startOfTime,
-    'rat': startOfTime,
-    'octopus': startOfTime,
-    'dilatory_derby': startOfTime,
-    'atom1': startOfTime,
-    'atom2': startOfTime,
-    'atom3': startOfTime,
-    'harpy': startOfTime,
-    'rooster': startOfTime,
-    'spider': startOfTime,
-    'moonstone1': startOfTime,
-    'moonstone2': startOfTime,
-    'moonstone3': startOfTime,
-    'goldenknight1': startOfTime,
-    'goldenknight2': startOfTime,
-    'goldenknight3': startOfTime,
-    'basilist': startOfTime,
-    'owl': startOfTime,
-    'penguin': startOfTime,
-    'trex': startOfTime,
-    'trex_undead': startOfTime,
-    'rock': startOfTime,
-    'bunny': startOfTime,
-    'slime': startOfTime,
-    'sheep': startOfTime,
-    'kraken': startOfTime,
-    'whale': startOfTime,
-    'dilatoryDistress1': startOfTime,
-    'dilatoryDistress2': startOfTime,
-    'dilatoryDistress3': startOfTime,
-    'cheetah': startOfTime,
-    'horse': startOfTime,
-    'frog': startOfTime,
-    'snake': startOfTime,
-    'unicorn': '2015-12',
-    'sabretooth' : '2016-01',
-};
-// get the current month's date in case the latest quest
-// hasn't been added above yet:
-var d = new Date();
-var month = d.getMonth() + 1;
-var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
-
 
 //////////////////////////////////////////////////////////////////////
 ////   Global Variables                              /////////////////
 //////////////////////////////////////////////////////////////////////
 var content; // holds site-wide content (gear names and stats, quests, etc)
-
-
-//////////////////////////////////////////////////////////////////////
-////   Global Connection Variables      //////////////////////////////
-//////////////////////////////////////////////////////////////////////
-var serverName        = 'Habitica'; // used in "loading" message
-var serverUrl         = 'https://habitica.com:443/api/v2';
-var serverPathContent = '/content';
-var serverPathUser    = '/user';
-var userId            = '';
-var apiToken          = '';
-
-/* TST - FOR TESTING:
-$('body').css({'background-color':'#C4B4A4'});
-serverName        = 'localhost';
-serverUrl         = 'http://localhost';
-serverPathContent = '/cgi-bin/hrpg_content.pl';
-*/
+var serverUrl = 'https://habitica.com:443/api/v3';
 
 
 //////////////////////////////////////////////////////////////////////
@@ -208,13 +198,12 @@ serverPathContent = '/cgi-bin/hrpg_content.pl';
 //////////////////////////////////////////////////////////////////////
 fetchData();
 function fetchData() {
-    $('#loading #serverName').text(serverName);
     $('#loading .good').show();
     $('#loading .bad' ).hide();
 
     // fetch the site-wide content (quest names and stats, etc):
     $.ajax({
-        url: serverUrl + serverPathContent,
+        url: serverUrl + '/content',
         type: 'GET',
         dataType: 'json',
         cache: true,
@@ -227,7 +216,7 @@ function fetchData() {
         $('#loading .bad' ).show();
     }
     function fetchContentSuccess(data) {
-        content = data;
+        content = data.data;
         parseData();
     }
 }
@@ -774,7 +763,7 @@ function parseData() {
                     '<li>This is a close-to-final draft of information produced automatically for one or more wiki quest table pages.</li>' +
                     '<li>Tell Alys if you want to propose changes.</li>' +
 
-                    '<li>The <strong>length</strong>, <strong>difficulty</strong>, and <strong>rating</strong> columns do appear on the wiki but are included in the table below to help us categorise the quests into pages.</li>' +
+                    '<li>The <strong>length</strong>, <strong>difficulty</strong>, and <strong>rating</strong> columns do not appear on the wiki but are included in the table below to help us categorise the quests into pages.</li>' +
                     '<li>The <strong>release date</strong> column does not appear on the wiki. It is used here only to help us work out which pages need to be updated when a new quest is released, and so exact release dates for most of the quests are not included.</li>' +
                     ((includeQuestId) ?
                         '<li>The <strong>quest ID</strong> column will not appear on the wiki. It is purely for Alys\'s benefit when setting up the data in the script.</li>' : '') +
@@ -1044,13 +1033,12 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 21 January 2016)</span></h1><!-- VERSION -->
+    <span>(last updated 2 August 2016)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
     <div class="good hide">
-        <p>Please wait. Fetching data from
-        <span id="serverName">Habitica</span>...</p>
+        <p>Please wait. Fetching data from Habitica...</p>
     </div>
     <div class="bad hide">
         <p>There was an error obtaining the data.</p>

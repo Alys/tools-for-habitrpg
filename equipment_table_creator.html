@@ -35,6 +35,100 @@ Contributors:
 $(function() { // wraps around all our code to not pollute global namespace
 
 
+//////////////////////////////////////////////////////////////////////
+////   	EQUIPMENT TO BE IGNORED (e.g., not released yet)    //////////
+//////////////////////////////////////////////////////////////////////
+var ignore = {
+    'armor_special_takeThis' : true,
+    'head_special_takeThis' : true,
+    'body_special_takeThis' : true,
+    'back_special_takeThis' : true,
+    'weapon_special_3' : true, // only for Kickstarter backers and similar to shield_special_goldenknight
+};
+
+//////////////////////////////////////////////////////////////////////
+////   RELEASE DATES FOR ENCHANTED ARMOIRE ITEMS       ///////////////
+//////////////////////////////////////////////////////////////////////
+var releaseDates = {
+    'weapon_armoire_basicCrossbow' : '2015-06',
+    'weapon_armoire_lunarSceptre' : '2015-06',
+    'armor_armoire_lunarArmor' : '2015-06',
+    'armor_armoire_gladiatorArmor' : '2015-06',
+    'head_armoire_redHairbow' : '2015-06',
+    'head_armoire_violetFloppyHat' : '2015-06',
+    'head_armoire_gladiatorHelm' : '2015-06',
+    'head_armoire_rancherHat' : '2015-06',
+    'shield_armoire_gladiatorShield' : '2015-06',
+    'head_armoire_lunarCrown' : '2015-06',
+    'weapon_armoire_rancherLasso' : '2015-07',
+    'head_armoire_blueHairbow' : '2015-07',
+    'armor_armoire_rancherRobes' : '2015-07',
+    'head_armoire_royalCrown' : '2015-07',
+    'armor_armoire_goldenToga' : '2015-08',
+    'armor_armoire_hornedIronArmor' : '2015-08',
+    'head_armoire_goldenLaurels' : '2015-08',
+    'head_armoire_hornedIronHelm' : '2015-08',
+    'weapon_armoire_ironCrook' : '2015-08',
+    'weapon_armoire_mythmakerSword' : '2015-08',
+    'head_armoire_redFloppyHat' : '2015-09',
+    'weapon_armoire_goldWingStaff' : '2015-09',
+    'armor_armoire_plagueDoctorOvercoat' : '2015-09',
+    'head_armoire_yellowHairbow' : '2015-09',
+    'head_armoire_plagueDoctorHat' : '2015-09',
+    'eyewear_armoire_plagueDoctorMask' : '2015-09',
+    'weapon_armoire_batWand' : '2015-10',
+    'head_armoire_blackCat' : '2015-10',
+    'head_armoire_orangeCat' : '2015-10',
+    'shield_armoire_midnightShield' : '2015-10',
+    'weapon_armoire_shepherdsCrook' : '2015-11',
+    'armor_armoire_shepherdRobes' : '2015-11',
+    'armor_armoire_royalRobes' : '2015-11',
+    'head_armoire_blueFloppyHat' : '2015-11',
+    'head_armoire_shepherdHeaddress' : '2015-11',
+    'shield_armoire_royalCane' : '2015-11',
+    'weapon_armoire_crystalCrescentStaff' : '2015-12',
+    'weapon_armoire_blueLongbow' : '2015-12',
+    'armor_armoire_crystalCrescentRobes' : '2015-12',
+    'head_armoire_crystalCrescentHat' : '2015-12',
+    'armor_armoire_dragonTamerArmor' : '2016-01',
+    'head_armoire_dragonTamerHelm' : '2016-01',
+    'shield_armoire_dragonTamerShield' : '2016-01',
+    'weapon_armoire_glowingSpear' : '2016-01',
+    'weapon_armoire_barristerGavel' : '2016-02',
+    'weapon_armoire_jesterBaton' : '2016-02',
+    'armor_armoire_barristerRobes' : '2016-02',
+    'armor_armoire_jesterCostume' : '2016-02',
+    'head_armoire_barristerWig' : '2016-02',
+    'head_armoire_jesterCap' : '2016-02',
+    'weapon_armoire_miningPickax' : '2016-03',
+    'armor_armoire_minerOveralls' : '2016-03',
+    'head_armoire_minerHelmet' : '2016-03',
+    'shield_armoire_mysticLamp' : '2016-03',
+    'weapon_armoire_basicLongbow' : '2016-04',
+    'armor_armoire_basicArcherArmor' : '2016-04',
+    'head_armoire_basicArcherCap' : '2016-04',
+    'headAccessory_armoire_comicalArrow' : '2016-04',
+    'weapon_armoire_habiticanDiploma' : '2016-05',
+    'armor_armoire_graduateRobe' : '2016-05',
+    'head_armoire_graduateCap' : '2016-05',
+    'shield_armoire_floralBouquet' : '2016-05',
+    'weapon_armoire_sandySpade' : '2016-06',
+    'armor_armoire_stripedSwimsuit' : '2016-06',
+    'head_armoire_greenFloppyHat' : '2016-06',
+    'shield_armoire_sandyBucket' : '2016-06',
+    'weapon_armoire_cannon' : '2016-07',
+    'armor_armoire_cannoneerRags' : '2016-07',
+    'head_armoire_cannoneerBandanna' : '2016-07',
+    'armor_armoire_falconerArmor' : '2016-08',
+    'head_armoire_falconerCap' : '2016-08',
+    'shield_armoire_perchingFalcon' : '2016-08',
+};
+// get the current month's date in case the latest Enchanted Armoire
+// items haven't been added above yet:
+var d = new Date();
+var month = d.getMonth() + 1;
+var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
+
 
 //////////////////////////////////////////////////////////////////////
 ////   IMAGE FILE NAMES FOR EACH EQUIPMENT PIECE       ///////////////
@@ -292,84 +386,12 @@ var urls = {
     'shield_special_fallHealer' : 'Fall_Festival#Special_Class_Gear'
 };
 
-//////////////////////////////////////////////////////////////////////
-////   RELEASE DATES FOR ENCHANTED ARMOIRE ITEMS       ///////////////
-//////////////////////////////////////////////////////////////////////
-var releaseDates = {
-    'weapon_armoire_basicCrossbow' : '2015-06',
-    'weapon_armoire_lunarSceptre' : '2015-06',
-    'armor_armoire_lunarArmor' : '2015-06',
-    'armor_armoire_gladiatorArmor' : '2015-06',
-    'head_armoire_redHairbow' : '2015-06',
-    'head_armoire_violetFloppyHat' : '2015-06',
-    'head_armoire_gladiatorHelm' : '2015-06',
-    'head_armoire_rancherHat' : '2015-06',
-    'shield_armoire_gladiatorShield' : '2015-06',
-    'head_armoire_lunarCrown' : '2015-06',
-    'weapon_armoire_rancherLasso' : '2015-07',
-    'head_armoire_blueHairbow' : '2015-07',
-    'armor_armoire_rancherRobes' : '2015-07',
-    'head_armoire_royalCrown' : '2015-07',
-    'armor_armoire_goldenToga' : '2015-08',
-    'armor_armoire_hornedIronArmor' : '2015-08',
-    'head_armoire_goldenLaurels' : '2015-08',
-    'head_armoire_hornedIronHelm' : '2015-08',
-    'weapon_armoire_ironCrook' : '2015-08',
-    'weapon_armoire_mythmakerSword' : '2015-08',
-    'head_armoire_redFloppyHat' : '2015-09',
-    'weapon_armoire_goldWingStaff' : '2015-09',
-    'armor_armoire_plagueDoctorOvercoat' : '2015-09',
-    'head_armoire_yellowHairbow' : '2015-09',
-    'head_armoire_plagueDoctorHat' : '2015-09',
-    'eyewear_armoire_plagueDoctorMask' : '2015-09',
-    'weapon_armoire_batWand' : '2015-10',
-    'head_armoire_blackCat' : '2015-10',
-    'head_armoire_orangeCat' : '2015-10',
-    'shield_armoire_midnightShield' : '2015-10',
-    'weapon_armoire_shepherdsCrook' : '2015-11',
-    'armor_armoire_shepherdRobes' : '2015-11',
-    'armor_armoire_royalRobes' : '2015-11',
-    'head_armoire_blueFloppyHat' : '2015-11',
-    'head_armoire_shepherdHeaddress' : '2015-11',
-    'shield_armoire_royalCane' : '2015-11',
-    'weapon_armoire_crystalCrescentStaff' : '2015-12',
-    'weapon_armoire_blueLongbow' : '2015-12',
-    'armor_armoire_crystalCrescentRobes' : '2015-12',
-    'head_armoire_crystalCrescentHat' : '2015-12',
-    'armor_armoire_dragonTamerArmor' : '2016-01',
-    'head_armoire_dragonTamerHelm' : '2016-01',
-    'shield_armoire_dragonTamerShield' : '2016-01',
-    'weapon_armoire_glowingSpear' : '2016-01',
-};
-// get the current month's date in case the latest Enchanted Armoire
-// items haven't been added above yet:
-var d = new Date();
-var month = d.getMonth() + 1;
-var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
-
 
 //////////////////////////////////////////////////////////////////////
 ////   Global Variables                              /////////////////
 //////////////////////////////////////////////////////////////////////
 var content; // holds site-wide content (gear names and stats, quests, etc)
-
-
-//////////////////////////////////////////////////////////////////////
-////   Global Connection Variables      //////////////////////////////
-//////////////////////////////////////////////////////////////////////
-var serverName        = 'Habitica'; // used in "loading" message
-var serverUrl         = 'https://habitica.com:443/api/v2';
-var serverPathContent = '/content';
-var serverPathUser    = '/user';
-var userId            = '';
-var apiToken          = '';
-
-/* TST - FOR TESTING:
-$('body').css({'background-color':'#C4B4A4'});
-serverName        = 'localhost';
-serverUrl         = 'http://localhost';
-serverPathContent = '/cgi-bin/hrpg_content.pl';
-*/
+var serverUrl = 'https://habitica.com:443/api/v3';
 
 
 //////////////////////////////////////////////////////////////////////
@@ -377,7 +399,6 @@ serverPathContent = '/cgi-bin/hrpg_content.pl';
 //////////////////////////////////////////////////////////////////////
 fetchData();
 function fetchData() {
-    $('#loading #serverName').text(serverName);
     $('#loading .good').show();
     $('#loading .bad' ).hide();
 
@@ -385,7 +406,7 @@ function fetchData() {
 
     // fetch the site-wide content (gear names and stats, etc):
     $.ajax({
-        url: serverUrl + serverPathContent,
+        url: serverUrl + '/content',
         type: 'GET',
         dataType: 'json',
         cache: true,
@@ -398,7 +419,7 @@ function fetchData() {
         $('#loading .bad' ).show();
     }
     function fetchContentSuccess(data) {
-        content = data;
+        content = data.data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -464,12 +485,8 @@ function parseData() {
     for (var i in allGear) {
         var obj = allGear[i];
 
-        if (obj.key == 'weapon_special_3') {
-      continue; // don't show items that aren't released yet
-                // or weird items like weapon_special_3 which
-                // is only for Kickstarter backers and is
-                // similar to shield_special_goldenknight
-                // XXX probably do want to show that now
+        if (ignore[obj.key]) {
+      continue;
         }
 
         // if (obj.key == 'weapon_warrior_0' ||
@@ -806,13 +823,12 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(last updated 21 January 2016)</span></h1><!-- VERSION -->
+    <span>(last updated 5 August 2016)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
     <div class="good hide">
-        <p>Please wait. Fetching data from
-        <span id="serverName">Habitica</span>...</p>
+        <p>Please wait. Fetching data from Habitica...</p>
     </div>
     <div class="bad hide">
         <p>There was an error obtaining the data.</p>

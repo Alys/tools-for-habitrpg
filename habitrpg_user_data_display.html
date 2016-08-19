@@ -58,14 +58,14 @@ you'll find there.
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script> <!-- https://github.com/chjj/marked -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/1.6.2/remarkable.min.js"></script>
     <script src="js/DataTables/media/js/jquery.dataTables.js"></script>
     <script src="js/DataTables/extras/ColumnFilterWidgets/media/js/ColumnFilterWidgets.js"></script>
     <script src="js/emoji-images/emoji-images.js"></script>
 
     <!-- TST - FOR TESTING
     For more information on using jquery-mockjax for simulating ajax requests, see https://github.com/jakerella/jquery-mockjax
-    --><!--
+    --><!--  The testdata files have not been updated for API v3. If you'd like to update and use them, you're welcome to submit a PR for them!
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mockjax/1.5.3/jquery.mockjax.min.js" type="text/javascript"></script>
     <script src="testdata/content.js" type="text/javascript"></script>
     <script src="testdata/habits-many.js" type="text/javascript"></script>
@@ -81,24 +81,34 @@ $(function() { // wraps around all our code to not pollute global namespace
 //////////////////////////////////////////////////////////////////////
 ////   Global Variables                              /////////////////
 //////////////////////////////////////////////////////////////////////
-var content; // holds site-wide content (gear names and stats, quests, etc)
-var tavern;  // holds tavern data
-var party;   // holds party data
-var user;    // holds user's data
+var content;  // holds site-wide content (gear names and stats, quests, etc)
+var tavern;   // holds tavern data
+var party;    // holds party data
+var user;     // holds user's data
+var tasksFromDb;          // holds user's tasks except for ...
+var completedTodosFromDb; // completed To-Dos
 
 
 //////////////////////////////////////////////////////////////////////
 ////   Global Connection Variables      //////////////////////////////
 //////////////////////////////////////////////////////////////////////
-var serverName        = 'Habitica'; // used in "loading" message
-var serverUrl         = 'https://habitica.com:443/api/v2';
-// serverUrl         = 'https://habitrpg.herokuapp.com:443/api/v2';
-var serverPathContent = '/content?language=en';
-var serverPathTavern  = '/groups/habitrpg';
-var serverPathParty   = '/groups/party';
-var serverPathUser    = '/user';
-var userId            = '';
-var apiToken          = '';
+var serverName               = 'Habitica'; // used in "loading" message
+var serverUrl                = 'https://habitica.com/api/v3';
+var serverPathContent        = '/content?language=en';
+var serverPathTavern         = '/groups/habitrpg';
+var serverPathParty          = '/groups/party';
+var serverPathUser           = '/user';
+var serverPathTasks          = '/tasks/user';
+var serverPathCompletedTodos = '/tasks/user?type=_allCompletedTodos';
+var userId                   = '';
+var apiToken                 = '';
+var debug                    = false;
+
+var markdown = new Remarkable({
+    'html':       false,
+    'linkify':    true,
+    'linkTarget': '_blank',
+});
 
 /* TST - FOR TESTING:
 // Use this section if you do not have a local webserver and want to use the provided test data.
@@ -127,20 +137,32 @@ $.mockjax({
   dataType: 'json',
   responseText: userJsonString,
 });
+$.mockjax({
+  url: serverUrl + serverPathTasks,
+  dataType: 'json',
+  responseText: tasksJsonString,
+});
+$.mockjax({
+  url: serverUrl + serverPathCompletedTodos,
+  dataType: 'json',
+  responseText: completedTodosJsonString,
+});
 */
 
 /* TST - FOR TESTING:
 // Use this section if you have a local webserver set up to handle the requests.
-serverName        = 'localhost';
-serverUrl         = 'http://localhost';
-serverPathTavern  = '/cgi-bin/hrpg_tavern.pl';
-serverPathParty   = '/cgi-bin/hrpg_party.pl';
-serverPathContent = '/cgi-bin/hrpg_content.pl';
-serverPathUser    = '/cgi-bin/hrpg_user.pl';
-apiToken          = 'null';
-userId            = 'test';
-userId            = 'work';
-userId            = 'home';
+serverName               = 'localhost';
+serverUrl                = 'http://localhost';
+serverPathTavern         = '/cgi-bin/hrpg_tavern.pl';
+serverPathParty          = '/cgi-bin/hrpg_party.pl';
+serverPathContent        = '/cgi-bin/hrpg_content.pl';
+serverPathUser           = '/cgi-bin/hrpg_user.pl';
+serverPathTasks          = '/cgi-bin/XXX.pl';
+serverPathTodosCompleted = '/cgi-bin/XXX.pl';
+apiToken                 = 'null';
+userId                   = 'test';
+userId                   = 'work';
+userId                   = 'home';
 */
 
 /* TST - FOR TESTING:
@@ -149,6 +171,7 @@ $('#userApiDetailsForm #userId').val(userId);
 $('#userApiDetailsForm #apiToken').val(apiToken);
 fetchData();
 */
+if (debug) console.log('debug 1');
 
 var sectionOpen = ''; // holds the ID attribute of a section of the page;
                       // persists through re-fetch of data so we can
@@ -244,6 +267,7 @@ $('#userApiDetailsForm').submit(function(event){
 ////   Login and Data Fetch Functions   //////////////////////////////
 //////////////////////////////////////////////////////////////////////
 function fetchData() {
+    if (debug) console.log('debug 2');
     if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' || // AliceHarris
         userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
     ) {
@@ -256,9 +280,9 @@ function fetchData() {
     $('#loading .good').show();
     $('#loading .bad' ).hide();
 
-    var ajaxRunningCount = 4; // drops to 0 when all calls have succeeded
+    var ajaxRunningCount = 6; // drops to 0 when all calls have succeeded
 
-    // fetch the user's own content (tasks, gear owned, etc):
+    // fetch the user's own content (gear owned, etc):
     $.ajax({
         url: serverUrl + serverPathUser,
         type: 'GET',
@@ -269,6 +293,34 @@ function fetchData() {
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
         success: fetchUserSuccess,
+        error: fetchFailure
+    });
+
+    // fetch the user's tasks (except completed To-Dos):
+    $.ajax({
+        url: serverUrl + serverPathTasks,
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            },
+        success: fetchTasksSuccess,
+        error: fetchFailure
+    });
+
+    // fetch the user's completed To-Dos:
+    $.ajax({
+        url: serverUrl + serverPathCompletedTodos,
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-api-user', userId);
+                xhr.setRequestHeader('x-api-key',  apiToken);
+            },
+        success: fetchCompletedTodosSuccess,
         error: fetchFailure
     });
 
@@ -307,39 +359,66 @@ function fetchData() {
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
         success: fetchPartySuccess,
-        error: fetchFailure,
+        error: function() { // assume no party
+            party = {}; // no party
+            ajaxRunningCount--;
+            if (ajaxRunningCount === 0) { // all ajax calls have finished
+                parseData();
+            }
+        },
     });
 
-
     function fetchFailure() {
+        if (debug) console.log('debug fetchFailure start');
         $('#loading .good').hide();
         $('#loading .bad' ).show();
         $('#documentationAndForm').show(); // in case user has done a re-fetch
         $('#documentationAndFormClose').hide();
+        if (debug) console.log('debug fetchFailure end');
     }
     function fetchContentSuccess(data) {
-        content = data;
+        if (debug) console.log('debug parseData Content success start');
+        content = data.data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
         }
     }
     function fetchTavernSuccess(data) {
-        tavern = data;
+        if (debug) console.log('debug parseData Tavern success start');
+        tavern = data.data; // XXX_LATER test for world boss
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
         }
     }
     function fetchPartySuccess(data) {
-        party = data;
+        if (debug) console.log('debug parseData Party success start');
+        party = data.data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
         }
     }
     function fetchUserSuccess(data) {
-        user = data;
+        if (debug) console.log('debug parseData User success start');
+        user = data.data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
+    }
+    function fetchTasksSuccess(data) {
+        if (debug) console.log('debug parseData Tasks success start');
+        tasksFromDb = data.data;
+        ajaxRunningCount--;
+        if (ajaxRunningCount === 0) { // all ajax calls have finished
+            parseData();
+        }
+    }
+    function fetchCompletedTodosSuccess(data) {
+        if (debug) console.log('debug parseData CompletedTodos success start');
+        completedTodosFromDb = data.data;
         ajaxRunningCount--;
         if (ajaxRunningCount === 0) { // all ajax calls have finished
             parseData();
@@ -347,10 +426,13 @@ function fetchData() {
     }
 }
 function parseData() {
+    if (debug) console.log('debug parseData start');
     // variables for storing the content:
     var MAIN = {}; // each element defines the HTML for one section on the page
     var TOC  = {}; // each element defines one Table of Contents entry
     var DASHBOARD = {}; // each element defines the HTML for one dashboard tile
+
+    convertTasksToApiV2Format();
 
     // save the fetch time early:
     var fetchtime = myDateConverter(new Date(), 'pretty');
@@ -360,10 +442,24 @@ function parseData() {
     var userKlass = user.stats.class;
     var health = getCurrentHealth(); // also sets dashboard tile
     var quest = {};
-    // user.party.quest.key='vice3'; party.quest.active=true; // FOR TESTING
-    if (user.party && user.party.quest && user.party.quest.key && party.quest && party.quest.active) {
-        quest = $.extend({}, user.party.quest);
-        quest.content = $.extend({}, content.quests[ party.quest.key ] );
+    var questProgressUp = 0;
+    var questProgressCollect = 0;
+    var userIsOnBossQuest = false;
+    var userIsOnCollectionQuest = false;
+    if (party && user.party && user.party.quest) {
+        if (party.quest && party.quest.active && party.quest.key && party.quest.members[userId]) {
+            quest = $.extend({}, user.party.quest);
+            quest.content = $.extend({}, content.quests[ party.quest.key ] );
+            if  (quest.content.collect) userIsOnCollectionQuest = true;
+            if (!quest.content.collect) userIsOnBossQuest = true;
+        }
+        if (user.party.quest.progress && user.party.quest.progress.up) {
+            // might not be in a quest but want to know damage done to world boss
+            questProgressUp = user.party.quest.progress.up;
+        }
+        if (user.party.quest.progress && user.party.quest.progress.collectedItems) {
+            questProgressCollect = user.party.quest.progress.collectedItems;
+        }
     }
     var customDayStart = user.preferences.dayStart || 0; // CDS
     var timezoneOffset = user.preferences.timezoneOffset || 0;
@@ -383,7 +479,7 @@ function parseData() {
 
     var bossesLabel = '';
     var bossesWord  = 'boss';
-    if (quest.content && quest.content.boss) {
+    if (userIsOnBossQuest) {
         bossesLabel = 'your quest boss';
         if (tavernBoss) {
             bossesLabel += ' and ';
@@ -405,7 +501,6 @@ function parseData() {
     var computedStats        = computeStats(true);  // computed CON, INT, etc
     var computedStatsNoBuffs = computeStats(false); // ... without buffs
     // XXX_SOON god my computedStats code is just getting worse and worse
-    var userIsOnCollectionQuest = false;
 
     // When calculating drop chance for a task, some of the user's stats
     // are used. We calculate those parts of the drop chance here since
@@ -590,7 +685,7 @@ function myDateConverter(date, style) { // XXX_SOON replace with moment
         date = new Date();
     }
 
-    if (style === 'pretty') {
+    if (style === 'XXX pretty') {
         // Format date as (weekday date month) and hh:mm:ss;
         // toDateString ordering might be locale-specific
         // var dateStr = date.toDateString().split(' ').slice(0,3).join(' ') +
@@ -681,11 +776,16 @@ function upperCaseFirst(word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-// This function decodes &nbsp; -> renders markdown -> escapes HTML entities -> and renders emoji
-function renderFormattedText(text) {
+function renderFormattedText(text, options) {
     function renderMarkdown(text) {
-        text = marked(text, {sanitize: true});
-        text = String(text).replace(/^<p>|<\/p>\n$/g, ''); // The bonus paragraph around every text snippet is unnecessary
+        text = markdown.render(text);
+        if (options && options.removeParaTags) {
+            text = String(text).replace(/^<p>|<\/p>\n$/g, '');
+        }
+        else if (options && options.setParaClass) {
+            text = String(text).replace(/<p>/g,
+                       '<p class="' + options.setParaClass + '">');
+        }
         return text;
     }
 
@@ -701,7 +801,8 @@ function renderFormattedText(text) {
 }
 
 function userDataInHeader() {
-    var displayName = renderFormattedText(user.profile.name);
+    var displayName =
+            renderFormattedText(user.profile.name, {'removeParaTags':true});
     if (userId == '3e595299-3d8a-4a10-bfe0-88f555e4aa0c' || // AliceHarris
         userId == 'e7b5d1e2-3b6e-4192-b867-8bafdb03eeec'    // Ryan
     ) {
@@ -831,6 +932,26 @@ function collateAndDisplayTaskData() {
     var todos          = todosAll[0];
     var todosCompleted = todosAll[1];
 
+    // in case where the user has no tasks, or no tasks of a specific type:
+    var nullTask = {text:'none', value:0, type:'habit', typePretty:'Habit'};
+    if (typeof bluestTask.value === "undefined") {
+        bluestTask   = $.extend({}, nullTask);
+    }
+    if (typeof reddestTask.value === "undefined") {
+        reddestTask  = $.extend({}, nullTask);
+    }
+    if (typeof reddestHabit.value === "undefined") {
+        reddestHabit = $.extend({}, nullTask);
+    }
+    if (typeof reddestDaily.value === "undefined") {
+        reddestDaily = $.extend({}, nullTask);
+        reddestDaily['type'] = 'daily';
+        reddestDaily['typePretty'] = 'Daily';
+    }
+    if (typeof biggestTask.value === "undefined") {
+        biggestTask  = $.extend({}, nullTask);
+    }
+
     // TO ADD NEW SECTION: if the section is related specifically to tasks,
     // here is probably where you want to put its function.
 
@@ -872,21 +993,23 @@ function collateAndDisplayTaskData() {
                 untaggedTasks['habits'].push(obj);
             }
 
-            if (typeof reddestHabit.value === "undefined" ||
-                obj.value < reddestHabit.value) {
-                reddestHabit = obj;
-            }
-            if (typeof reddestTask.value === "undefined" ||
-                obj.value < reddestTask.value) {
-                reddestTask = obj;
-            }
-            if (typeof bluestTask.value === "undefined" ||
-                obj.value > bluestTask.value) {
-                bluestTask = obj;
-            }
-            if (typeof biggestTask.value === "undefined" ||
-                Math.abs(obj.value) > Math.abs(biggestTask.value)) {
-                biggestTask = obj;
+            if (!obj.challenge || !obj.challenge.id) {
+                if (typeof reddestHabit.value === "undefined" ||
+                    obj.value < reddestHabit.value) {
+                    reddestHabit = obj;
+                }
+                if (typeof reddestTask.value === "undefined" ||
+                    obj.value < reddestTask.value) {
+                    reddestTask = obj;
+                }
+                if (typeof bluestTask.value === "undefined" ||
+                    obj.value > bluestTask.value) {
+                    bluestTask = obj;
+                }
+                if (typeof biggestTask.value === "undefined" ||
+                    Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+                    biggestTask = obj;
+                }
             }
         });
         return habits;
@@ -977,21 +1100,23 @@ function collateAndDisplayTaskData() {
             if (! taskIsTagged(obj.tags)) {
                 untaggedTasks['dailies'].push(obj);
             }
-            if (typeof reddestDaily.value === "undefined" ||
-                obj.value < reddestDaily.value) {
-                reddestDaily = obj;
-            }
-            if (typeof reddestTask.value === "undefined" ||
-                obj.value < reddestTask.value) {
-                reddestTask = obj;
-            }
-            if (typeof bluestTask.value === "undefined" ||
-                obj.value > bluestTask.value) {
-                bluestTask = obj;
-            }
-            if (typeof biggestTask.value === "undefined" ||
+            if (!obj.challenge || !obj.challenge.id) {
+                if (typeof reddestDaily.value === "undefined" ||
+                    obj.value < reddestDaily.value) {
+                    reddestDaily = obj;
+                }
+                if (typeof reddestTask.value === "undefined" ||
+                    obj.value < reddestTask.value) {
+                    reddestTask = obj;
+                }
+                if (typeof bluestTask.value === "undefined" ||
+                    obj.value > bluestTask.value) {
+                    bluestTask = obj;
+                }
+                if (typeof biggestTask.value === "undefined" ||
                 Math.abs(obj.value) > Math.abs(biggestTask.value)) {
-                biggestTask = obj;
+                    biggestTask = obj;
+                }
             }
         });
         return dailies;
@@ -1127,18 +1252,20 @@ function collateAndDisplayTaskData() {
                     untaggedTasks['todos'].push(obj);
                 }
             }
-            if (obj.completed == false) {
-                if (typeof reddestTask.value === "undefined" ||
-                    obj.value < reddestTask.value) {
-                    reddestTask = obj;
-                }
-                if (typeof bluestTask.value === "undefined" ||
-                    obj.value > bluestTask.value) {
-                    bluestTask = obj;
-                }
-                if (typeof biggestTask.value === "undefined" ||
-                    Math.abs(obj.value) > Math.abs(biggestTask.value)) {
-                    biggestTask = obj;
+            if (!obj.challenge || !obj.challenge.id) {
+                if (obj.completed == false) {
+                    if (typeof reddestTask.value === "undefined" ||
+                        obj.value < reddestTask.value) {
+                        reddestTask = obj;
+                    }
+                    if (typeof bluestTask.value === "undefined" ||
+                        obj.value > bluestTask.value) {
+                        bluestTask = obj;
+                    }
+                    if (typeof biggestTask.value === "undefined" ||
+                        Math.abs(obj.value) > Math.abs(biggestTask.value)) {
+                        biggestTask = obj;
+                    }
                 }
             }
         });
@@ -1161,15 +1288,15 @@ function collateAndDisplayTaskData() {
 
 
     function modifyTaskProperties(obj) {
-        obj.text = renderFormattedText(obj.text);
-        obj.notes = renderFormattedText(obj.notes);
+        obj.text  = renderFormattedText(obj.text, {'setParaClass':'taskName'});
+        obj.notes = renderFormattedText(obj.notes,{'setParaClass':'taskNote'});
         obj.attributePretty = obj.attribute.toUpperCase();
         obj.typePretty   = upperCaseFirst(
                 (obj.type == 'todo') ? 'To-Do' : obj.type );
         obj.valueRounded = Math.round(obj.value * 100) / 100;
         obj.magnitude    = Math.abs(obj.valueRounded);
         obj.order        = ++taskOrder;
-        obj.creation     = reformatDate(obj.dateCreated);
+        obj.creation     = reformatDate(obj.createdAt);
         obj.completion   = (obj.dateCompleted) ?
                            reformatDate(obj.dateCompleted) : {};
         obj.colour       = chooseColour(obj.value);
@@ -1180,6 +1307,11 @@ function collateAndDisplayTaskData() {
         obj.difficulty = chooseDifficulty(obj.priority);
         obj.attributesHTML = '<div class="taskAttributes ' + obj.type + '">' +
                              attributesHTML() + '</div>';
+
+        // compensate for bad history fields in Habits:
+        if (obj.type === 'habit' && ! obj.history) {
+            obj.history = [];
+        }
 
         // calculate drop chance:
         if (obj.type === 'habit' && obj.up === false) {
@@ -1286,11 +1418,7 @@ function collateAndDisplayTaskData() {
     function taskIsTagged(tagObj) { // returns true if tagged, false otherwise
         tagFound = false; // we have not yet found any valid tags for this task
         if (tagObj) {
-            $.each(tagObj, function(tagId, value){
-                if (value === false) {
-                    // this tag was once applied to the task, but no longer
-                    return true; // go to next iteration
-                }
+            $.each(tagObj, function(index, tagId){
                 if ($.inArray(tagId, knownTags) >= 0) {
                     tagFound = true;
                     return false; // break out of the loop
@@ -1322,7 +1450,7 @@ function collateAndDisplayTaskData() {
 '   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (Habits, Dailies, and To-Dos), with their ' + wiki('Advanced Options', 'attributes') + ' and ' + wiki('Task Value', 'colours, values, and magnitudes') + ' (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in Habitica.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all Habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</p>' +
 '   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
 '</div>' +
-'<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs and dateCreated strings">toggle developer data</div>' +
+'<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs and createdAt strings">toggle developer data</div>' +
 '<table></table>' +
 randomTodoHtml
 };
@@ -1401,7 +1529,7 @@ randomTodoHtml
                          source.creation.dateAndTime + '">' +
                          source.creation.shortDate +
                          '</abbr><span class="developerData"><br />' +
-                         source.dateCreated + '</span>';
+                         source.createdAt + '</span>';
                 }
                 else if (type === 'filter') {
                   return source.creation.dateAndTime;
@@ -1417,7 +1545,10 @@ randomTodoHtml
                 else if (type === 'display') {
                   return source.text +
                          '<span class="developerData"><br />' +
-                         source.id + '</span>' +
+                         source._id +
+                         (source.legacyId ? '<br />legacyId: ' +
+                          source.legacyId : '') +
+                         '</span>' +
                          source.attributesHTML;
                 }
                 else if (type === 'filter') {
@@ -1491,7 +1622,8 @@ randomTodoHtml
         }
         html += ' Note that attributes on tasks are only relevant if you ' +
             'have task-based ' + wiki('Automatic Allocation')
-            + ' turned on.</p><table><tr>' +
+            + ' turned on.</p>' +
+            '<table><tr>' +
             '<th>Attribute</th><th>Habits</th>' +
             '<th>Dailies - Due</th><th>Dailies - All</th>' +
             '<th>To-Dos - Incomplete</th><th>To-Dos - Complete *</th>' +
@@ -2012,7 +2144,7 @@ randomTodoHtml
             html += '<h3>Grey Dailies</h3><p>' +
                     pluralise('This', dailiesIncompleteGrey.length) + ' ' +
                     wiki('Dailies#Grey_Dailies', 'Grey ' +
-                        pluralise('Daily', dailiesIncompleteGrey.length)) + // XXX test
+                        pluralise('Daily', dailiesIncompleteGrey.length)) +
                     ' ' +
                     pluralise('is', dailiesIncompleteGrey.length) +
                     ' <span class="highlight">not</span> due today but' +
@@ -2196,7 +2328,11 @@ randomTodoHtml
 '<div id="dailiesHistoryExplanation" class="hide">' +
 '    <p>The table below shows historical data for your Dailies. If you are a subscriber, you will see data for every day going back to the date on which you subscribed. If you are not a subscriber, you will see data for every day for the past week, but before that your data points start to be merged together (this is to save on expensive database storage space). In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the Daily, even if it was a ' +
 wiki('Dailies#Grey_Dailies', 'Grey Daily') +
-'.</li><li><span class="danger">x</span> You did not tick off the Daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the Daily but you took no damage from it for several possible reasons (the Daily was not due that day; you ticked off all of the ' +
+', or you left the Daily incomplete but cast ' +
+wiki('Healer#Skills', 'Searing Brightness') +
+' or ' +
+wiki('Warrior#Skills', 'Brutal Smash') +
+' on it.</li><li><span class="danger">x</span> You did not tick off the Daily but you should have (it was due that day).</li><li><span class="neutral">-</span> You did not tick off the Daily but you took no damage from it for several possible reasons (the Daily was not due that day; you ticked off all of the ' +
 wiki('Checklist#Dailies', 'checklist') +
 ' items under that Daily, although not the Daily itself; you evaded the Daily with ' +
 wiki('Rogue#Skills', 'Stealth') + '; you were ' +
@@ -2285,7 +2421,8 @@ wiki('Tavern', 'resting in the inn') +
         var id      = 'todosCompletedSection';
         var title   = 'To-Dos Completed';
         var orderId = 'todosCompleted';
-        var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p><table></table>';
+        var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
+        '<table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'function': createTodosCompletedTable,
@@ -2528,11 +2665,12 @@ wiki('Tavern', 'resting in the inn') +
                 '</ul>';
 
         html += '<p style="font-size:18px; color:orange; font-weight:bold">' +
-                'The information below is highly experimental and is' +
-                ' still undergoing testing. Do not rely upon it until this' +
-                ' message has been removed!' +
-                ' If you notice the skills behaving differently than' +
-                ' described here, please ' + tellMe
+                'The information below is only an approximation.' +
+                // 'The information below is highly experimental and is' +
+                // ' still undergoing testing. Do not rely upon it until this' +
+                // ' message has been removed!' +
+                // ' If you notice the skills behaving differently than' +
+                // ' described here, please ' + tellMe
                 '.</p>';
 
         var conIncreaseDamageExplanation      = '';
@@ -2661,14 +2799,14 @@ wiki('Tavern', 'resting in the inn') +
                         'The ' + taskValueLink + ' of each of your tasks ' +
                         'will be increased (made more blue) by ' +
                         (Math.round(inc * 100) / 100) + '.',
-                        'For example, your bluest task (the ' +
+                        'For example, your bluest non-challenge task (the ' +
                         '<span class="taskName">' +
                         bluestTask.text + '</span> ' +
                         bluestTask.typePretty +
                         ') will have its value changed from ' +
                         (Math.round(bluestTask.value * 100) / 100) + ' to ' +
                         (Math.round((bluestTask.value + inc) * 100) / 100) +
-                        '. Your reddest task (the '+
+                        '. Your reddest non-challenge task (the '+
                         '<span class="taskName">' +
                         reddestTask.text + '</span> ' +
                         reddestTask.typePretty +
@@ -2692,7 +2830,7 @@ wiki('Tavern', 'resting in the inn') +
                         conIncreaseDamageExplanationParty,
                         increase]; },
 
-            'heallAll': function() { // Healer - Blessing
+            'healAll': function() { // Healer - Blessing
                 var inc = (computedStats.con + computedStats.int + 5) * 0.04;
                 var health = Math.round((user.stats.hp + inc) * 10) / 10;
                 if (health > 50) { health = 50; }
@@ -2742,7 +2880,8 @@ wiki('Tavern', 'resting in the inn') +
                             'damage the ' +
                             bossesWord + ' but don\'t want to adjust the ' +
                             'rewards you would receive for a task, then ' +
-                            'cast the skill on your bluest task (your ' +
+                            'cast the skill on any completed To-Do or on ' +
+                            'your bluest task (your ' +
                             '<span class="taskName">' +
                             bluestTask.text + '</span> ' +
                             bluestTask.typePretty + ').';
@@ -2985,29 +3124,10 @@ function questProgress() {
     var orderId       = 'questProgress';
     var orderIdSecond = 'questProgressSecond';
     var html = '<p>';
-    // on a quest:
-    // "quest":{"completed":null,"key":"ghost_stag",
-    //          "progress":{"collect":{},"down":0,"up":13.780066986139815}},
-    //
-    // on a collection quest but found nothing yet:
-    // "quest":{"completed":null,"key":"vice2","progress":{"collect":
-    //          {"lightCrystal":0},"down":0,"up":0}},
-    //
-    // on a collection quest and found stuff:
-    // "quest":{"completed":null,"key":"vice2","progress":{"collect":
-    //          {"lightCrystal":2},"down":0,"up":2.4434153558001794}},
-    //
-    // not on a quest:
-    // "quest":{"progress":{"collect":{},"down":0,"up":0}},
-    //
-    // before the user has ever joined a party or started a quest:
-    // "party":{"current":null,"invitation":null,"quest":
-    // {"progress":{"collect":{},"down":0,"up":0}},"order":"level"},
-    //
 
     var alreadyHaveDashboardTile = false;
-    if (quest && quest.progress && ((quest.content && quest.content.boss) || tavernBoss)) {
-        var progress = Math.floor(quest.progress.up * 10) / 10;
+    if (tavernBoss || (quest.content && quest.content.boss)) {
+        var progress = Math.floor(questProgressUp * 10) / 10;
         // Round DOWN with floor so we don't let the user think they
         // have even slightly more progress than they really have.
         // Imagine if they missed ending a quest overnight by 0.1 health!
@@ -3025,7 +3145,7 @@ function questProgress() {
             }
         }
         if (tavernBoss) {
-            html += "Burnout"; // XXX_LATER automate
+            html += "The Be-Wilder"; // XXX_LATER automate
         }
         html += '.';
         var dashboardTitle = 'Damage to ' + upperCaseFirst(bossesWord);
@@ -3037,33 +3157,18 @@ function questProgress() {
         alreadyHaveDashboardTile = true;
     }
 
-    if (quest.content && quest.content.collect) { // collection quest
-        userIsOnCollectionQuest = true;
-        var total = 0;
-        var stuff = '';
-        var uniqueItemsCount = 0;
-        $.each(quest.progress.collect, function(tagId, value){
-            uniqueItemsCount++;
-            total += value;
-            var itemName = quest.content.collect[tagId].text || tagId;
-            if (uniqueItemsCount > 1) { // we have stuff already
-                stuff += ", ";
-            }
-            stuff += value + " " + itemName;
-        });
-        var replaceStr = (uniqueItemsCount > 2) ? ", and" : " and";
-        stuff = stuff.replace(/(.+),/, "$1" + replaceStr);
+    if (userIsOnCollectionQuest) {
         if (tavernBoss) {
             html += '<br />';
         }
         html += 'So far today you have found ' + '<span class="highlight">';
-        if (total == 0) {
-            html += 'no items';
+        if (questProgressCollect === 0) {
+            html += 'no';
         }
         else {
-            html += stuff;
+            html += questProgressCollect;
         }
-        html += '</span> for the ' +
+        html += ' items</span> for the ' +
                 (quest.content.text || quest.content.key) + ' quest.';
 
         var orderId1 = (alreadyHaveDashboardTile) ? orderIdSecond : orderId;
@@ -3071,14 +3176,14 @@ function questProgress() {
         DASHBOARD[orderId1] = {'label': dashboardTitle,
             'hoverText': 'number of items you have found today for your ' +
                          'collection quest (click for more information)',
-            'target': id, 'value': total, 'status': 'neutral'};
+            'target': id, 'value': questProgressCollect, 'status': 'neutral'};
     }
     html += '</p>';
 
     if (tavernBoss && tavern.quest.progress) {
-        var name = "Burnout"; // XXX_LATER automate!
+        var name = "The Be-Wilder"; // XXX_LATER automate!
         var hp = Math.round(tavern.quest.progress.hp);
-        var hpMax = 11000000; // XXX_LATER automate!
+        var hpMax = 20000000; // XXX_LATER automate!
         var hpPercent = Math.round(hp / hpMax * 1000) / 10;
         if (hp > 0 && hpPercent == 0) { // XXX_LATER do this better
             hpPercent = Math.round(hp / hpMax * 10000) / 100;
@@ -3092,14 +3197,14 @@ function questProgress() {
                 }
             }
         }
-        html += '<h3>Stats for the ' + name + '</h3>' +
+        html += '<h3>Stats for ' + name + '</h3>' +
                 '<p>Health: ' + hpPercent + '% (' +
                  hp + ', down from ' + hpMax + ')';
         if (tavern.quest.progress.rage) {
             var rage = Math.round(tavern.quest.progress.rage);
-            var rageMax = 1000000; // XXX_LATER automate!
+            var rageMax = 800000; // XXX_LATER automate!
             var ragePercent = Math.round(rage / rageMax * 1000) / 10;
-            html += '<br />Stress: ' + ragePercent + '% (' +
+            html += '<br />Beguilement: ' + ragePercent + '% (' + // XXX_LATER automate "Beguilement"
                     rage + ' out of ' + rageMax + ')';
         }
         html += '</p>';
@@ -4169,7 +4274,65 @@ function calculateBonus(value, stat, crit, stat_scale) {
     return value + stat * stat_scale * crit;
 }
 
+
+function convertTasksToApiV2Format() {
+    // In Habitica's API v2, the tasks were stored as part of the user's
+    // document, and everything in this tool was written based on that.
+    // In API v3, they are stored separately, which is definitely better
+    // but moving them back to the old format is the easiest way to
+    // adapt this tool.
+    // XXX_LATER Adapt this tool properly.
+
+    var allV3Tasks = {};
+    $.each(tasksFromDb, function(index, obj){
+        allV3Tasks[obj._id] = obj;
+    });
+
+    user.habits = [];
+    $.each(user.tasksOrder.habits, function(index, id){
+        if (allV3Tasks[id]) {
+            user.habits.push(allV3Tasks[id]);
+        }
+        else {
+            console.log("missing Habit", id);
+        }
+    });
+
+    user.dailys = [];
+    $.each(user.tasksOrder.dailys, function(index, id){
+        if (allV3Tasks[id]) {
+            user.dailys.push(allV3Tasks[id]);
+        }
+        else {
+            console.log("missing Daily", id);
+        }
+    });
+
+    user.todos = [];
+    $.each(user.tasksOrder.todos, function(index, id){
+        if (allV3Tasks[id]) {
+            user.todos.push(allV3Tasks[id]);
+        }
+        else {
+            console.log("missing To-Do", id);
+        }
+    });
+    $.each(completedTodosFromDb, function(index, obj){
+        user.todos.push(obj);
+    });
+
+    user.rewards = [];
+    $.each(user.tasksOrder.rewards, function(index, id){
+        if (allV3Tasks[id]) {
+            user.rewards.push(allV3Tasks[id]);
+        }
+        else {
+            console.log("missing Reward", id);
+        }
+    });
+}
 } // end of parseData() and its nested functions
+    if (debug) console.log('debug 99');
 });
 </script>
 
@@ -4251,6 +4414,11 @@ img.emoji {
 }
 ul.padded > li {
     padding: 3px 0;
+}
+
+p.taskName, p.taskNote {
+    margin-top:    0.1em;
+    margin-bottom: 0;
 }
 
 .gearList .item .stats {
@@ -4659,6 +4827,9 @@ ul#tableOfContents > li {
     font-style: italic;
     font-variant: small-caps;
 }
+#todosDatedSection li p.taskName {
+    display: inline;
+}
 
 
 #questProgressSection h3 {
@@ -4678,6 +4849,9 @@ ul#tableOfContents > li {
 #statsAndStreaksSection li span {
     display: inline-block;
     width: 4em;
+}
+#statsAndStreaksSection li p.taskName {
+    display: inline;
 }
 
 
@@ -4734,6 +4908,9 @@ ul#tableOfContents > li {
 #skillsAndBuffsSection span.taskName {
     font-weight: normal;
     font-style: italic;
+}
+#skillsAndBuffsSection li p.taskName {
+    display: inline;
 }
 
 
@@ -4936,16 +5113,14 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v7.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.3)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
 <p style="font-size:18px; color:orange"><strong>If you are unable to use Habitica, please try with this alternative URL: <a href="https://habitrpg.herokuapp.com/">https://habitrpg.herokuapp.com/</a></strong></p>
-
 <p><i>The usual website is down because the Domain Registrar company that we use is having problems.</i></p>
 <hr class="clear" />
 -->
-
 <div id="loading">
     <div class="good hide">
         <p>Please wait. Fetching data from
@@ -4966,11 +5141,102 @@ ul#tableOfContents > li {
         </ul>
     </div>
 </div>
-
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
 
+        <dt>8.3 <span class="date">2016-08-07</span></dt>
+        <dd><ul>
+            <li>Documentation:
+                <ul>
+                    <li>Added a note to the explanation in the Dailies History section to explain that a Daily can appear to have been completed on a day when it wasn't if a skill had been used to increase the task's value.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>8.2 <span class="date">2016-07-23</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>The task suggestions for skills now no longer include challenge tasks (skills cannot be cast on challenge tasks).</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>8.1 <span class="date">2016-07-14</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>The completed To-Dos section now shows all completed To-Dos. This might result in the tool being slower for some people. If it causes significant problems, <a href="mailto:lady_alys@oldgods.net">email Alys</a>.</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>8.0 <span class="date">2016-06-06</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Adjusted for Habitica's API v3.</li>
+                </ul>
+            </li>
+            <li>Bug fix (version 8.0a):
+                <ul>
+                    <li>Fixed a bug that was preventing people who aren't in a party from using the tool.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>7.8 <span class="date">2016-06-05</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Adjust handling of collection quests for upcoming change in Habitica.</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>7.7 <span class="date">2016-04-25</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Reenabled markdown support.</li>
+                </ul>
+            </li>
+            <li>Bug fix (version 7.7a):
+                <ul>
+                    <li>Compensate for missing Habit history arrays that would cause the tool to not work.</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>7.6 <span class="date">2016-04-22</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Temporarily turned off markdown support due to a bug. It will be back on in a couple of days.</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>7.5 <span class="date">2016-04-05</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Now shows your damage to the world boss when you aren't in a party quest.</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>7.4 <span class="date">2016-04-01</span></dt>
+        <dd><ul>
+            <li>Features:
+                <ul>
+                    <li>Updated for new world boss.</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>7.3 <span class="date">2016-03-13</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Fixed a bug that prevented anyone not in a party from using the tool!</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>7.2 <span class="date">2015-11-24</span></dt>
         <dd><ul>
             <li>Code:
@@ -4979,7 +5245,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>7.1 <span class="date">2015-08-15</span></dt>
         <dd><ul>
             <li>Features:
@@ -4993,7 +5258,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>7.0 <span class="date">2015-07-31</span></dt>
         <dd><ul>
             <li>Features:
@@ -5869,6 +6133,10 @@ I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-
 -->
             </li>
             <li>Prevent fatal failures when unexpected conditions occur (try/catch or similar everywhere).</li>
+            <li>List how many preferred food items are needed to turn each pet into a mount.</li>
+            <li>Clairvoyance: Show which Dailies will be due tomorrow. <!-- when done reply to Daniel von Pazatka Lipinski on the Trello card DAILIES v. 3 (Dailies Minimum, Does-Not-Apply Button, Weekly Rolling Over, Streak History) --></li>
+            <li>Display how many and which Enchanted Armoire items you do not already have.</li>
+            <li>Improve how <strong>Equipment Recommendations</strong> handles Enchanted Armoire items. <!-- Timoteo32:    Hey darlin, I just wanted to let you know about a possible error I noticed in the User Data Tool. Under "Equipment Recommendations" my Soothing Lunar Scepter seems to be getting analyzed wrong. The stats listed are correct, but then it qualifies it as "middling" instead of "best" even though it's my best item that gives Int and Con for a Primary Weapon. I don't know how the ratings are actually done, so maybe it's "working" but misunderstanding what I'm asking. :P I think it used to show up, so either something changed or another weapon I've picked up since is trumping it somehow. I can get you screenshots if you want. :)   // me: Ugh, bugs, I hate them. Screenshots aren't necessary because I'll have much the same equipment as you. I think that one is being pushed out of the "best" category by the Blue Floppy Hat, because they have much the same stats. However both should be considered best because you can wear both at the same time. // That table was designed long before the Armoire existed and it's not holding up well under the strain of the extra, multi-attribute gear. I'll have to make modifications to the code. Any day now........ // Thanks for letting me know! I would likely never have noticed otherwise. // --></li>
             <li>Upgrade <a href="https://datatables.net/upgrade/1.10">Data Tables</a> to the latest version, adjust all calls to it as needed and test thoroughly.
 <!--
 - Use a CDN (https://datatables.net/manual/installation#CDN) instead of keeping a local copy. Remove the local copy from js-for-habitrpg_user_data_display.tar.gz
