@@ -1,5 +1,5 @@
 Various small scripts for working with exported data or API data from
-HabitRPG ( http://habitrpg.com/  http://habitrpg.wikia.com/ ).
+Habitica ( http://habitica.com/  http://habitica.wikia.com/ ).
 
 --------------------------------------------
 
