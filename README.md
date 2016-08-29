@@ -21,5 +21,5 @@ TODO: Update this.
 Contact:
 
 	Alys (Alice Harris)
-	http://habitrpg.wikia.com/wiki/User:LadyAlys
+	http://habitica.wikia.com/wiki/User:LadyAlys
 	lady_alys@oldgods.net
