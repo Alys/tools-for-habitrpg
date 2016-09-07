@@ -704,6 +704,10 @@ function collateAndDisplayTaskData() {
         $('#taskOrderErrorsMessage').html("Your account has a minor problem that might prevent you from sorting your tasks correctly. An admin can fix this for you. Paste the following message into the <a href=\"https://habitica.com/#/options/groups/guilds/a29da26b-37de-4a71-b0c6-48e72a900dac\">Report a Bug</a> guild:<br /><br />" + taskOrderErrors);
         $('#taskOrderErrorsMessage').removeClass('hide');
     }
+    else {
+        $('#taskOrderErrorsMessage').html("");
+        $('#taskOrderErrorsMessage').addClass('hide');
+    }
 
     if (allTasks.length > 50) {
         var some = 'a few';
