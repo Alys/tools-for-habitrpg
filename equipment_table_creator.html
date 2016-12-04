@@ -39,7 +39,6 @@ $(function() { // wraps around all our code to not pollute global namespace
 ////    EQUIPMENT TO BE IGNORED (e.g., not released yet)    //////////
 //////////////////////////////////////////////////////////////////////
 var ignore = {
-    'back_special_takeThis' : true,
     'weapon_special_3' : true, // only for Kickstarter backers and similar to shield_special_goldenknight
 };
 
@@ -128,6 +127,9 @@ var releaseDates = {
     'armor_armoire_ironBlueArcherArmor' : '2016-11',
     'armor_armoire_redPartyDress' : '2016-11',
     'head_armoire_ironBlueArcherHelm' : '2016-11',
+    'weapon_armoire_woodElfStaff' : '2016-12',
+    'armor_armoire_woodElfArmor' : '2016-12',
+    'head_armoire_woodElfHelm' : '2016-12',
 };
 // get the current month's date in case the latest Enchanted Armoire
 // items haven't been added above yet:
@@ -685,7 +687,7 @@ function parseData() {
 
     var htmlEnd = '';
     if (releaseDateNeeded) {
-        htmlEnd  += '<p>NEED RELEASE DATE:<br />' + releaseDateNeeded + '</p>';
+        htmlEnd  += '<p>NOTES FOR ALYS: Need release date:<br />' + releaseDateNeeded + '</p>';
     }
     if (warnings) htmlEnd += '<p>WARNING:<br />' + warnings + '</p>';
     htmlEnd += "<p>The material below here is Habitica's JSON data that" +
@@ -836,7 +838,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(last updated 5 November 2016)</span></h1><!-- VERSION -->
+    <span>(last updated 5 December 2016)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
