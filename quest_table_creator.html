@@ -777,8 +777,7 @@ function parseData() {
                     '<p>' + latestQuestUpdatesNeeded + '</p>' +
                     '<h2>Notes:</h2>' +
                     '<ul>' +
-                    '<li>This is a close-to-final draft of information produced automatically for one or more wiki quest table pages.</li>' +
-                    '<li>Tell Alys if you want to propose changes.</li>' +
+                    '<li>Post to the Wizards of the Wiki guild if you have suggestions for improving this.</li>' +
 
                     '<li>The <strong>length</strong>, <strong>difficulty</strong>, and <strong>rating</strong> columns do not appear on the wiki but are included in the table below to help us categorise the quests into pages.</li>' +
                     '<li>The <strong>release date</strong> column does not appear on the wiki. It is used here only to help us work out which pages need to be updated when a new quest is released, and so exact release dates for most of the quests are not included.</li>' +
@@ -790,6 +789,13 @@ function parseData() {
 
                     '<li>Any information pulled straight from Habitica should be correct. Any information that Alys had to write code to calculate might be wrong. Any bugs can be easily fixed.</li>' +
 
+                    '</ul>' +
+
+                    '<h3>Length, Difficulty, and Rating</h3>' +
+                    '<ul>' +
+                    '<li>For a boss quest, if the boss\'s HP is 1000 or above, it\'s "long"; 500 and up is "medium"; others are "short".  If the boss strength is greater than 2.5, it\'s "very hard"; exactly 2.5 is "hard"; 2 or above is "medium"; 1.5 or above is "easy"; others are "trivial".</li>' +
+                    '<li>For a collection quest, needing more than 300 items is "very hard" and "long"; more than 100 is "hard" and "long"; more than 30 is "medium" for both; others are "easy" and "short".</li>' +
+                    '<li>The rating is a merge of the length and difficulty. Any quest with a trivial / easy difficulty AND a short length is rated "easy". Any quest with a hard difficulty or a long quest with a medium difficulty is rated "hard". The others are rated "medium".</li>' +
                     '</ul>' +
 
                     '<h2>All Quests</h2>' +
