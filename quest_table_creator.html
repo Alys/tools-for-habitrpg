@@ -95,6 +95,17 @@ var releaseDates = {
     'treeling' : '2016-05',
     'axolotl' : '2016-06',
     'turtle' : '2016-07',
+    'armadillo' : '2016-08',
+    'cow' : '2016-09',
+    'beetle' : '2016-10',
+    'taskwoodsTerror1' : '2016-10',
+    'taskwoodsTerror2' : '2016-10',
+    'taskwoodsTerror3' : '2016-10',
+    'ferret' : '2016-11',
+    'dustbunnies' : '2016-11',
+    'moon1' : '2016-11',
+    'moon2' : '2016-11',
+    'moon3' : '2016-11',
 };
 // get the current month's date in case the latest quest
 // hasn't been added above yet:
@@ -119,6 +130,7 @@ var images = {
     'burnout':     'n/a',
     'stressbeast': 'n/a',
     'dilatory':    'n/a',
+    'bewilder':    'n/a',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -134,9 +146,10 @@ var questAvailability = {
     'egg':         'only during ' + make_url('Spring Fling'),
     'evilsanta':   'only during ' + make_url('Winter Wonderland'),
     'evilsanta2':  'only during ' + make_url('Winter Wonderland'),
-    'burnout':     'finished<br />('+ make_url('Fall Festival 2015','Fall_Festival') +')',
+    'burnout':     'finished',
     'stressbeast': 'finished',
     'dilatory':    'finished',
+    'bewilder':    'finished',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -152,20 +165,6 @@ var questAvailability = {
 //////////////////////////////////////////////////////////////////////
 var questPageUrls = {
     'atom1' : 'Dish_Disaster',
-    'atom2' : 'The_SnackLess_Monster',
-    'atom3' : 'The_Laundromancer',
-    'goldenknight1' : 'A_Stern_Talking-To',
-    'goldenknight2' : 'Gold_Knight',
-    'goldenknight3' : 'The_Iron_Knight',
-    'moonstone1' : 'The_Moonstone_Chain',
-    'moonstone2' : 'Recidivate_the_Necromancer',
-    'moonstone3' : 'Recidivate_Transformed',
-    'vice1' : 'Free_Yourself_of_the_Dragon\'s_Influence',
-    'vice2' : 'Find_the_Lair_of_the_Wyrm',
-    'vice3' : 'Vice_Awakens',
-    'dilatoryDistress1' : 'Message_in_a_Bottle',
-    'dilatoryDistress2' : 'Creatures_of_the_Crevasse',
-    'dilatoryDistress3' : 'Not_a_Mere_Maid',
     'evilsanta2' : 'Find_the_Cub',
 };
 
@@ -223,6 +222,7 @@ function fetchData() {
 
 function parseData() {
     var allQuests = content.quests;
+    var allQuestsStringified = JSON.stringify(allQuests, null, 4);
 
     // Get quest IDs and sort them in the desired display order
     // (world bosses at end because of least interest):
@@ -238,6 +238,15 @@ function parseData() {
         }
     }
     questIds = questIds.concat(questIdsEnd);
+
+    // Find the first quest in each quest line:
+    var questLineStartIds = {};
+    for (var questId in allQuests) {
+        var quest = allQuests[questId];
+        if (quest.previous) {
+            questLineStartIds[quest.previous] = true;
+        }
+    }
 
     var warnings = '';
 
@@ -286,7 +295,16 @@ function parseData() {
         var availability = '';
         var displayLevelRestriction = false;
         if (quest.category && quest.category === 'unlockable') {
-            if (quest.previous) {
+            if (quest.unlockCondition && quest.unlockCondition.text &&
+                quest.unlockCondition.text === "Create Account"
+               ) {
+                availability = quest.unlockCondition.text.toLowerCase();
+            }
+            else if (quest.unlockCondition && quest.unlockCondition.incentiveThreshold) {
+                availability = '<a href="' + wikiaBaseUrl + 'Daily_Check-In_Incentives">' +
+                    quest.unlockCondition.incentiveThreshold + ' Check-Ins</a>';
+            }
+            else if (quest.previous) {
                 availability = 'previous part';
                 displayLevelRestriction = quest.lvl; // true
             }
@@ -331,6 +349,7 @@ function parseData() {
         var droppedXP = quest.drop.exp || 0;
         delete quest.drop.gp;
         delete quest.drop.exp;
+        var XPandGPonly = jQuery.isEmptyObject(quest.drop);
 
         // if (quest.drop.unlock) { console.log(quest.drop.unlock); } // TST
         delete quest.drop.unlock;
@@ -429,8 +448,7 @@ function parseData() {
 
         var specialRewardType = 'unknown';
         var etcPossible = false;
-        var dropsScroll = false;
-        if (questId === 'basilist') {
+        if (XPandGPonly) {
             specialRewardType = 'XP, GP<br />only';
         }
         if (items['gear']) {
@@ -439,7 +457,6 @@ function parseData() {
             delete items['gear'];
         }
         if (items['quests']) {
-            dropsScroll = true;
             specialRewardType = 'scroll';
             etcPossible = true;
             delete items['quests'];
@@ -669,7 +686,7 @@ function parseData() {
             latestQuestUpdatesNeeded += "<strong>" + questName + "</strong> was released this month. Update the tables for: all quests";
         }
 
-        if (quest.previous || dropsScroll || questId === 'evilsanta' || questId === 'dilatoryDistress1') {
+        if (quest.previous || questId.match(/evilsanta/) || questLineStartIds[questId]) {
             tableRows.questLines.push( convertRow('wikia', row) );
             if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ", quest lines"; }
         }
@@ -722,12 +739,12 @@ function parseData() {
         htmlEnd  += '<p>NEED RELEASE DATE:<br />' + releaseDateNeeded + '</p>';
     }
     if (warnings) htmlEnd += '<p>WARNING:<br />' + warnings + '</p>';
-    if (false) {
+    if (false) { // FOR TESTING
         htmlEnd += "<p>The material below here is Habitica's JSON data that" +
                 " was used to make the wikia code above. You can ignore it" +
                 " unless you are interested in it. You do not need to" +
                 " copy it to the wiki.</p>" +
-                "<pre>" + JSON.stringify(allQuests, null, 4) + "</pre>";
+                "<pre>" + allQuestsStringified + "</pre>";
     }
     if (devData) {
         htmlEnd += '<pre>' + devData + '</pre>';
@@ -857,6 +874,7 @@ function convertRow(format, rowArray, cellType) {
 function make_url(text, url) {
     if (!url) {
         url = text.replace(/ /g, '_');
+        url = url.replace(/.*Part_[0-9]:_/, ''); // e.g., convert Terror_in_the_Taskwoods,_Part_3:_Jacko_of_the_Lantern to Jacko_of_the_Lantern
     }
     if (url.indexOf('://') === -1) {
         url = wikiaBaseUrl + url;
@@ -1033,7 +1051,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 2 August 2016)</span></h1><!-- VERSION -->
+    <span>(last updated 5 December 2016)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
