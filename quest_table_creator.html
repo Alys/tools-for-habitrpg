@@ -307,8 +307,8 @@ function parseData() {
                 availability = quest.unlockCondition.text.toLowerCase();
             }
             else if (quest.unlockCondition && quest.unlockCondition.incentiveThreshold) {
-                availability = '<a href="' + wikiaBaseUrl + 'Daily_Check-In_Incentives">' +
-                    quest.unlockCondition.incentiveThreshold + ' Check-Ins</a>';
+                availability = make_url(quest.unlockCondition.incentiveThreshold +
+                                        ' Check-Ins', 'Daily_Check-In_Incentives');
             }
             else if (quest.previous) {
                 availability = 'previous part';
