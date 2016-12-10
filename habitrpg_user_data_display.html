@@ -528,6 +528,7 @@ function parseData() {
     dropCountAndCap();
     questProgress();
     analyseEquipment(); // missing gear, current gear, recommended gear
+    subscriptionData();
 
 
 
@@ -600,7 +601,8 @@ function formatAndDisplayTOC() {
                 'questProgress', 'damageDailies', 'statsAndStreaks',
             'HEADING Other',
                 'missingEquipment',
-                'currentGear', 'equipmentRecommendations', 'skillsAndBuffs'];
+                'currentGear', 'equipmentRecommendations', 'skillsAndBuffs',
+                'subscriptionData'];
     var html = '';
     for (var i=0,ic=keys.length; i<ic; i++) {
         if (keys[i].match(/^HEADING/)) { // new section in Table of Contents
@@ -637,7 +639,7 @@ function formatAndDisplayMAIN() {
                 'damageDailies','dailiesIncomplete',//keep in that order
                 'statsAndStreaks',
                 'missingEquipment', 'currentGear', 'equipmentRecommendations',
-                'skillsAndBuffs'];
+                'skillsAndBuffs', 'subscriptionData'];
     var html = '';
     var functions = []; // functions to run after HTML code has been loaded
     for (var i=0,ic=keys.length; i<ic; i++) {
@@ -4164,6 +4166,140 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
 }
 
 
+function subscriptionData() {
+    var id      = 'subscriptionDataSection';
+    var title   = 'Subscription Data';
+    var orderId = 'subscriptionData';
+
+    var html = '<p>If you are a subscriber, this section will show you ' +
+               'the data Habitica has about your subscription. ' +
+               'If you think any of it is not correct, please describe ' +
+               'the problem at <a href="' +
+               'https://habitica.com/#/options/groups/guilds/a29da26b-37de-4a71-b0c6-48e72a900dac' +
+               '">Help > Report a Bug</a> from the website\'s menu or ' +
+               '<strong>Guilds &gt; Report a Bug</strong> on the mobile ' +
+               'app.</p>' +
+               '<p>If you have been a subscriber in the past, this section ' +
+               'might show some of your old data but that\'s not guaranteed. ' +
+               'If you think you should still be a subscriber, ' +
+               'please report it as described above.</p>';
+
+    try {
+        var plan = user.purchased.plan;
+
+        var table = '';
+        if (plan.dateCreated) {
+            var date = moment(plan.dateCreated);
+            if (date.isValid()) {
+                table += '<tr><td>Date Created</td><td>' +
+                         date.format('YYYY-MM-DD HH:MM') +
+                         ' in your device\'s current time zone' +
+                         '</td></tr>\n';
+            }
+        }
+
+        if (plan.dateTerminated) {
+            var date = moment(plan.dateTerminated);
+            if (date.isValid()) {
+                table += '<tr><td>Termination Date</td><td>' +
+                         date.format('YYYY-MM-DD HH:MM') +
+                         ' in your device\'s current time zone' +
+                         ' (if this is too early, immediately report it in the ' +
+                         'Report a Bug guild - see above for how).</td></tr>\n';
+            }
+        }
+
+        if (plan.paymentMethod) {
+            table += '<tr><td>Payment Method</td><td>' +
+                     plan.paymentMethod + '</td></tr>\n';
+        }
+
+        var giftAlreadyFound = false;
+        if (plan.customerId) {
+            if (plan.customerId === 'Gift' || plan.customerId === 'gift') {
+                giftAlreadyFound = true;
+                table += '<tr><td>Subscription Type</td><td>' +
+                         'Gift' + '</td></tr>\n';
+            }
+        }
+
+        if (plan.planId) {
+            var types = {
+                    'Gift': 'Gift',
+                    'gift': 'Gift',
+                    'basic': 'One-month recurring',
+                    'basic_earned': 'One-month recurring',
+                    'basic_3mo': 'Three-month recurring',
+                    'basic_6mo': 'Six-month recurring',
+                    'basic_12mo': 'Twelve-month recurring',
+                };
+            var description = '';
+            if (types[plan.planId]) {
+                description = types[plan.planId];
+            }
+            else {
+                description = '"' + plan.planId + '"';
+            }
+            if (description === 'Gift' && giftAlreadyFound) {
+                // display nothing - already displayed from the customerId
+            }
+            else {
+                table += '<tr><td>Subscription Type</td><td>' +
+                         description + '</td></tr>\n';
+            }
+        }
+
+        if (plan.extraMonths) {
+            var value = '';
+            if (plan.extraMonths < 0) {
+                value = 'Your subscription has a minor problem, which we can fix easily. Please go to the Report a Bug guild (see above for how), and paste in this text: "The Data Display Tool told me to report that my subscription has negative extraMonths." You do not need to say anything else.';
+            }
+            else if (plan.extraMonths > 0) {
+                value = plan.extraMonths.toFixed(2);
+            }
+            if (value) {
+                table += '<tr><td>Extra Months</td><td>' +
+                         value + '</td></tr>\n';
+            }
+        }
+
+        if (plan.consecutive) {
+            if (typeof plan.consecutive.gemCapExtra !== 'undefined') {
+                var total = 25 + plan.consecutive.gemCapExtra;
+                table += '<tr><td>Total Monthly Gem Cap</td><td>' +
+                         total +
+                         ' (the base 25 per month + ' +
+                         plan.consecutive.gemCapExtra + ' extra)</td></tr>\n';
+            }
+
+            if (plan.consecutive.count) {
+                table += '<tr><td>Consecutive Months Subscribed</td><td>' +
+                         plan.consecutive.count + '</td></tr>\n';
+            }
+
+            if (plan.consecutive.offset) {
+                table += '<tr><td>Months Remaining</td><td>' +
+                         plan.consecutive.offset + '</td></tr>\n';
+            }
+        }
+
+        if (table) {
+            html += '<table>' + table + '</table>';
+        }
+        else {
+            html += 'No subscription data is recorded.';
+        }
+
+    } catch(err) {
+        html += '<p><strong>Your subscription has unexpected information that can\'t be displayed. Please go to the Report a Bug guild (see above for how), and paste in this text: "The Data Display Tool told me to report that my subscription couldn\'t be displayed." You do not need to say anything else.</strong></p>';
+        html += '<p>' + err + '</p>';
+    }
+
+    TOC[orderId]  = {'target': id, 'title':  title};
+    MAIN[orderId] = {'id': id, 'title': title, 'html': html};
+}
+
+
 function computeStats(withBuffs) {
     // XXX make this be less hideously inefficient
     var computedStats = [];
@@ -4208,7 +4344,6 @@ function computeStats(withBuffs) {
         details['equipment']  = 0;
         details['classBonus'] = 0;
         for(var key in equippedKeys) {
-            // console.log(key); // TST
             var obj = equippedKeys[key];
             var value = obj[stat];
             details['equipment'] += value;
@@ -5114,12 +5249,23 @@ ul#tableOfContents > li {
     font-style: italic;
 }
 
+#subscriptionDataSection table {
+    padding-top: 1em;
+}
+#subscriptionDataSection table tr td:nth-child(1) {
+    text-align: right;
+    padding-right: 0.8em;
+}
+#subscriptionDataSection table tr td:nth-child(2) {
+    font-weight: bold;
+}
+
 </style>
 </head>
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.4)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.5)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <!--
@@ -5151,6 +5297,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>8.5 <span class="date">2016-12-10</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>New "Subscription Data" section to show the details of your Habitica subscription. You will see this section even if you don't have a subscription but it will be empty (this allows people who think they should have a subscription to realise that something might have gone wrong).</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>8.4 <span class="date">2016-11-03</span></dt>
         <dd><ul>
             <li>Bug fix:
@@ -5159,7 +5314,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>8.3 <span class="date">2016-08-07</span></dt>
         <dd><ul>
             <li>Documentation:
