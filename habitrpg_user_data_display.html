@@ -4171,6 +4171,8 @@ function subscriptionData() {
     var title   = 'Subscription Data';
     var orderId = 'subscriptionData';
 
+    var subscriptionWarning = '';
+    var subscriptionWarningFull = '';
     var html = '<p>If you are a subscriber, this section will show you ' +
                'the data Habitica has about your subscription. ' +
                'If you think any of it is not correct, please describe ' +
@@ -4201,6 +4203,12 @@ function subscriptionData() {
         if (plan.dateTerminated) {
             var date = moment(plan.dateTerminated);
             if (date.isValid()) {
+                if (date.diff(moment(), 'days') <= 7) {
+                    subscriptionWarning = 'Your subscription is ending soon.';
+                    subscriptionWarningFull = 'Your Habitica subscription will end on ' +
+                            date.format('YYYY-MM-DD') +
+                            '. See the "Subscription Data" section for more details.';
+                }
                 table += '<tr><td>Termination Date</td><td>' +
                          date.format('YYYY-MM-DD HH:MM') +
                          ' in your device\'s current time zone' +
@@ -4288,6 +4296,14 @@ function subscriptionData() {
         }
         else {
             html += 'No subscription data is recorded.';
+        }
+
+        if (subscriptionWarning) {
+            html += '<p class="errorMessage">' + subscriptionWarning + '</p>';
+            $('#subscriptionWarningFull').text(subscriptionWarningFull);
+        }
+        else {
+            $('#subscriptionWarningFull').text(''); // required if user renews subscription then refetches data
         }
 
     } catch(err) {
@@ -4541,6 +4557,11 @@ hr.padded {
 }
 .explanation {
     font-style: italic;
+}
+.errorMessage {
+    color: orange;
+    font-size: 18px;
+    font-weight: bold;
 }
 abbr {
     border-bottom: 1px dashed black;
@@ -5265,9 +5286,10 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.5)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.5a)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
+<div id="subscriptionWarningFull" class="errorMessage"></div>
 <!--
 <p style="font-size:18px; color:orange"><strong>If you are unable to use Habitica, please try with this alternative URL: <a href="https://habitrpg.herokuapp.com/">https://habitrpg.herokuapp.com/</a></strong></p>
 <p><i>The usual website is down because the Domain Registrar company that we use is having problems.</i></p>
@@ -5302,6 +5324,7 @@ ul#tableOfContents > li {
             <li>Feature:
                 <ul>
                     <li>New "Subscription Data" section to show the details of your Habitica subscription. You will see this section even if you don't have a subscription but it will be empty (this allows people who think they should have a subscription to realise that something might have gone wrong).</li>
+                    <li>(Version 8.5a): If you have a Habitica subscription and if the subscription's termination date is less than a week away, a banner showing the termination date apears. This banner might be a bit annoying for those who already know that their subscription is ending, and I am sorry about that, but it will last for only a week and then disappear. The banner exists for the benefit of those who don't realise the termination date is approaching, and I know from my support work that that's not uncommon.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -6272,6 +6295,7 @@ ul#tableOfContents > li {
             <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitica.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitica.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitica.wikia.com/wiki/Pets">pet</a> and <a href="http://habitica.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
             <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
             <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes.</li>
+            <li><span class="subheading">Subscription Data</span>: If you have a Habitica subscription, this section will show you the data Habitica has about your subscription. If you have been a subscriber in the past, this section might show some of your old data. If you have a current subscription that is ending in less than a week, a large orange notification will appear at the top of the page. (This banner might be a bit annoying for those who already know that their subscription is ending, and I am sorry about that, but it will last for only a week and then disappear. The banner exists for the benefit of those who don't realise the termination date is approaching, and I know from my support work that that's not uncommon.)</li>
        </ul>
         <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
