@@ -108,6 +108,9 @@ var releaseDates = {
     'moon3' : '2016-11',
     'sloth' : '2016-12',
     'triceratops' : '2017-01',
+    'stoikalmCalamity1' : '2017-01',
+    'stoikalmCalamity2' : '2017-01',
+    'stoikalmCalamity3' : '2017-01',
 };
 // get the current month's date in case the latest quest
 // hasn't been added above yet:
@@ -770,7 +773,8 @@ function parseData() {
     var htmlEnd = '';
     if (releaseDateNeeded) {
         htmlEnd  += '<p>NOTES FOR ALYS:<br />Need release date:<br />' + releaseDateNeeded +
-                    'Rewards:<br />' + allQuestRewardsBugFixSpecial + allQuestRewardsBugFixNormal + '</p>';
+                    // 'Rewards:<br />' + allQuestRewardsBugFixSpecial + allQuestRewardsBugFixNormal +
+                    '</p>';
 
     }
     if (warnings) htmlEnd += '<p>WARNING:<br />' + warnings + '</p>';
@@ -1092,7 +1096,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 17 January 2017)</span></h1><!-- VERSION -->
+    <span>(last updated 21 January 2017)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
