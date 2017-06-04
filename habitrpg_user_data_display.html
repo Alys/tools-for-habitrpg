@@ -437,7 +437,7 @@ function parseData() {
     convertTasksToApiV2Format();
 
     // save the fetch time early:
-    var fetchtime = myDateConverter(new Date(), 'pretty');
+    var fetchtime = moment().format('YYYY-MM-DD HH:MM');
 
     // extract some commonly-used data:
     var sleeping = user.preferences.sleep; // true if resting in the inn
