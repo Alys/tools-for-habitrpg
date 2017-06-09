@@ -736,10 +736,9 @@ function collateAndDisplayTaskData() {
             count[obj.type]++;
             if (obj.type === 'daily') {
                 fixDailiesDefaults(obj);
-                obj.dueToday = dailyIsDueToday(obj);
             }
             else if (obj.type === 'todo') {
-                obj.dueToday = (obj.date &&
+                obj.isDue = (obj.date &&
                     moment(obj.date).zone(timezoneOffset).startOf('day') <=
                     todayUser) ? true : false;
             }
@@ -923,7 +922,7 @@ function collateAndDisplayTaskData() {
                 var startDateDescription = '';
                 if (moment(obj.startDate).isAfter(todayUser)) {
                     startDateDescription = '<br style="line-height:150%;" />' +
-                            taskPartHTML(obj.dueToday, 'starts ' +
+                            taskPartHTML(obj.isDue, 'starts ' +
                                 obj.startDatePretty,
                                 true);
                 }
@@ -938,7 +937,7 @@ function collateAndDisplayTaskData() {
                            startDateDescription;
                 }
                 else if (obj.frequency === 'daily') {
-                    return taskPartHTML(obj.dueToday,
+                    return taskPartHTML(obj.isDue,
                             'every ' + obj.everyX + ' days') +
                             startDateDescription;
                 }
@@ -1163,13 +1162,13 @@ function createTaskOverviewTable() {
                 if (source.metaType === 'undated') {
                     return notApplicable;
                 }
-                return source.dueToday ? 'yes' : 'no';
+                return source.isDue ? 'yes' : 'no';
             }
             else {
                 if (source.metaType === 'undated') {
                     return 'n/a';
                 }
-                return source.dueToday ? 'yes' : 'no';
+                return source.isDue ? 'yes' : 'no';
             }
        }
     },
@@ -1751,7 +1750,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Task Adjustor
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.5)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.6)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -1775,6 +1774,15 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
+        <dt>0.6 <span class="date">2017-06-08</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>Working out if a Daily is due is now done with Habitica's <code>isDue</code> property and so will always give the same result as you see on the official mobile apps. If you see that the website is displaying a different selection of due Dailies, the website will be correct; please report it in the <a href="https://habitica.com/#/options/groups/guilds/a29da26b-37de-4a71-b0c6-48e72a900dac">Report a Bug guild</a> so we can fix the mobile apps.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>0.5 <span class="date">2016-04-24</span></dt>
         <dd><ul>
             <li>Feature:
@@ -1793,7 +1801,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>0.4 <span class="date">2016-04-24</span></dt>
         <dd><ul>
             <li>Bug fix:
