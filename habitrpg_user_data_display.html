@@ -2523,17 +2523,19 @@ wiki('Tavern', 'resting in the inn') +
             '<div class="subsection"><p class="forCopyPaste">&nbsp;</p>' +
             '<h3>Your Stats</h3><ul>' +
             '<li><span>' + (Math.round(user.stats.hp  * 100) / 100) +
-               '</span> Health' +
+               '</span> Health</li>' +
             '<li><span>' + (Math.round(user.stats.exp * 100) / 100) +
-               '</span> Experience' +
+               '</span> Experience</li>' +
             '<li><span>' + (Math.round(user.stats.gp  * 100) / 100) +
-               '</span> Gold' +
+               '</span> Gold</li>' +
             '<li><span>' + (Math.round(user.stats.mp  * 100) / 100) +
-               '</span> Mana' +
+               '</span> Mana</li>' +
             '<li><span>' + user.stats.lvl +
-               '</span> Level' +
+               '</span> Level</li>' +
             '<li><span>' + (user.achievements.streak || 0) +
-               '</span> 21-Day Streaks' +
+               '</span> 21-Day Streaks</li>' +
+            '<li><span>' + (user.balance * 4) +
+               '</span> Gems</li>' +
             '</ul></div>' +
             '<div class="subsection"><p class="forCopyPaste">&nbsp;</p>' +
             '<h3>Your Dailies\' Streaks</h3><ul class="padded">';
@@ -5288,6 +5290,11 @@ ul#tableOfContents > li {
 
         <dt>8.6 <span class="date">2017-06-08</span></dt>
         <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>Added your current number of Gems to the "Stats and Streaks Backup" section.</li>
+                </ul>
+            </li>
             <li>Bug fix:
                 <ul>
                     <li>Working out if a Daily is due is now done with Habitica's <code>isDue</code> property and so will always give the same result as you see on the official mobile apps. If you see that the website is displaying a different selection of due Dailies, the website will be correct; please report it in the <a href="https://habitica.com/#/options/groups/guilds/a29da26b-37de-4a71-b0c6-48e72a900dac">Report a Bug guild</a> so we can fix the mobile apps.</li>
