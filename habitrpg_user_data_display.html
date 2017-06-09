@@ -928,7 +928,6 @@ function collateAndDisplayTaskData() {
     var reddestHabit = {};
     var reddestDaily = {};
     var biggestTask  = {}; // task with greatest absolute magnitude
-    var everyXDaysInUse = false;
     var habits   = collateHabitsData();  // populates the...
     var dailies  = collateDailiesData(); // ... function's "global" variables...
     var todosAll = collateTodosData();   // ... defined above...
@@ -1029,14 +1028,13 @@ function collateAndDisplayTaskData() {
         var stealth = user.stats.buffs.stealth; // user avoids Dailies' damage
         $.each(user.dailys, function(index, obj){
             fixDailiesDefaults(obj);
-            obj.dueToday = dailyIsDueToday(obj);
             modifyTaskProperties(obj);
 
             countTasks['dailies']['total']++;
             countTasks['dailies'][obj.attribute]++;
             countTasks['statsTotals'][obj.attribute]++;
             countTasks['statsTotals']['total']++;
-            if (obj.dueToday) {
+            if (obj.isDue) {
                 countTasks['dailiesDue']['total']++;
                 countTasks['dailiesDue'][obj.attribute]++;
             }
@@ -1054,14 +1052,14 @@ function collateAndDisplayTaskData() {
 
             obj.orderDailies = countTasks['dailies']['total'];
 
-            if (obj.dueToday && !obj.completed && stealth > 0) {
+            if (obj.isDue && !obj.completed && stealth > 0) {
                 // user evades this daily
                 stealth--;
                 obj.stealthed = true;
             }
 
             // calculate damage this daily will do:
-            if (sleeping || obj.completed || ! obj.dueToday || obj.stealthed) {
+            if (sleeping || obj.completed || ! obj.isDue || obj.stealthed) {
                 obj.damageToUser           = 0;
                 obj.damageToParty          = 0;
                 obj.damageToPartyUnrounded = 0;
@@ -1188,32 +1186,6 @@ function collateAndDisplayTaskData() {
                 'exists': true,
                 'proportionDone': (countDone / task.checklist.length),
                 };
-        }
-
-        function dailyIsDueToday(task) { // ref: api.shouldDo
-            // returns true if the Daily is due, false otherwise
-            if (task.forceDue) {
-                return true;
-            }
-            if (task.forceNotDue) {
-                return false;
-            }
-            var startDate = moment(task.startDate).zone(timezoneOffset).startOf('day');
-            if (startDate > todayUser) {
-                return false;
-            }
-
-            if (task.frequency === 'weekly') { // Day of Week
-                var dayname = ["su","m","t","w","th","f","s"][todayUser.day()];
-                return task.repeat[dayname];
-            }
-            else if (task.frequency === 'daily') { // Every X Days
-                if (task.everyX > 1) { // bug not relevant if due EVERY day
-                    everyXDaysInUse = true;
-                }
-                var daysSinceTaskStart = todayUser.diff(startDate, 'days');
-                return (daysSinceTaskStart % task.everyX == 0);
-            }
         }
     }
 
@@ -1381,7 +1353,7 @@ function collateAndDisplayTaskData() {
                 var startDateDescription = '';
                 if (moment(obj.startDate).isAfter(todayUser)) {
                     startDateDescription = '<br style="line-height:150%;" />' +
-                            taskPartHTML(obj.dueToday, 'starts ' +
+                            taskPartHTML(obj.isDue, 'starts ' +
                                 moment(obj.startDate).format('YYYY-MM-DD'),
                                 true);
                 }
@@ -1396,7 +1368,7 @@ function collateAndDisplayTaskData() {
                            startDateDescription;
                 }
                 else if (obj.frequency === 'daily') {
-                    return taskPartHTML(obj.dueToday,
+                    return taskPartHTML(obj.isDue,
                             'every ' + obj.everyX + ' days') +
                             startDateDescription;
                 }
@@ -2093,7 +2065,7 @@ randomTodoHtml
             if (obj.completed) {
                 continue;
             }
-            if (obj.dueToday) { // Daily is due today
+            if (obj.isDue) { // Daily is due today
                 dailiesIncomplete.push(obj);
             }
             else {
@@ -2108,7 +2080,6 @@ randomTodoHtml
             return;
         }
         var html = '';
-        // html += '<p style="font-size:18px; color:orange" font-weight:bold">IMPORTANT: If you use the new Dailies "Start Date" or "Every X Days" option, the damage estimates and list of incomplete Dailies might be <strong>wrong</strong>. If you absolutely rely on the information here to manage your Dailies, it is recommended that you don\'t use the new options until this message disappears (in a day or two).</p>';
         if (dailiesIncomplete.length > 0) {
             html += '<p>The table below shows the Dailies that are due ' +
                     'today and have not yet been completed. ';
@@ -2139,10 +2110,6 @@ randomTodoHtml
         }
         else {
             html += '<p>You have completed all of the Dailies due today.</p>';
-        }
-        if (everyXDaysInUse) {
-            html += '<h3>Warning: "Every X Days" Dailies</h3>' +
-                    '<p>You have one or more Dailies that use the "Every X Days" repeat setting. If you live in a timezone where daylight savings is used for part of the year, then it is possible that these Dailies are being incorrectly reported here as due or not due. If Habitica is telling you that an "Every X Days" Daily is due, but the Data Display Tool is saying it isn\'t, then Habitica is likely to be correct. You can get around this problem by editing each of the affected Dailies to set the Start Date to a date that is more recent than the last daylight savings change in your region. A proper fix for this will be done soon.</p>';
         }
         if (dailiesIncompleteGrey.length > 0) {
             html += '<h3>Grey Dailies</h3><p>' +
@@ -5286,7 +5253,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.5a)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.6)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5319,6 +5286,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>8.6 <span class="date">2017-06-08</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>Working out if a Daily is due is now done with Habitica's <code>isDue</code> property and so will always give the same result as you see on the official mobile apps. If you see that the website is displaying a different selection of due Dailies, the website will be correct; please report it in the <a href="https://habitica.com/#/options/groups/guilds/a29da26b-37de-4a71-b0c6-48e72a900dac">Report a Bug guild</a> so we can fix the mobile apps.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>8.5 <span class="date">2016-12-10</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5328,7 +5304,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>8.4 <span class="date">2016-11-03</span></dt>
         <dd><ul>
             <li>Bug fix:
