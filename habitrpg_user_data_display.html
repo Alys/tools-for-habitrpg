@@ -4172,7 +4172,7 @@ function subscriptionData() {
         if (plan.dateTerminated) {
             var date = moment(plan.dateTerminated);
             if (date.isValid()) {
-                if (date.diff(moment(), 'days') <= 7) {
+                if (date.diff(moment(), 'days') <= 7 && date.diff(moment(), 'days') > 0) {
                     subscriptionWarning = 'Your subscription is ending soon.';
                     subscriptionWarningFull = 'Your Habitica subscription will end on ' +
                             date.format('YYYY-MM-DD') +
@@ -5255,7 +5255,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.6)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.7)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5288,6 +5288,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>8.7 <span class="date">2017-06-10</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>The warning about your subscription terminating no longer appears after it has already terminated.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>8.6 <span class="date">2017-06-08</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5301,7 +5310,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>8.5 <span class="date">2016-12-10</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5357,7 +5365,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>7.8 <span class="date">2016-06-05</span></dt>
         <dd><ul>
             <li>Code:
