@@ -1048,7 +1048,8 @@ function createTaskOverviewTable() {
                 if (source.type === 'reward') {
                     return notApplicable;
                 }
-                if (source.challenge && source.challenge.id) {
+                if ((source.challenge && source.challenge.id) ||
+                    (source.group && source.group.id)) {
                     return source.difficulty;
                 }
                 var tid = source.order; // temporary task ID
@@ -1185,7 +1186,8 @@ function createTaskOverviewTable() {
                     return notApplicable;
                 }
                 var initialDate = source[dataField + 'Pretty'];
-                if (source.challenge && source.challenge.id) {
+                if ((source.challenge && source.challenge.id) ||
+                    (source.group && source.group.id)) {
                     return initialDate;
                 }
                 var initialDateSuggestion = (initialDate === 'none' ||
@@ -1750,7 +1752,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Task Adjustor
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.6)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.7)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -1774,6 +1776,15 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
+        <dt>0.7 <span class="date">2017-06-10</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>Tasks from group plans no longer show editing controls for fields that can't be edited.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>0.6 <span class="date">2017-06-08</span></dt>
         <dd><ul>
             <li>Bug fix:
@@ -1782,7 +1793,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>0.5 <span class="date">2016-04-24</span></dt>
         <dd><ul>
             <li>Feature:
