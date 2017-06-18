@@ -2542,17 +2542,6 @@ wiki('Tavern', 'resting in the inn') +
                '</span> Gems</li>' +
             '</ul></div>' +
             '<div class="subsection"><p class="forCopyPaste">&nbsp;</p>' +
-            '<h3>Your Habits\' Counters</h3><ul class="padded">';
-        for (var i=0,ic=habits.length; i<ic; i++) {
-            if (! obj.down && ! obj.up) continue; // Habit is not clickable
-            var obj = habits[i];
-            html += '<li>' + obj.text + '<span>';
-            if (obj.up  ) html +=  ' : up   ' + obj.counterUp;
-            if (obj.down) html +=  ' : down ' + obj.counterDown;
-            html += '</span></li>';
-        }
-        html += '</ul></div>' +
-            '<div class="subsection"><p class="forCopyPaste">&nbsp;</p>' +
             '<h3>Your Dailies\' Streaks</h3><ul class="padded">';
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
@@ -2560,7 +2549,22 @@ wiki('Tavern', 'resting in the inn') +
                   + obj.streak + '</span> '
                   + obj.text + '</li>';
         }
-        html += '</ul></div><div class="clear"></div>';
+        html += '</ul></div>' +
+            '<div class="subsection"><p class="forCopyPaste">&nbsp;</p>' +
+            '<h3>Your Habits\' Counters</h3><ul class="padded">' +
+            '<table><thead><tr><th>Positive</th><th>Negative</th><th>Habit</th></thead><tbody>\n';
+        for (var i=0,ic=habits.length; i<ic; i++) {
+            var obj = habits[i];
+            if (! obj.down && ! obj.up) continue; // Habit is not clickable
+            html += '<tr><td class="data">';
+            html += (obj.up) ? '+ ' + obj.counterUp : '';
+            html += '</td><td class="data">';
+            html += (obj.down) ? '- ' + obj.counterDown : '';
+            html += '</td><td>';
+            html += obj.text;
+            html += '</td></tr>';
+        }
+        html += '</tbody></table></div><div class="clear"></div>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'html': html};
     }
@@ -4998,6 +5002,19 @@ ul#tableOfContents > li {
 }
 #statsAndStreaksSection li p.taskName {
     display: inline;
+}
+#statsAndStreaksSection table {
+    border-spacing: 0;
+}
+#statsAndStreaksSection table tr td {
+    border: 1px solid lightgrey;
+    padding-top:    0;
+    padding-bottom: 0;
+    padding-left:   1.4em;
+    padding-right:  1.4em;
+}
+#statsAndStreaksSection table tr td.data {
+    text-align: center;
 }
 
 
