@@ -575,7 +575,7 @@ function parseData() {
         var set         = obj.notes.split(' Enchanted Armoire: ')[1];
         if (set && set.match(/Independent Item/i)) {
             // create some unofficial sets
-            var res = name.match(/(Hairbow|Floppy<br \/>Hat|Cat<br \/>Hat)/i);
+            var res = name.match(/(Floppy<br \/>Hat|Cat<br \/>Hat)/i);
             if (res && res[0]) {
                 set = res[0] + '<br /><em>unofficial set</em>';
             }
