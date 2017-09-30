@@ -24,7 +24,7 @@ Contributors:
     Blade Barringer https://github.com/crookedneighbor
     donoftime https://github.com/donoftime
     me_and (Adam Dinwoodie) https://github.com/me-and
-
+	cTheDragons
 
 TO ADD A NEW SECTION TO THIS PAGE:
 Search through this code to find all the comments that start
@@ -2406,7 +2406,7 @@ wiki('Tavern', 'resting in the inn') +
         var id      = 'todosCompletedSection';
         var title   = 'To-Dos Completed';
         var orderId = 'todosCompleted';
-        var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/#/options/settings/export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
+        var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/user/settings/data-export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
         '<table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
@@ -4190,7 +4190,7 @@ function subscriptionData() {
                'the data Habitica has about your subscription. ' +
                'If you think any of it is not correct, please describe ' +
                'the problem at <a href="' +
-               'https://habitica.com/#/options/groups/guilds/a29da26b-37de-4a71-b0c6-48e72a900dac' +
+               'https://habitica.com/groups/guild/a29da26b-37de-4a71-b0c6-48e72a900dac' +
                '">Help > Report a Bug</a> from the website\'s menu or ' +
                '<strong>Guilds &gt; Report a Bug</strong> on the mobile ' +
                'app.</p>' +
@@ -5312,7 +5312,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.7)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.8)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5334,7 +5334,7 @@ ul#tableOfContents > li {
     <div class="bad hide">
         <p>There was an error obtaining your data.</p>
         <ul class="padded">
-            <li>Please reload the page and then check that your <a href="https://habitica.com/#/options/settings/api">User ID and API Token</a> are correct.</li>
+            <li>Please reload the page and then check that your <a href="https://habitica.com/user/settings/api">User ID and API Token</a> are correct.</li>
             <li>If you're using Internet Explorer, try another browser. <a href="https://www.google.com/intl/en/chrome/browser/">Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a> will be more reliable.</li>
             <li>If the page's URL starts with "http://" change it to start with "https://" (or just use <a href="https://oldgods.net/habitrpg/habitrpg_user_data_display.html">this correct link</a>).</li>
             <li>If neither of those help, contact me! See <strong>"Help and Contact Details"</strong> at the bottom of this page.</li>
@@ -5344,7 +5344,17 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
-
+	
+        <dt>8.8 <span class="date">2017-10-01</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>Show pending damage when quest is not available.</li>
+					<li>Update links for new version of the website.</li>
+                </ul>
+            </li>
+        </ul></dd>
+	
         <dt>8.7 <span class="date">2017-06-10</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5368,7 +5378,7 @@ ul#tableOfContents > li {
             </li>
             <li>Bug fix:
                 <ul>
-                    <li>Working out if a Daily is due is now done with Habitica's <code>isDue</code> property and so will always give the same result as you see on the official mobile apps. If you see that the website is displaying a different selection of due Dailies, the website will be correct; please report it in the <a href="https://habitica.com/#/options/groups/guilds/a29da26b-37de-4a71-b0c6-48e72a900dac">Report a Bug guild</a> so we can fix the mobile apps.</li>
+                    <li>Working out if a Daily is due is now done with Habitica's <code>isDue</code> property and so will always give the same result as you see on the official mobile apps. If you see that the website is displaying a different selection of due Dailies, the website will be correct; please report it in the <a href="https://habitica.com/groups/guild/a29da26b-37de-4a71-b0c6-48e72a900dac">Report a Bug guild</a> so we can fix the mobile apps.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -5696,7 +5706,7 @@ ul#tableOfContents > li {
                 <ul>
                     <li>The <strong>Equipment Recommendations</strong> section now includes images! Also, if you hover over an image, you'll see the "key" for that image, which might help anyone who uses the <a href="https://habitica.com/static/api">API</a> for manipulating their avatar. Thanks to <strong>goldfndr</strong> for this change! </li>
                     <li>The <strong>Re-Fetch</strong> button now tells you when your data was last fetched; <strong>goldfndr</strong> also made this enhancement.</li>
-                    <li>The feature that used to show you your email address has been removed because you can now see your address on the website at <https://habitica.com/#/options/settings/settings>Settings -> Site</a>.</li>
+                    <li>The feature that used to show you your email address has been removed because you can now see your address on the website at <https://habitica.com/user/settings/site>Settings -> Site</a>.</li>
                 </ul>
             </li>
             <li>Code:
@@ -6288,7 +6298,7 @@ ul#tableOfContents > li {
     <form id="userApiDetailsForm" method="POST" action="" target="formPasswdSaveFix">
         <fieldset>
             <legend><span class="highlight">Enter your Habitica API details</span>
-            (from the <a href="https://habitica.com/#/options/settings/api">Settings
+            (from the <a href="https://habitica.com/user/settings/api">Settings
              -&gt; API page</a>)
             </legend>
             <label for="userId"><span>User ID</span>
@@ -6373,7 +6383,7 @@ ul#tableOfContents > li {
 <!--
 I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more Habits then last week or: how many red/orange/yellow To-Dos are done this month etc. --lightsaber
 
-@lightsaber Now those are some interesting ideas! Some I could add to my tool (anything that uses current data, or very recent data - basically any data available from the [API](https://habitica.com/static/api) ). Others could be created with a tool that also reads [exported historical data](https://habitica.com/#/options/settings/export), although the level of detail that you might want might not be stored permanently in that data. If only I had unlimited time....
+@lightsaber Now those are some interesting ideas! Some I could add to my tool (anything that uses current data, or very recent data - basically any data available from the [API](https://habitica.com/static/api) ). Others could be created with a tool that also reads [exported historical data](https://habitica.com/user/settings/data-export), although the level of detail that you might want might not be stored permanently in that data. If only I had unlimited time....
 -->
             </li>
             <li>Prevent fatal failures when unexpected conditions occur (try/catch or similar everywhere).</li>
@@ -6399,7 +6409,7 @@ I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-
        <h2>Help and Contact Details</h2>
        <p>This page has been created by <a href="http://habitica.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitica.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
 
-        <p>If you have general questions about Habitica, post them to <a href="https://habitica.com/#/options/groups/tavern">Tavern Talk</a> or <a href="http://habitica.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
+        <p>If you have general questions about Habitica, post them to <a href="https://habitica.com/groups/tavern">Tavern Talk</a> or <a href="http://habitica.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
     </div>
 
     <div id="documentationAndFormClose" class="showHideToggle closer" data-target="documentationAndForm" data-resettoggletext="documentationAndFormToggle">hide documentation</div>
