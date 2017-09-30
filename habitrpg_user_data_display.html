@@ -448,13 +448,27 @@ function parseData() {
     var questProgressCollect = 0;
     var userIsOnBossQuest = false;
     var userIsOnCollectionQuest = false;
+	var questPending = {}; //messy but don't want to conflict
+	var questPendingBoss = false; //messy but don't want to conflict
+	var questPendingCollection = false; //messy but don't want to conflict
+
     if (party && user.party && user.party.quest) {
         if (party.quest && party.quest.active && party.quest.key && party.quest.members[userId]) {
             quest = $.extend({}, user.party.quest);
             quest.content = $.extend({}, content.quests[ party.quest.key ] );
             if  (quest.content.collect) userIsOnCollectionQuest = true;
             if (!quest.content.collect) userIsOnBossQuest = true;
-        }
+        } else if (party.quest && party.quest.key && party.quest.members[userId]) {
+			//This is messy but I didn't want to conflict current code.
+			questPending = $.extend({}, user.party.quest);
+            questPending.content = $.extend({}, content.quests[ party.quest.key ] );
+			if  (questPending.content.collect) questPendingCollection = true;
+            if (!questPending.content.collect) questPendingBoss = true;	
+		} else {
+			questPendingCollection = true;
+            questPendingBoss = true;
+		}
+		
         if (user.party.quest.progress && user.party.quest.progress.up) {
             // might not be in a quest but want to know damage done to world boss
             questProgressUp = user.party.quest.progress.up;
@@ -3170,6 +3184,17 @@ function questProgress() {
                          'collection quest (click for more information)',
             'target': id, 'value': questProgressCollect, 'status': 'neutral'};
     }
+	
+	if (questPendingBoss || questPendingCollection) {
+		html += 'So far today you have ' 
+		if (questPendingBoss) html += '<span class="highlight">' + Math.floor(questProgressUp * 10) / 10 + '</span> points of pending damage'
+		
+		if (questPendingBoss || questPendingCollection) html += ' or '
+		
+		if (questPendingCollection) html += '<span class="highlight">' + questProgressCollect + '</span> pending collected items'
+		
+		html += '. You will need to start the quest before cronning for this to take affect. ';
+	}	
     html += '</p>';
 
     if (tavernBoss && tavern.quest.progress) {
