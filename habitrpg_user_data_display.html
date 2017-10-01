@@ -2408,7 +2408,7 @@ wiki('Tavern', 'resting in the inn') +
         var id      = 'todosCompletedSection';
         var title   = 'To-Dos Completed';
         var orderId = 'todosCompleted';
-        var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/user/settings/data-export">Export User Data</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
+        var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/user/settings/data-export">Data Export</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
         '<table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
@@ -2782,9 +2782,10 @@ wiki('Tavern', 'resting in the inn') +
                               msg;
                 return ['',
                     effects,
-                    'After you have cast this, your <a href="' +
-                    'https://habitica.com/#/options/profile/stats">' +
-                    'User --> Stats page</a> will state "Streaks Frozen".']; },
+                    // 'After you have cast this, your <a href="' +
+                    // 'https://habitica.com/#/options/profile/stats">' +
+                    // 'User --> Stats page</a> will state "Streaks Frozen".'
+                    '']; },
 
             'heal': function() { // Healer - Healing Light
                 var inc = (computedStats.con + computedStats.int + 5) * 0.075;
@@ -3095,9 +3096,8 @@ function dropCountAndCap() {
         html += dropCap +
                '</span>. It will increase if your ' +
                wiki('Perception', 'perception') +
-               ' increases. Your perception is currently <a href="' +
-               'https://habitica.com/#/options/profile/stats">' +
-               computedStats['per'] + '</a>.</p>';
+               ' increases. Your perception is currently ' +
+               computedStats['per'] + '.</p>';
     }
     else {
         html += dropCap +
@@ -5705,7 +5705,7 @@ ul#tableOfContents > li {
                 <ul>
                     <li>The <strong>Equipment Recommendations</strong> section now includes images! Also, if you hover over an image, you'll see the "key" for that image, which might help anyone who uses the <a href="https://habitica.com/static/api">API</a> for manipulating their avatar. Thanks to <strong>goldfndr</strong> for this change! </li>
                     <li>The <strong>Re-Fetch</strong> button now tells you when your data was last fetched; <strong>goldfndr</strong> also made this enhancement.</li>
-                    <li>The feature that used to show you your email address has been removed because you can now see your address on the website at <https://habitica.com/user/settings/site>Settings -> Site</a>.</li>
+                    <li>The feature that used to show you your email address has been removed because you can now see your address on the website at <a href="https://habitica.com/user/settings/site">User Icon &gt; Settings</a>.</li>
                 </ul>
             </li>
             <li>Code:
@@ -6297,8 +6297,7 @@ ul#tableOfContents > li {
     <form id="userApiDetailsForm" method="POST" action="" target="formPasswdSaveFix">
         <fieldset>
             <legend><span class="highlight">Enter your Habitica API details</span>
-            (from the <a href="https://habitica.com/user/settings/api">Settings
-             -&gt; API page</a>)
+            (from <a href="https://habitica.com/user/settings/api">User Icon &gt; Settings &gt; API</a>)
             </legend>
             <label for="userId"><span>User ID</span>
                 <input type="text" name="userId" id="userId" />
