@@ -24,7 +24,7 @@ Contributors:
     Blade Barringer https://github.com/crookedneighbor
     donoftime https://github.com/donoftime
     me_and (Adam Dinwoodie) https://github.com/me-and
-	cTheDragons
+    cTheDragons https://github.com/cTheDragons
 
 TO ADD A NEW SECTION TO THIS PAGE:
 Search through this code to find all the comments that start
@@ -448,9 +448,9 @@ function parseData() {
     var questProgressCollect = 0;
     var userIsOnBossQuest = false;
     var userIsOnCollectionQuest = false;
-	var questPending = {}; //messy but don't want to conflict
-	var questPendingBoss = false; //messy but don't want to conflict
-	var questPendingCollection = false; //messy but don't want to conflict
+    var questPending = {}; //messy but don't want to conflict
+    var questPendingBoss = false; //messy but don't want to conflict
+    var questPendingCollection = false; //messy but don't want to conflict
 
     if (party && user.party && user.party.quest) {
         if (party.quest && party.quest.active && party.quest.key && party.quest.members[userId]) {
@@ -458,17 +458,19 @@ function parseData() {
             quest.content = $.extend({}, content.quests[ party.quest.key ] );
             if  (quest.content.collect) userIsOnCollectionQuest = true;
             if (!quest.content.collect) userIsOnBossQuest = true;
-        } else if (party.quest && party.quest.key && party.quest.members[userId]) {
-			//This is messy but I didn't want to conflict current code.
-			questPending = $.extend({}, user.party.quest);
+        }
+        else if (party.quest && party.quest.key && party.quest.members[userId]) {
+            //This is messy but I didn't want to conflict current code.
+            questPending = $.extend({}, user.party.quest);
             questPending.content = $.extend({}, content.quests[ party.quest.key ] );
-			if  (questPending.content.collect) questPendingCollection = true;
-            if (!questPending.content.collect) questPendingBoss = true;	
-		} else {
-			questPendingCollection = true;
+            if  (questPending.content.collect) questPendingCollection = true;
+            if (!questPending.content.collect) questPendingBoss = true;
+        }
+        else {
+            questPendingCollection = true;
             questPendingBoss = true;
-		}
-		
+        }
+
         if (user.party.quest.progress && user.party.quest.progress.up) {
             // might not be in a quest but want to know damage done to world boss
             questProgressUp = user.party.quest.progress.up;
@@ -3184,17 +3186,14 @@ function questProgress() {
                          'collection quest (click for more information)',
             'target': id, 'value': questProgressCollect, 'status': 'neutral'};
     }
-	
-	if (questPendingBoss || questPendingCollection) {
-		html += 'So far today you have ' 
-		if (questPendingBoss) html += '<span class="highlight">' + Math.floor(questProgressUp * 10) / 10 + '</span> points of pending damage'
-		
-		if (questPendingBoss || questPendingCollection) html += ' or '
-		
-		if (questPendingCollection) html += '<span class="highlight">' + questProgressCollect + '</span> pending collected items'
-		
-		html += '. You will need to start the quest before cronning for this to take affect. ';
-	}	
+
+    if (questPendingBoss || questPendingCollection) {
+        html += 'So far today you have ';
+        if (questPendingBoss) html += '<span class="highlight">' + Math.floor(questProgressUp * 10) / 10 + '</span> points of pending damage';
+        if (questPendingBoss && questPendingCollection) html += ' or ';
+        if (questPendingCollection) html += '<span class="highlight">' + questProgressCollect + '</span> pending collected items';
+        html += '. You will need to start a quest before cronning for this to take affect. ';
+    }
     html += '</p>';
 
     if (tavernBoss && tavern.quest.progress) {
@@ -5344,17 +5343,18 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
-	
+
         <dt>8.8 <span class="date">2017-10-01</span></dt>
         <dd><ul>
+            <li>Thanks very much to cTheDragons for making this update!</li>
             <li>Feature:
                 <ul>
                     <li>Show pending damage when quest is not available.</li>
-					<li>Update links for new version of the website.</li>
+                    <li>Update links for new version of the website.</li>
                 </ul>
             </li>
         </ul></dd>
-	
+
         <dt>8.7 <span class="date">2017-06-10</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5368,7 +5368,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>8.6 <span class="date">2017-06-08</span></dt>
         <dd><ul>
             <li>Feature:
