@@ -3259,8 +3259,8 @@ function analyseEquipment() {
         var missingEquipmentObjs = [];
         var html = '';
         var reasons = wiki('Death_Mechanics', 'Death') +
-                      ((user.achievements.rebirths > 0 ) ? ' or ' +
-                      wiki('Orb_of_Rebirth', 'Rebirth')  : '');
+                      ( (user.achievements.rebirths > 0 ) ? ' or ' + wiki('Orb_of_Rebirth', 'Rebirth')  : '' ) +
+                      ', or because the item has been made available to you but you haven't purchased it yet';
         if (equipment.length < 4) {
             html = '<p>You are missing this equipment due to ' + reasons +
                    ':</p>' +
