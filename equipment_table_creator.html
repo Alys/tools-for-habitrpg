@@ -480,6 +480,7 @@ function parseData() {
 
     var equipTable   = '<textarea rows="20" cols="120" wrap="off">';
     var armoireTable = '<textarea rows="20" cols="120" wrap="off">';
+    var armoireCount = 0;
 
     // table header:
     equipTable += '' +
@@ -680,6 +681,7 @@ function parseData() {
 '\n|' + isBest    ;           // quality
 
         if (armoireGear) {
+            armoireCount += 1;
             armoireTable += '' +
 '\n|-' +
 '\n|' + name        +         // name
@@ -729,6 +731,7 @@ function parseData() {
                     + '<h2>Equipment Table:</h2>'
                     + equipTable
                     + '<h2>Enchanted Armoire Table:</h2>'
+                    + '<p>Total number of Enchanted Armoire items: ' + armoireCount + '</p>'
                     + armoireTable
                     + htmlEnd);
 }
