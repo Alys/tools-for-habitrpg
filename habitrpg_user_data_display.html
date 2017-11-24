@@ -437,7 +437,7 @@ function parseData() {
     convertTasksToApiV2Format();
 
     // save the fetch time early:
-    var fetchtime = moment().format('YYYY-MM-DD HH:MM');
+    var fetchtime = moment().format('YYYY-MM-DD HH:mm');
 
     // extract some commonly-used data:
     var sleeping = user.preferences.sleep; // true if resting in the inn
@@ -3260,7 +3260,7 @@ function analyseEquipment() {
         var html = '';
         var reasons = wiki('Death_Mechanics', 'Death') +
                       ( (user.achievements.rebirths > 0 ) ? ' or ' + wiki('Orb_of_Rebirth', 'Rebirth')  : '' ) +
-                      ', or because the item has been made available to you but you haven't purchased it yet';
+                      ", or because a special item has been made available to you but you haven't purchased it yet";
         if (equipment.length < 4) {
             html = '<p>You are missing this equipment due to ' + reasons +
                    ':</p>' +
@@ -5311,7 +5311,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.8)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.9)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5344,6 +5344,20 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>8.9 <span class="date">2017-11-24</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>Allow the time to be reported correctly in the Re-Fetch button.</li>
+                </ul>
+            </li>
+            <li>Documentation:
+                <ul>
+                    <li>Improve the explanation for the Missing Equipment page.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>8.8 <span class="date">2017-10-01</span></dt>
         <dd><ul>
             <li>Thanks very much to cTheDragons for making this update!</li>
@@ -5354,7 +5368,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>8.7 <span class="date">2017-06-10</span></dt>
         <dd><ul>
             <li>Feature:
