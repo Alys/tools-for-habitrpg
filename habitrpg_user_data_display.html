@@ -3153,7 +3153,7 @@ function questProgress() {
             }
         }
         if (tavernBoss) {
-            html += "The Be-Wilder"; // XXX_LATER automate
+            html += "The Dysheartener"; // XXX_LATER automate
         }
         html += '.';
         var dashboardTitle = 'Damage to ' + upperCaseFirst(bossesWord);
@@ -3188,18 +3188,18 @@ function questProgress() {
     }
 
     if (questPendingBoss || questPendingCollection) {
-        html += 'So far today you have ';
-        if (questPendingBoss) html += '<span class="highlight">' + Math.floor(questProgressUp * 10) / 10 + '</span> points of pending damage';
-        if (questPendingBoss && questPendingCollection) html += ' or ';
-        if (questPendingCollection) html += '<span class="highlight">' + questProgressCollect + '</span> pending collected items';
-        html += '. You will need to start a quest before cronning for this to take affect. ';
+        // html += 'So far today you have ';
+        // if (questPendingBoss) html += '<span class="highlight">' + Math.floor(questProgressUp * 10) / 10 + '</span> points of pending damage';
+        // if (questPendingBoss && questPendingCollection) html += ' or ';
+        // if (questPendingCollection) html += '<span class="highlight">' + questProgressCollect + '</span> pending collected items';
+        // html += '. You will need to start a quest before cronning for this to take affect. ';
     }
     html += '</p>';
 
     if (tavernBoss && tavern.quest.progress) {
-        var name = "The Be-Wilder"; // XXX_LATER automate!
+        var name = "The Dysheartener"; // XXX_LATER automate!
         var hp = Math.round(tavern.quest.progress.hp);
-        var hpMax = 20000000; // XXX_LATER automate!
+        var hpMax = 17000000; // XXX_LATER automate!
         var hpPercent = Math.round(hp / hpMax * 1000) / 10;
         if (hp > 0 && hpPercent == 0) { // XXX_LATER do this better
             hpPercent = Math.round(hp / hpMax * 10000) / 100;
@@ -3218,9 +3218,9 @@ function questProgress() {
                  hp + ', down from ' + hpMax + ')';
         if (tavern.quest.progress.rage) {
             var rage = Math.round(tavern.quest.progress.rage);
-            var rageMax = 800000; // XXX_LATER automate!
+            var rageMax = 500000; // XXX_LATER automate!
             var ragePercent = Math.round(rage / rageMax * 1000) / 10;
-            html += '<br />Beguilement: ' + ragePercent + '% (' + // XXX_LATER automate "Beguilement"
+            html += '<br />Rage: ' + ragePercent + '% (' + // XXX_LATER automate "Rage" / "Beguilement"
                     rage + ' out of ' + rageMax + ')';
         }
         html += '</p>';
@@ -5311,7 +5311,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.9)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.9b)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5344,10 +5344,12 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
-        <dt>8.9 <span class="date">2017-11-24</span></dt>
+        <dt>8.9 <span class="date">2017-11-24 / 2018-02-16</span></dt>
         <dd><ul>
             <li>Bug fix:
                 <ul>
+                    <li>8.9b: Add stats for new World Boss.</li>
+                    <li>8.9a: Add name for new World Boss.</li>
                     <li>Allow the time to be reported correctly in the Re-Fetch button.</li>
                 </ul>
             </li>
@@ -6310,7 +6312,7 @@ ul#tableOfContents > li {
     <form id="userApiDetailsForm" method="POST" action="" target="formPasswdSaveFix">
         <fieldset>
             <legend><span class="highlight">Enter your Habitica API details</span>
-            (from <a href="https://habitica.com/user/settings/api">User Icon &gt; Settings &gt; API</a>)
+            (from <a href="https://habitica.com/user/settings/api">User Icon &gt; Settings &gt; API</a> on the website or Settings &gt; API on the Android app or Settings &gt; Account Details on the iOS app)
             </legend>
             <label for="userId"><span>User ID</span>
                 <input type="text" name="userId" id="userId" />
