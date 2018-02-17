@@ -99,6 +99,7 @@ var serverUrl                = 'https://habitica.com/api/v3';
 var serverPathContent        = '/content?language=en';
 var serverPathTavern         = '/groups/habitrpg';
 var serverPathParty          = '/groups/party';
+var serverPathGuildBase      = '/groups/';
 var serverPathUser           = '/user';
 var serverPathTasks          = '/tasks/user';
 var serverPathCompletedTodos = '/tasks/user?type=_allCompletedTodos';
@@ -543,6 +544,7 @@ function parseData() {
     collateAndDisplayTaskData();
     dropCountAndCap();
     questProgress();
+    guildsList();
     analyseEquipment(); // missing gear, current gear, recommended gear
     subscriptionData();
 
@@ -616,6 +618,7 @@ function formatAndDisplayTOC() {
             'HEADING Drops, Quests, Damage', 'dropsToday',
                 'questProgress', 'damageDailies', 'statsAndStreaks',
             'HEADING Other',
+                'guildsList',
                 'missingEquipment',
                 'currentGear', 'equipmentRecommendations', 'skillsAndBuffs',
                 'subscriptionData'];
@@ -653,7 +656,7 @@ function formatAndDisplayMAIN() {
                 'habitTrends', 'habitHistory', 'dailiesHistory', 'todosDated',
                 'todosCompleted', 'dropsToday', 'questProgress',
                 'damageDailies','dailiesIncomplete',//keep in that order
-                'statsAndStreaks',
+                'statsAndStreaks', 'guildsList',
                 'missingEquipment', 'currentGear', 'equipmentRecommendations',
                 'skillsAndBuffs', 'subscriptionData'];
     var html = '';
@@ -3233,6 +3236,151 @@ function questProgress() {
 }
 
 
+function guildsList() {
+    var id            = 'guildsListSection';
+    var title         = 'Guilds List';
+    var orderId       = 'guildsList';
+    var html = '<p><img src="images/guilds_list_sample_task.png" style="float:right"/>This section will show you a list of links to all the guilds you are a member of. Click the button and wait a few seconds for the data to load. The list will also be displayed in ' + wiki('Markdown_Cheat_Sheet', 'markdown') + ' format so that you can paste it into the note of a Habit or Reward in Habitica to have quick access to your Guilds from your tasks page, as shown in the example on the right.</p>' +
+            '<div style="padding-bottom: 15px;">' +
+            '<input id="fetchGuildsList" type="submit" value="Fetch Guilds List" />' +
+            ' &nbsp; ' +
+            '<span id="fetchGuildsListProgress" class="hide">fetching guilds, please wait.<span></span></span>' +
+            '</div>' +
+            '<div style="clear:both"></div>' +
+            '<div id="guildsListOutput">' +
+                '<div id="guildsLink">' +
+                '</div>' +
+                '<div id="guildsMarkdown" class="hide">' +
+                    '<p>The box below contains those same links in markdown format.</p>' +
+                    '<textarea rows="20" cols="100" wrap="off">' +
+                    '</textarea>' +
+                '</div>' +
+                '<div id="guildsStagingMarkdown">' +
+                '</div>' +
+                '<div id="guildsStagingData" class="hide">' +
+                    '<h3>Staging Links</h3>' +
+                    '<p>This section is visible to only mods and staff. It contains the same data as above but the links point to staging instead of production.</p>' +
+                    '<div id="guildsStagingLink">' +
+                    '</div>' +
+                    '<div id="guildsStagingMarkdown" class="hide">' +
+                        '<p>Staging markdown links:</p>' +
+                        '<textarea rows="20" cols="100" wrap="off">' +
+                        '</textarea>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '';
+
+    if (html) {
+        TOC[orderId]  = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html };
+    }
+
+}
+
+$('#fetchGuildsList').click(function(event){
+    /* The user clicked on the Fetch Guilds List button. */
+    fetchGuildsListFunction();
+});
+
+function fetchGuildsListFunction() {
+    var allGuilds = {}; // Guild names and IDs if the user requests the Guild List
+    var baseGuildUrl        = 'https://habitica.com/groups/guild/';
+    var baseGuildUrlStaging = 'https://habitrpg-staging.herokuapp.com/groups/guild/';
+    ajaxRunningCount = user.guilds.length;
+    // user.guilds = ['00000000-0000-4000-A000-000000000000']; // FOR TESTING
+    if (user.guilds.length === 0) {
+        $('#guildsListOutput #guildsLink').html('<p>You have not joined any Guilds. You can find some in the <a href="https://habitica.com/groups/discovery">Discover Guilds</a> section in Habitica.</p>');
+    }
+    else {
+        $('#fetchGuildsListProgress').show();
+        for (var i=0; i<user.guilds.length; ++i) { // fetch content for one guild
+            var gid = user.guilds[i];
+            var defaultName = 'unknown name (' + gid + ')';
+            $.ajax({
+                url: serverUrl + serverPathGuildBase + gid,
+                type: 'GET',
+                dataType: 'json',
+                cache: false,
+                beforeSend: function(xhr){
+                        xhr.setRequestHeader('x-api-user', userId);
+                        xhr.setRequestHeader('x-api-key',  apiToken);
+                    },
+                // success: fetchGuildSuccess,
+                success: function(data) {
+                    ajaxRunningCount--;
+                    $('#fetchGuildsListProgress span').append('.');
+                    allGuilds[data.data._id] = data.data.name;
+                    if (ajaxRunningCount === 0) { // all ajax calls have finished
+                        displayGuildData();
+                    }
+                },
+                error: function() { // treat as non-fatal failure
+                    ajaxRunningCount--;
+                    $('#fetchGuildsListProgress span').append('.');
+                    allGuilds[gid] = defaultName; // XXX does this work?
+                    if (ajaxRunningCount === 0) { // all ajax calls have finished
+                        displayGuildData();
+                    }
+                },
+            });
+        }
+    }
+
+    function displayGuildData() {
+        $('#fetchGuildsListProgress').hide();
+        var names            = [];
+        var linksForNames    = {};
+        var markdownForNames = {};
+        Object.keys(allGuilds).forEach(function(gid) {
+            var name = allGuilds[gid];
+            var count = 1;
+            while (linksForNames[name]) {
+                // name is already known
+                count++; // start at 2 since it's the second guild with this name
+                name = allGuilds[gid] + ' (' + count + ')';
+            }
+            names.push(name);
+            var link        = '<a href="' + baseGuildUrl        + gid + '">' + name + '</a>';
+            var stagingLink = '<a href="' + baseGuildUrlStaging + gid + '">' + name + '</a>';
+            var markdown        = '[' + name + '](' + baseGuildUrl        + gid + ')';
+            var stagingMarkdown = '[' + name + '](' + baseGuildUrlStaging + gid + ')';
+            markdownForNames = {};
+            linksForNames[name] = {};
+            linksForNames[name]['link']            = link;
+            linksForNames[name]['stagingLink']     = stagingLink;
+            linksForNames[name]['markdown']        = markdown;
+            linksForNames[name]['stagingMarkdown'] = stagingMarkdown;
+        });
+        names.sort();
+        var links           = '';
+        var stagingLinks    = '';
+        var markdown        = '';
+        var stagingMarkdown = '';
+        for (var i=0; i<names.length; ++i) {
+            var name = names[i];
+            if (links       ) links        += '<br />';
+            if (stagingLinks) stagingLinks += '<br />';
+            links           += linksForNames[name]['link'];
+            stagingLinks    += linksForNames[name]['stagingLink'];
+            markdown        += '+ ' + linksForNames[name]['markdown']        + '\n';
+            stagingMarkdown += '+ ' + linksForNames[name]['stagingMarkdown'] + '\n';
+        }
+        $('#guildsListOutput #guildsLink').html(links);
+        $('#guildsListOutput #guildsMarkdown textarea').text(markdown);
+        $('#guildsListOutput #guildsMarkdown').show();
+
+        if (user.contributor && user.contributor.admin) {
+            $('#guildsListOutput #guildsStagingData').show();
+            $('#guildsListOutput #guildsStagingLink').html(stagingLinks);
+            $('#guildsListOutput #guildsStagingMarkdown textarea').text(stagingMarkdown);
+            $('#guildsListOutput #guildsStagingMarkdown').show();
+        }
+    }
+}
+
+
+
 function analyseEquipment() {
     var missing = []; // gear lost due to death or rebirth
     var missingPretty = []; // like missing but formatted
@@ -5311,7 +5459,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v8.9b)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.0)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5344,6 +5492,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.0 <span class="date">2018-02-17</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>The "Guilds List" section shows you a list of links to all the guilds you are a member of. The list will also be displayed in markdown format so that you can paste it into the note of a Habit or Reward in Habitica to have quick access to your Guilds from your tasks page. Thanks to shanaqui for this idea!</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>8.9 <span class="date">2017-11-24 / 2018-02-16</span></dt>
         <dd><ul>
             <li>Bug fix:
@@ -5359,7 +5516,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>8.8 <span class="date">2017-10-01</span></dt>
         <dd><ul>
             <li>Thanks very much to cTheDragons for making this update!</li>
