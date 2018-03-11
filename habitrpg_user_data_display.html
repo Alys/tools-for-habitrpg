@@ -3191,11 +3191,11 @@ function questProgress() {
     }
 
     if (questPendingBoss || questPendingCollection) {
-        // html += 'So far today you have ';
-        // if (questPendingBoss) html += '<span class="highlight">' + Math.floor(questProgressUp * 10) / 10 + '</span> points of pending damage';
-        // if (questPendingBoss && questPendingCollection) html += ' or ';
-        // if (questPendingCollection) html += '<span class="highlight">' + questProgressCollect + '</span> pending collected items';
-        // html += '. You will need to start a quest before cronning for this to take affect. ';
+        html += 'So far today you have ';
+        if (questPendingBoss) html += '<span class="highlight">' + Math.floor(questProgressUp * 10) / 10 + '</span> points of pending damage';
+        if (questPendingBoss && questPendingCollection) html += ' or ';
+        if (questPendingCollection) html += '<span class="highlight">' + questProgressCollect + '</span> pending collected items';
+        html += '. A quest must start before you cron for this to take affect. ';
     }
     html += '</p>';
 
@@ -5460,7 +5460,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.0)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5492,7 +5492,14 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
-
+        <dt>9.1 <span class="date">2018-03-12</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>Re-enable to show pending damage when quest is not available.</li>
+                </ul>
+            </li>
+		</ul></dd>	
         <dt>9.0 <span class="date">2018-02-17</span></dt>
         <dd><ul>
             <li>Feature:
