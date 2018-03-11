@@ -3293,6 +3293,7 @@ function fetchGuildsListFunction() {
         $('#guildsListOutput #guildsLink').html('<p>You have not joined any Guilds. You can find some in the <a href="https://habitica.com/groups/discovery">Discover Guilds</a> section in Habitica.</p>');
     }
     else {
+        allGuilds = {}; // reset the list for the case where the user is refetching
         $('#fetchGuildsListProgress').show();
         for (var i=0; i<user.guilds.length; ++i) { // fetch content for one guild
             var gid = user.guilds[i];
@@ -3364,7 +3365,7 @@ function fetchGuildsListFunction() {
             links           += linksForNames[name]['link'];
             stagingLinks    += linksForNames[name]['stagingLink'];
             markdown        += '+ ' + linksForNames[name]['markdown']        + '\n';
-            stagingMarkdown += '+ ' + linksForNames[name]['stagingMarkdown'] + '\n';
+            stagingMarkdown +=        linksForNames[name]['stagingMarkdown'] + '\n\n';
         }
         $('#guildsListOutput #guildsLink').html(links);
         $('#guildsListOutput #guildsMarkdown textarea').text(markdown);
