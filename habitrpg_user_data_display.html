@@ -1713,6 +1713,7 @@ randomTodoHtml
     function habitTrends() {
         var html = '<p>The chart below provides a visual representation of the trends in your Habits as reflected by the data recorded in Habitica. Here you can get an idea of which Habits you are reinforcing, and which are being neglected. The data provided to this chart is the same as displayed in the Habit History section, limited to the last 500 entries. The Habit History section only records when a change occurs in a Habit, while the trend chart includes the values for all Habits every day, regardless if they changed.</p>';
         html += '<p>This chart is interactive, and exposes multiple controls:<ul><li>Scroll inside the chart to <strong>zoom</strong></li><li>Click and drag (left/right) to <strong>slide</strong> along the time-axis when zoomed in</li><li><strong>Hover</strong> over a datapoint to see all the values for that day</li><li>Click the Habits in the <strong>legend</strong> to toggle their display in the chart on/off</li></ul></p>';
+        html += '<p><strong>IMPORTANT! As described in the Habit History section, Habitica&apos;s staff are making a change to Habits on 25 June 2018. I don&apos;t yet know how that will affect this Habit Trends section but I&apos;ll update this message when I have worked out what the effect will be.</strong></p>';
         html += '<button onclick="$(\'.legend-toggle\').length != 0 ? $(\'.legend-toggle\').click() : $(\'.legend span\').click();" title="This may take a few seconds with a large amount of data">Toggle All</button>';
         var habitNames = habits.reduce(function(names, item) {
              names.push(item.text);
@@ -1861,7 +1862,10 @@ randomTodoHtml
     }
 
     function habitHistory() {
-        var html = '<p class="narrowContent">This shows your Habits and <strong>some</strong> of the dates and times you clicked on them; there is <a href="https://github.com/HabitRPG/habitrpg/issues/3079">an issue</a> which prevents Habitica from showing all of your clicks. <!-- IF THE ISSUE GOES AWAY: ... and the dates and times they were marked <span class="buttonUsed">up</span> (+ button) or <span class="buttonUsed">down</span> (- button). It does not include any archived history data that might have been saved for your account, so it contains only recent data. For up-and-down Habits (where both + and - are active), most of the data points are marked with <span class="buttonUsed">up</span> or <span class="buttonUsed">down</span>, but for the oldest data point, it is not possible to tell whether + or - had been hit. --> Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p><ul>';
+        var html = '<p class="narrowContent">This shows your Habits and the dates and times you clicked on them.</p>';
+        html += '<p class="narrowContent">Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
+        html += '<p class="narrowContent"><strong>IMPORTANT! On 25 June 2018, Habitica&apos;s staff will change Habits so that they no longer record the time of day that you clicked on them. All that will be recorded each day for each Habit will be how many times you clicked the plus button and how many times you clicked the minus button. Your old data that currently contains times will be modified by Habitica&apos;s staff to convert it to just the total number of clicks each day.<br />Because of this change in Habitica, it will be impossible for this tool to show you the time of day that you clicked your Habits - that data will simply no longer exist. Instead, this tool will show you your total number of clicks for each day.<br />If the times of day are important to you, you should copy the data below to save it in a text file or spreadsheet. It will not be possible for you to access the times of day from 25 June onwards. For some time zones, the change might happen on 24 June.<br />Technical details are available in <a href="https://github.com/HabitRPG/habitica/pull/10442">pull request 10442</a> and Habitica&apos;s staff will be releasing information in a Bailey message soon.</strong></p>';
+        html += '<ul>';
         $.each(habits, function(index, obj){
             html += collateHistoryForOneHabit(obj);
         });
@@ -5462,7 +5466,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.1a)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.1b)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5495,6 +5499,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.1b <span class="date">2018-06-14</span></dt>
+        <dd><ul>
+            <li>Documentation:
+                <ul>
+                    <li>Added a note to the Habit History and Habit Trends sections about an upcoming change that the staff are making to Habitica (in brief, Habitica will no longer record the times that you clicked the Habit buttons).</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.1a <span class="date">2018-06-03</span></dt>
         <dd><ul>
             <li>Documentation:
@@ -5503,7 +5516,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.1 <span class="date">2018-03-12</span></dt>
         <dd><ul>
             <li>Bug fix:
