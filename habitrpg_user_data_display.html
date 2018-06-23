@@ -1862,9 +1862,9 @@ randomTodoHtml
     }
 
     function habitHistory() {
-        var html = '<p class="narrowContent">This shows your Habits and the dates and times you clicked on them.</p>';
+        var html = '<p class="narrowContent">This shows your Habits, the dates you clicked on them, and the total number of plus and minus clicks on each of those dates.</p>';
         html += '<p class="narrowContent">Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
-        html += '<p class="narrowContent"><strong>IMPORTANT! On 25 June 2018, Habitica&apos;s staff will change Habits so that they no longer record the time of day that you clicked on them. All that will be recorded each day for each Habit will be how many times you clicked the plus button and how many times you clicked the minus button. Your old data that currently contains times will be modified by Habitica&apos;s staff to convert it to just the total number of clicks each day.<br />Because of this change in Habitica, it will be impossible for this tool to show you the time of day that you clicked your Habits - that data will simply no longer exist. Instead, this tool will show you your total number of clicks for each day.<br />If the times of day are important to you, you should copy the data below to save it in a text file or spreadsheet. It will not be possible for you to access the times of day from 25 June onwards. For some time zones, the change might happen on 24 June.<br />Technical details are available in <a href="https://github.com/HabitRPG/habitica/pull/10442">pull request 10442</a> and Habitica&apos;s staff will be releasing information in a Bailey message soon.</strong></p>';
+        html += '<p class="narrowContent"><strong>As of 25 June 2018 (or a day different in some time zones), Habitica no longer records the time of day that you clicked the buttons on your Habits. All that is stored each day for each Habit is how many times you clicked the plus button and how many times you clicked the minus button. All old data containing times has been automatically converted by Habitica&apos;s staff to just contain the total number of clicks.<br /><font size="5em">If you happen to use this tool while that change is occuring on 25 June, you might not see all your data below but it will return in the new format within a day.</font><br />Technical details are available in <a href="https://github.com/HabitRPG/habitica/pull/10442">pull request 10442</a> and some details are in a recent <a href="https://habitica.wikia.com/wiki/Whats_New#6.2F21.2F2018">Bailey message</a>.</strong></p>'; // XXX change this on 26 June
         html += '<ul>';
         $.each(habits, function(index, obj){
             html += collateHistoryForOneHabit(obj);
@@ -1878,55 +1878,24 @@ randomTodoHtml
                          'html': html};
 
         function collateHistoryForOneHabit(obj) {
-            //// The commented out code below is only useful if ALL recent
-            //// habit clicks are recorded in the user's data.
-            //// Currently they are not:
-            ////    https://github.com/HabitRPG/habitrpg/issues/3079
-            ////    "habit history condenses current day's data"
-
-            //// var canDoDown = obj.down;
-            //// var canDoUp   = obj.up;
-            //// var canDoBoth = canDoDown && canDoUp;
-
-            // Here we take each history item, convert its date to a
-            // standard format (my histories have varying formats,
-            // presumably from different apps I've used), and store
-            // it in an array; then we sort the array by date:
-            var historyItems = [];
-            $.each(obj.history, function(index, histObj){
-                var value = histObj.value;
-                var date = new Date(histObj.date);
-                historyItems.push({"date":date, "value":value});
-            });
-            historyItems.sort(function(a,b) {
-                return a.date - b.date;
-            });
-
-            //// var previousValue; // used to work out if user hit + or -
+            // ASSUMPTION: The history array is in chronological order (cross fingers).
             var historyList = [];
-            $.each(historyItems, function(index, histObj){
-                var value = histObj.value;
-                var date  = myDateConverter(histObj.date, 'long');
-                //// var buttonUsed = '?up/down?'; // default value
-                //// if (canDoBoth) {
-                    //// if (previousValue != undefined) {
-                        //// buttonUsed = (value > previousValue) ? 'up':'down';
-                    //// }
-                //// }
-                //// else {
-                    //// buttonUsed = (canDoUp) ? 'up' : 'down';
-                //// }
-                value = Math.round(value * 100) / 100;
-                historyList.push('<li>'
-                        + date
-                        //// + ': ' + ' <span class="buttonUsed">'
-                        //// + buttonUsed
-                        //// + '</span>'
-                        + ' <span class="historyValue">(value: '
-                        + value + ')</span>'
-                        + '</li>');
-                //// previousValue = value;
+            $.each(obj.history, function(index, histObj){
+                if (typeof histObj.scoredUp !== 'undefined' && typeof histObj.scoredDown !== 'undefined') {
+                    var valueRounded = Math.round(histObj.value * 100) / 100;
+                    var string = moment(histObj.date).format('YYYY-MM-DD') + ' : ';
+                    if (obj.up) {
+                        string += ' up: ' + histObj.scoredUp;
+                        if (obj.down) string += '; ';
+                    }
+                    if (obj.down) {
+                        string += ' down: ' + histObj.scoredDown;
+                    }
+                    string += ' <span class="historyValue">(value: ' + valueRounded + ')</span>';
+                    historyList.push('<li>' + string + '</li>');
+                }
             });
+
             var habitText = obj.text;
             var noHistoryClass = '';
             if (historyList.length == 0) {
@@ -1934,9 +1903,7 @@ randomTodoHtml
                 habitText += ' <span>(no history)</span>';
             }
             else {
-                historyList.reverse(); // put most recent at top; we couldn't
-                       // do this earlier when we sorted the items because the
-                       // 'buttonUsed' code needed them in chronological order
+                historyList.reverse(); // put most recent at top
                 habitText += '<ul class="padded">' +
                            historyList.join('') + '</ul>';
             }
@@ -5071,9 +5038,6 @@ ul#tableOfContents > li {
 }
 
 
-#habitHistorySection .buttonUsed { /* which button (+ or -) was pressed */
-    font-weight: bold;
-}
 #habitHistorySection .historyValue {
     font-size: .8em;
 }
@@ -5467,6 +5431,7 @@ ul#tableOfContents > li {
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
     <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.1c)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.2)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5498,6 +5463,15 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>9.2 <span class="date">2018-06-24</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>Changed the Habit History and Habit Trends sections in line with a change that Habitica's staff have made to Habits: Habitica no longer records the times that you clicked the Habit buttons, just the total number of plus and minus clicks each day.</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>9.1c <span class="date">2018-06-23</span></dt>
         <dd><ul>
