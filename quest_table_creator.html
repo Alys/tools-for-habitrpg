@@ -128,6 +128,9 @@ var releaseDates = {
     'badger' : '2018-02',
     'dysheartener' : '2018-02',
     'squirrel' : '2018-04',
+    'seaserpent' : '2018-07',
+    'kangaroo' : '2018-08',
+    'alligator' : '2018-10',
 };
 // get the current month's date in case the latest quest
 // hasn't been added above yet:
@@ -148,11 +151,12 @@ var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
 ////   DO NOT PUT SPACES IN THESE FILE NAMES!          ///////////////
 //////////////////////////////////////////////////////////////////////
 var images = {
-    'evilsanta':  'Inventory_quest_scroll_evilsanta.png',
-    'burnout':     'n/a',
-    'stressbeast': 'n/a',
-    'dilatory':    'n/a',
-    'bewilder':    'n/a',
+    'evilsanta':    'Inventory_quest_scroll_evilsanta.png',
+    'burnout':      'n/a',
+    'stressbeast':  'n/a',
+    'dilatory':     'n/a',
+    'bewilder':     'n/a',
+    'dysheartener': 'n/a',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -164,14 +168,15 @@ var images = {
 ////   "permanent".                                    ///////////////
 //////////////////////////////////////////////////////////////////////
 var questAvailability = {
-    'basilist':    'invite to party',
-    'egg':         'only during ' + make_url('Spring Fling'),
-    'evilsanta':   'only during ' + make_url('Winter Wonderland'),
-    'evilsanta2':  'only during ' + make_url('Winter Wonderland'),
-    'burnout':     'finished',
-    'stressbeast': 'finished',
-    'dilatory':    'finished',
-    'bewilder':    'finished',
+    'basilist':     'invite to party',
+    'egg':          'only during ' + make_url('Spring Fling'),
+    'evilsanta':    'only during ' + make_url('Winter Wonderland'),
+    'evilsanta2':   'only during ' + make_url('Winter Wonderland'),
+    'burnout':      'finished',
+    'stressbeast':  'finished',
+    'dilatory':     'finished',
+    'bewilder':     'finished',
+    'dysheartener': 'finished',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1107,7 +1112,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.wikia.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 30 April 2018)</span></h1><!-- VERSION -->
+    <span>(last updated 12 October 2018)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
