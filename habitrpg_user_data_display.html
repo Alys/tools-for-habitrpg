@@ -743,7 +743,7 @@ function myDateConverter(date, style) { // XXX_SOON replace with moment
 function wiki(wikilink, pipelink) {
     // http://stackoverflow.com/a/1145525
     var wiki_link = wikilink.split(' ').join('_');
-    return '<a href="http://habitica.wikia.com/wiki/' + wiki_link + '">' +
+    return '<a href="http://habitica.fandom.com/wiki/' + wiki_link + '">' +
         ((typeof pipelink === "undefined") ? wikilink : pipelink) +
         '</a>';
 }
@@ -1338,7 +1338,7 @@ function collateAndDisplayTaskData() {
         }
 
         function chooseColour(value) {
-            // from http://habitica.wikia.com/wiki/Task_Value :
+            // from http://habitica.fandom.com/wiki/Task_Value :
             // Bright Blue  Greater than 10
             // Blue Grey    Between 5 and 10
             // Green        Between 1 and 5
@@ -1864,7 +1864,7 @@ randomTodoHtml
     function habitHistory() {
         var html = '<p class="narrowContent">This shows your Habits, the dates you clicked on them, and the total number of plus and minus clicks on each of those dates.</p>';
         html += '<p class="narrowContent">Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
-        html += '<p class="narrowContent"><strong>As of 25 June 2018 (or a day different in some time zones), Habitica no longer records the time of day that you clicked the buttons on your Habits. All that is stored each day for each Habit is how many times you clicked the plus button and how many times you clicked the minus button. All old data containing times has been automatically converted by Habitica&apos;s staff to just contain the total number of clicks.<br /><font size="5em">If you happen to use this tool while that change is occuring on 25 June, you might not see all your data below but it will return in the new format within a day.</font><br />Technical details are available in <a href="https://github.com/HabitRPG/habitica/pull/10442">pull request 10442</a> and some details are in a recent <a href="https://habitica.wikia.com/wiki/Whats_New#6.2F21.2F2018">Bailey message</a>.</strong></p>'; // XXX change this on 26 June
+        html += '<p class="narrowContent"><strong>As of 25 June 2018 (or a day different in some time zones), Habitica no longer records the time of day that you clicked the buttons on your Habits. All that is stored each day for each Habit is how many times you clicked the plus button and how many times you clicked the minus button. All old data containing times has been automatically converted by Habitica&apos;s staff to just contain the total number of clicks.<br /><font size="5em">If you happen to use this tool while that change is occuring on 25 June, you might not see all your data below but it will return in the new format within a day.</font><br />Technical details are available in <a href="https://github.com/HabitRPG/habitica/pull/10442">pull request 10442</a>.</strong></p>'; // XXX change this on 26 June
         html += '<ul>';
         $.each(habits, function(index, obj){
             html += collateHistoryForOneHabit(obj);
@@ -2310,7 +2310,7 @@ wiki('Tavern', 'resting in the inn') +
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
 
-// LIST FORMAT FOR REASONS (INCOMPLETE): <li><span class="neutral">-</span> you did not tick off the Daily but you took no damage from it for a reason such as:<ul><li>the Daily was not due that day</li><li>you evaded the Daily with <a href="http://habitica.wikia.com/wiki/Rogue#Skills">Stealth</a></li><li>you were <a href="http://habitica.wikia.com/wiki/Tavern">resting in the inn</a></li><li>you had not logged in to Habitica that day</li><li>the Daily did not yet exist on that day</li></ul></li>      #dailiesHistorySection > ul ul { margin-left: 2em; }
+// LIST FORMAT FOR REASONS (INCOMPLETE): <li><span class="neutral">-</span> you did not tick off the Daily but you took no damage from it for a reason such as:<ul><li>the Daily was not due that day</li><li>you evaded the Daily with <a href="http://habitica.fandom.com/wiki/Rogue#Skills">Stealth</a></li><li>you were <a href="http://habitica.fandom.com/wiki/Tavern">resting in the inn</a></li><li>you had not logged in to Habitica that day</li><li>the Daily did not yet exist on that day</li></ul></li>      #dailiesHistorySection > ul ul { margin-left: 2em; }
     }
 
 
@@ -5430,8 +5430,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.1c)</span></h1><!-- VERSION TOGGLE -->
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.2)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.3)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5464,6 +5463,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.3 <span class="date">2019-05-20</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>Changed all wiki links from habitica.wikia.com to habitica.fandom.com.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.2 <span class="date">2018-06-24</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5472,7 +5480,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.1c <span class="date">2018-06-23</span></dt>
         <dd><ul>
             <li>Documentation:
@@ -5481,7 +5488,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.1b <span class="date">2018-06-14</span></dt>
         <dd><ul>
             <li>Documentation:
@@ -6561,7 +6567,6 @@ ul#tableOfContents > li {
             <li>Modify the "Random To-Do" function to also display a random Daily from those that have not been completed.</li>
             <li>Create a "Random Task" button that displays a randomly-selected To-Do and Daily near the top of the page. Allow the button to be clicked to show different tasks without the whole page having to be refetched. Remove the random task currently shown at the bottom of the Task Overview section.</li>
             <li>For Habit History and Untagged Tasks, apply the "longContent" class if there are more than x number of items.</li>
-            <li>Add <a href="http://medleyweb.com/web-dev/jquery-chart-and-graph-plugins/">Pie Charts</a> to Task Statistics: <a href="http://habitica.wikia.com/wiki/Thread:11457">join the discussion</a>
 <!--
 I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more Habits then last week or: how many red/orange/yellow To-Dos are done this month etc. --lightsaber
 
