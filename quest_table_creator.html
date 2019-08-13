@@ -406,6 +406,7 @@ function parseData() {
                 delete obj.type;
                 delete obj.key;
                 delete obj.text;
+                delete obj.onlyOwner;
                 if (Object.keys(obj).length) {
                     console.log('"obj" object has other contents:');
                     console.log(obj);
