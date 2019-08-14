@@ -34,7 +34,77 @@ Contributors:
 <script type="text/javascript">
 $(function() { // wraps around all our code to not pollute global namespace
 
-var wikiaBaseUrl = 'http://habitica.fandom.com/wiki/';
+
+//////////////////////////////////////////////////////////////////////
+////   TRANSLATED STRINGS                              ///////////////
+////                                                   ///////////////
+////   Add strings that this page uses (not strings    ///////////////
+////   that are found in Habitica).                    ///////////////
+////                                                   ///////////////
+//////////////////////////////////////////////////////////////////////
+var stringsForLanguage = {
+    'en': {
+WIKI_URL:      "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
+
+checkins:      "Check-Ins", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
+
+level:         "level",
+equipment:     "equipment",
+scroll:        "scroll", // quest scroll
+pet:           "pet",
+mount:         "mount",
+pet_and_mount: "pet &amp; mount",
+GP:            "GP", // abbreviation for Gold / Gold Points
+XP:            "XP", // abbreviation for Experience / Experience Points
+gems:          "Gems",
+collection:    "collection", // as in "collection quest"
+boss:          "boss",       // as in "boss quest"
+rage:          "rage",       // some bosses have a "rage" meter
+unknown:       "unknown",    // used when we don't know the quest type (boss/collection) or the reward type
+
+name:          "name",               // table header for the quest name column
+availability:  "availability",       // table header: how / when to obtain the scroll
+type:          "type",               // table header: type of quest (boss or collection)
+rewards:       "rewards",            // table header: rewards that the quest gives
+boss_HP:       "boss<br />HP",       // table header: starting health of boss
+boss_strength: "boss<br />strength", // table header: strength of boss
+
+previous_part: "previous part", // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
+invite_to_party: "invite to party", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
+finished:        "finished", // indicates that the World Boss quest has finished and is no longer available
+only_during:     "only during",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
+XP_GP_only:       "XP, GP<br />only", // the reward type for quests that give only XP and GP
+various: "various", // used to indicate the quest rewards when there's a variety of them
+etc: "etc", // added to the end of the quest's reward type when the quest gives multiple types
+one_of_each_food: "one of each food", // a type of quest reward
+not_applicable: "n/a", // an abbreviation meaning 'not applicable' (recommended to use a short word)
+
+weeks: "wk",      // an abbreviation for 'weeks'
+short: "short",   // describes the length of time generally taken to complete a quest
+medium: "medium", // as above
+long: "long",     // as above
+
+very_hard: "very hard", // describes how difficult a quest is in terms of having to be consistent with your Dailies
+hard: "hard",           // as above
+medium: "medium",       // as above
+easy: "easy",           // as above
+trivial: "trivial",     // as above
+    },
+    'ru': {
+		WIKI_URL:      "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
+    }
+};
+
+
+//////////////////////////////////////////////////////////////////////
+////   URL Parameter                                 /////////////////
+//////////////////////////////////////////////////////////////////////
+const urlParams = new URLSearchParams(window.location.search);
+const language = urlParams.get('language') || 'en';
+const inPageLanguage = (stringsForLanguage[language]) ? language : 'en';
+
+var wikiaBaseUrl = getString('WIKI_URL');
+
 
 //////////////////////////////////////////////////////////////////////
 ////   RELEASE DATES FOR QUEST SCROLLS                 ///////////////
@@ -134,6 +204,7 @@ var releaseDates = {
     'velociraptor' : '2019-01',
     'bronze' : '2019-05',
     'dolphin' : '2019-07',
+    'silver' : '2019-08',
 };
 // get the current month's date in case the latest quest
 // hasn't been added above yet:
@@ -155,11 +226,11 @@ var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
 //////////////////////////////////////////////////////////////////////
 var images = {
     'evilsanta':    'Inventory_quest_scroll_evilsanta.png',
-    'burnout':      'n/a',
-    'stressbeast':  'n/a',
-    'dilatory':     'n/a',
-    'bewilder':     'n/a',
-    'dysheartener': 'n/a',
+    'burnout':      'image_not_applicable',
+    'stressbeast':  'image_not_applicable',
+    'dilatory':     'image_not_applicable',
+    'bewilder':     'image_not_applicable',
+    'dysheartener': 'image_not_applicable',
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -171,15 +242,15 @@ var images = {
 ////   "permanent".                                    ///////////////
 //////////////////////////////////////////////////////////////////////
 var questAvailability = {
-    'basilist':     'invite to party',
-    'egg':          'only during ' + make_url('Spring Fling'),
-    'evilsanta':    'only during ' + make_url('Winter Wonderland'),
-    'evilsanta2':   'only during ' + make_url('Winter Wonderland'),
-    'burnout':      'finished',
-    'stressbeast':  'finished',
-    'dilatory':     'finished',
-    'bewilder':     'finished',
-    'dysheartener': 'finished',
+    'basilist':     getString('invite_to_party'),
+    'egg':          getString('only_during') + ' ' + make_url('Spring Fling'), // XXX finish translation
+    'evilsanta':    getString('only_during') + ' ' + make_url('Winter Wonderland'), // XXX finish translation
+    'evilsanta2':   getString('only_during') + ' ' + make_url('Winter Wonderland'), // XXX finish translation
+    'burnout':      getString('finished'),
+    'stressbeast':  getString('finished'),
+    'dilatory':     getString('finished'),
+    'bewilder':     getString('finished'),
+    'dysheartener': getString('finished'),
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -214,13 +285,11 @@ var rewardPageUrls = {
     'armor_special_2': 'Jean_Chalard%27s_Noble_Tunic',
 };
 
-
 //////////////////////////////////////////////////////////////////////
 ////   Global Variables                              /////////////////
 //////////////////////////////////////////////////////////////////////
 var content; // holds site-wide content (gear names and stats, quests, etc)
 var serverUrl = 'https://habitica.com:443/api/v3';
-
 
 //////////////////////////////////////////////////////////////////////
 ////   Data Fetch Function   /////////////////////////////////////////
@@ -234,6 +303,7 @@ function fetchData() {
     $.ajax({
         url: serverUrl + '/content',
         type: 'GET',
+        data: { language: language },
         dataType: 'json',
         cache: true,
         success: fetchContentSuccess,
@@ -280,18 +350,19 @@ function parseData() {
 
     var warnings = '';
 
-    var headers = [ ' class="unfilterable" | name',
-                    ' class="unfilterable" | scroll',
-                    ' class="unfilterable" | availability',
-                    ' class="unsortable"   | type',
-                    ' class="unfilterable" | rewards',
-                    ' class="unfilterable" | GP',
-                    ' class="unfilterable" | XP',
-                    ' class="unfilterable" | boss<br />HP',
-                    ' class="unfilterable" | boss<br />strength'];
+    var headers = [ ' class="unfilterable" | ' + getString('name'),
+                    ' class="unfilterable" | ' + getString('scroll'),
+                    ' class="unfilterable" | ' + getString('availability'),
+                    ' class="unsortable"   | ' + getString('type'),
+                    ' class="unfilterable" | ' + getString('rewards'),
+                    ' class="unfilterable" | ' + getString('GP'),
+                    ' class="unfilterable" | ' + getString('XP'),
+                    ' class="unfilterable" | ' + getString('boss_HP'),
+                    ' class="unfilterable" | ' + getString('boss_strength')
+                  ];
 
-    var headersHtml = ['name', 'scroll', 'availability', 'type', 'rewards', 'GP', 'XP', 'boss HP', 'boss strength'];
-    headersHtml.push('<em>length</em>', '<em>difficulty</em>', '<em>rating</em>', '<em>release date</em>');
+    var headersHtml = [ getString('name'), getString('scroll'), getString('availability'), getString('type'), getString('rewards'), getString('GP'), getString('XP'), getString('boss_HP'), getString('boss_strength') ];
+    headersHtml.push('<em>length</em>', '<em>difficulty</em>', '<em>rating</em>', '<em>release date</em>'); // XXX translate? Only for the page itself.
 
     // table row for each quest:
     var releaseDateNeeded = '';
@@ -317,6 +388,7 @@ function parseData() {
         questRewardsBugFixNormal += '"achievements.quests.' + questId + '":1, ';
 
         var questName = quest.text.replace(/^The /, '');
+        // questName = questName.replace(/Sto.kalm/, 'Stoikalm'); // TST
         row.push([ make_url(quest.text, questPageUrls[questId] || ''),
                    'data-sort-value="' + questName + '"' ]);
 
@@ -335,14 +407,14 @@ function parseData() {
             }
             else if (quest.unlockCondition && quest.unlockCondition.incentiveThreshold) {
                 availability = make_url(quest.unlockCondition.incentiveThreshold +
-                                        ' Check-Ins', 'Daily_Check-In_Incentives');
+                                        ' ' + getString('checkins'), 'Daily_Check-In_Incentives');
             }
             else if (quest.previous) {
-                availability = 'previous part';
+                availability = getString('previous_part');
                 displayLevelRestriction = quest.lvl; // true
             }
             else if (quest.lvl) {
-                availability = 'level ' + quest.lvl;
+                availability = getString('level') + ' ' + quest.lvl;
             }
         }
         if (quest.unlockCondition && quest.unlockCondition.condition &&
@@ -350,13 +422,12 @@ function parseData() {
            ) {
             delete quest.value; // Habitica's config lies
         }
-        var cost = (quest.goldValue) ? quest.goldValue + ' GP' :
-                   (quest.value)     ? quest.value + ' gem' +
-                                       ((quest.value > 1) ? 's' : '' )
+        var cost = (quest.goldValue) ? quest.goldValue + ' ' + getString('GP') :
+                   (quest.value)     ? quest.value + ' ' + getString('gems')
                                      : '';
         if (cost) {
             if (availability) {
-                availability += ' or<br />';
+                availability += ' or<br />'; // XXX translate
             }
             availability += cost;
         }
@@ -367,15 +438,15 @@ function parseData() {
             availability += questAvailability[questId];
         }
         if (displayLevelRestriction) {
-            availability += '<br />(level ' + quest.lvl + ')';
+            availability += '<br />(' + getString('level') + ' ' + quest.lvl + ')';
         }
         row.push(availability);
 
         var objectiveType =
             (quest.category && quest.category === 'world') ? 'world boss' :
-            (quest.collect) ? 'collection' :
-            (quest.boss)    ? 'boss' :
-                              'unknown';
+            (quest.collect) ? getString('collection') :
+            (quest.boss)    ? getString('boss') :
+                              getString('unknown');
         row.push(objectiveType);
 
         var droppedGP = quest.drop.gp || 0;
@@ -385,7 +456,6 @@ function parseData() {
         var XPandGPonly = jQuery.isEmptyObject(quest.drop);
         questRewardsBugFixNormal += '"stats.gp":' + droppedGP + ', "stats.exp":' + droppedXP + ', ';
 
-        // if (quest.drop.unlock) { console.log(quest.drop.unlock); } // TST
         delete quest.drop.unlock;
 
         var items = {};
@@ -425,7 +495,7 @@ function parseData() {
         var other     = [];
         for (var type in items) {
             if (type === 'food' && quest.category === 'world') {
-                other.push("one of each food"); // ASSUME this happens for each world quest
+                other.push(getString('one_of_each_food')); // ASSUME this happens for each world quest
             }
             else {
                 for (var key in items[type]) {
@@ -434,26 +504,38 @@ function parseData() {
                     if (type === 'pets') {
                         // ASSUME this key doesn't appear in rewardPageUrls
                         // ASSUME there's no more than one pet
-                        petName = text.replace(/ +\(Pet\)/i, '');
+                        petName = text;
+                        if (language === 'en') {
+                            petName = petName.replace(/ +\(Pet\)/i, ''); // XXX_soon consider other languages
+                        }
                         bugFixValue = 5;
                     }
                     else if (type === 'mounts') {
                         // ASSUME this key doesn't appear in rewardPageUrls
                         // ASSUME there's no more than one mount
-                        mountName = text.replace(/ +\(Mount\)/i, '');
+                        mountName = text;
+                        if (language === 'en') {
+                            mountName = mountName.replace(/ +\(Mount\)/i, ''); // XXX_soon consider other languages
+                        }
                         bugFixValue = 'true'; // string!
                     }
                     else {
                         if (type === 'gear') {
-                            text = text.replace(/ +\((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, '');
+                            if (language === 'en') {
+                                text = text.replace(/ +\((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, ''); // XXX_soon consider other languages
+                            }
                             bugFixValue = 'true'; // string!
                         }
                         else if (type === 'eggs') {
-                            text = text.replace(/\(Egg\)/i, '(egg)');
+                            if (language === 'en') {
+                                text = text.replace(/\(Egg\)/i, '(egg)'); // XXX_soon consider for other languages
+                            }
                             bugFixValue = items[type][key]['count'];
                         }
                         else if (type === 'hatchingPotions') {
-                            text = text.replace(/Hatching Potion/i, 'hatching potion');
+                            if (language === 'en') {
+                                text = text.replace(/Hatching Potion/i, 'hatching potion'); // XXX_soon consider other languages
+                            }
                             bugFixValue = items[type][key]['count'];
                         }
                         else {
@@ -483,50 +565,52 @@ function parseData() {
         }
 
         if (petName && mountName && petName === mountName) {
-            var pets = petName + ' (pet &amp; mount)';
+            var pets = petName + ' (' + getString('pet_and_mount') + ')';
             other.unshift(pets);
         }
         else {
             if (petName) {
-                other.unshift(petName + ' (pet)');
+                other.unshift(petName + ' (' + getString('pet') + ')');
             }
             if (mountName) {
-                other.unshift(mountName + ' (mount)');
+                other.unshift(mountName + ' (' + getString('mount') + ')');
             }
         }
         var rewardItems = equipment.concat(other);
 
-        var specialRewardType = 'unknown';
+        var specialRewardType = getString('unknown');
         var etcPossible = false;
         if (XPandGPonly) {
-            specialRewardType = 'XP, GP<br />only';
+            specialRewardType = getString('XP_GP_only');
         }
         if (items['gear']) {
-            specialRewardType = 'equipment';
+            specialRewardType = getString('equipment');
             etcPossible = true;
             delete items['gear'];
         }
         if (items['quests']) {
-            specialRewardType = 'scroll';
+            specialRewardType = getString('scroll');
             etcPossible = true;
             delete items['quests'];
         }
         if (etcPossible && Object.keys(items).length) {
-            specialRewardType += ', etc';
+            specialRewardType += ', ' + getString('etc');
         }
         var rewardType =
             (!quest.category)                 ? specialRewardType :
-            (quest.category === 'world')      ? 'various' :
+            (quest.category === 'world')      ? getString('various') :
             (quest.category === 'gold')       ? specialRewardType :
             (quest.category === 'unlockable') ? specialRewardType :
-                                                quest.category; // e.g., pet
+                                                quest.category; // e.g., pet // XXX translate?
 
         // add list of rewards to reward type, with some abbreviations:
         var itemsString = rewardItems.join(';<br />');
         if (rewardType === 'scroll') {
-            itemsString = itemsString.replace(/ \(Scroll\)/i, '');
-            itemsString = itemsString.replace(/ \(Quest Scroll\)/i, '');
-            itemsString = itemsString.replace(/.*Part [0-9]: /i, '');
+            if (language === 'en') {
+                itemsString = itemsString.replace(/ \(Scroll\)/i, ''); // XXX_soon consider other languages and the two lines below
+                itemsString = itemsString.replace(/ \(Quest Scroll\)/i, '');
+                itemsString = itemsString.replace(/.*Part [0-9]: /i, '');
+            }
         }
 
         if (itemsString) {
@@ -538,79 +622,79 @@ function parseData() {
         row.push(droppedGP);
         row.push(droppedXP);
 
-        var bossHP     = 'n/a';
+        var bossHP     = getString('not_applicable');
         var bossHPSort = 0;
-        var bossStr    = 'n/a';
+        var bossStr    = getString('not_applicable');
         var bossRage   = '';
-        var questLength         = 'n/a';
-        var questLengthDetailed = 'n/a';
-        var questDifficulty     = 'n/a';
+        var questLength         = getString('not_applicable');
+        var questLengthDetailed = getString('not_applicable');
+        var questDifficulty     = getString('not_applicable');
         if (quest.boss) {
-            bossHP     = quest.boss.hp   || 0;
+            bossHP     = quest.boss.hp || 0;
             bossHPSort = bossHP;
             bossStr  = quest.boss.str  || 0;
             bossRage = (quest.boss.rage && quest.boss.rage.value) ? +quest.boss.rage.value : 0;
             if ((!quest.category || quest.category !== 'world')) {
                 if (bossHP > 999) {
-                    questLength = '3. long';
+                    questLength = '3. ' + getString('long');
                 }
                 else if (bossHP > 499) {
-                    questLength = '2. medium';
+                    questLength = '2. ' + getString('medium');
                 }
                 else {
-                    questLength = '1. short';
+                    questLength = '1. ' + getString('short');
                 }
 
                 if (bossHP > 1200) {
-                    questLengthDetailed = '> 4 wk';
+                    questLengthDetailed = '> 4 ' + getString('wk');
                 }
                 else if (bossHP > 1000) {
-                    questLengthDetailed = '~ 4 wk';
+                    questLengthDetailed = '~ 4 ' + getString('wk');
                 }
                 else if (bossHP > 900) {
-                    questLengthDetailed = '3-4 wk';
+                    questLengthDetailed = '3-4 ' + getString('wk');
                 }
                 else if (bossHP > 799) {
-                    questLengthDetailed = '~ 3 wk';
+                    questLengthDetailed = '~ 3 ' + getString('wk');
                 }
                 else if (bossHP > 500) {
-                    questLengthDetailed = '2-3 wk';
+                    questLengthDetailed = '2-3 ' + getString('wk');
                 }
                 else if (bossHP > 400) {
-                    questLengthDetailed = '~ 2 wk';
+                    questLengthDetailed = '~ 2 ' + getString('wk');
                 }
                 else if (bossHP > 300) {
-                    questLengthDetailed = '< 2 wk';
+                    questLengthDetailed = '< 2 ' + getString('wk');
                 }
                 else {
-                    questLengthDetailed = '~ 1 wk';
+                    questLengthDetailed = '~ 1 ' + getString('wk');
                 }
 
                 if (bossStr > 2.5) {
-                    questDifficulty = '5. very hard';
+                    questDifficulty = '5. ' + getString('very_hard');
                 }
                 else if (bossStr === 2.5) {
-                    questDifficulty = '4. hard';
+                    questDifficulty = '4. ' + getString('hard');
                 }
                 else if (bossStr >= 2) {
-                    questDifficulty = '3. medium';
+                    questDifficulty = '3. ' + getString('medium');
                 }
                 else if (bossStr >= 1.5) {
-                    questDifficulty = '2. easy';
+                    questDifficulty = '2. ' + getString('easy');
                 }
                 else {
-                    questDifficulty = '1. trivial';
+                    questDifficulty = '1. ' + getString('trivial');
                 }
             }
 
             var divisor = 1000 * 1000;
             if (bossHP > divisor) {
                 bossHP = bossHP / divisor;
-                bossHP += 'M';
+                bossHP += 'M'; // XXX translate?
             }
             if (bossRage && bossRage > divisor/10) {
                 bossRage = bossRage / divisor;
-                bossRage += 'M';
+                bossRage += 'M'; // XXX translate?
             }
         }
         else if (quest.collect) {
@@ -622,51 +706,51 @@ function parseData() {
             }
 
             if (count > 300) {
-                questDifficulty = '5. very hard';
-                questLength = '3. long';
+                questDifficulty = '5. ' + getString('very_hard');
+                questLength = '3. ' + getString('long');
                 questLengthDetailed = '';
             }
             else if (count > 100) {
-                questDifficulty = '4. hard';
-                questLength = '3. long';
+                questDifficulty = '4. ' + getString('hard');
+                questLength = '3. ' + getString('long');
                 questLengthDetailed = '';
             }
             else if (count > 30) {
-                questDifficulty = '3. medium';
-                questLength = '2. medium';
+                questDifficulty = '3. ' + getString('medium');
+                questLength = '2. ' + getString('medium');
                 questLengthDetailed = '';
             }
             else {
-                questDifficulty = '2. easy';
-                questLength = '1. short';
+                questDifficulty = '2. ' + getString('easy');
+                questLength = '1. ' + getString('short');
                 questLengthDetailed = '';
             }
         }
 
         var rating = 'unknown';
         if (quest.category && quest.category === 'world') {
-            rating = '4. n/a';
+            rating = '4. ' + getString('not_applicable');
         }
-        else if ((questDifficulty === '1. trivial' ||
-             questDifficulty === '2. easy') && questLength === '1. short'
-           ) {
-            rating = '1. easy';
+        else if ((questDifficulty === '1. ' + getString('trivial') ||
+              questDifficulty === '2. ' + getString('easy')) && questLength === '1. ' + getString('short')
+            ) {
+            rating = '1. ' + getString('easy');
         }
-        else if ( questDifficulty >= '4. hard' ||
-                 (questDifficulty === '3. medium' && questLength === '3. long')
+        else if ( questDifficulty >= '4. ' + getString('hard') ||
+                 (questDifficulty === '3. ' + getString('medium') && questLength === '3. ' + getString('long'))
                 ) {
-            rating = '3. hard';
+            rating = '3. ' + getString('hard');
         }
         else {
-            rating = '2. medium';
+            rating = '2. ' + getString('medium');
         }
 
-        row.push([ bossHP + ((bossRage) ? '<br />rage:'+bossRage : ''),
+        row.push([ bossHP + ((bossRage) ? '<br />' + getString('rage') + ':'+bossRage : ''),
                    'data-sort-value="' + bossHPSort + '"' ]);
         row.push(bossStr);
 
-        var myRegexpLink  = /(.*)\[(\S+) +([^\]]+)\](.*)/g;            // '[' + url + ' ' + text + ']';
-        var myRegexpImage = /(.*)\[\[File:([^\|]+)\|[^\]]+\]\](.*)/g;  // '[[File:' + image + '|' + hoverText + ']]';
+        var myRegexpLink  = /(.*)\[(\S+) +([^\]]+)\](.*)/g;            // '[' + url + ' ' + text + ']'; // XXX translate?
+        var myRegexpImage = /(.*)\[\[File:([^\|]+)\|[^\]]+\]\](.*)/g;  // '[[File:' + image + '|' + hoverText + ']]'; // XXX translate?
 
         // So far, row contains the table cells for a Wikia table.
         // We now create an HTML version, and then add more fields to that.
@@ -707,19 +791,9 @@ function parseData() {
             releaseDateNeeded += "'" + questId +"' : '"+ thisMonth + "',<br />";
         }
         releaseDate = releaseDates[questId] || thisMonth;
-        // var myRegexp = /(.+)-0?(.+)/g; // year-month
-        // var match = myRegexp.exec(releaseDate);
         if (releaseDate === startOfTime) {
-            // releaseDatePretty = 'before<br />Dec 2015';
             releaseDatePretty = releaseDate + '<br />or earlier';
         }
-        // else if (match) {
-            // var months = ['zero','Jan','Feb','Mar','Apr','May','Jun',
-                                 // 'Jul','Aug','Sep','Oct','Nov','Dec'];
-            // var monthNumber = match[2];
-            // var month = months[match[2]] || match[2];
-            // releaseDatePretty = month + '<br />' + match[1];//year
-        // }
         else {
             releaseDatePretty = releaseDate;
         }
@@ -731,6 +805,7 @@ function parseData() {
         // quests, depending on the parameters of this quest.
         // For the HTML table, there is only one collection.
 
+        // XXX translate these instructions for which pages to update:
         if (releaseDate === thisMonth) {
             latestQuestUpdatesNeeded += "<strong>" + questName + "</strong> was released this month. Update the tables for: all quests";
         }
@@ -743,15 +818,15 @@ function parseData() {
         tableRowsHtml.push(rowHtml);
         tableRows.all.push( convertRow('wikia', row) );
 
-        if (rating === '1. easy') {
+        if (rating === '1. ' + getString('easy')) {
             tableRows.easy.push( convertRow('wikia', row) );
             if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ", easy quests"; }
         }
-        else if (rating === '2. medium') {
+        else if (rating === '2. ' + getString('medium')) {
             tableRows.medium.push( convertRow('wikia', row) );
             if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ", medium quests"; }
         }
-        else if (rating === '3. hard') {
+        else if (rating === '3. ' + getString('hard')) {
             tableRows.hard.push( convertRow('wikia', row) );
             if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ", hard quests"; }
         }
@@ -944,6 +1019,7 @@ function make_url(text, url) {
     if (url.indexOf('://') === -1) {
         url = wikiaBaseUrl + url;
     }
+    // text = text.replace(/Sto.kalm/, 'Stoikalm'); url = url.replace(/Sto.kalm/, 'Stoikalm'); // TST
     return '[' + url + ' ' + text + ']';
     // return [ '<a href="' + url + '">' + text + '</a>',
              // '[[' + url + '|' + text + ']]'           ];
@@ -956,8 +1032,8 @@ function make_image(image, hoverText) {
     if (!image) {
         return '';
     }
-    if (image === 'n/a') {
-        return image;
+    if (image === 'image_not_applicable') {
+        return getString('not_applicable');
     }
     hoverText = hoverText || '';
     return '[[File:' + image + '|' + hoverText + ']]';
@@ -967,6 +1043,18 @@ function make_image(image, hoverText) {
                     // '[[File:' + image + ']]';
 }
 
+
+function getString(key) {
+    if (stringsForLanguage[inPageLanguage] && stringsForLanguage[inPageLanguage][key]) {
+        return stringsForLanguage[inPageLanguage][key];
+    }
+    else if (stringsForLanguage['en'][key]) {
+        return stringsForLanguage['en'][key];
+    }
+    else {
+        return key;
+    }
+}
 
 });
 </script>
@@ -1116,7 +1204,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 16 July 2019)</span></h1><!-- VERSION -->
+    <span>(last updated 14 August 2019)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
