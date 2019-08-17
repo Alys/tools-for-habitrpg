@@ -51,53 +51,53 @@ $(function() { // wraps around all our code to not pollute global namespace
 //////////////////////////////////////////////////////////////////////
 var stringsForLanguage = {
     'en': {
-WIKI_URL:      "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
+        WIKI_URL:      "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
 
-checkins:      "Check-Ins", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
-checkins_page: "Daily_Check-In_Incentives", // the wiki page name for the language-specific version of http://habitica.fandom.com/wiki/Daily_Check-In_Incentives // XXX get from Jazzis's commit
+        checkins:      "Check-Ins", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
+        checkins_page: "Daily_Check-In_Incentives", // the wiki page name for the language-specific version of http://habitica.fandom.com/wiki/Daily_Check-In_Incentives // XXX get from Jazzis's commit
 
-level:         "level",
-equipment:     "equipment",
-scroll:        "scroll", // quest scroll
-pet:           "pet",
-mount:         "mount",
-pet_and_mount: "pet &amp; mount",
-GP:            "GP", // abbreviation for Gold / Gold Points
-XP:            "XP", // abbreviation for Experience / Experience Points
-gems:          "Gems",
-collection:    "collection", // as in "collection quest"
-boss:          "boss",       // as in "boss quest"
-rage:          "rage",       // some bosses have a "rage" meter
-unknown:       "unknown",    // used when we don't know the quest type (boss/collection) or the reward type
+        level:         "level",
+        equipment:     "equipment",
+        scroll:        "scroll", // quest scroll
+        pet:           "pet",
+        mount:         "mount",
+        pet_and_mount: "pet &amp; mount",
+        GP:            "GP", // abbreviation for Gold / Gold Points
+        XP:            "XP", // abbreviation for Experience / Experience Points
+        gems:          "Gems",
+        collection:    "collection", // as in "collection quest"
+        boss:          "boss",       // as in "boss quest"
+        rage:          "rage",       // some bosses have a "rage" meter
+        unknown:       "unknown",    // used when we don't know the quest type (boss/collection) or the reward type
 
-name:          "name",               // table header for the quest name column
-availability:  "availability",       // table header: how / when to obtain the scroll
-type:          "type",               // table header: type of quest (boss or collection)
-rewards:       "rewards",            // table header: rewards that the quest gives
-boss_HP:       "boss<br />HP",       // table header: starting health of boss
-boss_strength: "boss<br />strength", // table header: strength of boss
+        name:          "name",               // table header for the quest name column
+        availability:  "availability",       // table header: how / when to obtain the scroll
+        type:          "type",               // table header: type of quest (boss or collection)
+        rewards:       "rewards",            // table header: rewards that the quest gives
+        boss_HP:       "boss<br />HP",       // table header: starting health of boss
+        boss_strength: "boss<br />strength", // table header: strength of boss
 
-previous_part: "previous part", // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
-invite_to_party: "invite to party", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
-create_account: "Create Account", // this must be identical to Habitica's `createAccountReward` translated string
-finished:        "finished", // indicates that the World Boss quest has finished and is no longer available
-only_during:     "only during",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
-XP_GP_only:       "XP, GP<br />only", // the reward type for quests that give only XP and GP
-various: "various", // used to indicate the quest rewards when there's a variety of them
-etc: "etc", // added to the end of the quest's reward type when the quest gives multiple types
-one_of_each_food: "one of each food", // a type of quest reward
-not_applicable: "n/a", // an abbreviation meaning 'not applicable' (recommended to use a short word)
+        previous_part: "previous part", // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
+        invite_to_party: "invite to party", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
+        create_account: "Create Account", // this must be identical to Habitica's `createAccountReward` translated string
+        finished:        "finished", // indicates that the World Boss quest has finished and is no longer available
+        only_during:     "only during",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
+        XP_GP_only:       "XP, GP<br />only", // the reward type for quests that give only XP and GP
+        various: "various", // used to indicate the quest rewards when there's a variety of them
+        etc: "etc", // added to the end of the quest's reward type when the quest gives multiple types
+        one_of_each_food: "one of each food", // a type of quest reward
+        not_applicable: "n/a", // an abbreviation meaning 'not applicable' (recommended to use a short word)
 
-weeks: "wk",      // an abbreviation for 'weeks'
-short: "short",   // describes the length of time generally taken to complete a quest
-medium: "medium", // as above
-long: "long",     // as above
+        weeks: "wk",      // an abbreviation for 'weeks'
+        short: "short",   // describes the length of time generally taken to complete a quest
+        medium: "medium", // as above
+        long: "long",     // as above
 
-very_hard: "very hard", // describes how difficult a quest is in terms of having to be consistent with your Dailies
-hard: "hard",           // as above
-medium: "medium",       // as above
-easy: "easy",           // as above
-trivial: "trivial",     // as above
+        very_hard: "very hard", // describes how difficult a quest is in terms of having to be consistent with your Dailies
+        hard: "hard",           // as above
+        medium: "medium",       // as above
+        easy: "easy",           // as above
+        trivial: "trivial",     // as above
     },
     'ru': {
         WIKI_URL:      "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
@@ -1232,7 +1232,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 14 August 2019)</span></h1><!-- VERSION -->
+    <span>(last updated 18 August 2019)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
