@@ -543,6 +543,8 @@ function parseData() {
                 availability = quest.unlockCondition.text.toLowerCase();
             }
             else if (quest.unlockCondition && quest.unlockCondition.incentiveThreshold) {
+                // TODO: Is it possible to add pluralization?
+                //       (e.g., 1 вход, 22 входа, 7 входов)
                 availability = make_url(quest.unlockCondition.incentiveThreshold +
                                         ' ' + getString('checkins'), getString('checkins_page'));
             }
@@ -551,6 +553,8 @@ function parseData() {
                 displayLevelRestriction = quest.lvl; // true
             }
             else if (quest.lvl) {
+                // TODO: For example,in Russian, the order will be more familiar:
+                //       quest.lvl + ' ' + getString('level')
                 availability = getString('level') + ' ' + quest.lvl;
             }
         }
