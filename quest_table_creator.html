@@ -6,9 +6,16 @@
 
 <!--
 
-This page outputs the wikia code for creating the Quest Table
-in this page:
-    http://habitica.fandom.com/wiki/ XXX
+This page outputs the wikia code for creating tables displaying quest information in Habitica's official wiki.
+
+It's primarily written for the English language wiki (http://habitica.fandom.com/wiki/)
+but can also be used for other languages by specifying the language code in the URL like this:
+    https://oldgods.net/habitrpg/quest_table_creator.html?language=en
+That will cause Habitica's official content translations to be used.
+
+For texts inserted by this page (e.g., table headers), additional translations need to be added
+to the `stringsForLanguage` object in this file.
+Contact Alys (details below) if you'd like to provide translations for your language.
 
 This code is licenced under the same terms as Habitica:
     https://raw2.github.com/HabitRPG/habitrpg/develop/LICENSE
@@ -19,12 +26,12 @@ https://oldgods.net/habitrpg/quest_table_creator.html
 
 Contributors:
     Alys (Alice Harris), lady_alys@oldgods.net
+    Jazzis (Yuri Mashukov), jazzis18@gmail.com (Russian translation and code improvements)
 
 -->
 
     <meta name="description" content="Habitica Wiki Quest Table Creator" />
     <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
-
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
@@ -47,6 +54,7 @@ var stringsForLanguage = {
 WIKI_URL:      "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
 
 checkins:      "Check-Ins", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
+checkins_page: "Daily_Check-In_Incentives", // the wiki page name for the language-specific version of http://habitica.fandom.com/wiki/Daily_Check-In_Incentives // XXX get from Jazzis's commit
 
 level:         "level",
 equipment:     "equipment",
@@ -71,6 +79,7 @@ boss_strength: "boss<br />strength", // table header: strength of boss
 
 previous_part: "previous part", // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
 invite_to_party: "invite to party", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
+create_account: "Create Account", // this must be identical to Habitica's `createAccountReward` translated string
 finished:        "finished", // indicates that the World Boss quest has finished and is no longer available
 only_during:     "only during",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
 XP_GP_only:       "XP, GP<br />only", // the reward type for quests that give only XP and GP
@@ -91,9 +100,16 @@ easy: "easy",           // as above
 trivial: "trivial",     // as above
     },
     'ru': {
-		WIKI_URL:      "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
+        WIKI_URL:      "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
     }
 };
+
+var translationInstructions =    // Do not translate this into other languages. It's displayed only in the English version of the page. // XXX check that
+    '<h3>Translations for Non-English Wikis</h3>' +
+    '<p>If you would like to use this tool to create the tables for your own language\'s version of the wiki, add your language\'s code to the URL. For example, for the Russian ("ru") version you would use this URL:<br /><a href="https://oldgods.net/habitrpg/quest_table_creator.html?language=ru">https://oldgods.net/habitrpg/quest_table_creator.html?<strong>language=ru</strong></a><br />Habitica\'s official translations will then be used by this page. Some additional strings will need to be translated too (e.g., for the table headings) so contact Alys at lady_alys@oldgods.net to discuss that.</p>'
+    // '<p>So far support exists for the languages below but others can be added!</p>' +
+    // '<ul><li><a href="https://oldgods.net/habitrpg/quest_table_creator.html?language=ru">Russian</a></li></ul>'
+    ;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -387,7 +403,10 @@ function parseData() {
         var questRewardsBugFixSpecial = '';
         questRewardsBugFixNormal += '"achievements.quests.' + questId + '":1, ';
 
-        var questName = quest.text.replace(/^The /, '');
+        var questName = quest.text;
+        if (language === 'en') {
+            questName = questName.replace(/^The /, '');
+        }
         // questName = questName.replace(/Sto.kalm/, 'Stoikalm'); // TST
         row.push([ make_url(quest.text, questPageUrls[questId] || ''),
                    'data-sort-value="' + questName + '"' ]);
@@ -401,20 +420,20 @@ function parseData() {
         var displayLevelRestriction = false;
         if (quest.category && quest.category === 'unlockable') {
             if (quest.unlockCondition && quest.unlockCondition.text &&
-                quest.unlockCondition.text === "Create Account"
+                quest.unlockCondition.text === getString('create_account')
                ) {
                 availability = quest.unlockCondition.text.toLowerCase();
             }
             else if (quest.unlockCondition && quest.unlockCondition.incentiveThreshold) {
                 availability = make_url(quest.unlockCondition.incentiveThreshold +
-                                        ' ' + getString('checkins'), 'Daily_Check-In_Incentives');
+                                        ' ' + getString('checkins'), getString('checkins_page'));
             }
             else if (quest.previous) {
                 availability = getString('previous_part');
                 displayLevelRestriction = quest.lvl; // true
             }
             else if (quest.lvl) {
-                availability = getString('level') + ' ' + quest.lvl;
+                availability = getString('level') + ' ' + quest.lvl; // XXX for Russian, these are reversed
             }
         }
         if (quest.unlockCondition && quest.unlockCondition.condition &&
@@ -438,7 +457,7 @@ function parseData() {
             availability += questAvailability[questId];
         }
         if (displayLevelRestriction) {
-            availability += '<br />(' + getString('level') + ' ' + quest.lvl + ')';
+            availability += '<br />(' + getString('level') + ' ' + quest.lvl + ')'; // XXX for Russian, these are reversed
         }
         row.push(availability);
 
@@ -506,7 +525,7 @@ function parseData() {
                         // ASSUME there's no more than one pet
                         petName = text;
                         if (language === 'en') {
-                            petName = petName.replace(/ +\(Pet\)/i, ''); // XXX_soon consider other languages
+                            petName = petName.replace(/ +\(Pet\)/i, ''); // XXX_soon consider other languages - see Jazzis's commit
                         }
                         bugFixValue = 5;
                     }
@@ -515,29 +534,36 @@ function parseData() {
                         // ASSUME there's no more than one mount
                         mountName = text;
                         if (language === 'en') {
-                            mountName = mountName.replace(/ +\(Mount\)/i, ''); // XXX_soon consider other languages
+                            mountName = mountName.replace(/ +\(Mount\)/i, ''); // XXX_soon consider other languages - see Jazzis's commit
                         }
                         bugFixValue = 'true'; // string!
                     }
                     else {
                         if (type === 'gear') {
                             if (language === 'en') {
-                                text = text.replace(/ +\((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, ''); // XXX_soon consider other languages
+                                text = text.replace(/ +\((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i, ''); // XXX_soon consider other languages - see Jazzis's commit
                             }
                             bugFixValue = 'true'; // string!
                         }
                         else if (type === 'eggs') {
                             if (language === 'en') {
-                                text = text.replace(/\(Egg\)/i, '(egg)'); // XXX_soon consider for other languages
+                                text = text.replace(/\(Egg\)/i, '(egg)'); // XXX_soon consider for other languages - see Jazzis's commit
                             }
                             bugFixValue = items[type][key]['count'];
                         }
                         else if (type === 'hatchingPotions') {
                             if (language === 'en') {
-                                text = text.replace(/Hatching Potion/i, 'hatching potion'); // XXX_soon consider other languages
+                                text = text.replace(/Hatching Potion/i, 'hatching potion'); // XXX_soon consider other languages - see Jazzis's commit
                             }
                             bugFixValue = items[type][key]['count'];
                         }
+                        else if (type === 'food') {
+                            if (language === 'en') {
+                                text = text.replace(/XXX food?/i, 'XXX food?'); // XXX_soon consider other languages - see Jazzis's commit
+                            }
+                            bugFixValue = items[type][key]['count'];
+                        }
+
                         else {
                             bugFixValue = items[type][key]['count'];
                         }
@@ -605,9 +631,9 @@ function parseData() {
 
         // add list of rewards to reward type, with some abbreviations:
         var itemsString = rewardItems.join(';<br />');
-        if (rewardType === 'scroll') {
+        if (rewardType === getString('scroll')) {
             if (language === 'en') {
-                itemsString = itemsString.replace(/ \(Scroll\)/i, ''); // XXX_soon consider other languages and the two lines below
+                itemsString = itemsString.replace(/ \(Scroll\)/i, ''); // XXX_soon consider other languages and the two lines below - see Jazzis's commit
                 itemsString = itemsString.replace(/ \(Quest Scroll\)/i, '');
                 itemsString = itemsString.replace(/.*Part [0-9]: /i, '');
             }
@@ -690,11 +716,11 @@ function parseData() {
             var divisor = 1000 * 1000;
             if (bossHP > divisor) {
                 bossHP = bossHP / divisor;
-                bossHP += 'M'; // XXX translate?
+                bossHP += 'M'; // XXX translate? see Jazzis's commit
             }
             if (bossRage && bossRage > divisor/10) {
                 bossRage = bossRage / divisor;
-                bossRage += 'M'; // XXX translate?
+                bossRage += 'M'; // XXX translate? see Jazzis's commit
             }
         }
         else if (quest.collect) {
@@ -727,7 +753,7 @@ function parseData() {
             }
         }
 
-        var rating = 'unknown';
+        var rating = getString('unknown');
         if (quest.category && quest.category === 'world') {
             rating = '4. ' + getString('not_applicable');
         }
@@ -931,6 +957,8 @@ function parseData() {
                     '<li>For a collection quest, needing more than 300 items is "very hard" and "long"; more than 100 is "hard" and "long"; more than 30 is "medium" for both; others are "easy" and "short".</li>' +
                     '<li>The rating is a merge of the length and difficulty. Any quest with a trivial / easy difficulty AND a short length is rated "easy". Any quest with a hard difficulty or a long quest with a medium difficulty is rated "hard". The others are rated "medium".</li>' +
                     '</ul>' +
+
+                    ((inPageLanguage === 'en') ? translationInstructions : '') +
 
                     '<h2>All Quests</h2>' +
                     '<p>This textarea contains code to produce a Wikia table showing all quests. Paste this code into the <a href="http://habitica.fandom.com/wiki/Template:Quest_Table_All">Quest Table All</a> template.</p>' +
