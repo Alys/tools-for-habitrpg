@@ -51,8 +51,9 @@ $(function() { // wraps around all our code to not pollute global namespace
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
 var stringsForLanguage = {
+    // not used yet: wiki_name:        "Habitica Wiki", // the name of the wiki (it must contain "Habitica" and that word must not be translated)
     'en': {
-        WIKI_URL:         "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
+        wiki_url:         "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
 
         checkins:         "Check-Ins", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
         checkins_page:    "Daily_Check-In_Incentives", // link to the page itself above
@@ -122,7 +123,7 @@ var stringsForLanguage = {
         hard_quests:      "Hard Quests", // subsection heading used only within this page's instructions
     },
     'ru': { // XXX_LATER apply changes to comments above to these comments
-        WIKI_URL:         "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
+        wiki_url:         "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
 
         checkins:         "вх. в игру", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
         checkins_page:    "Ежедневное_вознаграждение", // link to the page itself above
@@ -290,7 +291,7 @@ const language = urlParams.get('language') || 'en';
 // for those strings.
 const inPageLanguage = (stringsForLanguage[language]) ? language : 'en';
 
-var wikiaBaseUrl = getString('WIKI_URL');
+var wikiaBaseUrl = getString('wiki_url');
 
 
 //////////////////////////////////////////////////////////////////////
@@ -1115,30 +1116,13 @@ function parseData() {
     //////////////////////////////////////////////////////////////////////
     // XXX_LATER translate all the instructions?
 
-    // XXX_NOW use wikiaBaseUrl in text below or make_url
-    var htmlStart = '';
-    ////// var htmlStart = '<p>This page outputs the wikia code for creating tables'
-        ////// + ' on the <a href="http://habitica.fandom.com/">Habitica wiki</a>.'
-        ////// + ' One table is for the [XXX finish this ... quest table pages ] '
-        // + ' <a href="http://habitica.fandom.com/wiki/Equipment_Table">'
-        // + 'Equipment Table</a> page, and the other is for the'
-        // + ' <a href="http://habitica.fandom.com/wiki/Enchanted_Armoire">'
-        // + 'Enchanted Armoire</a> page.</p>'
-        // + '<p>Copy everything inside each textarea below and paste it '
-        // + 'into the appropriate template pages: <a href="'
-        // + 'http://habitica.fandom.com/wiki/Template:Equipment_Table_Code'
-        // + '">Template:Equipment_Table_Code</a> and <a href="'
-        // + 'http://habitica.fandom.com/wiki/Template:Enchanted_Armoire_Table_Code'
-        // + '">Template:Enchanted_Armoire_Code</a>.'
-        ////// + '</p>';
-
     $('#loading .good').hide();
-    $('#output').html(htmlStart +
+    $('#output').html(
         '<p>' + latestQuestUpdatesNeeded + '</p>' +
         '<h2>Notes:</h2>' +
         '<ul>' +
+        '<li>This page outputs the wikia code for creating tables that display quests on the <a href="http://habitica.fandom.com/">Habitica wiki</a> and translated wikis.</li>' +
         '<li>Post to the Wizards of the Wiki guild if you have suggestions for improving this.</li>' +
-
         '<li>The <strong>length</strong>, <strong>difficulty</strong>, and <strong>rating</strong> columns do not appear on the wiki but are included in the table below to help us categorise the quests into pages.</li>' +
         '<li>The <strong>release date</strong> column does not appear on the wiki. It is used here only to help us work out which pages need to be updated when a new quest is released, and so exact release dates for most of the quests are not included.</li>' +
 
