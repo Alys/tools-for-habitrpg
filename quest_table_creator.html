@@ -66,7 +66,7 @@ var stringsForLanguage = {
         egg:                   "egg",
         food:                  "food",
         hatching_potion:       "hatching potion",
-        potion:                "hatching potion",
+        potion:                "hatching potion", 
         pet_and_mount:         "pet &amp; mount",
         GP:                    "GP", // abbreviation for Gold / Gold Points
         XP:                    "XP", // abbreviation for Experience / Experience Points
@@ -635,8 +635,8 @@ function parseData() {
             }
             else if (quest.unlockCondition && quest.unlockCondition.incentiveThreshold) {
                 // XXX_LATER TODO: Is it possible to add pluralization? May be possible if pluralisation rules in various languages won't make it too hard.
-                //       (e.g., 1 вход, 22 входа, 7 входов)
-                availability = make_url(quest.unlockCondition.incentiveThreshold + ' ' + getString('checkins'), {'url' : getString('checkins_page')} );
+                // XXX_ALYS I agree that you can like this: Check-Ins: N
+                availability = make_url(getString('checkins') + ': ' + quest.unlockCondition.incentiveThreshold, {'url' : getString('checkins_page')} );
             }
             else if (quest.previous) {
                 availability = getString('previous_part');
@@ -1133,7 +1133,6 @@ function parseData() {
 
         ((inPageLanguage === 'en') ? translationInstructions : '') +
 
-        // XXX_JAZZIS Can you please check that the five links to Template pages here are correct for the Russian wiki? I.e., every link that appears after "Paste this code into this template:"
         '<h2>' + getString('all_quests') + '</h2>' +
         '<p>This textarea contains code to produce a Wikia table showing all quests. Paste this code into this template: ' +
         make_url('all_quests', {template:true, html:true}) +
