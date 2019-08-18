@@ -54,145 +54,150 @@ $(function() { // wraps around all our code to not pollute global namespace
 var stringsForLanguage = {
     // not used yet: wiki_name:        "Habitica Wiki", // the name of the wiki (it must contain "Habitica" and that word must not be translated)
     'en': {
-        wiki_url:         "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
+        wiki_url:          "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
 
-        checkins:         "Check-Ins", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
-        checkins_page:    "Daily_Check-In_Incentives", // link to the page itself above
+        checkins:          "Check-Ins", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
+        checkins_page:     "Daily_Check-In_Incentives", // link to the page itself above
 
-        level:            "level",
-        equipment:        "equipment",
-        scroll:           "scroll", // quest scroll
-        pet:              "pet",
-        mount:            "mount",
-        egg:              "egg",
-        food:             "food",
-        hatching_potion:  "hatching potion",
-        pet_and_mount:    "pet &amp; mount",
-        GP:               "GP", // abbreviation for Gold / Gold Points
-        XP:               "XP", // abbreviation for Experience / Experience Points
-        gems:             "Gems",
-        world_boss:       "world boss", // as in 'world boss quest'
-        collection:       "collection", // as in 'collection quest'
-        boss:             "boss",       // as in 'boss quest'
-        rage:             "rage",       // some bosses have a 'rage' meter
-        unknown:          "unknown",    // used when we don't know the quest type (world boss/boss/collection) or the reward type
+        level:             "level",
+        equipment:         "equipment",
+        scroll:            "scroll", // quest scroll
+        pet:               "pet",
+        mount:             "mount",
+        egg:               "egg",
+        food:              "food",
+        hatching_potion:   "hatching potion",
+        pet_and_mount:     "pet &amp; mount",
+        GP:                "GP", // abbreviation for Gold / Gold Points
+        XP:                "XP", // abbreviation for Experience / Experience Points
+        gems:              "Gems",
+        world_boss:        "world boss", // as in 'world boss quest'
+        collection:        "collection", // as in 'collection quest'
+        boss:              "boss",       // as in 'boss quest'
+        rage:              "rage",       // some bosses have a 'rage' meter
+        unknown:           "unknown",    // used when we don't know the quest type (world boss/boss/collection) or the reward type
 
-        name:             "name",               // table header for the quest name column
-        availability:     "availability",       // table header: how / when to obtain the scroll
-        type:             "type",               // table header: type of quest (world boss or boss or collection)
-        rewards:          "rewards",            // table header: rewards that the quest gives
-        boss_HP:          "boss<br />HP",       // table header: starting health of boss
-        boss_strength:    "boss<br />strength", // table header: strength of boss
+        name:              "name",               // table header for the quest name column
+        availability:      "availability",       // table header: how / when to obtain the scroll
+        type:              "type",               // table header: type of quest (world boss or boss or collection)
+        rewards:           "rewards",            // table header: rewards that the quest gives
+        boss_HP:           "boss<br />HP",       // table header: starting health of boss
+        boss_strength:     "boss<br />strength", // table header: strength of boss
 
-        length:           "length",       // table header (HTML only): the length of time generally taken to complete a quest
-        difficulty:       "difficulty",   // table header (HTML only): how difficult a quest is in terms of having to be consistent with your Dailies
-        rating:           "rating",       // table header (HTML only): a merge of the length and difficulty
-        release_date:     "release date", // table header (HTML only): quest release date
+        length:            "length",       // table header (HTML only): the length of time generally taken to complete a quest
+        difficulty:        "difficulty",   // table header (HTML only): how difficult a quest is in terms of having to be consistent with your Dailies
+        rating:            "rating",       // table header (HTML only): a merge of the length and difficulty
+        release_date:      "release date", // table header (HTML only): quest release date
 
-        previous_part:    "previous part",   // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
-        invite_to_party:  "invite to party", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
-        create_account:   "Create Account",  // this must be identical to Habitica's `createAccountReward` translated string
-        finished:         "finished", // indicates that the World Boss quest has finished and is no longer available
-        only_during:      "only during",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
-        XP_GP_only:       "XP, GP<br />only", // the reward type for quests that give only XP and GP
-        various:          "various", // used to indicate the quest rewards when there's a variety of them
-        etc:              "etc", // added to the end of the quest's reward type when the quest gives multiple types
-        one_of_each_food: "one of each food", // a type of quest reward
-        not_applicable:   "n/a", // an abbreviation meaning 'not applicable' (recommended to use a short word)
+        previous_part:     "previous part",   // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
+        invite_to_party:   "invite to party", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
+        create_account:    "Create Account",  // this must be identical to Habitica's `createAccountReward` translated string
+        finished:          "finished", // indicates that the World Boss quest has finished and is no longer available
+        only_during:       "only during",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
+        spring_fling:      "Spring Fling",      // the name of the wiki page for the spring Grand Gala
+        winter_wonderland: "Winter Wonderland", // the name of the wiki page for the winter Grand Gala
+        XP_GP_only:        "XP, GP<br />only", // the reward type for quests that give only XP and GP
+        various:           "various", // used to indicate the quest rewards when there's a variety of them
+        etc:               "etc", // added to the end of the quest's reward type when the quest gives multiple types
+        one_of_each_food:  "one of each food", // a type of quest reward
+        not_applicable:    "n/a", // an abbreviation meaning 'not applicable' (recommended to use a short word)
 
-        weeks:            "wk",   // 'weeks' or a shorter word for it (as short as possible is best)
-        short:            "short",  // describes the length of time generally taken to complete a quest
-        medium:           "medium", // as above
-        long:             "long",   // as above
+        weeks:             "wk",   // 'weeks' or a shorter word for it (as short as possible is best)
+        short:             "short",  // describes the length of time generally taken to complete a quest
+        medium:            "medium", // as above
+        long:              "long",   // as above
 
-        very_hard:        "very hard", // describes how difficult a quest is in terms of having to be consistent with your Dailies
-        hard:             "hard",      // as above
-        medium:           "medium",    // as above
-        easy:             "easy",      // as above
-        trivial:          "trivial",   // as above
+        very_hard:         "very hard", // describes how difficult a quest is in terms of having to be consistent with your Dailies
+        hard:              "hard",      // as above
+        medium:            "medium",    // as above
+        easy:              "easy",      // as above
+        trivial:           "trivial",   // as above
 
-        million:          "M",  // an abbreviation for 'million' to indicate the strength of world boss or his rage
-        or:               "or",
-        or_earlier:       "or earlier",
+        million:           "M",  // an abbreviation for 'million' to indicate the strength of world boss or his rage
+        or:                "or",
+        or_earlier:        "or earlier",
 
-        new_quest:        "Quest released this month", // used only within this page's instructions; will not appear on the wiki
-        tables_to_edit:   "update the tables for", // used only within this page's instructions; will not appear on the wiki
-        all_quests:       "All Quests", // subsection heading used only within this page's instructions
-        quest_lines:      "Quest Lines", // subsection heading used only within this page's instructions
-        easy_quests:      "Easy Quests", // subsection heading used only within this page's instructions
-        medium_quests:    "Medium Quests", // subsection heading used only within this page's instructions
-        hard_quests:      "Hard Quests", // subsection heading used only within this page's instructions
+        new_quest:         "Quest released this month", // used only within this page's instructions; will not appear on the wiki
+        tables_to_edit:    "update the tables for", // used only within this page's instructions; will not appear on the wiki
+        all_quests:        "All Quests", // subsection heading used only within this page's instructions
+        quest_lines:       "Quest Lines", // subsection heading used only within this page's instructions
+        easy_quests:       "Easy Quests", // subsection heading used only within this page's instructions
+        medium_quests:     "Medium Quests", // subsection heading used only within this page's instructions
+        hard_quests:       "Hard Quests", // subsection heading used only within this page's instructions
     },
-    'ru': { // XXX_LATER apply changes to comments above to these comments
-        wiki_url:         "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
+    'ru': {
+        wiki_url:          "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
 
-        checkins:         "вх. в игру", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
-        checkins_page:    "Ежедневное_вознаграждение", // link to the page itself above
+        checkins:          "вх. в игру", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
+        checkins_page:     "Ежедневное_вознаграждение", // link to the page itself above
 
-        level:            "ур.",
-        equipment:        "снаряжение",
-        scroll:           "свиток", // quest scroll
-        pet:              "питомец",
-        mount:            "скакун",
-        egg:              "яйцо",
-        food:             "еда",
-        hatching_potion:  "инкубационный эликсир",
-        pet_and_mount:    "питомец и скакун",
-        GP:               "золота", // abbreviation for Gold / Gold Points
-        XP:               "опыт",   // abbreviation for Experience / Experience Points
-        gems:             "самоцв.",
-        world_boss:       "мировой босс",
-        collection:       "собираемый",    // as in "collection quest"
-        boss:             "босс",          // as in "boss quest"
-        rage:             "ярость",        // some bosses have a "rage" meter
-        unknown:          "неизвестно",    // used when we don't know the quest type (boss/collection) or the reward type
+        level:             "ур.",
+        equipment:         "снаряжение",
+        scroll:            "свиток", // quest scroll
+        pet:               "питомец",
+        mount:             "скакун",
+        egg:               "яйцо",
+        food:              "еда",
+        hatching_potion:   "инкубационный эликсир",
+        pet_and_mount:     "питомец и скакун",
+        GP:                "золота", // abbreviation for Gold / Gold Points
+        XP:                "опыт",   // abbreviation for Experience / Experience Points
+        gems:              "самоцв.",
+        world_boss:        "мировой босс",
+        collection:        "собираемый",    // as in 'collection quest'
+        boss:              "босс",          // as in 'boss quest'
+        rage:              "ярость",        // some bosses have a 'rage' meter
+        unknown:           "неизвестно",    // used when we don't know the quest type (world boss/boss/collection) or the reward type
 
-        name:             "название",            // table header for the quest name column
-        availability:     "доступность",         // table header: how / when to obtain the scroll
-        type:             "тип",                 // table header: type of quest (boss or collection)
-        rewards:          "награды",             // table header: rewards that the quest gives
-        boss_HP:          "здоровье<br />босса", // table header: starting health of boss
-        boss_strength:    "сила<br />босса",     // table header: strength of boss
+        name:              "название",            // table header for the quest name column
+        availability:      "доступность",         // table header: how / when to obtain the scroll
+        type:              "тип",                 // table header: type of quest (world boss or boss or collection)
+        rewards:           "награды",             // table header: rewards that the quest gives
+        boss_HP:           "здоровье<br />босса", // table header: starting health of boss
+        boss_strength:     "сила<br />босса",     // table header: strength of boss
 
-        length:           "длительность",
-        difficulty:       "сложность",
-        rating:           "рейтинг",
-        release_date:     "дата выпуска",
+        length:            "длительность",
+        difficulty:        "сложность",
+        rating:            "рейтинг",
+        release_date:      "дата выпуска",
 
-        previous_part:    "пред. часть", // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
-        invite_to_party:  "пригласить кого-нибудь в команду", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
-        create_account:   "Создать учетную запись",            // this must be identical to Habitica's `createAccountReward` translated string
-        finished:         "завершен", // indicates that the World Boss quest has finished and is no longer available
-        only_during:      "только во время",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
-        XP_GP_only:       "только<br />опыт и золото", // the reward type for quests that give only XP and GP
-        various:          "разное", // used to indicate the quest rewards when there's a variety of them
-        etc:              "и др.", // added to the end of the quest's reward type when the quest gives multiple types
-        one_of_each_food: "по одной ед. еды каждого вида", // a type of quest reward
-        not_applicable:   "н/д", // an abbreviation meaning 'not applicable' (recommended to use a short word)
+        previous_part:     "пред. часть", // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
+        invite_to_party:   "пригласить кого-нибудь в команду", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
+        create_account:    "Создать учетную запись",            // this must be identical to Habitica's `createAccountReward` translated string
+        finished:          "завершен", // indicates that the World Boss quest has finished and is no longer available
+        only_during:       "только во время",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
+        // XXX_JAZZIS new translations:
+        spring_fling:      "Spring Fling",      // the name of the wiki page for the spring Grand Gala
+        winter_wonderland: "Winter Wonderland", // the name of the wiki page for the winter Grand Gala
+        XP_GP_only:        "только<br />опыт и золото", // the reward type for quests that give only XP and GP
+        various:           "разное", // used to indicate the quest rewards when there's a variety of them
+        etc:               "и др.", // added to the end of the quest's reward type when the quest gives multiple types
+        one_of_each_food:  "по одной ед. еды каждого вида", // a type of quest reward
+        not_applicable:    "н/д", // an abbreviation meaning 'not applicable' (recommended to use a short word)
 
-        weeks:            "нед.",  // 'weeks' or a shorter word for it (as short as possible is best)
-        short:            "короткая",  // describes the length of time generally taken to complete a quest
-        medium:           "средняя",   // as above
-        long:             "длинная",   // as above
+        weeks:             "нед.",  // 'weeks' or a shorter word for it (as short as possible is best)
+        short:             "короткая",  // describes the length of time generally taken to complete a quest
+        medium:            "средняя",   // as above
+        long:              "длинная",   // as above
 
-        very_hard:        "очень сложно", // describes how difficult a quest is in terms of having to be consistent with your Dailies
-        hard:             "сложно",       // as above
-        medium:           "средне",       // as above
-        easy:             "легко",        // as above
-        trivial:          "пустяк",       // as above
+        very_hard:         "очень сложно", // describes how difficult a quest is in terms of having to be consistent with your Dailies
+        hard:              "сложно",       // as above
+        medium:            "средне",       // as above
+        easy:              "легко",        // as above
+        trivial:           "пустяк",       // as above
 
-        million:          " млн.",
-        or:               "или",
-        or_earlier:       "или раньше",
+        million:           " млн.",
+        or:                "или",
+        or_earlier:        "или раньше",
 
         // XXX_JAZZIS new translations:
-        new_quest:        "Quest released this month", // used only within this page's instructions; will not appear on the wiki
-        tables_to_edit:   "update the tables for", // used only within this page's instructions; will not appear on the wiki
-        all_quests:       "All Quests", // subsection heading used only within this page's instructions
-        quest_lines:      "Quest Lines", // subsection heading used only within this page's instructions
-        easy_quests:      "Easy Quests", // subsection heading used only within this page's instructions
-        medium_quests:    "Medium Quests", // subsection heading used only within this page's instructions
-        hard_quests:      "Hard Quests", // subsection heading used only within this page's instructions
+        new_quest:         "Quest released this month", // used only within this page's instructions; will not appear on the wiki
+        tables_to_edit:    "update the tables for", // used only within this page's instructions; will not appear on the wiki
+        all_quests:        "All Quests", // subsection heading used only within this page's instructions
+        quest_lines:       "Quest Lines", // subsection heading used only within this page's instructions
+        easy_quests:       "Easy Quests", // subsection heading used only within this page's instructions
+        medium_quests:     "Medium Quests", // subsection heading used only within this page's instructions
+        hard_quests:       "Hard Quests", // subsection heading used only within this page's instructions
     }
 };
 
@@ -471,9 +476,9 @@ var images = {
 //////////////////////////////////////////////////////////////////////
 var questAvailability = {
     'basilist':     getString('invite_to_party'),
-    'egg':          getString('only_during') + ' ' + make_url('Spring Fling'), // XXX finish translation - depending on the language, there may be a declension of the word
-    'evilsanta':    getString('only_during') + ' ' + make_url('Winter Wonderland'), // XXX finish translation
-    'evilsanta2':   getString('only_during') + ' ' + make_url('Winter Wonderland'), // XXX finish translation
+    'egg':          getString('only_during') + ' ' + make_url(getString('spring_fling')), // XXX consider declensions - might be too complex for supporting all languages
+    'evilsanta':    getString('only_during') + ' ' + make_url(getString('winter_wonderland')),
+    'evilsanta2':   getString('only_during') + ' ' + make_url(getString('winter_wonderland')),
     'burnout':      getString('finished'),
     'stressbeast':  getString('finished'),
     'dilatory':     getString('finished'),
@@ -946,8 +951,8 @@ function parseData() {
                    'data-sort-value="' + bossHPSort + '"' ]);
         row.push(bossStr);
 
-        var myRegexpLink  = /(.*)\[(\S+) +([^\]]+)\](.*)/g;            // '[' + url + ' ' + text + ']'; // XXX translate?
-        var myRegexpImage = /(.*)\[\[File:([^\|]+)\|[^\]]+\]\](.*)/g;  // '[[File:' + image + '|' + hoverText + ']]'; // XXX translate?
+        var myRegexpLink  = /(.*)\[(\S+) +([^\]]+)\](.*)/g;            // '[' + url + ' ' + text + ']'; // XXX_LATER try to do away with this
+        var myRegexpImage = /(.*)\[\[File:([^\|]+)\|[^\]]+\]\](.*)/g;  // '[[File:' + image + '|' + hoverText + ']]';
 
         // So far, row contains the table cells for a Wikia table.
         // We now create an HTML version, and then add more fields to that.
@@ -977,7 +982,7 @@ function parseData() {
             rowHtml.push(value);
         }
 
-        if (false) { // This is disabled for now because it prevents the data-sort-value field appearing in the output. XXX_LATER keep working on this. Maybe improve the original code to make the converting back and forth not needed. Get details about why internal links are better for this situation.
+        if (false) { // This is disabled for now because it prevents the data-sort-value field appearing in the output. XXX_LATER keep working on this. Probably best that I improve my original code to make the converting back and forth not needed. First get details about why internal links are better for this situation.
         // It would be better if the wiki pages had internal links, rather than external ones that link to wiki pages.
         // Therefore, after forming the row for the HTML table, we make the links internal again.
         var myRegexpLink = /(.*)\[((http|https)?:\/\/)?(\w+\.fandom\.com)(\/\w+)?(\/wiki)?\/(.+?)\s(.+)\](.*)/g;
@@ -1122,7 +1127,7 @@ function parseData() {
     //////////////////////////////////////////////////////////////////////
     ////   Display the HTML    ///////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    // XXX_LATER translate all the instructions?
+    // XXX_LATER translate all the instructions? How necessary is this?
 
     $('#loading .good').hide();
     $('#output').html(
@@ -1150,6 +1155,7 @@ function parseData() {
 
         ((inPageLanguage === 'en') ? translationInstructions : '') +
 
+        // XXX_JAZZIS Can you please check that the five links to Template pages here are correct for the Russian wiki? I.e., every link that appears after "Paste this code into this template:"
         '<h2>' + getString('all_quests') + '</h2>' +
         '<p>This textarea contains code to produce a Wikia table showing all quests. Paste this code into this template: ' +
         make_url('all_quests', {template:true, html:true}) +
@@ -1235,7 +1241,7 @@ function convertRow(format, rowArray, cellType) {
 }
 
 
-function make_url(visibleText, options = {}) { // XXX_LATER manually check that all the Template links are correct, including for Russian
+function make_url(visibleText, options = {}) { // XXX_LATER if any more changes are made to this function, manually that all the Template links are correct, including for Russian (they don't appear in my before-and-after diffs)
     var linkText = visibleText;
     var url = options['url'] || '';
     if (options['template']) {
