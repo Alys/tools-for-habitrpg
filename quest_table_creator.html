@@ -95,7 +95,11 @@ var stringsForLanguage = {
         only_during:           "only during",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
 
         spring_fling:          "Spring Fling", // the name of the wiki page for the spring Grand Gala
+        // XXX_ALYS I added a separate line to link to the case when the page title requires declension.
+        spring_fling_url:      "Spring_Fling", // the url of the wiki page for spring Grand Gala (in case it is different from the name)
         winter_wonderland:     "Winter Wonderland", // the name of the wiki page for the winter Grand Gala
+        // XXX_ALYS I added a separate line to link to the case when the page title requires declension.
+        winter_wonderland_url: "Winter_Wonderland", // the url of the wiki page for winter Grand Gala (in case it is different from the name)
         XP_GP_only:            "XP, GP<br />only", // the reward type for quests that give only XP and GP
         various:               "various", // used to indicate the quest rewards when there's a variety of them
         etc:                   "etc", // added to the end of the quest's reward type when the quest gives multiple types
@@ -166,8 +170,10 @@ var stringsForLanguage = {
         create_account:        "Создать учетную запись",            // this must be identical to Habitica's `createAccountReward` translated string
         finished:              "завершен", // indicates that the World Boss quest has finished and is no longer available
         only_during:           "только во время",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
-        spring_fling:          "Весенняя веселуха", // the name of the wiki page for the spring Grand Gala
-        winter_wonderland:     "Зимняя страна чудес", // the name of the wiki page for the winter Grand Gala
+        spring_fling:          "Весенней веселухи", // the name of the wiki page for the spring Grand Gala
+        spring_fling_url:      "Весенняя_веселуха", // the url of the wiki page for spring Grand Gala (in case it is different from the name)
+        winter_wonderland:     "Зимней страны чудес", // the name of the wiki page for the winter Grand Gala
+        winter_wonderland_url: "Зимняя_страна_чудес", // the url of the wiki page for the winter Grand Gala (in case it is different from the name)
         XP_GP_only:            "только<br />опыт и золото", // the reward type for quests that give only XP and GP
         various:               "разное", // used to indicate the quest rewards when there's a variety of them
         etc:                   "и др.", // added to the end of the quest's reward type when the quest gives multiple types
@@ -499,9 +505,9 @@ var images = {
 //////////////////////////////////////////////////////////////////////
 var questAvailability = {
     'basilist':     getString('invite_to_party'),
-    'egg':          getString('only_during') + ' ' + make_url(getString('spring_fling')), // XXX consider declensions - might be too complex for supporting all languages
-    'evilsanta':    getString('only_during') + ' ' + make_url(getString('winter_wonderland')),
-    'evilsanta2':   getString('only_during') + ' ' + make_url(getString('winter_wonderland')),
+    'egg':          getString('only_during') + ' ' + make_url(getString('spring_fling'), {url : getString('spring_fling_url')}), // XXX consider declensions - might be too complex for supporting all languages
+    'evilsanta':    getString('only_during') + ' ' + make_url(getString('winter_wonderland'), {url : getString('winter_wonderland_url')}),
+    'evilsanta2':   getString('only_during') + ' ' + make_url(getString('winter_wonderland'), {url : getString('winter_wonderland_url')}),
     'burnout':      getString('finished'),
     'stressbeast':  getString('finished'),
     'dilatory':     getString('finished'),
