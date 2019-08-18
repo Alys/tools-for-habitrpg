@@ -66,6 +66,7 @@ var stringsForLanguage = {
         egg:                   "egg",
         food:                  "food",
         hatching_potion:       "hatching potion",
+        potion:                "hatching potion",
         pet_and_mount:         "pet &amp; mount",
         GP:                    "GP", // abbreviation for Gold / Gold Points
         XP:                    "XP", // abbreviation for Experience / Experience Points
@@ -143,6 +144,8 @@ var stringsForLanguage = {
         egg:                   "яйцо",
         food:                  "еда",
         hatching_potion:       "инкубационный эликсир",
+        // XXX_ALYS I added another line, as a tautology arises in the Russian language. Therefore, here is a simplified line.
+        potion:                "эликсир",
         pet_and_mount:         "питомец и скакун",
         GP:                    "золота", // abbreviation for Gold / Gold Points
         XP:                    "опыт",   // abbreviation for Experience / Experience Points
@@ -817,7 +820,7 @@ function parseData() {
             (quest.category === 'world')          ? getString('various')         :
             (quest.category === 'gold')           ? specialRewardType            :
             (quest.category === 'unlockable')     ? specialRewardType            :
-            (quest.category === 'hatchingPotion') ? getString('hatching_potion') : // XXX_LATER make less redundant: "hatching potion: Silver hatching potion x 3"
+            (quest.category === 'hatchingPotion') ? getString('potion')          : // XXX_LATER make less redundant: "hatching potion: Silver hatching potion x 3"
                                                     getString(quest.category); // e.g., pet
 
         // add list of rewards to reward type, with some abbreviations:
