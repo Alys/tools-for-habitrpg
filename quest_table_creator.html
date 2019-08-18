@@ -14,7 +14,8 @@ but can also be used for other languages by specifying the language code in the 
 That will cause Habitica's official content translations to be used.
 
 For texts inserted by this page (e.g., table headers), additional translations need to be added
-to the `stringsForLanguage` and `regexpsForLanguage` objects in this file.
+to the `stringsForLanguage` and `regexpsForLanguage` and `templateNamesForLanguage` objects in this file.
+For some languages, `reverseTextForLanguage` might also need to be edited.
 Contact Alys (details below) if you'd like to provide translations for your language.
 
 This code is licenced under the same terms as Habitica:
@@ -61,18 +62,17 @@ var stringsForLanguage = {
         scroll:           "scroll", // quest scroll
         pet:              "pet",
         mount:            "mount",
-        egg:              "egg", // XXX check usage
-        food:             "Food", // XXX check usage
-        hatching_potion:  "hatching potion", // XXX check usage
-        potion:           "hatching potion", // XXX see if we can remove one of these // XXX check usage
+        egg:              "egg",
+        food:             "food",
+        hatching_potion:  "hatching potion",
         pet_and_mount:    "pet &amp; mount",
         GP:               "GP", // abbreviation for Gold / Gold Points
         XP:               "XP", // abbreviation for Experience / Experience Points
         gems:             "Gems",
-        world_boss:       "world boss", // as in "world boss quest" // XXX check usage
-        collection:       "collection", // as in "collection quest"
-        boss:             "boss",       // as in "boss quest"
-        rage:             "rage",       // some bosses have a "rage" meter
+        world_boss:       "world boss", // as in 'world boss quest'
+        collection:       "collection", // as in 'collection quest'
+        boss:             "boss",       // as in 'boss quest'
+        rage:             "rage",       // some bosses have a 'rage' meter
         unknown:          "unknown",    // used when we don't know the quest type (world boss/boss/collection) or the reward type
 
         name:             "name",               // table header for the quest name column
@@ -89,7 +89,7 @@ var stringsForLanguage = {
 
         previous_part:    "previous part",   // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
         invite_to_party:  "invite to party", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
-        create_account:   "Create Account",  // this must be identical to Habitica's `createAccountReward` translated string // XXX can we get this from the content data?
+        create_account:   "Create Account",  // this must be identical to Habitica's `createAccountReward` translated string
         finished:         "finished", // indicates that the World Boss quest has finished and is no longer available
         only_during:      "only during",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
         XP_GP_only:       "XP, GP<br />only", // the reward type for quests that give only XP and GP
@@ -109,11 +109,11 @@ var stringsForLanguage = {
         easy:             "easy",      // as above
         trivial:          "trivial",   // as above
 
-        million:          "M",  // an abbreviation for 'million' to indicate the strength of world boss or his rage XXX SI??
+        million:          "M",  // an abbreviation for 'million' to indicate the strength of world boss or his rage
         or:               "or",
         or_earlier:       "or earlier",
     },
-    'ru': { // XXX_LATER check comments and keys are the same as above
+    'ru': { // XXX_LATER apply changes to comments above to these comments
         WIKI_URL:         "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
 
         checkins:         "вх. в игру", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
@@ -127,7 +127,6 @@ var stringsForLanguage = {
         egg:              "яйцо",
         food:             "еда",
         hatching_potion:  "инкубационный эликсир",
-        potion:           "эликсир",
         pet_and_mount:    "питомец и скакун",
         GP:               "золота", // abbreviation for Gold / Gold Points
         XP:               "опыт",   // abbreviation for Experience / Experience Points
@@ -152,7 +151,7 @@ var stringsForLanguage = {
 
         previous_part:    "пред. часть", // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
         invite_to_party:  "пригласить кого-нибудь в команду", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
-        create_account:   "Создать учетную запись",            // used to indicate that you get the quest scroll when you create account
+        create_account:   "Создать учетную запись",            // this must be identical to Habitica's `createAccountReward` translated string
         finished:         "завершен", // indicates that the World Boss quest has finished and is no longer available
         only_during:      "только во время",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
         XP_GP_only:       "только<br />опыт и золото", // the reward type for quests that give only XP and GP
@@ -185,7 +184,7 @@ var stringsForLanguage = {
 ////   Add regular expressions that this page uses.    ///////////////
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
-var regexpsForLanguage = { // XXX test. Should this specify that some strings must be identical to certain Habitica translations? If so, can we get that from the content data?
+var regexpsForLanguage = { // XXX_LATER Should this specify that some strings must be identical to certain Habitica translations? If so, can we get that from the content data?
     'en': {
         pet:             / +\(Pet\)/i,
         mount:           / +\(Mount\)/i,
@@ -210,7 +209,7 @@ var regexpsForLanguage = { // XXX test. Should this specify that some strings mu
         part_url:        /.*[Чч]асть_[0-9]:_/,
         food:            /\([Ее]да\)/i,
     }
-}
+};
 
 
 //////////////////////////////////////////////////////////////////////
@@ -219,7 +218,7 @@ var regexpsForLanguage = { // XXX test. Should this specify that some strings mu
 ////   Add template names that specific wiki uses.     ///////////////
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
-var templateNamesForLanguage = { // XXX test. Merge with wiki link function? Add to comments at top of file.
+var templateNamesForLanguage = {
     'en': {
         all_quests:    "Quest Table All",
         quest_lines:   "Quest Table Quest Lines",
@@ -234,10 +233,25 @@ var templateNamesForLanguage = { // XXX test. Merge with wiki link function? Add
         medium_quests: "Таблица квестов/Средние квесты",
         hard_quests:   "Таблица квестов/Сложные квесты",
     }
-}
+};
 
 
-var translationInstructions =    // Do not translate this into other languages. It's displayed only in the English version of the page. // XXX check that
+//////////////////////////////////////////////////////////////////////
+////   TRANSLATED TEXT ORDER                           ///////////////
+////                                                   ///////////////
+////   Some data+text phrases in some languages need   ///////////////
+////   to be reversed compared to English. Specify     ///////////////
+////   them here.                                      ///////////////
+////                                                   ///////////////
+//////////////////////////////////////////////////////////////////////
+var reverseTextForLanguage = {
+    'level' : {
+        'ru': true,
+    },
+};
+
+
+var translationInstructions =    // Do not translate this into other languages. It's displayed only in the English version of the page.
     '<h3>Translations for Non-English Wikis</h3>' +
     '<p>If you would like to use this tool to create the tables for your own language\'s version of the wiki, add your language\'s code to the URL. For example, for the Russian ("ru") version you would use this URL:<br /><a href="https://oldgods.net/habitrpg/quest_table_creator.html?language=ru">https://oldgods.net/habitrpg/quest_table_creator.html?<strong>language=ru</strong></a><br />Habitica\'s official translations will then be used by this page. Some additional strings will need to be translated too (e.g., for the table headings) so contact Alys at lady_alys@oldgods.net to discuss that.</p>'
     // '<p>So far support exists for the languages below but others can be added!</p>' +
@@ -245,13 +259,19 @@ var translationInstructions =    // Do not translate this into other languages. 
     ;
 
 //////////////////////////////////////////////////////////////////////
-////   URL Parameter                                 /////////////////
+////   Determine Langauge from URL Parameter         /////////////////
 //////////////////////////////////////////////////////////////////////
 const urlParams = new URLSearchParams(window.location.search);
+
+// Get the language specified in the URL if any:
 const language = urlParams.get('language') || 'en';
-// XXX FIXME: language availability is checked only in "stringsForLanguage",
-//        but below there are functions that use the "inPageLanguage" variable
-//        (see FIXME below)
+// That language(will be used to choose the appropriate official
+// Habitica translations when fetching/ the Habitica content data.
+
+// If that language exists in the stringsForLanguage object, then
+// this file contains additional translations specifically for this
+// page (e.g., for table headers). Otherwise, English will be used
+// for those strings.
 const inPageLanguage = (stringsForLanguage[language]) ? language : 'en';
 
 var wikiaBaseUrl = getString('WIKI_URL');
@@ -415,7 +435,7 @@ var questAvailability = {
 ////                                                   ///////////////
 ////   DO NOT PUT SPACES IN THESE LINKS!               ///////////////
 //////////////////////////////////////////////////////////////////////
-var questPageUrls = {  // XXX need translate
+var questPageUrls = {  // XXX_NOW need translate
     'atom1' : 'Dish_Disaster',
     'evilsanta2' : 'Find_the_Cub',
 };
@@ -429,7 +449,7 @@ var questPageUrls = {  // XXX need translate
 ////                                                   ///////////////
 ////   DO NOT PUT SPACES IN THESE LINKS!               ///////////////
 //////////////////////////////////////////////////////////////////////
-var rewardPageUrls = {  // XXX need translate
+var rewardPageUrls = {  // XXX_NOW need translate
     'shield_special_goldenknight': 'Mustaine%27s_Milestone_Mashing_Morningstar',
     'weapon_special_2': 'Stephen_Weber%27s_Shaft_of_the_Dragon',
     'head_special_2': 'Nameless_Helm',
@@ -540,10 +560,9 @@ function parseData() {
 
         var questName = quest.text;
         if (language === 'en') {
-            questName = questName.replace(/^The /, '');
+            questName = questName.replace(/^The /, ''); // XXX_LATER replicate for other languages? Might be a can of worms, especially for gendered languages.
         }
-        // questName = questName.replace(/Sto.kalm/, 'Stoikalm'); // TST
-        row.push([ make_url(quest.text, questPageUrls[questId] || ''),
+        row.push([ make_url(quest.text, {'url': questPageUrls[questId] || ''} ),
                    'data-sort-value="' + questName + '"' ]);
 
         row.push([ make_image(images[questId] ||
@@ -560,17 +579,18 @@ function parseData() {
                 availability = quest.unlockCondition.text.toLowerCase();
             }
             else if (quest.unlockCondition && quest.unlockCondition.incentiveThreshold) {
-                // XXX TODO: Is it possible to add pluralization?
+                // XXX_LATER TODO: Is it possible to add pluralization? May be possible if pluralisation rules in various languages won't make it too hard.
                 //       (e.g., 1 вход, 22 входа, 7 входов)
-                availability = make_url(quest.unlockCondition.incentiveThreshold +
-                                        ' ' + getString('checkins'), getString('checkins_page'));
+                availability = make_url(quest.unlockCondition.incentiveThreshold + ' ' + getString('checkins'), {'url' : getString('checkins_page')} );
             }
             else if (quest.previous) {
                 availability = getString('previous_part');
                 displayLevelRestriction = quest.lvl; // true
             }
             else if (quest.lvl) {
-                availability = getString('level') + ' ' + quest.lvl; // XXX for Russian, these are reversed: quest.lvl + ' ' + getString('level')
+                availability = (reverseTextForLanguage['level'][inPageLanguage])
+                             ? quest.lvl + ' ' + getString('level')
+                             : getString('level') + ' ' + quest.lvl;
             }
         }
         if (quest.unlockCondition && quest.unlockCondition.condition &&
@@ -594,12 +614,16 @@ function parseData() {
             availability += questAvailability[questId];
         }
         if (displayLevelRestriction) {
-            availability += '<br />(' + getString('level') + ' ' + quest.lvl + ')'; // XXX for Russian, these are reversed
+            availability += '<br />(';
+            availability += (reverseTextForLanguage['level'][inPageLanguage])
+                         ? quest.lvl + ' ' + getString('level')
+                         : getString('level') + ' ' + quest.lvl;
+            availability += ')';
         }
         row.push(availability);
 
         var objectiveType =
-            (quest.category && quest.category === 'world') ? getString('world_boss') : // XXX see if more is needed here - "world"?
+            (quest.category && quest.category === 'world') ? getString('world_boss') :
             (quest.collect) ? getString('collection') :
             (quest.boss)    ? getString('boss') :
                               getString('unknown');
@@ -660,37 +684,38 @@ function parseData() {
                     if (type === 'pets') {
                         // ASSUME this key doesn't appear in rewardPageUrls
                         // ASSUME there's no more than one pet
-                        petName = text.replace(getRegexp('pet'), ''); // XXX test
+                        petName = text.replace(getRegexp('pet'), '');
                         bugFixValue = 5;
                     }
                     else if (type === 'mounts') {
                         // ASSUME this key doesn't appear in rewardPageUrls
                         // ASSUME there's no more than one mount
-                        mountName = text.replace(getRegexp('mount'), ''); // XXX test
+                        mountName = text.replace(getRegexp('mount'), '');
                         bugFixValue = 'true'; // string!
                     }
                     else {
                         if (type === 'gear') {
-                            text = text.replace(getRegexp('gear'), ''); // XXX test
+                            text = text.replace(getRegexp('gear'), '');
                             bugFixValue = 'true'; // string!
                         }
                         else if (type === 'eggs') {
-                            text = text.replace(getRegexp('egg'), '('+ getString('egg') +')'); // XXX test
+                            text = text.replace(getRegexp('egg'), '('+ getString('egg') +')');
                             bugFixValue = items[type][key]['count'];
                         }
                         else if (type === 'hatchingPotions') {
-                            text = text.replace(getRegexp('hatching_potion'), getString('hatching_potion')); // XXX test
+                            text = text.replace(getRegexp('hatching_potion'), getString('hatching_potion'));
                             bugFixValue = items[type][key]['count'];
                         }
                         else if (type === 'food') {
-                            text = text.replace(getRegexp('food'), '('+ getString('food') +')'); // XXX test
+                            text = text.replace(getRegexp('food'), '('+ getString('food') +')');
                             bugFixValue = items[type][key]['count'];
+							// XXX from Jazzis in GitHub: "By the way, such a replacement with a translatable regular expression and a translatable string is not very obvious. I mean, it are set separately, and it is not clear that this the string will probably be involved in the replacement."
                         }
                         else {
                             bugFixValue = items[type][key]['count'];
                         }
                         if (rewardPageUrls[key]) {
-                            text = make_url(text, rewardPageUrls[key]);
+                            text = make_url(text, {'url': rewardPageUrls[key]} );
                         }
                         if (items[type][key]['count'] > 1) {
                             text += ' x ' + items[type][key]['count'];
@@ -745,34 +770,19 @@ function parseData() {
             specialRewardType += ', ' + getString('etc');
         }
         var rewardType =
-            (!quest.category)                     ? specialRewardType    :
-            (quest.category === 'world')          ? getString('various') :
-            (quest.category === 'gold')           ? specialRewardType    :
-            (quest.category === 'unlockable')     ? specialRewardType    :
-            (quest.category === 'pet')            ? getString('pet')     : // XXX not needed?
-            (quest.category === 'hatchingPotion') ? getString('potion')  : // XXX not needed if we change the translation key?
-                                                    quest.category; // e.g., pet // XXX translate?
-// XXX original code:
-// -            (!quest.category)                 ? specialRewardType :
-// -            (quest.category === 'world')      ? getString('various') :
-// -            (quest.category === 'gold')       ? specialRewardType :
-// -            (quest.category === 'unlockable') ? specialRewardType :
-// -                                                quest.category; // e.g., pet // XXX translate?
-// +            (!quest.category)                     ? specialRewardType    :
-// +            (quest.category === 'world')          ? getString('various') :
-// +            (quest.category === 'gold')           ? specialRewardType    :
-// +            (quest.category === 'unlockable')     ? specialRewardType    :
-// +            (quest.category === 'pet')            ? getString('pet')     :
-// +            (quest.category === 'hatchingPotion') ? getString('potion')  :
-// +                                                    quest.category; // e.g., pet // XXX translate?
-
+            (!quest.category)                     ? specialRewardType            :
+            (quest.category === 'world')          ? getString('various')         :
+            (quest.category === 'gold')           ? specialRewardType            :
+            (quest.category === 'unlockable')     ? specialRewardType            :
+            (quest.category === 'hatchingPotion') ? getString('hatching_potion') : // XXX_LATER make less redundant: "hatching potion: Silver hatching potion x 3"
+                                                    getString(quest.category); // e.g., pet
 
         // add list of rewards to reward type, with some abbreviations:
         var itemsString = rewardItems.join(';<br />');
         if (rewardType === getString('scroll')) {
-            itemsString = itemsString.replace(getRegexp('scroll'), ''); // XXX test
-            itemsString = itemsString.replace(getRegexp('quest_scroll'), ''); // XXX test
-            itemsString = itemsString.replace(getRegexp('part'), ''); // XXX test
+            itemsString = itemsString.replace(getRegexp('scroll'), '');
+            itemsString = itemsString.replace(getRegexp('quest_scroll'), '');
+            itemsString = itemsString.replace(getRegexp('part'), '');
         }
 
         if (itemsString) {
@@ -942,7 +952,7 @@ function parseData() {
             rowHtml.push(value);
         }
 
-if (false) { // XXX enable this after testing results of other code with before-and-after diffs. Can I improve my original code to make the converting back and forth not needed?
+        if (false) { // This is disabled for now because it prevents the data-sort-value field appearing in the output. XXX_LATER keep working on this. Maybe improve the original code to make the converting back and forth not needed. Get details about why internal links are better for this situation.
         // It would be better if the wiki pages had internal links, rather than external ones that link to wiki pages.
         // Therefore, after forming the row for the HTML table, we make the links internal again.
         var myRegexpLink = /(.*)\[((http|https)?:\/\/)?(\w+\.fandom\.com)(\/\w+)?(\/wiki)?\/(.+?)\s(.+)\](.*)/g;
@@ -975,7 +985,7 @@ if (false) { // XXX enable this after testing results of other code with before-
                 row[4] = match[1] + '[[' + match[7] + '|' + match[8] + ']]' + match[9];
             }
         }
-}
+        }
 
         rowHtml.push(questLength + ((questLengthDetailed) ?
                     '<br />(' + questLengthDetailed + ')' : ''));
@@ -1002,7 +1012,7 @@ if (false) { // XXX enable this after testing results of other code with before-
         // quests, depending on the parameters of this quest.
         // For the HTML table, there is only one collection.
 
-        // XXX translate these instructions for which pages to update:
+        // XXX_NOW translate these instructions for which pages to update:
         if (releaseDate === thisMonth) {
             latestQuestUpdatesNeeded += "<strong>" + questName + "</strong> was released this month. Update the tables for: all quests";
         }
@@ -1087,8 +1097,9 @@ if (false) { // XXX enable this after testing results of other code with before-
     //////////////////////////////////////////////////////////////////////
     ////   Display the HTML    ///////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
+    // XXX_LATER translate all the instructions?
 
-    // XXX use wikiaBaseUrl in text below
+    // XXX_NOW use wikiaBaseUrl in text below or make_url
     var htmlStart = '';
     ////// var htmlStart = '<p>This page outputs the wikia code for creating tables'
         ////// + ' on the <a href="http://habitica.fandom.com/">Habitica wiki</a>.'
@@ -1105,7 +1116,6 @@ if (false) { // XXX enable this after testing results of other code with before-
         // + '">Template:Enchanted_Armoire_Code</a>.'
         ////// + '</p>';
 
-    // XXX translate?
     $('#loading .good').hide();
     $('#output').html(htmlStart +
         '<p>' + latestQuestUpdatesNeeded + '</p>' +
@@ -1133,40 +1143,45 @@ if (false) { // XXX enable this after testing results of other code with before-
         ((inPageLanguage === 'en') ? translationInstructions : '') +
 
         '<h2>All Quests</h2>' +
-        '<p>This textarea contains code to produce a Wikia table showing all quests. Paste this code into the <a href="' + getString('WIKI_URL') + 'Template:' + getTemplateName('all_quests').replace(/ /g, '_') + '">' + getTemplateName('all_quests') + '</a> template.</p>' + // XXX see if we can use wikia link function
-        '<textarea rows="5" cols="100" wrap="off">' +
+        '<p>This textarea contains code to produce a Wikia table showing all quests. Paste this code into this template: ' +
+        make_url('all_quests', {template:true, html:true}) +
+        '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.all.join("") +
         questTableFooter +
         '</textarea>' +
 
         '<h2>Quest Lines</h2>' +
-        '<p>This textarea contains code to produce a Wikia table showing only quests that are in quest lines. Paste this code into the <a href="' + getString('WIKI_URL') + 'Template:' + getTemplateName('quest_lines').replace(/ /g, '_') + '">' + getTemplateName('quest_lines') + '</a> template.</p>' + // XXX see if we can use wikia link function
-        '<textarea rows="5" cols="100" wrap="off">' +
+        '<p>This textarea contains code to produce a Wikia table showing only quests that are in quest lines. Paste this code into this template: ' +
+        make_url('quest_lines', {template:true, html:true}) +
+        '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.questLines.join("") +
         questTableFooter +
         '</textarea>' +
 
         '<h2>Easy Quests</h2>' +
-        '<p>This textarea contains code to produce a Wikia table showing only easy quests. Paste this code into the <a href="' + getString('WIKI_URL') + 'Template:' + getTemplateName('easy_quests').replace(/ /g, '_') + '">' + getTemplateName('easy_quests') + '</a> template.</p>' + // XXX see if we can use wikia link function
-        '<textarea rows="5" cols="100" wrap="off">' +
+        '<p>This textarea contains code to produce a Wikia table showing only easy quests. Paste this code into this template: ' +
+        make_url('easy_quests', {template:true, html:true}) +
+        '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.easy.join("") +
         questTableFooter +
         '</textarea>' +
 
         '<h2>Medium Quests</h2>' +
-        '<p>This textarea contains code to produce a Wikia table showing only medium quests. Paste this code into the <a href="' + getString('WIKI_URL') + 'Template:' + getTemplateName('medium_quests').replace(/ /g, '_') + '">' + getTemplateName('medium_quests') + '</a> template.</p>' + // XXX see if we can use wikia link function
-        '<textarea rows="5" cols="100" wrap="off">' +
+        '<p>This textarea contains code to produce a Wikia table showing only medium quests. Paste this code into this template: ' +
+        make_url('medium_quests', {template:true, html:true}) +
+        '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.medium.join("") +
         questTableFooter +
         '</textarea>' +
 
         '<h2>Hard Quests</h2>' +
-        '<p>This textarea contains code to produce a Wikia table showing only hard quests. Paste this code into the <a href="' + getString('WIKI_URL') + 'Template:' + getTemplateName('hard_quests').replace(/ /g, '_') + '">' + getTemplateName('hard_quests') + '</a> template.</p>' + // XXX see if we can use wikia link function
-        '<textarea rows="5" cols="100" wrap="off">' +
+        '<p>This textarea contains code to produce a Wikia table showing only hard quests. Paste this code into this template: ' +
+        make_url('hard_quests', {template:true, html:true}) +
+        '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.hard.join("") +
         questTableFooter +
@@ -1212,20 +1227,26 @@ function convertRow(format, rowArray, cellType) {
 }
 
 
-function make_url(text, url) {
+function make_url(visibleText, options = {}) { // XXX_LATER manually check that all the Template links are correct, including for Russian
+    var linkText = visibleText;
+    var url = options['url'] || '';
+    if (options['template']) {
+		visibleText = getTemplateName(visibleText);
+		linkText = 'Template:' + visibleText;
+    }
     if (!url) {
-        url = text.replace(/ /g, '_');
+        url = linkText.replace(/ /g, '_');
         url = url.replace(getRegexp('part_url'), ''); // e.g., convert Terror_in_the_Taskwoods,_Part_3:_Jacko_of_the_Lantern to Jacko_of_the_Lantern
     }
     if (url.indexOf('://') === -1) {
         url = wikiaBaseUrl + url;
     }
-    // text = text.replace(/Sto.kalm/, 'Stoikalm'); url = url.replace(/Sto.kalm/, 'Stoikalm'); // TST
-    return '[' + url + ' ' + text + ']';
-    // return [ '<a href="' + url + '">' + text + '</a>',
-             // '[[' + url + '|' + text + ']]'           ];
-    // return (html) ? '<a href="' + url + '">' + text + '</a>' :
-                    // '[[' + url + '|' + text + ']]';
+    if (options['html']) { // XXX look into using this more?
+        return '<a href="' + url + '">' + visibleText + '</a>';
+    }
+    else {
+        return '[' + url + ' ' + visibleText + ']'; // XXX maybe change to this where possible: '[[' + url + '|' + text + ']]';
+    }
 }
 
 
@@ -1257,10 +1278,7 @@ function getString(key) {
     }
 }
 
-
-// XXX FIXME: the "inPageLanguage" variable is used,
-//        but it checks for the language availability in the "stringsForLanguage" dictionary
-function getRegexp(key) { // XXX new
+function getRegexp(key) {
     if (regexpsForLanguage[inPageLanguage] && regexpsForLanguage[inPageLanguage][key]) {
         return regexpsForLanguage[inPageLanguage][key];
     }
@@ -1272,10 +1290,7 @@ function getRegexp(key) { // XXX new
     }
 }
 
-
-// XXX FIXME: the "inPageLanguage" variable is used,
-//        but it checks for the language availability in the "stringsForLanguage" dictionary
-function getTemplateName(key) { // XXX new
+function getTemplateName(key) {
     if (templateNamesForLanguage[inPageLanguage] && templateNamesForLanguage[inPageLanguage][key]) {
         return templateNamesForLanguage[inPageLanguage][key];
     }
@@ -1435,8 +1450,9 @@ th em {
 </head>
 <body><div id="innerBody">
 
-<h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator <!-- XXX translate? -->
-    <span>(last updated 18 August 2019)</span></h1><!-- VERSION --> <!-- XXX translate? -->
+<!-- XXX_LATER translate header and "fetching" messages -->
+<h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
+    <span>(last updated 2019-08-18)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
