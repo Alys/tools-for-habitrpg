@@ -761,7 +761,9 @@ function parseData() {
                         else if (type === 'food') {
                             text = text.replace(getRegexp('food'), '('+ getString('food') +')');
                             bugFixValue = items[type][key]['count'];
-                            // XXX from Jazzis in GitHub: "By the way, such a replacement with a translatable regular expression and a translatable string is not very obvious. I mean, it are set separately, and it is not clear that this the string will probably be involved in the replacement."
+                            // XXX from Jazzis in GitHub:
+                            // "By the way, such a replacement with a translatable regular expression and a translatable string is not very obvious.
+                            //  I mean, it are set separately, and it is not clear that this the string will probably be involved in the replacement."
                         }
                         else {
                             bugFixValue = items[type][key]['count'];
