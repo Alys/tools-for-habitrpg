@@ -576,17 +576,11 @@ function parseData() {
     var tableRowsHtml    = [];
     var devData = '';
     var latestQuestUpdatesNeeded = '';
-    var allQuestRewardsBugFixNormal = '';
-    var allQuestRewardsBugFixSpecial = '';
     for (var index = 0; index < questIds.length; index++) {
         var questId = questIds[index];
         var quest = allQuests[questId];
         // devData += "    '" + questId + "': startOfTime,\n";
         var row     = [];
-
-        var questRewardsBugFixNormal = '';
-        var questRewardsBugFixSpecial = '';
-        questRewardsBugFixNormal += '"achievements.quests.' + questId + '":1, ';
 
         var questName = quest.text;
         if (language === 'en') {
@@ -664,7 +658,6 @@ function parseData() {
         delete quest.drop.gp;
         delete quest.drop.exp;
         var XPandGPonly = jQuery.isEmptyObject(quest.drop);
-        questRewardsBugFixNormal += '"stats.gp":' + droppedGP + ', "stats.exp":' + droppedXP + ', ';
 
         delete quest.drop.unlock;
 
@@ -756,12 +749,6 @@ function parseData() {
                         else {
                             other.push(text);
                         }
-                    }
-                    if (type === 'gear') {
-                        questRewardsBugFixSpecial += '"items.' + type + '.owned.' + key + '":' + bugFixValue + ', ';
-                    }
-                    else {
-                        questRewardsBugFixNormal += '"items.' + type + '.' + key + '":' + bugFixValue + ', ';
                     }
                 }
             }
@@ -1069,13 +1056,6 @@ function parseData() {
         }
         if (releaseDate === thisMonth) {
             latestQuestUpdatesNeeded += ".<br />";
-            allQuestRewardsBugFixNormal += '// ' + questRewardsBugFixNormal + '  // ' + questId + ' : ' + quest.text;
-            if (questRewardsBugFixSpecial) {
-                allQuestRewardsBugFixNormal += '  // ALSO SPECIAL REWARD';
-                allQuestRewardsBugFixSpecial += '// ' + questRewardsBugFixSpecial + '  // ' + questId + ' : ' + quest.text;
-                allQuestRewardsBugFixSpecial += '<br />';
-            }
-            allQuestRewardsBugFixNormal += '<br />';
         }
     }
 
@@ -1106,9 +1086,7 @@ function parseData() {
 
     var htmlEnd = '';
     if (releaseDateNeeded) {
-        htmlEnd  += '<p>NOTES FOR ALYS:<br />Need release date:<br />' + releaseDateNeeded +
-                    // 'Rewards:<br />' + allQuestRewardsBugFixSpecial + allQuestRewardsBugFixNormal +
-                    '</p>';
+        htmlEnd  += '<p>NOTES FOR ALYS:<br />Need release date:<br />' + releaseDateNeeded + '</p>';
 
     }
     if (warnings) htmlEnd += '<p>WARNING:<br />' + warnings + '</p>';
