@@ -948,7 +948,8 @@ function parseData() {
                    'data-sort-value="' + bossHPSort + '"' ]);
         row.push(bossStr);
 
-        var myRegexpLink  = /(.*)\[\[(([^\|]+)\|)?([^\]]+)\]\](.*)/g;  // '[[' + url + '|' + text + ']]'; XXX_ALYS Can you please check this regexp?
+        var myRegexpLink  = /(.*)\[(\S+) +([^\]]+)\](.*)/g;            // '[' + url + ' ' + text + ']'; // XXX_LATER try to do away with this // XXX old code
+        // var myRegexpLink  = /(.*)\[\[(([^\|]+)\|)?([^\]]+)\]\](.*)/g;  // '[[' + url + '|' + text + ']]'; // XXX new code - use if possible
         var myRegexpImage = /(.*)\[\[File:([^\|]+)\|[^\]]+\]\](.*)/g;  // '[[File:' + image + '|' + hoverText + ']]';
 
         // So far, row contains the table cells for a Wikia table.
@@ -965,15 +966,17 @@ function parseData() {
                 value = valueObj;
             }
 
-            // XXX_ALYS can you please check this
             // replace Wikia links and images with HTML versions (we ASSUME there's at most ONE link and ONE image per table cell):
             var match = myRegexpLink.exec(value);
             if (match) {
+                value = match[1] + '<a href="' + match[2] + '">' + match[3] + '</a>' + match[4]; // XXX old code
+                if (false) { // XXX new code, use it if possible
                 if (match[3]) {
                     value = match[1] + make_url(match[4], {html:true, url : match[3]}) + match[5];
                 }
                 else {
                     value = match[1] + make_url(match[4], {html:true}) + match[5];
+                }
                 }
             }
             var match = myRegexpImage.exec(value);
@@ -1199,10 +1202,10 @@ function convertRow(format, rowArray, cellType) {
 }
 
 
-function make_url(visibleText, options = {}) { // XXX_LATER if any more changes are made to this function, manually that all the Template links are correct, including for Russian (they don't appear in my before-and-after diffs)
+function make_url(visibleText, options = {}) { // XXX_LATER if any more changes are made to this function, manually test that all the Template links are correct, including for Russian (they don't appear in my before-and-after diffs)
     var linkText = visibleText;
     var url = options['url'] || '';
-    var html = options['html'] || false;
+    var html = options['html'] || false; // XXX new code
     if (options['template']) {
         visibleText = getTemplateName(visibleText);
         linkText = 'Template:' + visibleText;
@@ -1216,19 +1219,32 @@ function make_url(visibleText, options = {}) { // XXX_LATER if any more changes 
             url = wikiPageNameCorrections[inPageLanguage][url];
         }
     }
-    // XXX_ALYS return internal wiki links by default
+    if (url.indexOf('://') === -1) { // XXX old code
+        url = wikiaBaseUrl + url;
+    }
+
+    if (false) { // XXX new code to use if possible // return internal wiki links by default
     if (!html) {
         if (url === visibleText.replace(/ /g, '_')) {
             return '[[' + visibleText + ']]';
         }
         else {
             return '[[' + url + '|' + visibleText + ']]';
-        } 
+        }
     }
     if (url.indexOf('://') === -1) {
         url = wikiaBaseUrl + url;
     }
     return '<a href="' + url + '">' + visibleText + '</a>';
+    }
+
+    if (options['template']) visibleText += ' :: ' + url; // XXX TST - FOR TESTING - comment-out for production
+    if (options['html']) { // XXX look into using this more?
+        return '<a href="' + url + '">' + visibleText + '</a>';
+    }
+    else {
+        return '[' + url + ' ' + visibleText + ']'; // XXX maybe change to this where possible: '[[' + url + '|' + text + ']]';
+    }
 }
 
 
@@ -1434,7 +1450,7 @@ th em {
 
 <!-- XXX_LATER translate header and "fetching" messages -->
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 2019-08-18)</span></h1><!-- VERSION -->
+    <span>(last updated 2019-08-20)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
