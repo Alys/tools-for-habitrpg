@@ -13,9 +13,13 @@ but can also be used for other languages by specifying the language code in the 
     https://oldgods.net/habitrpg/quest_table_creator.html?language=en
 That will cause Habitica's official content translations to be used.
 
-For texts inserted by this page (e.g., table headers), additional translations need to be added
-to the `stringsForLanguage` and `regexpsForLanguage` and `templateNamesForLanguage` objects in this file.
-For some languages, `reverseTextForLanguage`, `rewardPageUrls`, and `wikiPageNameCorrections` might also need to be edited.
+For texts inserted by this page (e.g., table headers), additional
+translations need to be added to these objects in this file:
+ - stringsForLanguage
+ - regexpsForLanguage
+ - templateNamesForLanguage
+ - rewardPageUrls
+For some languages, `wikiPageNameCorrections` and `reverseTextForLanguage` might also need to be edited.
 Contact Alys (details below) if you'd like to provide translations for your language.
 
 This code is licenced under the same terms as Habitica:
@@ -41,7 +45,6 @@ Contributors:
 
 <script type="text/javascript">
 $(function() { // wraps around all our code to not pollute global namespace
-
 
 //////////////////////////////////////////////////////////////////////
 ////   TRANSLATED STRINGS                              ///////////////
@@ -492,7 +495,7 @@ var images = {
 //////////////////////////////////////////////////////////////////////
 var questAvailability = {
     'basilist':     getString('invite_to_party'),
-    'egg':          getString('only_during') + ' ' + make_url(getString('spring_fling'),      {bothFormats:true}), // XXX_LATER improve this; it makes me cry
+    'egg':          getString('only_during') + ' ' + make_url(getString('spring_fling'),      {bothFormats:true}), // XXX_ALYS: improve
     'evilsanta':    getString('only_during') + ' ' + make_url(getString('winter_wonderland'), {bothFormats:true}),
     'evilsanta2':   getString('only_during') + ' ' + make_url(getString('winter_wonderland'), {bothFormats:true}),
     'burnout':      getString('finished'),
@@ -621,7 +624,7 @@ function parseData() {
                 availability = quest.unlockCondition.text.toLowerCase();
             }
             else if (quest.unlockCondition && quest.unlockCondition.incentiveThreshold) {
-                availability = 'INSERT_URL_HERE'; // XXX_LATER ugh ugh ugh, improve this whole section so this isn't needed
+                availability = 'INSERT_URL_HERE'; // XXX_ALYS: improve
                 var text = (reverseTextForLanguage['checkins'][inPageLanguage])
                          ? getString('checkins') + ': ' + quest.unlockCondition.incentiveThreshold
                          : quest.unlockCondition.incentiveThreshold + ' ' + getString('checkins');
@@ -761,7 +764,7 @@ function parseData() {
                         if (rewardPageUrls[inPageLanguage][key]) {
                             linkWiki = make_url(text, {'url': rewardPageUrls[inPageLanguage][key]} );
                             linkHtml = make_url(text, {'url': rewardPageUrls[inPageLanguage][key], html:true} );
-                            text = 'INSERT_URL_HERE'; // XXX_LATER this is the second-worst hack ever. Improve this whole section so this isn't needed
+                            text = 'INSERT_URL_HERE'; // XXX_ALYS: improve
                         }
                         if (items[type][key]['count'] > 1) {
                             text += ' x ' + items[type][key]['count'];
@@ -1074,7 +1077,7 @@ function parseData() {
     //////////////////////////////////////////////////////////////////////
     ////   Display the HTML    ///////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    // XXX_LATER translate all the instructions? How necessary is this?
+    // XXX maybe translate all the instructions? How necessary is this?
 
     $('#loading .good').hide();
     $('#output').html(
@@ -1154,7 +1157,7 @@ function parseData() {
 
 
 function convertRow(format, rowArray, cellType) {
-    // format is 'html' or 'wikia'
+    // format is 'html' or 'wikia' // XXX_LATER 'html' support is no longer used. Is this function still needed?
     var html = (format === 'html') ? true : false;
     cellType = cellType || 'td'; // 'th' can be specified manually
     if (!html) {
@@ -1187,7 +1190,7 @@ function convertRow(format, rowArray, cellType) {
 }
 
 
-function make_url(visibleText, options = {}) { // XXX_LATER if any more changes are made to this function, manually test that all the Template links are correct, including for Russian (they don't appear in my before-and-after diffs)
+function make_url(visibleText, options = {}) { // XXX_ALYS: make 'placeholder' type (vs 'html' and 'wiki' the default) and have separate function for replacing all placeholders with links for a specified type. Also consider test mode that displays all full urls in clear text.
     var linkText = visibleText; // visibleText is what the user sees; linkText will be used to make the URL if needed
 
     if (options['template']) { // the URL being linked to is a wiki Template
@@ -1214,7 +1217,7 @@ function make_url(visibleText, options = {}) { // XXX_LATER if any more changes 
     }
 
     if (wikiPageName) {
-		// Ensure the wiki page name is correct and create the full URL.
+        // Ensure the wiki page name is correct and create the full URL.
         wikiPageName = wikiPageName.replace(/ /g, '_');
         wikiPageName = wikiPageName.replace(getRegexp('part_url'), ''); // e.g., convert ...Taskwoods,_Part_3:_Jacko_of_the_Lantern to Jacko_of_the_Lantern
         // apply manual fixes to URLs that aren't correct when automatically created:
@@ -1224,7 +1227,7 @@ function make_url(visibleText, options = {}) { // XXX_LATER if any more changes 
         fullUrl = wikiaBaseUrl + wikiPageName;
     }
 
-    if (options['template']) visibleText += ' :: ' + fullUrl; // XXX TST - FOR TESTING - comment-out for production
+    // if (options['template']) visibleText += ' :: ' + fullUrl; // TST - FOR TESTING - comment-out for production
 
     var linkHtml = '<a href="' + fullUrl + '">' + visibleText + '</a>';
 
@@ -1235,13 +1238,12 @@ function make_url(visibleText, options = {}) { // XXX_LATER if any more changes 
     else {
         linkWiki = '[[' + wikiPageName + '|' + visibleText + ']]';
     }
-    // linkWiki = '[' + fullUrl + ' ' + visibleText + ']';
 
     if (options['html']) {
         return linkHtml;
     }
     else if (options['bothFormats']) {
-        return ':::' + linkWiki + ':::' + linkHtml + ':::'; // XXX_LATER worst hack ever
+        return ':::' + linkWiki + ':::' + linkHtml + ':::'; // XXX_ALYS: improve
     }
     else {
         return linkWiki;
@@ -1447,9 +1449,9 @@ th em {
 </head>
 <body><div id="innerBody">
 
-<!-- XXX_LATER translate header and "fetching" messages -->
+<!-- XXX maybe translate header and "fetching" messages? -->
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 2019-08-20)</span></h1><!-- VERSION -->
+    <span>(last updated 2019-08-21)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
