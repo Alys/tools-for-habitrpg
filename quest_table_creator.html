@@ -1188,45 +1188,55 @@ function convertRow(format, rowArray, cellType) {
 
 
 function make_url(visibleText, options = {}) { // XXX_LATER if any more changes are made to this function, manually test that all the Template links are correct, including for Russian (they don't appear in my before-and-after diffs)
-    var linkText = visibleText;
-    var url = options['url'] || '';
-    var html = options['html'] || false; // XXX new code
-    if (options['template']) {
+    var linkText = visibleText; // visibleText is what the user sees; linkText will be used to make the URL if needed
+
+    if (options['template']) { // the URL being linked to is a wiki Template
         visibleText = getTemplateName(visibleText);
         linkText = 'Template:' + visibleText;
     }
-    if (!url) {
-        url = linkText.replace(/ /g, '_');
-        url = url.replace(getRegexp('part_url'), ''); // e.g., convert Terror_in_the_Taskwoods,_Part_3:_Jacko_of_the_Lantern to Jacko_of_the_Lantern
 
+    var wikiPageName; // e.g., Jacko_of_the_Lantern
+    var fullUrl; // e.g., https://habitica.fandom.com/wiki/Jacko_of_the_Lantern or a link to any other site
+
+    var url = options['url'] || '';
+    if (url.indexOf('://') > -1) {
+        // A full URL was provided (e.g., https://example.com/whatever/). We assume it's not a wiki link.
+        wikiPageName = ''; // this will remain empty
+        fullUrl = url;
+    }
+    else if (url) {
+        // A wiki page name was supplied as the URL, with or without underscores (e.g., "Jacko_of_the_Lantern" or "Jacko of the Lantern")
+        wikiPageName = url; // might need changes later (e.g., to insert underscores)
+    }
+    else {
+        // No URL was supplied so we create one from the visible text which we assume is a wiki page name.
+        wikiPageName = linkText;
+    }
+
+    if (wikiPageName) {
+		// Ensure the wiki page name is correct and create the full URL.
+        wikiPageName = wikiPageName.replace(/ /g, '_');
+        wikiPageName = wikiPageName.replace(getRegexp('part_url'), ''); // e.g., convert ...Taskwoods,_Part_3:_Jacko_of_the_Lantern to Jacko_of_the_Lantern
         // apply manual fixes to URLs that aren't correct when automatically created:
-        if (wikiPageNameCorrections[inPageLanguage] && wikiPageNameCorrections[inPageLanguage][url]) {
-            url = wikiPageNameCorrections[inPageLanguage][url];
+        if (wikiPageNameCorrections[inPageLanguage] && wikiPageNameCorrections[inPageLanguage][wikiPageName]) {
+            wikiPageName = wikiPageNameCorrections[inPageLanguage][wikiPageName];
         }
-    }
-    if (url.indexOf('://') === -1) { // XXX old code
-        url = wikiaBaseUrl + url;
+        fullUrl = wikiaBaseUrl + wikiPageName;
     }
 
-    if (false) { // XXX new code to use if possible // return internal wiki links by default
-    if (!html) {
-        if (url === visibleText.replace(/ /g, '_')) {
-            return '[[' + visibleText + ']]';
-        }
-        else {
-            return '[[' + url + '|' + visibleText + ']]';
-        }
-    }
-    if (url.indexOf('://') === -1) {
-        url = wikiaBaseUrl + url;
-    }
-    return '<a href="' + url + '">' + visibleText + '</a>';
-    }
+    if (options['template']) visibleText += ' :: ' + fullUrl; // XXX TST - FOR TESTING - comment-out for production
 
-    if (options['template']) visibleText += ' :: ' + url; // XXX TST - FOR TESTING - comment-out for production
+    var linkHtml = '<a href="' + fullUrl + '">' + visibleText + '</a>';
 
-    var linkHtml = '<a href="' + url + '">' + visibleText + '</a>';
-    var linkWiki = '[' + url + ' ' + visibleText + ']'; // XXX maybe change to this where possible: '[[' + url + '|' + text + ']]';
+    var linkWiki;
+    if (wikiPageName === visibleText.replace(/ /g, '_')) {
+        linkWiki = '[[' + visibleText + ']]';
+    }
+    else {
+        linkWiki = '[[' + wikiPageName + '|' + visibleText + ']]';
+    }
+    // linkWiki = '[' + fullUrl + ' ' + visibleText + ']';
+
     if (options['html']) {
         return linkHtml;
     }
