@@ -60,7 +60,8 @@ var stringsForLanguage = {
 
         level:                 "level",
         equipment:             "equipment",
-        scroll:                "scroll", // quest scroll
+        scroll:                "scroll", // as in quest scroll
+        quest_scroll:          "quest scroll",
         pet:                   "pet",
         mount:                 "mount",
         egg:                   "egg",
@@ -133,7 +134,8 @@ var stringsForLanguage = {
 
         level:                 "ур.",
         equipment:             "снаряжение",
-        scroll:                "свиток", // quest scroll
+        scroll:                "свиток", // as in quest scroll
+        quest_scroll:          "квестовый свиток",
         pet:                   "питомец",
         mount:                 "скакун",
         egg:                   "яйцо",
@@ -206,30 +208,16 @@ var stringsForLanguage = {
 ////   Add regular expressions that this page uses.    ///////////////
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
-var regexpsForLanguage = { // XXX_LATER Should this specify that some strings must be identical to certain Habitica translations? If so, can we get that from the content data?
+var regexpsForLanguage = {
     'en': {
-        pet:             / +\(Pet\)/i,
-        mount:           / +\(Mount\)/i,
         gear:            / +\((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i,
-        egg:             /\(Egg\)/i,
-        hatching_potion: /Hatching Potion/i,
-        scroll:          / \(Scroll\)/i,
-        quest_scroll:    / \(Quest Scroll\)/i,
         part:            /.*Part [0-9]: /i,
         part_url:        /.*Part_[0-9]:_/,
-        food:            /\(Food\)/i,
     },
     'ru': {
-        pet:             / +\([Пп]итомец\)/i,
-        mount:           / +\([Сс]какун\)/i,
         gear:            / +\((оружие для защитной руки|оружие|для защитной руки|доспехи|головной убор|двуручное оружие)\)/i,
-        egg:             /\([Яя]йцо\)/i,
-        hatching_potion: /инкубационный эликсир/,
-        scroll:          / \([Сс]виток\)/i,
-        quest_scroll:    / \([Кк]вестовый [Сс]виток\)/i,
         part:            /.*[Чч]асть [0-9]: /i,
         part_url:        /.*[Чч]асть_[0-9]:_/,
-        food:            /\([Ее]да\)/i,
     }
 };
 
@@ -733,25 +721,27 @@ function parseData() {
                     var text = items[type][key]['text'];
                     if (type === 'pets') {
                         // ASSUME there's no more than one pet
-                        petName = text.replace(getRegexp('pet'), '');
+                        petName = text.replace(new RegExp(' +\\(' + getString('pet') + '\\)','i'), '');
                     }
                     else if (type === 'mounts') {
                         // ASSUME there's no more than one mount
-                        mountName = text.replace(getRegexp('mount'), '');
+                        mountName = text.replace(new RegExp(' +\\(' + getString('mount') + '\\)','i'), '');
                     }
                     else {
                         if (type === 'gear') {
                             text = text.replace(getRegexp('gear'), '');
                         }
                         else if (type === 'eggs') {
-                            text = text.replace(getRegexp('egg'), '('+ getString('egg') +')');
+                            // this and the similar code below is just used for lower-casing less important strings like "egg",
+                            // otherwise nearly every word in the table is mixed case, which makes it harder to see the important
+                            // strings like the pet names
+                            text = text.replace(new RegExp('\\(' + getString('egg') + '\\)','i'), '('+ getString('egg') +')');
                         }
                         else if (type === 'hatchingPotions') {
-                            text = text.replace(getRegexp('hatching_potion'), getString('hatching_potion'));
+                            text = text.replace(new RegExp(getString('hatching_potion'),'i'), getString('hatching_potion'));
                         }
                         else if (type === 'food') {
-                            text = text.replace(getRegexp('food'), '('+ getString('food') +')');
-                            // XXX from Jazzis in GitHub: "By the way, such a replacement with a translatable regular expression and a translatable string is not very obvious. I mean, it are set separately, and it is not clear that this the string will probably be involved in the replacement."
+                            text = text.replace(new RegExp('\\(' + getString('food') + '\\)','i'), '('+ getString('food') +')');
                         }
                         if (rewardPageUrls[inPageLanguage][key]) {
                             text = make_url(text, {'url': rewardPageUrls[inPageLanguage][key]} );
@@ -813,12 +803,12 @@ function parseData() {
         // add list of rewards to reward type, with some abbreviations:
         var itemsString = rewardItems.join(';<br />');
         if (rewardType === getString('hatching_potion')) {
-            itemsString = itemsString.replace(getRegexp('hatching_potion'), '');
+            itemsString = itemsString.replace(new RegExp(getString('hatching_potion'),'i'), '');
             itemsString = itemsString.replace(/Hatching Potion/, ''); // XXX temporary until Silver Hatching Potions are translated for Russian
         }
         if (rewardType === getString('scroll')) {
-            itemsString = itemsString.replace(getRegexp('scroll'), '');
-            itemsString = itemsString.replace(getRegexp('quest_scroll'), '');
+            itemsString = itemsString.replace(new RegExp(' +\\(' + getString('scroll') + '\\)','i'), '');
+            itemsString = itemsString.replace(new RegExp(' +\\(' + getString('quest_scroll') + '\\)','i'), '');
             itemsString = itemsString.replace(getRegexp('part'), '');
         }
 
