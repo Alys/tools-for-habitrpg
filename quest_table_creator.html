@@ -66,7 +66,6 @@ var stringsForLanguage = {
         egg:                   "egg",
         food:                  "food",
         hatching_potion:       "hatching potion",
-        potion:                "hatching potion", 
         pet_and_mount:         "pet &amp; mount",
         GP:                    "GP", // abbreviation for Gold / Gold Points
         XP:                    "XP", // abbreviation for Experience / Experience Points
@@ -140,8 +139,6 @@ var stringsForLanguage = {
         egg:                   "яйцо",
         food:                  "еда",
         hatching_potion:       "инкубационный эликсир",
-        // XXX_ALYS I added another line, as a tautology arises in the Russian language. Therefore, here is a simplified line.
-        potion:                "эликсир",
         pet_and_mount:         "питомец и скакун",
         GP:                    "золота", // abbreviation for Gold / Gold Points
         XP:                    "опыт",   // abbreviation for Experience / Experience Points
@@ -227,7 +224,7 @@ var regexpsForLanguage = { // XXX_LATER Should this specify that some strings mu
         mount:           / +\([Сс]какун\)/i,
         gear:            / +\((оружие для защитной руки|оружие|для защитной руки|доспехи|головной убор|двуручное оружие)\)/i,
         egg:             /\([Яя]йцо\)/i,
-        hatching_potion: /[Ии]нкубационый [Ээ]ликсир/i,
+        hatching_potion: /инкубационный эликсир/,
         scroll:          / \([Сс]виток\)/i,
         quest_scroll:    / \([Кк]вестовый [Сс]виток\)/i,
         part:            /.*[Чч]асть [0-9]: /i,
@@ -820,11 +817,15 @@ function parseData() {
             (quest.category === 'world')          ? getString('various')         :
             (quest.category === 'gold')           ? specialRewardType            :
             (quest.category === 'unlockable')     ? specialRewardType            :
-            (quest.category === 'hatchingPotion') ? getString('potion')          : // XXX_LATER make less redundant: "hatching potion: Silver hatching potion x 3"
+            (quest.category === 'hatchingPotion') ? getString('hatching_potion') :
                                                     getString(quest.category); // e.g., pet
 
         // add list of rewards to reward type, with some abbreviations:
         var itemsString = rewardItems.join(';<br />');
+        if (rewardType === getString('hatching_potion')) {
+            itemsString = itemsString.replace(getRegexp('hatching_potion'), '');
+            itemsString = itemsString.replace(/Hatching Potion/, ''); // XXX temporary until Silver Hatching Potions are translated for Russian
+        }
         if (rewardType === getString('scroll')) {
             itemsString = itemsString.replace(getRegexp('scroll'), '');
             itemsString = itemsString.replace(getRegexp('quest_scroll'), '');
