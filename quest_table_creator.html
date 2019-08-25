@@ -496,9 +496,9 @@ var images = {
 //////////////////////////////////////////////////////////////////////
 var questAvailability = {
     'basilist':     getString('invite_to_party'),
-    'egg':          getString('only_during') + ' ' + make_url(getString('spring_fling'),      {bothFormats:true}), // XXX_ALYS: improve
-    'evilsanta':    getString('only_during') + ' ' + make_url(getString('winter_wonderland'), {bothFormats:true}),
-    'evilsanta2':   getString('only_during') + ' ' + make_url(getString('winter_wonderland'), {bothFormats:true}),
+    'egg':          getString('only_during') + ' ' + make_url(getString('spring_fling'),      {type:'placeholder'}),
+    'evilsanta':    getString('only_during') + ' ' + make_url(getString('winter_wonderland'), {type:'placeholder'}),
+    'evilsanta2':   getString('only_during') + ' ' + make_url(getString('winter_wonderland'), {type:'placeholder'}),
     'burnout':      getString('finished'),
     'stressbeast':  getString('finished'),
     'dilatory':     getString('finished'),
@@ -608,15 +608,13 @@ function parseData() {
             questName = questName.replace(/^The /, ''); // doing this for other languages might be difficult, especially for gendered languages
         }
         row.push([ make_url(quest.text), 'data-sort-value="' + questName + '"' ]);
-        rowHtml.push(make_url(quest.text, {html:true}));
+        rowHtml.push(make_url(quest.text, {type:'html'}));
 
         var imageLocation = images[questId] || 'Inventory_quest_scroll_' + questId + '.png';
         row.push([ make_image(imageLocation, questId), 'data-sort-value="' + questId + '"' ]);
         rowHtml.push(make_image(imageLocation, questId, {html:true}));
 
         var availability = '';
-        var linkWiki = '';
-        var linkHtml = '';
         var displayLevelRestriction = false;
         if (quest.category && quest.category === 'unlockable') {
             if (quest.unlockCondition && quest.unlockCondition.text &&
@@ -625,12 +623,10 @@ function parseData() {
                 availability = quest.unlockCondition.text.toLowerCase();
             }
             else if (quest.unlockCondition && quest.unlockCondition.incentiveThreshold) {
-                availability = 'INSERT_URL_HERE'; // XXX_ALYS: improve
                 var text = (reverseTextForLanguage['checkins'][inPageLanguage])
                          ? getString('checkins') + ': ' + quest.unlockCondition.incentiveThreshold
                          : quest.unlockCondition.incentiveThreshold + ' ' + getString('checkins');
-                linkWiki = make_url(text, {url: getString('checkins_page')} );
-                linkHtml = make_url(text, {url: getString('checkins_page'), html:true} );
+                availability = make_url(text, {url: getString('checkins_page'), type:'placeholder'} );
             }
             else if (quest.previous) {
                 availability = getString('previous_part');
@@ -669,14 +665,8 @@ function parseData() {
                          : getString('level') + ' ' + quest.lvl;
             availability += ')';
         }
-
-        // this is a really nasty hack to work around the items in `questAvailability` needing to contain URLs
-        var avail = availability.split(':::'); // four array elements: general text; wiki-format link; html-format link; general text
-        var availabilityWiki = (avail[1]) ? avail[0] + avail[1] + avail[3] : avail[0]; // I don't want to talk about it.
-        var availabilityHtml = (avail[1]) ? avail[0] + avail[2] + avail[3] : avail[0];
-        // and this is a nasty hack to use the correct `quest.unlockCondition` link format
-        row.push(    availabilityWiki.replace('INSERT_URL_HERE', linkWiki));
-        rowHtml.push(availabilityHtml.replace('INSERT_URL_HERE', linkHtml));
+        row.push(    replacePlaceholderLink(availability, {type:'wiki'}));
+        rowHtml.push(replacePlaceholderLink(availability, {type:'html'}));
 
         var objectiveType =
             (quest.category && quest.category === 'world') ? getString('world_boss') :
@@ -729,8 +719,6 @@ function parseData() {
         var mountName = '';
         var equipment = [];
         var other     = [];
-        linkWiki = '';
-        linkHtml = '';
         for (var type in items) {
             if (type === 'food' && quest.category === 'world') {
                 other.push(getString('one_of_each_food')); // ASSUME this happens for each world quest
@@ -763,9 +751,7 @@ function parseData() {
                             text = text.replace(new RegExp('\\(' + getString('food') + '\\)','i'), '('+ getString('food') +')');
                         }
                         if (rewardPageUrls[inPageLanguage][key]) {
-                            linkWiki = make_url(text, {'url': rewardPageUrls[inPageLanguage][key]} );
-                            linkHtml = make_url(text, {'url': rewardPageUrls[inPageLanguage][key], html:true} );
-                            text = 'INSERT_URL_HERE'; // XXX_ALYS: improve
+                            text = make_url(text, {url: rewardPageUrls[inPageLanguage][key], type:'placeholder'} );
                         }
                         if (items[type][key]['count'] > 1) {
                             text += ' x ' + items[type][key]['count'];
@@ -837,8 +823,8 @@ function parseData() {
             rewardType += ':<br />' + itemsString;
         }
 
-        row.push(    rewardType.replace('INSERT_URL_HERE', linkWiki));
-        rowHtml.push(rewardType.replace('INSERT_URL_HERE', linkHtml));
+        row.push(    replacePlaceholderLink(rewardType, {type:'wiki'}));
+        rowHtml.push(replacePlaceholderLink(rewardType, {type:'html'}));
 
         row.push(droppedGP);
         rowHtml.push(droppedGP);
@@ -1107,7 +1093,7 @@ function parseData() {
 
         '<h2>' + getString('all_quests') + '</h2>' +
         '<p>This textarea contains code to produce a Wikia table showing all quests. Paste this code into this template: ' +
-        make_url('all_quests', {template:true, html:true}) +
+        make_url('all_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.all.join("") +
@@ -1116,7 +1102,7 @@ function parseData() {
 
         '<h2>' + getString('quest_lines') + '</h2>' +
         '<p>This textarea contains code to produce a Wikia table showing only quests that are in quest lines. Paste this code into this template: ' +
-        make_url('quest_lines', {template:true, html:true}) +
+        make_url('quest_lines', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.questLines.join("") +
@@ -1125,7 +1111,7 @@ function parseData() {
 
         '<h2>' + getString('easy_quests') + '</h2>' +
         '<p>This textarea contains code to produce a Wikia table showing only easy quests. Paste this code into this template: ' +
-        make_url('easy_quests', {template:true, html:true}) +
+        make_url('easy_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.easy.join("") +
@@ -1134,7 +1120,7 @@ function parseData() {
 
         '<h2>' + getString('medium_quests') + '</h2>' +
         '<p>This textarea contains code to produce a Wikia table showing only medium quests. Paste this code into this template: ' +
-        make_url('medium_quests', {template:true, html:true}) +
+        make_url('medium_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.medium.join("") +
@@ -1143,7 +1129,7 @@ function parseData() {
 
         '<h2>' + getString('hard_quests') + '</h2>' +
         '<p>This textarea contains code to produce a Wikia table showing only hard quests. Paste this code into this template: ' +
-        make_url('hard_quests', {template:true, html:true}) +
+        make_url('hard_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.hard.join("") +
@@ -1191,8 +1177,9 @@ function convertRow(format, rowArray, cellType) {
 }
 
 
-function make_url(visibleText, options = {}) { // XXX_ALYS: make 'placeholder' type (vs 'html' and 'wiki' the default) and have separate function for replacing all placeholders with links for a specified type.
+function make_url(visibleText, options = {}) {
     var linkText = visibleText; // visibleText is what the user sees; linkText will be used to make the URL if needed
+    var urlType = options['type'] || 'wiki'; // wiki or html or placeholder (for later converting to either using replacePlaceholderLink function)
 
     if (options['template']) { // the URL being linked to is a wiki Template
         visibleText = getTemplateName(visibleText);
@@ -1239,15 +1226,27 @@ function make_url(visibleText, options = {}) { // XXX_ALYS: make 'placeholder' t
         linkWiki = '[[' + wikiPageName + '|' + visibleText + ']]';
     }
 
-    if (options['html']) {
+    if (urlType === 'html') {
         return linkHtml;
     }
-    else if (options['bothFormats']) {
-        return ':::' + linkWiki + ':::' + linkHtml + ':::'; // XXX_ALYS: improve
+    else if (urlType === 'placeholder') {
+        return ':::' + linkWiki + ':::' + linkHtml + ':::';
     }
     else {
         return linkWiki;
     }
+}
+
+
+function replacePlaceholderLink(text, options = {}) {
+    // text contains four array elements:
+    // initial text (not part of link); link in wiki format; wiki link in html format; final text (not part of link)
+    var elements = text.split(':::');
+    if (! elements[1]) { // ::: didn't appear in the text; nothing to replace
+        return elements[0];
+    }
+    var link = (options['type'] && options['type'] === 'html') ? elements[2] : elements[1];
+    return elements[0] + link + elements[3];
 }
 
 
