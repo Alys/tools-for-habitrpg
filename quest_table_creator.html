@@ -45,6 +45,8 @@ Contributors:
 
 <script type="text/javascript">
 $(function() { // wraps around all our code to not pollute global namespace
+var TEST_MODE = false; // causes extra text to be printed in the web page
+TEST_MODE = true;
 
 //////////////////////////////////////////////////////////////////////
 ////   TRANSLATED STRINGS                              ///////////////
@@ -603,7 +605,7 @@ function parseData() {
 
         var questName = quest.text;
         if (language === 'en') {
-            questName = questName.replace(/^The /, ''); // XXX_LATER replicate for other languages? Might be a can of worms, especially for gendered languages.
+            questName = questName.replace(/^The /, ''); // doing this for other languages might be difficult, especially for gendered languages
         }
         row.push([ make_url(quest.text), 'data-sort-value="' + questName + '"' ]);
         rowHtml.push(make_url(quest.text, {html:true}));
@@ -1076,7 +1078,6 @@ function parseData() {
     //////////////////////////////////////////////////////////////////////
     ////   Display the HTML    ///////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
-    // XXX maybe translate all the instructions? How necessary is this?
 
     $('#loading .good').hide();
     $('#output').html(
@@ -1150,6 +1151,7 @@ function parseData() {
         '</textarea>' +
 
         '<p>This is an HTML version of the table that shows all quests (but with some differences to the tables you\'ll find on the wiki):</p>' +
+        ((TEST_MODE) ? 'START OF HTML TABLE ' + new Date() : '') +
         htmlEnd
     );
 }
@@ -1189,7 +1191,7 @@ function convertRow(format, rowArray, cellType) {
 }
 
 
-function make_url(visibleText, options = {}) { // XXX_ALYS: make 'placeholder' type (vs 'html' and 'wiki' the default) and have separate function for replacing all placeholders with links for a specified type. Also consider test mode that displays all full urls in clear text.
+function make_url(visibleText, options = {}) { // XXX_ALYS: make 'placeholder' type (vs 'html' and 'wiki' the default) and have separate function for replacing all placeholders with links for a specified type.
     var linkText = visibleText; // visibleText is what the user sees; linkText will be used to make the URL if needed
 
     if (options['template']) { // the URL being linked to is a wiki Template
@@ -1226,9 +1228,8 @@ function make_url(visibleText, options = {}) { // XXX_ALYS: make 'placeholder' t
         fullUrl = wikiaBaseUrl + wikiPageName;
     }
 
-    // if (options['template']) visibleText += ' :: ' + fullUrl; // TST - FOR TESTING - comment-out for production
-
     var linkHtml = '<a href="' + fullUrl + '">' + visibleText + '</a>';
+    if (TEST_MODE) linkHtml += ' ' + fullUrl;
 
     var linkWiki;
     if (wikiPageName === visibleText.replace(/ /g, '_')) {
@@ -1448,7 +1449,6 @@ th em {
 </head>
 <body><div id="innerBody">
 
-<!-- XXX maybe translate header and "fetching" messages? -->
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
     <span>(last updated 2019-08-22)</span></h1><!-- VERSION -->
 <hr class="clear" />
