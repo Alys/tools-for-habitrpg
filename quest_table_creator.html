@@ -125,11 +125,19 @@ var stringsForLanguage = {
 
         new_quest:             "Quest released this month", // used only within this page's instructions; will not appear on the wiki
         tables_to_edit:        "update the tables for", // used only within this page's instructions; will not appear on the wiki
-        all_quests:            "All Quests", // subsection heading used only within this page's instructions
-        quest_lines:           "Quest Lines", // subsection heading used only within this page's instructions
-        easy_quests:           "Easy Quests", // subsection heading used only within this page's instructions
-        medium_quests:         "Medium Quests", // subsection heading used only within this page's instructions
-        hard_quests:           "Hard Quests", // subsection heading used only within this page's instructions
+        all_quests_heading:    "All Quests", // subsection heading used only within this page's instructions
+        quest_lines_heading:   "Quest Lines", // subsection heading used only within this page's instructions
+        easy_quests_heading:   "Easy Quests", // subsection heading used only within this page's instructions
+        medium_quests_heading: "Medium Quests", // subsection heading used only within this page's instructions
+        hard_quests_heading:   "Hard Quests", // subsection heading used only within this page's instructions
+
+        textarea_intro:        "This textarea contains code to produce a Wikia table showing",
+        all_quests:            "all quests",
+        quest_lines:           "only quests that are in quest lines",
+        easy_quests:           "only easy quests",
+        medium_quests:         "only medium quests",
+        hard_quests:           "only hard quests",
+        textarea_paste:        "Paste this code into this template:",
     },
     'ru': {
         wiki_url:              "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
@@ -198,11 +206,19 @@ var stringsForLanguage = {
 
         new_quest:             "В этом месяце был выпущен квест", // used only within this page's instructions; will not appear on the wiki
         tables_to_edit:        "обновите следующие таблицы:", // used only within this page's instructions; will not appear on the wiki
-        all_quests:            "Все квесты", // subsection heading used only within this page's instructions
-        quest_lines:           "Квестовые линии", // subsection heading used only within this page's instructions
-        easy_quests:           "Легкие квесты", // subsection heading used only within this page's instructions
-        medium_quests:         "Средние квесты", // subsection heading used only within this page's instructions
-        hard_quests:           "Сложные квесты", // subsection heading used only within this page's instructions
+        all_quests_heading:    "Все квесты", // subsection heading used only within this page's instructions
+        quest_lines_heading:   "Квестовые линии", // subsection heading used only within this page's instructions
+        easy_quests_heading:   "Легкие квесты", // subsection heading used only within this page's instructions
+        medium_quests_heading: "Средние квесты", // subsection heading used only within this page's instructions
+        hard_quests_heading:   "Сложные квесты", // subsection heading used only within this page's instructions
+
+        textarea_intro:        "Эта текстовая область содержит код для создания вики-таблицы, показывающей",
+        all_quests:            "все квесты",
+        quest_lines:           "только квесты, которые относятся к квестовым линиям",
+        easy_quests:           "только легкие квесты",
+        medium_quests:         "только средние квесты",
+        hard_quests:           "только сложные квесты",
+        textarea_paste:        "Вставьте этот код в шаблон:",
     }
 };
 
@@ -990,12 +1006,12 @@ function parseData() {
 
         if (releaseDate === thisMonth) {
             latestQuestUpdatesNeeded += getString('new_quest') + ': <strong>' + questName + '</strong> -- ' +
-                                        getString('tables_to_edit') + ' ' + getString('all_quests');
+                                        getString('tables_to_edit') + ' ' + getString('all_quests_heading');
         }
 
         if (quest.previous || questId.match(/evilsanta/) || questLineStartIds[questId]) {
             tableRows.questLines.push( convertRow('wikia', row) );
-            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('quest_lines'); }
+            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('quest_lines_heading'); }
         }
 
         tableRowsHtml.push(rowHtml);
@@ -1003,15 +1019,15 @@ function parseData() {
 
         if (rating === '1. ' + getString('easy')) {
             tableRows.easy.push( convertRow('wikia', row) );
-            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('easy_quests'); }
+            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('easy_quests_heading'); }
         }
         else if (rating === '2. ' + getString('medium')) {
             tableRows.medium.push( convertRow('wikia', row) );
-            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('medium_quests'); }
+            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('medium_quests_heading'); }
         }
         else if (rating === '3. ' + getString('hard')) {
             tableRows.hard.push( convertRow('wikia', row) );
-            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('hard_quests'); }
+            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('hard_quests_heading'); }
         }
         if (releaseDate === thisMonth) {
             latestQuestUpdatesNeeded += ".<br />";
@@ -1091,8 +1107,8 @@ function parseData() {
 
         ((inPageLanguage === 'en') ? translationInstructions : '') +
 
-        '<h2>' + getString('all_quests') + '</h2>' +
-        '<p>This textarea contains code to produce a Wikia table showing all quests. Paste this code into this template: ' +
+        '<h2>' + getString('all_quests_heading') + '</h2>' +
+        '<p>' + getString('textarea_intro') + ' ' + getString('all_quests') + '. ' + getString('textarea_paste') + ' ' +
         make_url('all_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
@@ -1100,8 +1116,8 @@ function parseData() {
         questTableFooter +
         '</textarea>' +
 
-        '<h2>' + getString('quest_lines') + '</h2>' +
-        '<p>This textarea contains code to produce a Wikia table showing only quests that are in quest lines. Paste this code into this template: ' +
+        '<h2>' + getString('quest_lines_heading') + '</h2>' +
+        '<p>' + getString('textarea_intro') + ' ' + getString('quest_lines') + '. ' + getString('textarea_paste') + ' ' +
         make_url('quest_lines', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
@@ -1109,8 +1125,8 @@ function parseData() {
         questTableFooter +
         '</textarea>' +
 
-        '<h2>' + getString('easy_quests') + '</h2>' +
-        '<p>This textarea contains code to produce a Wikia table showing only easy quests. Paste this code into this template: ' +
+        '<h2>' + getString('easy_quests_heading') + '</h2>' +
+        '<p>' + getString('textarea_intro') + ' ' + getString('easy_quests') + '. ' + getString('textarea_paste') + ' ' +
         make_url('easy_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
@@ -1118,8 +1134,8 @@ function parseData() {
         questTableFooter +
         '</textarea>' +
 
-        '<h2>' + getString('medium_quests') + '</h2>' +
-        '<p>This textarea contains code to produce a Wikia table showing only medium quests. Paste this code into this template: ' +
+        '<h2>' + getString('medium_quests_heading') + '</h2>' +
+        '<p>' + getString('textarea_intro') + ' ' + getString('medium_quests') + '. ' + getString('textarea_paste') + ' ' +
         make_url('medium_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
@@ -1127,8 +1143,8 @@ function parseData() {
         questTableFooter +
         '</textarea>' +
 
-        '<h2>' + getString('hard_quests') + '</h2>' +
-        '<p>This textarea contains code to produce a Wikia table showing only hard quests. Paste this code into this template: ' +
+        '<h2>' + getString('hard_quests_heading') + '</h2>' +
+        '<p>' + getString('textarea_intro') + ' ' + getString('hard_quests') + '. ' + getString('textarea_paste') + ' ' +
         make_url('hard_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
