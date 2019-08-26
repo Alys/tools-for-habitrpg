@@ -46,7 +46,7 @@ Contributors:
 <script type="text/javascript">
 $(function() { // wraps around all our code to not pollute global namespace
 var TEST_MODE = false; // causes extra text to be printed in the web page
-TEST_MODE = true;
+// TEST_MODE = true;
 
 //////////////////////////////////////////////////////////////////////
 ////   TRANSLATED STRINGS                              ///////////////
@@ -587,8 +587,8 @@ function parseData() {
 
     var warnings = '';
 
-    var headers = [ ' class="unfilterable" | ' + getString('name'),
-                    ' class="unfilterable" | ' + getString('scroll'),
+    var headers = [ ' class="unfilterable" | ' + getString('name'), // also scroll image
+                    // ' class="unfilterable" | ' + getString('scroll'),
                     ' class="unfilterable" | ' + getString('availability'),
                     ' class="unsortable"   | ' + getString('type'),
                     ' class="unfilterable" | ' + getString('rewards'),
@@ -598,7 +598,8 @@ function parseData() {
                     ' class="unfilterable" | ' + getString('boss_strength')
                   ];
 
-    var headersHtml = [ getString('name'), getString('scroll'), getString('availability'), getString('type'), getString('rewards'), getString('GP'), getString('XP'), getString('boss_HP'), getString('boss_strength') ];
+    var headersHtml = [ getString('name'), // getString('scroll'),
+                        getString('availability'), getString('type'), getString('rewards'), getString('GP'), getString('XP'), getString('boss_HP'), getString('boss_strength') ];
     headersHtml.push('<em>' + getString('length') + '</em>', '<em>' + getString('difficulty') + '</em>', '<em>' + getString('rating') + '</em>', '<em>' + getString('release_date') + '</em>');
 
     // table row for each quest:
@@ -623,12 +624,13 @@ function parseData() {
         if (language === 'en') {
             questName = questName.replace(/^The /, ''); // doing this for other languages might be difficult, especially for gendered languages
         }
-        row.push([ make_url(quest.text), 'data-sort-value="' + questName + '"' ]);
-        rowHtml.push(make_url(quest.text, {type:'html'}));
 
         var imageLocation = images[questId] || 'Inventory_quest_scroll_' + questId + '.png';
-        row.push([ make_image(imageLocation, questId), 'data-sort-value="' + questId + '"' ]);
-        rowHtml.push(make_image(imageLocation, questId, {html:true}));
+        // row.push([ make_image(imageLocation, questId), 'data-sort-value="' + questId + '"' ]);
+        // rowHtml.push(make_image(imageLocation, questId, {html:true}));
+
+        row.push([ make_url(quest.text) + '<br />' + make_image(imageLocation, questId), 'data-sort-value="' + questName + '"' ]);
+        rowHtml.push(make_url(quest.text, {type:'html'}) + '<br />' + make_image(imageLocation, questId, {html:true}));
 
         var availability = '';
         var displayLevelRestriction = false;
@@ -1083,6 +1085,8 @@ function parseData() {
 
     $('#loading .good').hide();
     $('#output').html(
+        '<p style="font-size:2em; font-weight:bold">This page currently contains some test code that merges the quest name and quest scroll columns. I\'m still considering whether it\'s an improvement or not and will check with the Wiki Wizards after some more testing. If you need to use the older version of this page to update the wiki, contact me in Habitica or at lady_alys@oldgods.net -- Alys.</p><hr />' +
+        '<p>' + 
         '<p>' + latestQuestUpdatesNeeded + '</p>' +
         '<h2>Notes:</h2>' +
         '<ul>' +
@@ -1268,7 +1272,7 @@ function replacePlaceholderLink(text, options = {}) {
 
 function make_image(image, hoverText, options = {}) {
     if (image === 'image_not_applicable') {
-        return getString('not_applicable');
+        return ''; // XXX ? getString('not_applicable');
     }
     if (options['html']) {
         // for the HTML table on the page, it's too hard to get a working link to a wikia image, so we display a broken image
@@ -1465,7 +1469,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 2019-08-22)</span></h1><!-- VERSION -->
+    <span>(last updated 2019-08-26)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
