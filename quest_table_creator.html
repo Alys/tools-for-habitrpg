@@ -76,6 +76,7 @@ var stringsForLanguage = {
         GP:                    "GP", // abbreviation for Gold / Gold Points
         XP:                    "XP", // abbreviation for Experience / Experience Points
         gems:                  "Gems",
+        hourglasses:           "Hourglasses",
         world_boss:            "world boss", // as in 'world boss quest'
         collection:            "collection", // as in 'collection quest'
         boss:                  "boss",       // as in 'boss quest'
@@ -158,6 +159,7 @@ var stringsForLanguage = {
         GP:                    "золота", // abbreviation for Gold / Gold Points
         XP:                    "опыт",   // abbreviation for Experience / Experience Points
         gems:                  "самоцв.",
+        hourglasses:           "песочные часы",
         world_boss:            "мировой босс",
         collection:            "собираемый",    // as in 'collection quest'
         boss:                  "босс",          // as in 'boss quest'
@@ -474,6 +476,7 @@ var releaseDates = {
     'bronze' : '2019-05',
     'dolphin' : '2019-07',
     'silver' : '2019-08',
+    'robot' : '2019-08',
 };
 // get the current month's date in case the latest quest
 // hasn't been added above yet:
@@ -655,11 +658,12 @@ function parseData() {
         if (quest.unlockCondition && quest.unlockCondition.condition &&
             quest.unlockCondition.condition === 'party invite'
            ) {
-            delete quest.value; // Habitica's config lies
+            delete quest.value; // Habitica's config lies // XXX_later see if that's been fixed in Habitica
         }
-        var cost = (quest.goldValue) ? quest.goldValue + ' ' + getString('GP') :
-                   (quest.value)     ? quest.value + ' ' + getString('gems')
-                                     : '';
+        var cost = (quest.goldValue)                    ? quest.goldValue + ' ' + getString('GP') :
+                   (quest.category === 'timeTravelers') ? quest.value + ' ' + getString('hourglasses') :
+                   (quest.value)                        ? quest.value + ' ' + getString('gems')
+                                                        : '';
         if (cost) {
             if (availability) {
                 availability += ' ' + getString('or') + '<br />';
@@ -818,6 +822,7 @@ function parseData() {
             (quest.category === 'world')          ? getString('various')         :
             (quest.category === 'gold')           ? specialRewardType            :
             (quest.category === 'unlockable')     ? specialRewardType            :
+            (quest.category === 'timeTravelers')  ? getString('egg')             : // XXX_later fix this - it works for Robot but maybe not future quests
             (quest.category === 'hatchingPotion') ? getString('hatching_potion') :
                                                     getString(quest.category); // e.g., pet
 
@@ -825,7 +830,6 @@ function parseData() {
         var itemsString = rewardItems.join(';<br />');
         if (rewardType === getString('hatching_potion')) {
             itemsString = itemsString.replace(new RegExp(' +' + getString('hatching_potion'),'i'), '');
-            itemsString = itemsString.replace(/ +Hatching Potion/, ''); // XXX temporary until Silver Hatching Potions are translated for Russian
         }
         if (rewardType === getString('scroll')) {
             itemsString = itemsString.replace(new RegExp(' +\\(' + getString('scroll') + '\\)','i'), '');
@@ -1463,7 +1467,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 2019-08-26)</span></h1><!-- VERSION -->
+    <span>(last updated 2019-08-30)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
