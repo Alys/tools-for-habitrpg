@@ -828,8 +828,8 @@ function parseData() {
         // add list of rewards to reward type, with some abbreviations:
         var itemsString = rewardItems.join(';<br />');
         if (rewardType === getString('hatching_potion')) {
-            itemsString = itemsString.replace(new RegExp(getString('hatching_potion'),'i'), '');
-            itemsString = itemsString.replace(/Hatching Potion/, ''); // XXX temporary until Silver Hatching Potions are translated for Russian
+            itemsString = itemsString.replace(new RegExp(' +' + getString('hatching_potion'),'i'), '');
+            itemsString = itemsString.replace(/ +Hatching Potion/, ''); // XXX temporary until Silver Hatching Potions are translated for Russian
         }
         if (rewardType === getString('scroll')) {
             itemsString = itemsString.replace(new RegExp(' +\\(' + getString('scroll') + '\\)','i'), '');
