@@ -515,9 +515,9 @@ var images = {
 //////////////////////////////////////////////////////////////////////
 var questAvailability = {
     'basilist':     getString('invite_to_party'),
-    'egg':          getString('only_during') + ' ' + make_url(getString('spring_fling'),      {type:'placeholder'}),
-    'evilsanta':    getString('only_during') + ' ' + make_url(getString('winter_wonderland'), {type:'placeholder'}),
-    'evilsanta2':   getString('only_during') + ' ' + make_url(getString('winter_wonderland'), {type:'placeholder'}),
+    'egg':          getString('only_during') + ' ' + makeUrl(getString('spring_fling'),      {type:'placeholder'}),
+    'evilsanta':    getString('only_during') + ' ' + makeUrl(getString('winter_wonderland'), {type:'placeholder'}),
+    'evilsanta2':   getString('only_during') + ' ' + makeUrl(getString('winter_wonderland'), {type:'placeholder'}),
     'burnout':      getString('finished'),
     'stressbeast':  getString('finished'),
     'dilatory':     getString('finished'),
@@ -628,8 +628,8 @@ function parseData() {
 
         var imageLocation = images[questId] || 'Inventory_quest_scroll_' + questId + '.png';
 
-        row.push([ make_url(quest.text) + '<br />' + make_image(imageLocation, questId), 'data-sort-value="' + questName + '"' ]);
-        rowHtml.push(make_url(quest.text, {type:'html'}) + '<br />' + make_image(imageLocation, questId, {html:true}));
+        row.push([ makeUrl(quest.text) + '<br />' + makeImage(imageLocation, questId), 'data-sort-value="' + questName + '"' ]);
+        rowHtml.push(makeUrl(quest.text, {type:'html'}) + '<br />' + makeImage(imageLocation, questId, {html:true}));
 
         var availability = '';
         var displayLevelRestriction = false;
@@ -643,7 +643,7 @@ function parseData() {
                 var text = (reverseTextForLanguage['checkins'][inPageLanguage])
                          ? getString('checkins') + ': ' + quest.unlockCondition.incentiveThreshold
                          : quest.unlockCondition.incentiveThreshold + ' ' + getString('checkins');
-                availability = make_url(text, {url: getString('checkins_page'), type:'placeholder'} );
+                availability = makeUrl(text, {url: getString('checkins_page'), type:'placeholder'} );
             }
             else if (quest.previous) {
                 availability = getString('previous_part');
@@ -769,7 +769,7 @@ function parseData() {
                             text = text.replace(new RegExp('\\(' + getString('food') + '\\)','i'), '('+ getString('food') +')');
                         }
                         if (rewardPageUrls[inPageLanguage][key]) {
-                            text = make_url(text, {url: rewardPageUrls[inPageLanguage][key], type:'placeholder'} );
+                            text = makeUrl(text, {url: rewardPageUrls[inPageLanguage][key], type:'placeholder'} );
                         }
                         if (items[type][key]['count'] > 1) {
                             text += ' x ' + items[type][key]['count'];
@@ -1111,7 +1111,7 @@ function parseData() {
 
         '<h2>' + getString('all_quests_heading') + '</h2>' +
         '<p>' + getString('textarea_intro') + ' ' + getString('all_quests') + '. ' + getString('textarea_paste') + ' ' +
-        make_url('all_quests', {template:true, type:'html'}) +
+        makeUrl('all_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.all.join("") +
@@ -1120,7 +1120,7 @@ function parseData() {
 
         '<h2>' + getString('quest_lines_heading') + '</h2>' +
         '<p>' + getString('textarea_intro') + ' ' + getString('quest_lines') + '. ' + getString('textarea_paste') + ' ' +
-        make_url('quest_lines', {template:true, type:'html'}) +
+        makeUrl('quest_lines', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.questLines.join("") +
@@ -1129,7 +1129,7 @@ function parseData() {
 
         '<h2>' + getString('easy_quests_heading') + '</h2>' +
         '<p>' + getString('textarea_intro') + ' ' + getString('easy_quests') + '. ' + getString('textarea_paste') + ' ' +
-        make_url('easy_quests', {template:true, type:'html'}) +
+        makeUrl('easy_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.easy.join("") +
@@ -1138,7 +1138,7 @@ function parseData() {
 
         '<h2>' + getString('medium_quests_heading') + '</h2>' +
         '<p>' + getString('textarea_intro') + ' ' + getString('medium_quests') + '. ' + getString('textarea_paste') + ' ' +
-        make_url('medium_quests', {template:true, type:'html'}) +
+        makeUrl('medium_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.medium.join("") +
@@ -1147,7 +1147,7 @@ function parseData() {
 
         '<h2>' + getString('hard_quests_heading') + '</h2>' +
         '<p>' + getString('textarea_intro') + ' ' + getString('hard_quests') + '. ' + getString('textarea_paste') + ' ' +
-        make_url('hard_quests', {template:true, type:'html'}) +
+        makeUrl('hard_quests', {template:true, type:'html'}) +
         '</p><textarea rows="5" cols="100" wrap="off">' +
         questTableHeader +
         tableRows.hard.join("") +
@@ -1195,7 +1195,7 @@ function convertRow(format, rowArray, cellType) {
 }
 
 
-function make_url(visibleText, options = {}) {
+function makeUrl(visibleText, options = {}) {
     var linkText = visibleText; // visibleText is what the user sees; linkText will be used to make the URL if needed
     var urlType = options['type'] || 'wiki'; // wiki or html or placeholder (for later converting to either using replacePlaceholderLink function)
 
@@ -1268,7 +1268,7 @@ function replacePlaceholderLink(text, options = {}) {
 }
 
 
-function make_image(image, hoverText, options = {}) {
+function makeImage(image, hoverText, options = {}) {
     if (image === 'image_not_applicable') {
         return '';
     }
