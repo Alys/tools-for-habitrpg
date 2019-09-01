@@ -1012,23 +1012,23 @@ function parseData() {
         }
 
         if (quest.previous || questId.match(/evilsanta/) || questLineStartIds[questId]) {
-            tableRows.questLines.push( convertRow('wikia', row) );
+            tableRows.questLines.push( convertRow(row) );
             if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('quest_lines_heading'); }
         }
 
         tableRowsHtml.push(rowHtml);
-        tableRows.all.push( convertRow('wikia', row) );
+        tableRows.all.push( convertRow(row) );
 
         if (rating === '1. ' + getString('easy')) {
-            tableRows.easy.push( convertRow('wikia', row) );
+            tableRows.easy.push( convertRow(row) );
             if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('easy_quests_heading'); }
         }
         else if (rating === '2. ' + getString('medium')) {
-            tableRows.medium.push( convertRow('wikia', row) );
+            tableRows.medium.push( convertRow(row) );
             if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('medium_quests_heading'); }
         }
         else if (rating === '3. ' + getString('hard')) {
-            tableRows.hard.push( convertRow('wikia', row) );
+            tableRows.hard.push( convertRow(row) );
             if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('hard_quests_heading'); }
         }
         if (releaseDate === thisMonth) {
@@ -1039,7 +1039,7 @@ function parseData() {
     var questTableHeader = '' +
 '\n{| class="filterable sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
 '\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"' +
-    convertRow('wikia', headers, 'th');
+    convertRow(headers, 'th');
 
     var questTableFooter = '' +
 '\n|- class="sortbottom"' +
@@ -1161,15 +1161,8 @@ function parseData() {
 }
 
 
-function convertRow(format, rowArray, cellType) {
-    // format is 'html' or 'wikia' // XXX_LATER 'html' support is no longer used. Is this function still needed?
-    var html = (format === 'html') ? true : false;
-    cellType = cellType || 'td'; // 'th' can be specified manually
-    if (!html) {
-        cellType = (cellType === 'td') ? '|' : '!'; // Wikia versions of td and th
-    }
-
-    var row = (html) ? '<tr>' : ((cellType === '|') ? '\n|-' : '');
+function convertRow(rowArray, cellType = 'td') {  // cellType can also be 'th'
+    var row = (cellType === 'td') ? '\n|-' : '';
     for (var i in rowArray) {
         var valueObj = rowArray[i];
         var value  = '';
@@ -1181,16 +1174,11 @@ function convertRow(format, rowArray, cellType) {
         else {
             value = valueObj;
         }
-
-        row += (html) ?
-            '<'  + cellType + '>' :
-            '\n' + cellType;
-        row += config + value;
-        row += (html) ?
-            '</' + cellType + '>' :
-            '';
+        row += '\n' +
+               ((cellType === 'td') ? '|' : '!') +  // Wikia versions of td and th
+               config +
+               value;
     }
-    row += (html) ? '</tr>\n' : '';
     return row;
 }
 
