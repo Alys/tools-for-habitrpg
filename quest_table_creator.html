@@ -658,7 +658,7 @@ function parseData() {
         if (quest.unlockCondition && quest.unlockCondition.condition &&
             quest.unlockCondition.condition === 'party invite'
            ) {
-            delete quest.value; // Habitica's config lies // XXX_later see if that's been fixed in Habitica
+            delete quest.value; // Habitica's config lies
         }
         var cost = (quest.goldValue)                    ? quest.goldValue + ' ' + getString('GP') :
                    (quest.category === 'timeTravelers') ? quest.value + ' ' + getString('hourglasses') :
@@ -1455,7 +1455,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 2019-08-30)</span></h1><!-- VERSION -->
+    <span>(last updated 2019-09-01)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
