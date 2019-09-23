@@ -334,7 +334,15 @@ var reverseTextForLanguage = {  // XXX Is this needed? Adjust comments if necess
 
 var translationInstructions =    // Do not translate this into other languages. It's displayed only in the English version of the page.
     '<h3>Translations for Non-English Wikis</h3>' +
-    '<p>If you would like to use this tool to create the tables for your own language\'s version of the wiki, add your language\'s code to the URL. For example, for the Russian ("ru") version you would use this URL:<br /><a href="https://oldgods.net/habitrpg/equipment_table_creator.html?language=ru">https://oldgods.net/habitrpg/equipment_table_creator.html?<strong>language=ru</strong></a><br />Habitica\'s official translations will then be used by this page. Some additional strings will need to be translated too (e.g., for the table headings) so contact Alys at lady_alys@oldgods.net to discuss that.</p>'
+    '<p>' +
+        'If you would like to use this tool to create the tables for your own language\'s version of the wiki, add your language\'s code to the URL. ' +
+        'For example, for the Russian ("ru") version you would use this URL:<br />' +
+        '<a href="https://oldgods.net/habitrpg/equipment_table_creator.html?language=ru">' +
+            'https://oldgods.net/habitrpg/equipment_table_creator.html?<strong>language=ru</strong>' +
+        '</a>' +
+        '<br />Habitica\'s official translations will then be used by this page. ' +
+        'Some additional strings will need to be translated too (e.g., for the table headings) so contact Alys at lady_alys@oldgods.net to discuss that.' +
+    '</p>' +
     '<p>So far support exists for the languages below but others can be added!</p>' +
     '<ul><li><a href="https://oldgods.net/habitrpg/quest_table_creator.html?language=ru">Russian</a></li></ul>'
     ;
@@ -979,7 +987,7 @@ function parseData() {
                      obj.klass;
         klass = (klass == 'wizard') ? 'mage' : klass;
         if (klass == 'base') {
-      continue; // don't show "No Weapon", "Plain Clothing", etc
+            continue; // don't show "No Weapon", "Plain Clothing", etc
         }
 
         var name        = obj.text.replace(/ /g, '<br />');
