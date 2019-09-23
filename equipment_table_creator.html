@@ -1191,6 +1191,67 @@ function parseData() {
 }
 
 
+function makeUrl(visibleText, options = {}) {
+    var linkText = visibleText; // visibleText is what the user sees; linkText will be used to make the URL if needed
+    var urlType = options['type'] || 'wiki'; // wiki or html or placeholder (for later converting to either using replacePlaceholderLink function)
+
+    if (options['template']) { // the URL being linked to is a wiki Template
+        visibleText = getTemplateName(visibleText);
+        linkText = 'Template:' + visibleText;
+    }
+
+    var wikiPageName; // e.g., Jacko_of_the_Lantern
+    var fullUrl; // e.g., https://habitica.fandom.com/wiki/Jacko_of_the_Lantern or a link to any other site
+
+    var url = options['url'] || '';
+    if (url.indexOf('://') > -1) {
+        // A full URL was provided (e.g., https://example.com/whatever/). We assume it's not a wiki link.
+        wikiPageName = ''; // this will remain empty
+        fullUrl = url;
+    }
+    else if (url) {
+        // A wiki page name was supplied as the URL, with or without underscores (e.g., "Jacko_of_the_Lantern" or "Jacko of the Lantern")
+        wikiPageName = url; // might need changes later (e.g., to insert underscores)
+    }
+    else {
+        // No URL was supplied so we create one from the visible text which we assume is a wiki page name.
+        wikiPageName = linkText;
+    }
+
+    if (wikiPageName) {
+        // Ensure the wiki page name is correct and create the full URL.
+        wikiPageName = wikiPageName.replace(/ /g, '_');
+        wikiPageName = wikiPageName.replace(getRegexp('part_url'), ''); // e.g., convert ...Taskwoods,_Part_3:_Jacko_of_the_Lantern to Jacko_of_the_Lantern
+        // apply manual fixes to URLs that aren't correct when automatically created:
+        if (wikiPageNameCorrections[inPageLanguage] && wikiPageNameCorrections[inPageLanguage][wikiPageName]) {
+            wikiPageName = wikiPageNameCorrections[inPageLanguage][wikiPageName];
+        }
+        fullUrl = wikiaBaseUrl + wikiPageName;
+    }
+
+    var linkHtml = '<a href="' + fullUrl + '">' + visibleText + '</a>';
+    if (TEST_MODE) linkHtml += ' ' + fullUrl;
+
+    var linkWiki;
+    if (wikiPageName === visibleText.replace(/ /g, '_')) {
+        linkWiki = '[[' + visibleText + ']]';
+    }
+    else {
+        linkWiki = '[[' + wikiPageName + '|' + visibleText + ']]';
+    }
+
+    if (urlType === 'html') {
+        return linkHtml;
+    }
+    else if (urlType === 'placeholder') {
+        return ':::' + linkWiki + ':::' + linkHtml + ':::';
+    }
+    else {
+        return linkWiki;
+    }
+}
+
+
 function getString(key) {
     if (stringsForLanguage[inPageLanguage] && stringsForLanguage[inPageLanguage][key]) {
         return stringsForLanguage[inPageLanguage][key];
