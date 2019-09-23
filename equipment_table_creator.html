@@ -269,6 +269,8 @@ var regexpsForLanguage = {
 //////////////////////////////////////////////////////////////////////
 var templateNamesForLanguage = {
     'en': {
+        equipment: "Equipment_Table_Code",
+        armoire:   "Enchanted_Armoire_Table_Code",
     },
     'ru': {
     }
@@ -900,19 +902,18 @@ function parseData() {
     var warnings = '';
 
 // XXX UPTOHERE FOR TRANSLATION SUPPORT
-    var htmlStart = '<p>This page outputs the wikia code for creating tables'
-        + ' on the <a href="http://habitica.fandom.com/">Habitica wiki</a>.'
+    var htmlStart = '<p>' + getString('intro')
+        + ' <a href="' + getString('wiki_url') + '">' + getString('wiki_name') + '</a>.'
         + ' One table is for the'
         + ' <a href="http://habitica.fandom.com/wiki/Equipment_Table">'
         + 'Equipment Table</a> page, and the other is for the'
         + ' <a href="http://habitica.fandom.com/wiki/Enchanted_Armoire">'
         + 'Enchanted Armoire</a> page.</p>'
-        + '<p>Copy everything inside each textarea below and paste it '
-        + 'into the appropriate template pages: <a href="'
-        + 'http://habitica.fandom.com/wiki/Template:Equipment_Table_Code'
-        + '">Template:Equipment_Table_Code</a> and <a href="'
-        + 'http://habitica.fandom.com/wiki/Template:Enchanted_Armoire_Table_Code'
-        + '">Template:Enchanted_Armoire_Code</a>.</p>';
+        + '<p>'
+        + getString('textarea_paste') +': '
+        + makeUrl('equipment', {template:true, type:'html'})
+        + ' ' + getString('and') + ' ' + makeUrl('armoire', {template:true, type:'html'}) + '.</p>'
+        + ((inPageLanguage === 'en') ? translationInstructions : '');
 
     var equipTable   = '<textarea rows="20" cols="120" wrap="off">';
     var armoireTable = '<textarea rows="20" cols="120" wrap="off">';
