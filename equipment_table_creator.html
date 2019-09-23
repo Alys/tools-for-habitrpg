@@ -858,6 +858,7 @@ function fetchData() {
     $.ajax({
         url: serverUrl + '/content',
         type: 'GET',
+        data: { language: language },
         dataType: 'json',
         cache: true,
         success: fetchContentSuccess,
