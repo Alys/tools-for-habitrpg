@@ -1019,7 +1019,9 @@ function parseData() {
             // create some unofficial sets
             var res = name.match(getRegexp('unofficial_set'));
             if (res && res[0]) {
-                set = res[0] + '<br /><em>unofficial set</em>';
+                // XXX_ALYS I added this, because in the Russian language it is not customary to capitalize every word in the name. 
+                // And in the string, the Russian translation of the word "Floppy" just comes second.
+                set = capitalizeFirstLetter(res[0]) + '<br /><em>' + getString('unofficial_set') + '</em>';
             }
             else {
                 set = '&#8211;'; // en dash
@@ -1194,6 +1196,11 @@ function parseData() {
                     + '<p>' + getString('total_number_armoire_items') + ' ' + armoireCount + '</p>'
                     + armoireTable
                     + htmlEnd);
+}
+
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 
