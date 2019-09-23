@@ -245,8 +245,18 @@ var stringsForLanguage = { // XXX purge this for both languages
 //////////////////////////////////////////////////////////////////////
 var regexpsForLanguage = {
     'en': {
+        increases: " Increases ",
+        armoire: " Enchanted Armoire: ",
+        independent_item: /Independent Item/i,
+        set: /(.+ Set) \(Item ([0-9]+) of ([0-9]+)/i,
+        unofficial_set: /(Floppy<br \/>Hat|Cat<br \/>Hat)/i,
     },
     'ru': {
+        increases: " Увеличивает ",
+        armoire: " Зачарованный сундук: ",
+        independent_item: /Независимый предмет/i,
+        set: /(.+ [Нн]абор|[Нн]абор .+) \(предмет ([0-9]+) из ([0-9]+)/i,
+        unofficial_set: /(широкополая<br \/>шляпа|Шапка(.+)кота)/i,  // XXX_JAZZIS FIXME
     }
 };
 
@@ -1002,11 +1012,11 @@ function parseData() {
             warnings += 'No notes for ' + obj.key + '<br />';
             obj.notes = '';
         }
-        var description = obj.notes.split(' Increases ')[0];
-        var set         = obj.notes.split(' Enchanted Armoire: ')[1];
-        if (set && set.match(/Independent Item/i)) {
+        var description = obj.notes.split(getRegexp('increases'))[0];
+        var set         = obj.notes.split(getRegexp('armoire'))[1];
+        if (set && set.match(getRegexp('independent_item'))) {
             // create some unofficial sets
-            var res = name.match(/(Floppy<br \/>Hat|Cat<br \/>Hat)/i);
+            var res = name.match(getRegexp('unofficial_set'));
             if (res && res[0]) {
                 set = res[0] + '<br /><em>unofficial set</em>';
             }
@@ -1015,8 +1025,7 @@ function parseData() {
             }
         }
         else if (set) {
-            var myRegexp = /(.+ Set) \(Item ([0-9]+) of ([0-9]+)/gi;
-            var match = myRegexp.exec(set);
+            var match = set.match(getRegexp('set'));
             if (match) {
                 set = match[1] + '<br />' + match[2] + ' / ' + match[3];
                 // e.g., Gladiator 1 / 3
