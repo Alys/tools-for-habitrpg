@@ -48,7 +48,7 @@ Contributors:
 <script type="text/javascript">
 $(function() { // wraps around all our code to not pollute global namespace
 var TEST_MODE = false; // causes extra text to be printed in the web page
-TEST_MODE = true;
+//TEST_MODE = true;
 
 //////////////////////////////////////////////////////////////////////
 ////   TRANSLATED STRINGS                              ///////////////
@@ -58,171 +58,181 @@ TEST_MODE = true;
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
 var stringsForLanguage = { // XXX purge this for both languages
-    // not used yet: wiki_name:        "Habitica Wiki", // the name of the wiki (it must contain "Habitica" and that word must not be translated)
     'en': {
+        wiki_name:             "Habitica Wiki", // the name of the wiki (it must contain "Habitica" and that word must not be translated)
         wiki_url:              "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
 
-        checkins:              "Check-Ins", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
-        checkins_page:         "Daily_Check-In_Incentives", // link to the page itself above
-
-        level:                 "level",
         equipment:             "equipment",
-        scroll:                "scroll", // as in quest scroll
-        quest_scroll:          "quest scroll",
-        pet:                   "pet",
-        mount:                 "mount",
-        egg:                   "egg",
-        food:                  "food",
-        hatching_potion:       "hatching potion",
-        pet_and_mount:         "pet &amp; mount",
-        GP:                    "GP", // abbreviation for Gold / Gold Points
-        XP:                    "XP", // abbreviation for Experience / Experience Points
-        gems:                  "Gems",
-        hourglasses:           "Hourglasses",
-        world_boss:            "world boss", // as in 'world boss quest'
-        collection:            "collection", // as in 'collection quest'
-        boss:                  "boss",       // as in 'boss quest'
-        rage:                  "rage",       // some bosses have a 'rage' meter
         unknown:               "unknown",    // used when we don't know the quest type (world boss/boss/collection) or the reward type
 
-        name:                  "name",               // table header for the quest name column
-        availability:          "availability",       // table header: how / when to obtain the scroll
-        type:                  "type",               // table header: type of quest (world boss or boss or collection)
-        rewards:               "rewards",            // table header: rewards that the quest gives
-        boss_HP:               "boss<br />HP",       // table header: starting health of boss
-        boss_strength:         "boss<br />strength", // table header: strength of boss
-
-        length:                "length",       // table header (HTML only): the length of time generally taken to complete a quest
-        difficulty:            "difficulty",   // table header (HTML only): how difficult a quest is in terms of having to be consistent with your Dailies
-        rating:                "rating",       // table header (HTML only): a merge of the length and difficulty
-        release_date:          "release date", // table header (HTML only): quest release date
-
-        previous_part:         "previous part",   // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
-        invite_to_party:       "invite to party", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
-        create_account:        "Create Account",  // this must be identical to Habitica's `createAccountReward` translated string
-        finished:              "finished", // indicates that the World Boss quest has finished and is no longer available
-        only_during:           "only during",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
-
-        spring_fling:          "Spring Fling", // the name of the spring Grand Gala (if the wiki page is named differently, add to wikiPageNameCorrections)
-        winter_wonderland:     "Winter Wonderland", // the name of the winter Grand Gala (if the wiki page is named differently, add to wikiPageNameCorrections)
-        XP_GP_only:            "XP, GP<br />only", // the reward type for quests that give only XP and GP
-        various:               "various", // used to indicate the quest rewards when there's a variety of them
-        etc:                   "etc", // added to the end of the quest's reward type when the quest gives multiple types
-        one_of_each_food:      "one of each food", // a type of quest reward
         not_applicable:        "n/a", // an abbreviation meaning 'not applicable' (recommended to use a short word)
 
-        weeks:                 "wk",   // 'weeks' or a shorter word for it (as short as possible is best)
-        short:                 "short",  // describes the length of time generally taken to complete a quest
-        medium:                "medium", // as above
-        long:                  "long",   // as above
+        ///////////////////////////////////////////////////////////////////////////////
 
-        very_hard:             "very hard", // describes how difficult a quest is in terms of having to be consistent with your Dailies
-        hard:                  "hard",      // as above
-        medium:                "medium",    // as above
-        easy:                  "easy",      // as above
-        trivial:               "trivial",   // as above
+        kickstarter: "Kickstarter",
+        contributor_gear: "Contributor_Rewards#Contributor_Gear",
+        absurd_party_hat: "Winter_Wonderland#Absurd_Party_Hat",
+        absurd_party_robes: "Winter_Wonderland#Absurd_Party_Robes",
+        winter_special_2014: "Winter_Wonderland#Special_Class_Gear_2014",
+        winter_special_2015: "Winter_Wonderland#Special_Class_Gear_2015",
+        summer_special: "Summer_Splash#Special_Class_Gear",
+        fall_special: "Fall_Festival#Special_Class_Gear",
+        spring_fling: "Spring_Fling",
+        take_this_challenges: "Official_Habitica_Challenges#Take_This_Challenges",
+        weapon_special_critical: "Critical_Warhammer_of_Bug-Crushing",
 
-        million:               "M",  // an abbreviation for 'million' to indicate the strength of world boss or his rage
-        or:                    "or",
-        or_earlier:            "or earlier",
+        equipment_table: "Equipment_Table",
+        armoire_table:   "Enchanted_Armoire",
 
-        new_quest:             "Quest released this month", // used only within this page's instructions; will not appear on the wiki
-        tables_to_edit:        "update the tables for", // used only within this page's instructions; will not appear on the wiki
-        all_quests_heading:    "All Quests", // subsection heading used only within this page's instructions
-        quest_lines_heading:   "Quest Lines", // subsection heading used only within this page's instructions
-        easy_quests_heading:   "Easy Quests", // subsection heading used only within this page's instructions
-        medium_quests_heading: "Medium Quests", // subsection heading used only within this page's instructions
-        hard_quests_heading:   "Hard Quests", // subsection heading used only within this page's instructions
+        name: "Name",
+        image: "Image",
+        class: "Class",
+        type: "Type",
+        cost: "Cost",
+        con: "CON",
+        int: "INT",
+        per: "PER",
+        str: "STR",
+        quality: "Quality",
 
-        textarea_intro:        "This textarea contains code to produce a Wikia table showing",
-        all_quests:            "all quests",
-        quest_lines:           "only quests that are in quest lines",
-        easy_quests:           "only easy quests",
-        medium_quests:         "only medium quests",
-        hard_quests:           "only hard quests",
-        textarea_paste:        "Paste this code into this template:",
+        description: "Description",
+        set: "Set",
+        release_date: "Release<br />Date",
+
+        jan: "Jan",
+        feb: "Feb",
+        mar: "Mar",
+        apr: "Apr",
+        may: "May",
+        jun: "Jun",
+        jul: "Jul",
+        aug: "Aug",
+        sep: "Sep",
+        oct: "Oct",
+        nov: "Nov",
+        dec: "Dec",
+
+        best: "best",
+        medium: "medium",
+        stats_free: "stats<br />free",
+
+        head_accessory: "head<br />accessory",
+        back_accessory: "back<br />accessory",
+        body_accessory: "body<br />accessory",
+        head_gear: "head<br />gear",
+        armor: "armor",
+        weapon: "weapon",
+        shield: "shield",
+        eyewear: "eyewear",
+
+        special: "special",
+        warrior: "warrior",
+        mage: "mage",
+        healer: "healer",
+        rogue: "rogue",
+        take_this: "Take This",
+        mystery: "mystery",
+        armoire: "armoire",
+
+        unofficial_set: "unofficial set",
+
+        textarea_paste: "Copy everything inside each textarea below and paste it into the appropriate template pages",
+
+        equipment_table_heading: "Equipment Table",
+        armoire_table_heading: "Enchanted Armoire Table",
+        
+        total_number_armoire_items: "Total number of Enchanted Armoire items",
+
+        and: "and",
     },
     'ru': {
+        wiki_name:             "Habitica Вики", // the name of the wiki (it must contain "Habitica" and that word must not be translated)
         wiki_url:              "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
 
-        checkins:              "вх. в игру", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
-        checkins_page:         "Ежедневное_вознаграждение", // link to the page itself above
-
-        level:                 "ур.",
         equipment:             "снаряжение",
-        scroll:                "свиток", // as in quest scroll
-        quest_scroll:          "квестовый свиток",
-        pet:                   "питомец",
-        mount:                 "скакун",
-        egg:                   "яйцо",
-        food:                  "еда",
-        hatching_potion:       "инкубационный эликсир",
-        pet_and_mount:         "питомец и скакун",
-        GP:                    "золота", // abbreviation for Gold / Gold Points
-        XP:                    "опыт",   // abbreviation for Experience / Experience Points
-        gems:                  "самоцв.",
-        hourglasses:           "песочные часы",
-        world_boss:            "мировой босс",
-        collection:            "собираемый",    // as in 'collection quest'
-        boss:                  "босс",          // as in 'boss quest'
-        rage:                  "ярость",        // some bosses have a 'rage' meter
         unknown:               "неизвестно",    // used when we don't know the quest type (world boss/boss/collection) or the reward type
 
-        name:                  "название",            // table header for the quest name column
-        availability:          "доступность",         // table header: how / when to obtain the scroll
-        type:                  "тип",                 // table header: type of quest (world boss or boss or collection)
-        rewards:               "награды",             // table header: rewards that the quest gives
-        boss_HP:               "здоровье<br />босса", // table header: starting health of boss
-        boss_strength:         "сила<br />босса",     // table header: strength of boss
-
-        length:                "длительность",
-        difficulty:            "сложность",
-        rating:                "рейтинг",
-        release_date:          "дата выпуска",
-
-        previous_part:         "пред. часть", // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
-        invite_to_party:       "пригласить кого-нибудь в команду", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
-        create_account:        "Создать учетную запись",            // this must be identical to Habitica's `createAccountReward` translated string
-        finished:              "завершен", // indicates that the World Boss quest has finished and is no longer available
-        only_during:           "только во время",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
-        spring_fling:          "Весенней веселухи", // the name of the spring Grand Gala (if the wiki page is named differently, add to wikiPageNameCorrections)
-        winter_wonderland:     "Зимней страны чудес", // the name of the winter Grand Gala (if the wiki page is named differently, add to wikiPageNameCorrections)
-        XP_GP_only:            "только<br />опыт и золото", // the reward type for quests that give only XP and GP
-        various:               "разное", // used to indicate the quest rewards when there's a variety of them
-        etc:                   "и др.", // added to the end of the quest's reward type when the quest gives multiple types
-        one_of_each_food:      "по одной ед. еды каждого вида", // a type of quest reward
         not_applicable:        "н/д", // an abbreviation meaning 'not applicable' (recommended to use a short word)
 
-        weeks:                 "нед.",  // 'weeks' or a shorter word for it (as short as possible is best)
-        short:                 "короткая",  // describes the length of time generally taken to complete a quest
-        medium:                "средняя",   // as above
-        long:                  "длинная",   // as above
+        ///////////////////////////////////////////////////////////////////////////////
 
-        very_hard:             "очень сложно", // describes how difficult a quest is in terms of having to be consistent with your Dailies
-        hard:                  "сложно",       // as above
-        medium:                "средне",       // as above
-        easy:                  "легко",        // as above
-        trivial:               "пустяк",       // as above
+        kickstarter: "Kickstarter",
+        contributor_gear: "Награды_за_вклад#Снаряжение_участника",
+        absurd_party_hat: "Зимняя_страна_чудес#Праздничные_шляпы",
+        absurd_party_robes: "Зимняя_страна_чудес#Праздничные_мантии",
+        winter_special_2014: "Зимняя_страна_чудес#Специальное_классовое_снаряжение_2014",
+        winter_special_2015: "Зимняя_страна_чудес#Специальное_классовое_снаряжение_2015",
+        summer_special: "Летний_всплеск#Специальное_классовое_снаряжение",
+        fall_special: "Осенний_фестиваль#Специальное_классовое_снаряжение",
+        spring_fling: "Весенняя_веселуха",
+        take_this_challenges: "Официальные_испытания_Habitica#Испытания_«Take_This»",
+        weapon_special_critical: "Молот_победителя_критических_багов",
 
-        million:               " млн.",  // an abbreviation for 'million' to indicate the strength of world boss or his rage
-        or:                    "или",
-        or_earlier:            "или раньше",
+        equipment_table: "Таблица_снаряжения",
+        armoire_table:   "Зачарованный_сундук",
 
-        new_quest:             "В этом месяце был выпущен квест", // used only within this page's instructions; will not appear on the wiki
-        tables_to_edit:        "обновите следующие таблицы:", // used only within this page's instructions; will not appear on the wiki
-        all_quests_heading:    "Все квесты", // subsection heading used only within this page's instructions
-        quest_lines_heading:   "Квестовые линии", // subsection heading used only within this page's instructions
-        easy_quests_heading:   "Легкие квесты", // subsection heading used only within this page's instructions
-        medium_quests_heading: "Средние квесты", // subsection heading used only within this page's instructions
-        hard_quests_heading:   "Сложные квесты", // subsection heading used only within this page's instructions
+        name: "Название",
+        image: "Изобр.",
+        class: "Класс",
+        type: "Тип",
+        cost: "Цена",
+        con: "ТЕЛ",
+        int: "ИНТ",
+        per: "ВОС",
+        str: "СИЛ",
+        quality: "Качество",
 
-        textarea_intro:        "Эта текстовая область содержит код для создания вики-таблицы, показывающей",
-        all_quests:            "все квесты",
-        quest_lines:           "только квесты из квестовых линий",
-        easy_quests:           "только легкие квесты",
-        medium_quests:         "только средние квесты",
-        hard_quests:           "только сложные квесты",
-        textarea_paste:        "Вставьте этот код в шаблон:",
+        description: "Описание",
+        set: "Набор",
+        release_date: "Дата<br />выпуска",
+
+        jan: "Янв",
+        feb: "Фев",
+        mar: "Мар",
+        apr: "Апр",
+        may: "Май",
+        jun: "Июн",
+        jul: "Июл",
+        aug: "Авг",
+        sep: "Сен",
+        oct: "Окт",
+        nov: "Ноя",
+        dec: "Дек",
+
+        best: "лучшее",
+        medium: "среднее",
+        stats_free: "бонусов<br />не дает",
+
+        head_accessory: "аксессуар<br />на голову",
+        back_accessory: "аксессуар<br />на спину",
+        body_accessory: "аксессуар<br />на тело",
+        head_gear: "головной<br />убор",
+        armor: "доспехи",
+        weapon: "оружие",
+        shield: "щит",
+        eyewear: "очки",
+
+        special: "особое",
+        warrior: "воин",
+        mage: "маг",
+        healer: "целитель",
+        rogue: "разбойник",
+        take_this: "Take This",
+        mystery: "таинственный<br />предмет",
+        armoire: "зачарованный<br />сундук",
+
+        unofficial_set: "неофиц. набор",
+
+        intro: "Эта страница выводит вики-разметку для создания таблиц на",
+
+        textarea_paste: "Скопируйте все, что находится в каждой текстовой области ниже и вставьте это в соответсвующие страницы шаблонов",
+
+        equipment_table_heading: "Таблица снаряжения",
+        armoire_table_heading: "Таблица для зачарованного сундука",
+        
+        total_number_armoire_items: "Общее кол-во предметов в зачарованном сундуке:",
+
+        and: "и",
     }
 };
 
@@ -235,8 +245,18 @@ var stringsForLanguage = { // XXX purge this for both languages
 //////////////////////////////////////////////////////////////////////
 var regexpsForLanguage = {
     'en': {
+        increases: " Increases ",
+        armoire: " Enchanted Armoire: ",
+        independent_item: /Independent Item/i,
+        set: /(.+ Set) \(Item ([0-9]+) of ([0-9]+)/i,
+        unofficial_set: /(Floppy<br \/>Hat|Cat<br \/>Hat)/i,
     },
     'ru': {
+        increases: " Увеличивает ",
+        armoire: " Зачарованный сундук: ",
+        independent_item: /Независимый предмет/i,
+        set: /(.+ [Нн]абор|[Нн]абор .+) \(предмет ([0-9]+) из ([0-9]+)/i,
+        unofficial_set: /(широкополая<br \/>шляпа|Шапка(.+)кота)/i,  // XXX_JAZZIS FIXME
     }
 };
 
@@ -249,6 +269,8 @@ var regexpsForLanguage = {
 //////////////////////////////////////////////////////////////////////
 var templateNamesForLanguage = {
     'en': {
+        equipment: "Equipment_Table_Code",
+        armoire:   "Enchanted_Armoire_Table_Code",
     },
     'ru': {
     }
@@ -325,16 +347,20 @@ var wikiPageNameCorrections = {  // XXX Is this needed? Adjust comments if neces
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
 var reverseTextForLanguage = {  // XXX Is this needed? Adjust comments if necessary.
-    'checkins' : {
-    },
-    'level' : {
-    },
 };
 
 
 var translationInstructions =    // Do not translate this into other languages. It's displayed only in the English version of the page.
     '<h3>Translations for Non-English Wikis</h3>' +
-    '<p>If you would like to use this tool to create the tables for your own language\'s version of the wiki, add your language\'s code to the URL. For example, for the Russian ("ru") version you would use this URL:<br /><a href="https://oldgods.net/habitrpg/equipment_table_creator.html?language=ru">https://oldgods.net/habitrpg/equipment_table_creator.html?<strong>language=ru</strong></a><br />Habitica\'s official translations will then be used by this page. Some additional strings will need to be translated too (e.g., for the table headings) so contact Alys at lady_alys@oldgods.net to discuss that.</p>'
+    '<p>' +
+        'If you would like to use this tool to create the tables for your own language\'s version of the wiki, add your language\'s code to the URL. ' +
+        'For example, for the Russian ("ru") version you would use this URL:<br />' +
+        '<a href="https://oldgods.net/habitrpg/equipment_table_creator.html?language=ru">' +
+            'https://oldgods.net/habitrpg/equipment_table_creator.html?<strong>language=ru</strong>' +
+        '</a>' +
+        '<br />Habitica\'s official translations will then be used by this page. ' +
+        'Some additional strings will need to be translated too (e.g., for the table headings) so contact Alys at lady_alys@oldgods.net to discuss that.' +
+    '</p>' +
     '<p>So far support exists for the languages below but others can be added!</p>' +
     '<ul><li><a href="https://oldgods.net/habitrpg/quest_table_creator.html?language=ru">Russian</a></li></ul>'
     ;
@@ -742,90 +768,90 @@ var images = { // XXX Are translations needed? If inter-wiki image sharing is us
 ////   familiar with.                                  ///////////////
 //////////////////////////////////////////////////////////////////////
 var urls = { // XXX merge with object above and translate
-    'armor_special_0' : 'Backers',
-    'armor_special_1' : 'Contributor_Rewards#Contributor_Gear',
-    'armor_special_2' : 'Jean_Chalard%27s_Noble_Tunic',
-    'armor_special_birthday' : 'Winter_Wonderland#Absurd_Party_Robes',
-    'armor_special_candycane' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'armor_special_ski' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'armor_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'armor_special_springHealer' : 'Spring_Fling',
-    'armor_special_springMage' : 'Spring_Fling',
-    'armor_special_springRogue' : 'Spring_Fling',
-    'armor_special_springWarrior' : 'Spring_Fling',
-    'armor_special_yeti' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'headAccessory_special_springHealer' : 'Spring_Fling',
-    'headAccessory_special_springMage' : 'Spring_Fling',
-    'headAccessory_special_springRogue' : 'Spring_Fling',
-    'headAccessory_special_springWarrior' : 'Spring_Fling',
-    'head_special_0' : 'Backers',
-    'head_special_1' : 'Contributor_Rewards#Contributor_Gear',
-    'head_special_candycane' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'head_special_nye' : 'Winter_Wonderland#Absurd_Party_Hat',
-    'head_special_ski' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'head_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'head_special_springHealer' : 'Spring_Fling',
-    'head_special_springMage' : 'Spring_Fling',
-    'head_special_springRogue' : 'Spring_Fling',
-    'head_special_springWarrior' : 'Spring_Fling',
-    'head_special_yeti' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'shield_special_0' : 'Backers',
-    'shield_special_1' : 'Contributor_Rewards#Contributor_Gear',
-    'shield_special_ski' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'shield_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'shield_special_springHealer' : 'Spring_Fling',
-    'shield_special_springRogue' : 'Spring_Fling',
-    'shield_special_springWarrior' : 'Spring_Fling',
-    'shield_special_yeti' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'weapon_special_0' : 'Backers',
-    'weapon_special_1' : 'Contributor_Rewards#Contributor_Gear',
-    'weapon_special_2' : 'Stephen_Weber%27s_Shaft_of_the_Dragon',
-    'weapon_special_3' : 'Mustaine%27s_Milestone_Mashing_Morningstar',
-    'shield_special_goldenknight' : 'Mustaine%27s_Milestone_Mashing_Morningstar',
-    'weapon_special_candycane' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'weapon_special_critical' : 'Critical_Warhammer_of_Bug-Crushing',
-    'weapon_special_ski' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'weapon_special_snowflake' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'weapon_special_springHealer' : 'Spring_Fling',
-    'weapon_special_springMage' : 'Spring_Fling',
-    'weapon_special_springRogue' : 'Spring_Fling',
-    'weapon_special_springWarrior' : 'Spring_Fling',
-    'weapon_special_yeti' : 'Winter_Wonderland#Special_Class_Gear_2014',
-    'weapon_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
-    'weapon_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
-    'weapon_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
-    'weapon_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
-    'armor_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
-    'armor_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
-    'armor_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
-    'armor_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
-    'head_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
-    'head_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
-    'head_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
-    'head_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
-    'shield_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
-    'shield_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
-    'shield_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
-    'body_special_summerHealer' : 'Summer_Splash#Special_Class_Gear',
-    'body_special_summerMage' : 'Summer_Splash#Special_Class_Gear',
-    'eyewear_special_summerRogue' : 'Summer_Splash#Special_Class_Gear',
-    'eyewear_special_summerWarrior' : 'Summer_Splash#Special_Class_Gear',
-    'head_special_2' : 'Nameless_Helm',
-    'weapon_special_fallRogue' : 'Fall_Festival#Special_Class_Gear',
-    'weapon_special_fallWarrior' : 'Fall_Festival#Special_Class_Gear',
-    'weapon_special_fallMage' : 'Fall_Festival#Special_Class_Gear',
-    'weapon_special_fallHealer' : 'Fall_Festival#Special_Class_Gear',
-    'armor_special_fallRogue' : 'Fall_Festival#Special_Class_Gear',
-    'armor_special_fallWarrior' : 'Fall_Festival#Special_Class_Gear',
-    'armor_special_fallMage' : 'Fall_Festival#Special_Class_Gear',
-    'armor_special_fallHealer' : 'Fall_Festival#Special_Class_Gear',
-    'head_special_fallRogue' : 'Fall_Festival#Special_Class_Gear',
-    'head_special_fallWarrior' : 'Fall_Festival#Special_Class_Gear',
-    'head_special_fallMage' : 'Fall_Festival#Special_Class_Gear',
-    'head_special_fallHealer' : 'Fall_Festival#Special_Class_Gear',
-    'shield_special_fallRogue' : 'Fall_Festival#Special_Class_Gear',
-    'shield_special_fallWarrior' : 'Fall_Festival#Special_Class_Gear',
-    'shield_special_fallHealer' : 'Fall_Festival#Special_Class_Gear'
+    'armor_special_0' : getString('kickstarter'),
+    'armor_special_1' : getString('contributor_gear'),
+    'armor_special_2' : rewardPageUrls[inPageLanguage]['armor_special_2'],
+    'armor_special_birthday' : getString('absurd_party_robes'),
+    'armor_special_candycane' : getString('winter_special_2014'),
+    'armor_special_ski' : getString('winter_special_2014'),
+    'armor_special_snowflake' : getString('winter_special_2014'),
+    'armor_special_springHealer' : getString('spring_fling'),
+    'armor_special_springMage' : getString('spring_fling'),
+    'armor_special_springRogue' : getString('spring_fling'),
+    'armor_special_springWarrior' : getString('spring_fling'),
+    'armor_special_yeti' : getString('winter_special_2014'),
+    'headAccessory_special_springHealer' : getString('spring_fling'),
+    'headAccessory_special_springMage' : getString('spring_fling'),
+    'headAccessory_special_springRogue' : getString('spring_fling'),
+    'headAccessory_special_springWarrior' : getString('spring_fling'),
+    'head_special_0' : getString('kickstarter'),
+    'head_special_1' : getString('contributor_gear'),
+    'head_special_candycane' : getString('winter_special_2014'),
+    'head_special_nye' : getString('absurd_party_hat'),
+    'head_special_ski' : getString('winter_special_2014'),
+    'head_special_snowflake' : getString('winter_special_2014'),
+    'head_special_springHealer' : getString('spring_fling'),
+    'head_special_springMage' : getString('spring_fling'),
+    'head_special_springRogue' : getString('spring_fling'),
+    'head_special_springWarrior' : getString('spring_fling'),
+    'head_special_yeti' : getString('winter_special_2014'),
+    'shield_special_0' : getString('kickstarter'),
+    'shield_special_1' : getString('contributor_gear'),
+    'shield_special_ski' : getString('winter_special_2014'),
+    'shield_special_snowflake' : getString('winter_special_2014'),
+    'shield_special_springHealer' : getString('spring_fling'),
+    'shield_special_springRogue' : getString('spring_fling'),
+    'shield_special_springWarrior' : getString('spring_fling'),
+    'shield_special_yeti' : getString('winter_special_2014'),
+    'weapon_special_0' : getString('kickstarter'),
+    'weapon_special_1' : getString('contributor_gear'),
+    'weapon_special_2' : rewardPageUrls[inPageLanguage]['weapon_special_2'],
+    'weapon_special_3' : rewardPageUrls[inPageLanguage]['shield_special_goldenknight'],
+    'shield_special_goldenknight' : rewardPageUrls[inPageLanguage]['shield_special_goldenknight'],
+    'weapon_special_candycane' : getString('winter_special_2014'),
+    'weapon_special_critical' : getString('weapon_special_critical'),
+    'weapon_special_ski' : getString('winter_special_2014'),
+    'weapon_special_snowflake' : getString('winter_special_2014'),
+    'weapon_special_springHealer' : getString('spring_fling'),
+    'weapon_special_springMage' : getString('spring_fling'),
+    'weapon_special_springRogue' : getString('spring_fling'),
+    'weapon_special_springWarrior' : getString('spring_fling'),
+    'weapon_special_yeti' : getString('winter_special_2014'),
+    'weapon_special_summerRogue' : getString('summer_special'),
+    'weapon_special_summerWarrior' : getString('summer_special'),
+    'weapon_special_summerMage' : getString('summer_special'),
+    'weapon_special_summerHealer' : getString('summer_special'),
+    'armor_special_summerRogue' : getString('summer_special'),
+    'armor_special_summerWarrior' : getString('summer_special'),
+    'armor_special_summerMage' : getString('summer_special'),
+    'armor_special_summerHealer' : getString('summer_special'),
+    'head_special_summerRogue' : getString('summer_special'),
+    'head_special_summerWarrior' : getString('summer_special'),
+    'head_special_summerMage' : getString('summer_special'),
+    'head_special_summerHealer' : getString('summer_special'),
+    'shield_special_summerRogue' : getString('summer_special'),
+    'shield_special_summerWarrior' : getString('summer_special'),
+    'shield_special_summerHealer' : getString('summer_special'),
+    'body_special_summerHealer' : getString('summer_special'),
+    'body_special_summerMage' : getString('summer_special'),
+    'eyewear_special_summerRogue' : getString('summer_special'),
+    'eyewear_special_summerWarrior' : getString('summer_special'),
+    'head_special_2' : rewardPageUrls[inPageLanguage]['head_special_2'],
+    'weapon_special_fallRogue' : getString('fall_special'),
+    'weapon_special_fallWarrior' : getString('fall_special'),
+    'weapon_special_fallMage' : getString('fall_special'),
+    'weapon_special_fallHealer' : getString('fall_special'),
+    'armor_special_fallRogue' : getString('fall_special'),
+    'armor_special_fallWarrior' : getString('fall_special'),
+    'armor_special_fallMage' : getString('fall_special'),
+    'armor_special_fallHealer' : getString('fall_special'),
+    'head_special_fallRogue' : getString('fall_special'),
+    'head_special_fallWarrior' : getString('fall_special'),
+    'head_special_fallMage' : getString('fall_special'),
+    'head_special_fallHealer' : getString('fall_special'),
+    'shield_special_fallRogue' : getString('fall_special'),
+    'shield_special_fallWarrior' : getString('fall_special'),
+    'shield_special_fallHealer' : getString('fall_special')
 };
 
 
@@ -850,6 +876,7 @@ function fetchData() {
     $.ajax({
         url: serverUrl + '/content',
         type: 'GET',
+        data: { language: language },
         dataType: 'json',
         cache: true,
         success: fetchContentSuccess,
@@ -875,19 +902,18 @@ function parseData() {
     var warnings = '';
 
 // XXX UPTOHERE FOR TRANSLATION SUPPORT
-    var htmlStart = '<p>This page outputs the wikia code for creating tables'
-        + ' on the <a href="http://habitica.fandom.com/">Habitica wiki</a>.'
+    var htmlStart = '<p>' + getString('intro')
+        + ' <a href="' + getString('wiki_url') + '">' + getString('wiki_name') + '</a>.'
         + ' One table is for the'
         + ' <a href="http://habitica.fandom.com/wiki/Equipment_Table">'
         + 'Equipment Table</a> page, and the other is for the'
         + ' <a href="http://habitica.fandom.com/wiki/Enchanted_Armoire">'
         + 'Enchanted Armoire</a> page.</p>'
-        + '<p>Copy everything inside each textarea below and paste it '
-        + 'into the appropriate template pages: <a href="'
-        + 'http://habitica.fandom.com/wiki/Template:Equipment_Table_Code'
-        + '">Template:Equipment_Table_Code</a> and <a href="'
-        + 'http://habitica.fandom.com/wiki/Template:Enchanted_Armoire_Table_Code'
-        + '">Template:Enchanted_Armoire_Code</a>.</p>';
+        + '<p>'
+        + getString('textarea_paste') +': '
+        + makeUrl('equipment', {template:true, type:'html'})
+        + ' ' + getString('and') + ' ' + makeUrl('armoire', {template:true, type:'html'}) + '.</p>'
+        + ((inPageLanguage === 'en') ? translationInstructions : '');
 
     var equipTable   = '<textarea rows="20" cols="120" wrap="off">';
     var armoireTable = '<textarea rows="20" cols="120" wrap="off">';
@@ -897,30 +923,30 @@ function parseData() {
     equipTable += '' +
 '\n{| class="filterable sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
 '\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"' +
-'\n! class="unfilterable" | Name' +
-'\n! class="unfilterable" | Image' +
-'\n! class="unsortable"   | Class' +
-'\n! class="unsortable"   | Type' +
-'\n! class="unfilterable" | Cost' +
-'\n! class="unfilterable" data-sort-type="number" | CON' +
-'\n! class="unfilterable" data-sort-type="number" | INT' +
-'\n! class="unfilterable" data-sort-type="number" | PER' +
-'\n! class="unfilterable" data-sort-type="number" | STR' +
-'\n! class="unsortable"   | Quality';
+'\n! class="unfilterable" | ' + getString('name') +
+'\n! class="unfilterable" | ' + getString('image') +
+'\n! class="unsortable"   | ' + getString('class') +
+'\n! class="unsortable"   | ' + getString('type') +
+'\n! class="unfilterable" | ' + getString('cost') +
+'\n! class="unfilterable" data-sort-type="number" | ' + getString('con') +
+'\n! class="unfilterable" data-sort-type="number" | ' + getString('int') +
+'\n! class="unfilterable" data-sort-type="number" | ' + getString('per') +
+'\n! class="unfilterable" data-sort-type="number" | ' + getString('str') +
+'\n! class="unsortable"   | ' + getString('quality');
 
     armoireTable += '' +
 '\n{| class="sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
 '\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"' +
-'\n! Name' +
-'\n! Image' +
-'\n! Description' +
-'\n! Set' +
-'\n! Type' +
-'\n! Release<br />Date' +
-'\n! data-sort-type="number" | CON' +
-'\n! data-sort-type="number" | INT' +
-'\n! data-sort-type="number" | PER' +
-'\n! data-sort-type="number" | STR' +
+'\n! ' + getString('name') +
+'\n! ' + getString('image') +
+'\n! ' + getString('description') +
+'\n! ' + getString('set') +
+'\n! ' + getString('type') +
+'\n! ' + getString('release_date') +
+'\n! data-sort-type="number" | ' + getString('con') +
+'\n! data-sort-type="number" | ' + getString('int') +
+'\n! data-sort-type="number" | ' + getString('per') +
+'\n! data-sort-type="number" | ' + getString('str') +
 '';
 
     // table row for each piece of gear:
@@ -946,11 +972,11 @@ function parseData() {
             // continue; // don't show monthly subscriber mystery items
         // }
 
-        var type = (obj.type == 'headAccessory') ? 'head<br />accessory' :
-                   (obj.type == 'back')          ? 'back<br />accessory' :
-                   (obj.type == 'body')          ? 'body<br />accessory' :
-                   (obj.type == 'head')          ? 'head<br />gear'      :
-                   obj.type;
+        var type = (obj.type == 'headAccessory') ? getString('head_accessory') :
+                   (obj.type == 'back')          ? getString('back_accessory') :
+                   (obj.type == 'body')          ? getString('back_accessory') :
+                   (obj.type == 'head')          ? getString('head_gear')      :
+                   getString(obj.type);
 
         var armoireGear = (obj.klass == 'armoire'); // true / false
 
@@ -977,9 +1003,9 @@ function parseData() {
         }
         var klass = (obj.klass == 'special') ? (obj.specialClass || 'special') :
                      obj.klass;
-        klass = (klass == 'wizard') ? 'mage' : klass;
+        klass = (klass == 'wizard') ? getString('mage') : getString(klass);
         if (klass == 'base') {
-      continue; // don't show "No Weapon", "Plain Clothing", etc
+            continue; // don't show "No Weapon", "Plain Clothing", etc
         }
 
         var name        = obj.text.replace(/ /g, '<br />');
@@ -987,21 +1013,22 @@ function parseData() {
             warnings += 'No notes for ' + obj.key + '<br />';
             obj.notes = '';
         }
-        var description = obj.notes.split(' Increases ')[0];
-        var set         = obj.notes.split(' Enchanted Armoire: ')[1];
-        if (set && set.match(/Independent Item/i)) {
+        var description = obj.notes.split(getRegexp('increases'))[0];
+        var set         = obj.notes.split(getRegexp('armoire'))[1];
+        if (set && set.match(getRegexp('independent_item'))) {
             // create some unofficial sets
-            var res = name.match(/(Floppy<br \/>Hat|Cat<br \/>Hat)/i);
+            var res = name.match(getRegexp('unofficial_set'));
             if (res && res[0]) {
-                set = res[0] + '<br /><em>unofficial set</em>';
+                // XXX_ALYS I added this, because in the Russian language it is not customary to capitalize every word in the name. 
+                // And in the string, the Russian translation of the word "Floppy" just comes second.
+                set = capitalizeFirstLetter(res[0]) + '<br /><em>' + getString('unofficial_set') + '</em>';
             }
             else {
                 set = '&#8211;'; // en dash
             }
         }
         else if (set) {
-            var myRegexp = /(.+ Set) \(Item ([0-9]+) of ([0-9]+)/gi;
-            var match = myRegexp.exec(set);
+            var match = set.match(getRegexp('set'));
             if (match) {
                 set = match[1] + '<br />' + match[2] + ' / ' + match[3];
                 // e.g., Gladiator 1 / 3
@@ -1018,8 +1045,21 @@ function parseData() {
             var myRegexp = /(.+)-0?(.+)/g; // year-month
             var match = myRegexp.exec(releaseDate);
             if (match) {
-                var months = ['zero','Jan','Feb','Mar','Apr','May','Jun',
-                                     'Jul','Aug','Sep','Oct','Nov','Dec'];
+                var months = [
+                    'zero',
+                    getString('jan'),
+                    getString('feb'),
+                    getString('mar'),
+                    getString('apr'),
+                    getString('may'),
+                    getString('jun'),
+                    getString('jul'),
+                    getString('aug'),
+                    getString('sep'),
+                    getString('oct'),
+                    getString('nov'),
+                    getString('dec'),
+                ];
                 var monthNumber = match[2];
                 var month = months[match[2]] || match[2];
                 releaseDatePretty = month + '<br />' + match[1];//year
@@ -1031,10 +1071,10 @@ function parseData() {
 
         var url = urls[obj.key] || '';
         if (!url && obj.key.match(/_winter2015/)) {
-            url = 'Winter_Wonderland#Special_Class_Gear_2015';
+            url = getString('winter_special_2015');
         }
         if (!url && obj.key.match(/takeThis/)) {
-            url = 'Official_Habitica_Challenges#Take_This_Challenges';
+            url = getString('take_this_challenges');
         }
         if (url) {
             name = '[[' + url + '|' + name + ']]';
@@ -1052,17 +1092,17 @@ function parseData() {
                 givesStats = true;
                 stats[stat] = 'data-sort-value="' + val + '"|' +
                                             "'''" + val + "'''";
-                if (klass == 'healer' || klass == 'rogue' ||
-                    klass == 'mage' || klass == 'warrior') { // class bonus
+                if (klass == getString('healer') || klass == getString('rogue') ||
+                    klass == getString('mage') || klass == getString('warrior')) { // class bonus
                     stats[stat] += "<br /><sub>''" + (val*1.5) + "''</sub>";
                 }
             }
         }
 
-        var isBest = (obj.last)                               ? 'best'   :
-                     (klass == 'special' && obj.value >= 100) ? 'best'   :
-                     (givesStats)                             ? 'medium' :
-                                                                'stats<br />free';
+        var isBest = (obj.last)                                          ? getString('best')   :
+                     (klass == getString('special') && obj.value >= 100) ? getString('best')   :
+                     (givesStats)                                        ? getString('medium') :
+                                                                           getString('stats_free');
 
         // if (givesStats == 'no') {
             // continue; // do not include any stats-free gear
@@ -1150,12 +1190,78 @@ function parseData() {
     //////////////////////////////////////////////////////////////////////
     $('#loading .good').hide();
     $('#output').html(htmlStart
-                    + '<h2>Equipment Table:</h2>'
+                    + '<h2>' + getString('equipment_table_heading') + ':</h2>'
                     + equipTable
-                    + '<h2>Enchanted Armoire Table:</h2>'
-                    + '<p>Total number of Enchanted Armoire items: ' + armoireCount + '</p>'
+                    + '<h2>' + getString('armoire_table_heading') + ':</h2>'
+                    + '<p>' + getString('total_number_armoire_items') + ' ' + armoireCount + '</p>'
                     + armoireTable
                     + htmlEnd);
+}
+
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+
+function makeUrl(visibleText, options = {}) {
+    var linkText = visibleText; // visibleText is what the user sees; linkText will be used to make the URL if needed
+    var urlType = options['type'] || 'wiki'; // wiki or html or placeholder (for later converting to either using replacePlaceholderLink function)
+
+    if (options['template']) { // the URL being linked to is a wiki Template
+        visibleText = getTemplateName(visibleText);
+        linkText = 'Template:' + visibleText;
+    }
+
+    var wikiPageName; // e.g., Jacko_of_the_Lantern
+    var fullUrl; // e.g., https://habitica.fandom.com/wiki/Jacko_of_the_Lantern or a link to any other site
+
+    var url = options['url'] || '';
+    if (url.indexOf('://') > -1) {
+        // A full URL was provided (e.g., https://example.com/whatever/). We assume it's not a wiki link.
+        wikiPageName = ''; // this will remain empty
+        fullUrl = url;
+    }
+    else if (url) {
+        // A wiki page name was supplied as the URL, with or without underscores (e.g., "Jacko_of_the_Lantern" or "Jacko of the Lantern")
+        wikiPageName = url; // might need changes later (e.g., to insert underscores)
+    }
+    else {
+        // No URL was supplied so we create one from the visible text which we assume is a wiki page name.
+        wikiPageName = linkText;
+    }
+
+    if (wikiPageName) {
+        // Ensure the wiki page name is correct and create the full URL.
+        wikiPageName = wikiPageName.replace(/ /g, '_');
+        wikiPageName = wikiPageName.replace(getRegexp('part_url'), ''); // e.g., convert ...Taskwoods,_Part_3:_Jacko_of_the_Lantern to Jacko_of_the_Lantern
+        // apply manual fixes to URLs that aren't correct when automatically created:
+        if (wikiPageNameCorrections[inPageLanguage] && wikiPageNameCorrections[inPageLanguage][wikiPageName]) {
+            wikiPageName = wikiPageNameCorrections[inPageLanguage][wikiPageName];
+        }
+        fullUrl = wikiaBaseUrl + wikiPageName;
+    }
+
+    var linkHtml = '<a href="' + fullUrl + '">' + visibleText + '</a>';
+    if (TEST_MODE) linkHtml += ' ' + fullUrl;
+
+    var linkWiki;
+    if (wikiPageName === visibleText.replace(/ /g, '_')) {
+        linkWiki = '[[' + visibleText + ']]';
+    }
+    else {
+        linkWiki = '[[' + wikiPageName + '|' + visibleText + ']]';
+    }
+
+    if (urlType === 'html') {
+        return linkHtml;
+    }
+    else if (urlType === 'placeholder') {
+        return ':::' + linkWiki + ':::' + linkHtml + ':::';
+    }
+    else {
+        return linkWiki;
+    }
 }
 
 
