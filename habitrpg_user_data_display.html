@@ -241,6 +241,11 @@ var url_vars = getUrlVars();
 if (url_vars.uuid) {
     $("#userId").val(url_vars.uuid);
 }
+if (url_vars.sectionOpen) {
+    sectionOpen = url_vars.sectionOpen;
+    // e.g., to start with the 'Drops Received Today' section open:
+    // https://oldgods.net/habitica/habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=
+}
 function getUrlVars() {
     // Function found at http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url#answer-4656873
     var vars = [], hash;
@@ -5430,7 +5435,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.3.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.4)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5463,8 +5468,13 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
-        <dt>9.3.1 <span class="date">2019-09-29</span></dt>
+        <dt>9.4 <span class="date">2019-09-29</span></dt>
         <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>Added the ability to specify the section that should be open when you log in using the "sectionOpen=..." URL parameter. See documentation for more details.</li>
+                </ul>
+            </li>
             <li>Code:
                 <ul>
                     <li>Changed jquery link from ajax.googleapis.com to cdnjs.cloudflare.com to allow access in China.</li>
