@@ -235,7 +235,7 @@ function enableShowHideToggling() {
 
 
 //////////////////////////////////////////////////////////////////////
-////   Get UUID from URL      ////////////////////////////////////////
+////   Get UUID etc from URL      ////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 var url_vars = getUrlVars();
 if (url_vars.uuid) {
@@ -6544,8 +6544,8 @@ ul#tableOfContents > li {
 
 
     <div>
-       <h2>What's On This Page?</h2>
-       <ul>
+        <h2>What's On This Page?</h2>
+        <ul>
             <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To-Dos, with their <a href="http://habitica.fandom.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitica.fandom.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</li>
             <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To-Dos, and Rewards you have in total, and how many are assigned to each <a href="http://habitica.fandom.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitica.fandom.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
             <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To-Dos, or Rewards that have not been <a href="http://habitica.fandom.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
@@ -6564,11 +6564,36 @@ ul#tableOfContents > li {
             <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
             <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes.</li>
             <li><span class="subheading">Subscription Data</span>: If you have a Habitica subscription, this section will show you the data Habitica has about your subscription. If you have been a subscriber in the past, this section might show some of your old data. If you have a current subscription that is ending in less than a week, a large orange notification will appear at the top of the page. (This banner might be a bit annoying for those who already know that their subscription is ending, and I am sorry about that, but it will last for only a week and then disappear. The banner exists for the benefit of those who don't realise the termination date is approaching, and I know from my support work that that's not uncommon.)</li>
-       </ul>
+        </ul>
         <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
-       <h2>Possible Future Features</h2>
-       <ul>
+        <h2>Starting with a Section Open</h2>
+        <p>Normally when you log in, you see the links that allow you to access each section with none of those sections open. If you'd prefer a particular section to be open by default every time, use one of the links below and bookmark it.</p>
+        <ul>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=taskOverviewSection&uuid=">Task Overview</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=taskStatisticsSection&uuid=">Task Statistics</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=untaggedTasksSection&uuid=">Tasks Untagged</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=habitTrendsSection&uuid=">Habit Trends</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=habitHistorySection&uuid=">Habit History</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=dailiesHistorySection&uuid=">Dailies History</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=dailiesIncompleteSection&uuid=">Dailies Incomplete</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=todosDatedSection&uuid=">To-Dos with Dates</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=todosCompletedSection&uuid=">To-Dos Completed</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=">Drops Received Today</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=questProgressSection&uuid=">Quest Progress</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=damageDailiesSection&uuid=">Damage from Dailies</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=statsAndStreaksSection&uuid=">Stats and Streaks Backup</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=guildsListSection&uuid=">Guilds List</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=missingEquipmentSection&uuid=">Missing Equipment</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=currentGearSection&uuid=">Current Appearance and Gear</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=equipmentRecommendationsSection&uuid=">Equipment Recommendations</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=skillsAndBuffsSection&uuid=">Skills and Buffs</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=subscriptionDataSection&uuid=">Subscription Data</a></li>
+        </ul>
+        <p>To have your User ID specified automatically as well, click on one of those links, then edit the URL in your browser's address bar to add your User ID at the end, then bookmark that. For example, if your User ID is <em>12345678-90ab-40a4-cdef-1234567890ab</em> and you want the "Task Overview" section to be open when you log in, you would bookmark this URL: <br /><em>https://oldgods.net/habitica/habitrpg_user_data_display.html?sectionOpen=taskOverviewSection&uuid=12345678-90ab-40a4-cdef-1234567890ab</em></p>
+
+        <h2>Possible Future Features</h2>
+        <ul>
             <li>Display checklists and notes for tasks.</li>
             <li>For relevant Skills And Buffs, show how to increase the chance of a critical hit happening.</li>
             <li>Add percentages to Task Statistics.
@@ -6605,7 +6630,7 @@ I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-
 -->
 </li>
             <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
-       </ul>
+        </ul>
 
        <h2>Known Bugs</h2>
        <p>Internet Explorer will produce odd results if you use the "Re-Fetch Data" button. Reloading the page will fix the problem. Avoid using that button. Avoiding Internet Explorer will also work.</p>
