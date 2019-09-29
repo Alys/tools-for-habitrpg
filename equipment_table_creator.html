@@ -17,7 +17,7 @@ That will cause Habitica's official content translations to be used.
 TRANSLATIONS ARE STILL UNDER DEVELOPMENT AS OF EARLY SEPTEMBER 2019.
 
 For texts inserted by this page (e.g., table headers), additional
-translations need to be added to these objects in this file: // XXX check this is correct:
+translations need to be added to these objects in this file:
  - stringsForLanguage
  - regexpsForLanguage
  - templateNamesForLanguage
@@ -34,7 +34,7 @@ https://oldgods.net/habitrpg/equipment_table_creator.html
 
 Contributors:
     Alys (Alice Harris), lady_alys@oldgods.net
-    Jazzis (Yuri Mashukov), jazzis18@gmail.com (Russian translation) // XXX add "and code improvements" if needed! :)
+    Jazzis (Yuri Mashukov), jazzis18@gmail.com (Russian translation and significant code improvements to enable translations)
 
 -->
 
@@ -42,7 +42,7 @@ Contributors:
     <meta name="author" content="Alys (Alice Harris) lady_alys@oldgods.net" />
 
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 
 
 <script type="text/javascript">
@@ -57,7 +57,7 @@ var TEST_MODE = false; // causes extra text to be printed in the web page
 ////   that are found in Habitica).                    ///////////////
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
-var stringsForLanguage = { // XXX purge this for both languages
+var stringsForLanguage = {
     'en': {
         wiki_name:             "Habitica Wiki", // the name of the wiki (it must contain "Habitica" and that word must not be translated)
         wiki_url:              "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
@@ -66,8 +66,6 @@ var stringsForLanguage = { // XXX purge this for both languages
         unknown:               "unknown",    // used when we don't know the quest type (world boss/boss/collection) or the reward type
 
         not_applicable:        "n/a", // an abbreviation meaning 'not applicable' (recommended to use a short word)
-
-        ///////////////////////////////////////////////////////////////////////////////
 
         kickstarter: "Kickstarter",
         contributor_gear: "Contributor_Rewards#Contributor_Gear",
@@ -136,11 +134,13 @@ var stringsForLanguage = { // XXX purge this for both languages
 
         unofficial_set: "unofficial set",
 
+        intro: "This page outputs the wikia code for creating tables on the",
+
         textarea_paste: "Copy everything inside each textarea below and paste it into the appropriate template pages",
 
         equipment_table_heading: "Equipment Table",
         armoire_table_heading: "Enchanted Armoire Table",
-        
+
         total_number_armoire_items: "Total number of Enchanted Armoire items",
 
         and: "and",
@@ -153,8 +153,6 @@ var stringsForLanguage = { // XXX purge this for both languages
         unknown:               "неизвестно",    // used when we don't know the quest type (world boss/boss/collection) or the reward type
 
         not_applicable:        "н/д", // an abbreviation meaning 'not applicable' (recommended to use a short word)
-
-        ///////////////////////////////////////////////////////////////////////////////
 
         kickstarter: "Kickstarter",
         contributor_gear: "Награды_за_вклад#Снаряжение_участника",
@@ -229,7 +227,7 @@ var stringsForLanguage = { // XXX purge this for both languages
 
         equipment_table_heading: "Таблица снаряжения",
         armoire_table_heading: "Таблица для зачарованного сундука",
-        
+
         total_number_armoire_items: "Общее кол-во предметов в зачарованном сундуке:",
 
         and: "и",
@@ -256,7 +254,7 @@ var regexpsForLanguage = {
         armoire: " Зачарованный сундук: ",
         independent_item: /Независимый предмет/i,
         set: /(.+ [Нн]абор|[Нн]абор .+) \(предмет ([0-9]+) из ([0-9]+)/i,
-        unofficial_set: /(широкополая<br \/>шляпа|Шапка(.+)кота)/i,  // XXX_JAZZIS FIXME
+        unofficial_set: /(широкополая<br \/>шляпа|Шапка(.+)кота)/i,
     }
 };
 
@@ -291,7 +289,7 @@ var templateNamesForLanguage = {
 ////   DO NOT PUT SPACES IN THESE PAGE NAMES!          ///////////////
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
-var rewardPageUrls = {  // XXX Is this needed? Adjust comments if necessary.
+var rewardPageUrls = {
     'en': {
         shield_special_goldenknight: "Mustaine%27s_Milestone_Mashing_Morningstar",
         weapon_special_2: "Stephen_Weber%27s_Shaft_of_the_Dragon",
@@ -330,7 +328,7 @@ var rewardPageUrls = {  // XXX Is this needed? Adjust comments if necessary.
 ////   DO NOT PUT SPACES IN THESE PAGE NAMES!          ///////////////
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
-var wikiPageNameCorrections = {  // XXX Is this needed? Adjust comments if necessary.
+var wikiPageNameCorrections = {
     'en': { // see comments above before adding data here
     },
     'ru': { // see comments above before adding data here
@@ -346,7 +344,7 @@ var wikiPageNameCorrections = {  // XXX Is this needed? Adjust comments if neces
 ////   them here.                                      ///////////////
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
-var reverseTextForLanguage = {  // XXX Is this needed? Adjust comments if necessary.
+var reverseTextForLanguage = {
 };
 
 
@@ -362,7 +360,7 @@ var translationInstructions =    // Do not translate this into other languages. 
         'Some additional strings will need to be translated too (e.g., for the table headings) so contact Alys at lady_alys@oldgods.net to discuss that.' +
     '</p>' +
     '<p>So far support exists for the languages below but others can be added!</p>' +
-    '<ul><li><a href="https://oldgods.net/habitrpg/quest_table_creator.html?language=ru">Russian</a></li></ul>'
+    '<ul><li><a href="https://oldgods.net/habitrpg/equipment_table_creator.html?language=ru">Russian</a></li></ul>'
     ;
 
 //////////////////////////////////////////////////////////////////////
@@ -590,6 +588,9 @@ var releaseDates = {
     'armor_armoire_invernessCape' : '2019-08',
     'head_armoire_deerstalkerCap' : '2019-08',
     'shield_armoire_trustyUmbrella' : '2019-08',
+    'weapon_armoire_floridFan' : '2019-09',
+    'weapon_armoire_resplendentRapier' : '2019-09',
+    'shield_armoire_polishedPocketwatch' : '2019-09',
 
 };
 // get the current month's date in case the latest Enchanted Armoire
@@ -607,7 +608,7 @@ var thisMonth = d.getFullYear() + '-' + ((month < 10) ? '0' : '') + month;
 ////   This is necessary only if the wiki image links  ///////////////
 ////   do not match the file names from Habitica.      ///////////////
 //////////////////////////////////////////////////////////////////////
-var images = { // XXX Are translations needed? If inter-wiki image sharing is used (which ideally it should be) then this probably won't need to be translated.
+var images = {
     'armor_healer_1' : 'Acolyterobe.png',
     'armor_healer_2' : 'Medicrobe.png',
     'armor_healer_3' : 'Defendervestment.png',
@@ -767,7 +768,7 @@ var images = { // XXX Are translations needed? If inter-wiki image sharing is us
 ////   for common equipment that most users will be    ///////////////
 ////   familiar with.                                  ///////////////
 //////////////////////////////////////////////////////////////////////
-var urls = { // XXX merge with object above and translate
+var urls = {
     'armor_special_0' : getString('kickstarter'),
     'armor_special_1' : getString('contributor_gear'),
     'armor_special_2' : rewardPageUrls[inPageLanguage]['armor_special_2'],
@@ -901,7 +902,6 @@ function parseData() {
 
     var warnings = '';
 
-// XXX UPTOHERE FOR TRANSLATION SUPPORT
     var htmlStart = '<p>' + getString('intro')
         + ' <a href="' + getString('wiki_url') + '">' + getString('wiki_name') + '</a>.'
         + ' One table is for the'
@@ -974,7 +974,7 @@ function parseData() {
 
         var type = (obj.type == 'headAccessory') ? getString('head_accessory') :
                    (obj.type == 'back')          ? getString('back_accessory') :
-                   (obj.type == 'body')          ? getString('back_accessory') :
+                   (obj.type == 'body')          ? getString('body_accessory') :
                    (obj.type == 'head')          ? getString('head_gear')      :
                    getString(obj.type);
 
@@ -983,7 +983,6 @@ function parseData() {
         if (obj.klass == 'special' && !obj.specialClass) {
             // deal with some class-specific special weapons that aren't
             // marked as such
-            // XXX is this still necessary?
             if (obj.key.match(/_special_snowflake/)) {
                 obj.specialClass = 'healer';
             }
@@ -1019,8 +1018,6 @@ function parseData() {
             // create some unofficial sets
             var res = name.match(getRegexp('unofficial_set'));
             if (res && res[0]) {
-                // XXX_ALYS I added this, because in the Russian language it is not customary to capitalize every word in the name. 
-                // And in the string, the Russian translation of the word "Floppy" just comes second.
                 set = capitalizeFirstLetter(res[0]) + '<br /><em>' + getString('unofficial_set') + '</em>';
             }
             else {
@@ -1278,7 +1275,7 @@ function getString(key) {
 }
 
 
-function getRegexp(key) { // XXX_LATER check that this is needed
+function getRegexp(key) {
     if (regexpsForLanguage[inPageLanguage] && regexpsForLanguage[inPageLanguage][key]) {
         return regexpsForLanguage[inPageLanguage][key];
     }
@@ -1291,7 +1288,7 @@ function getRegexp(key) { // XXX_LATER check that this is needed
 }
 
 
-function getTemplateName(key) { // XXX_LATER check that this is needed
+function getTemplateName(key) {
     if (templateNamesForLanguage[inPageLanguage] && templateNamesForLanguage[inPageLanguage][key]) {
         return templateNamesForLanguage[inPageLanguage][key];
     }
@@ -1435,7 +1432,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(last updated 13 August 2019)</span></h1><!-- VERSION -->
+    <span>(last updated 29 September 2019)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
