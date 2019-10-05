@@ -161,9 +161,6 @@ var stringsForLanguage = {
         take_this_challenges: "Официальные_испытания_Habitica#Испытания_«Take_This»",
         weapon_special_critical: "Молот_победителя_критических_багов",
 
-        equipment_table: "Таблица_снаряжения",
-        armoire_table:   "Зачарованный_сундук",
-
         name: "Название",
         image: "Изобр.",
         class: "Класс",
@@ -902,7 +899,7 @@ function parseData() {
         + makeUrl(getString('equipment_table_page_name'), {type:'html'})
         + ' ' + getString('and') + ' '
         + makeUrl(getString('enchanted_armoire_page_name'), {type:'html'})
-        + '</p><p>'
+        + '.</p><p>'
         + getString('textarea_paste') +': '
         + makeUrl('equipment', {template:true, type:'html'})
         + ' ' + getString('and') + ' ' + makeUrl('armoire', {template:true, type:'html'}) + '.</p>'
