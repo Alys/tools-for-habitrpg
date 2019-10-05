@@ -79,9 +79,6 @@ var stringsForLanguage = {
         take_this_challenges: "Official_Habitica_Challenges#Take_This_Challenges",
         weapon_special_critical: "Critical_Warhammer_of_Bug-Crushing",
 
-        equipment_table: "Equipment_Table",
-        armoire_table:   "Enchanted_Armoire",
-
         name: "Name",
         image: "Image",
         class: "Class",
@@ -134,12 +131,10 @@ var stringsForLanguage = {
 
         unofficial_set: "unofficial set",
 
-        intro: "This page outputs the wikia code for creating tables on the",
-
+        intro: "This page outputs the Fandom wiki code for creating the tables on these pages:",
+        equipment_table_page_name: "Equipment Table",
+        enchanted_armoire_page_name: "Enchanted Armoire",
         textarea_paste: "Copy everything inside each textarea below and paste it into the appropriate template pages",
-
-        equipment_table_heading: "Equipment Table",
-        armoire_table_heading: "Enchanted Armoire Table",
 
         total_number_armoire_items: "Total number of Enchanted Armoire items",
 
@@ -221,12 +216,11 @@ var stringsForLanguage = {
 
         unofficial_set: "неофиц. набор",
 
-        intro: "Эта страница выводит вики-разметку для создания таблиц на",
-
+        intro: "This page outputs the Fandom wiki code for creating the tables on these pages:",
+        // old intro: "Эта страница выводит вики-разметку для создания таблиц на",
+        equipment_table_page_name: "Equipment Table",
+        enchanted_armoire_page_name: "Enchanted Armoire",
         textarea_paste: "Скопируйте все, что находится в каждой текстовой области ниже и вставьте это в соответсвующие страницы шаблонов",
-
-        equipment_table_heading: "Таблица снаряжения",
-        armoire_table_heading: "Таблица для зачарованного сундука",
 
         total_number_armoire_items: "Общее кол-во предметов в зачарованном сундуке:",
 
@@ -591,7 +585,10 @@ var releaseDates = {
     'weapon_armoire_floridFan' : '2019-09',
     'weapon_armoire_resplendentRapier' : '2019-09',
     'shield_armoire_polishedPocketwatch' : '2019-09',
-
+    'weapon_armoire_shadowMastersMace' : '2019-10',
+    'armor_armoire_shadowMastersRobe' : '2019-10',
+    'head_armoire_shadowMastersHood' : '2019-10',
+    'shield_armoire_masteredShadow' : '2019-10',
 };
 // get the current month's date in case the latest Enchanted Armoire
 // items haven't been added above yet:
@@ -902,14 +899,11 @@ function parseData() {
 
     var warnings = '';
 
-    var htmlStart = '<p>' + getString('intro')
-        + ' <a href="' + getString('wiki_url') + '">' + getString('wiki_name') + '</a>.'
-        + ' One table is for the'
-        + ' <a href="http://habitica.fandom.com/wiki/Equipment_Table">'
-        + 'Equipment Table</a> page, and the other is for the'
-        + ' <a href="http://habitica.fandom.com/wiki/Enchanted_Armoire">'
-        + 'Enchanted Armoire</a> page.</p>'
-        + '<p>'
+    var htmlStart = '<p>' + getString('intro') + ' '
+        + makeUrl(getString('equipment_table_page_name'), {type:'html'})
+        + ' ' + getString('and') + ' '
+        + makeUrl(getString('enchanted_armoire_page_name'), {type:'html'})
+        + '</p><p>'
         + getString('textarea_paste') +': '
         + makeUrl('equipment', {template:true, type:'html'})
         + ' ' + getString('and') + ' ' + makeUrl('armoire', {template:true, type:'html'}) + '.</p>'
@@ -1187,9 +1181,9 @@ function parseData() {
     //////////////////////////////////////////////////////////////////////
     $('#loading .good').hide();
     $('#output').html(htmlStart
-                    + '<h2>' + getString('equipment_table_heading') + ':</h2>'
+                    + '<h2>' + getString('equipment_table_page_name') + ':</h2>'
                     + equipTable
-                    + '<h2>' + getString('armoire_table_heading') + ':</h2>'
+                    + '<h2>' + getString('enchanted_armoire_page_name') + ':</h2>'
                     + '<p>' + getString('total_number_armoire_items') + ' ' + armoireCount + '</p>'
                     + armoireTable
                     + htmlEnd);
@@ -1432,7 +1426,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(last updated 29 September 2019)</span></h1><!-- VERSION -->
+    <span>(last updated 5 October 2019)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
