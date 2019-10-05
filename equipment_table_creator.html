@@ -161,9 +161,6 @@ var stringsForLanguage = {
         take_this_challenges: "Официальные_испытания_Habitica#Испытания_«Take_This»",
         weapon_special_critical: "Молот_победителя_критических_багов",
 
-        equipment_table: "Таблица_снаряжения",
-        armoire_table:   "Зачарованный_сундук",
-
         name: "Название",
         image: "Изобр.",
         class: "Класс",
@@ -216,10 +213,9 @@ var stringsForLanguage = {
 
         unofficial_set: "неофиц. набор",
 
-        intro: "This page outputs the Fandom wiki code for creating the tables on these pages:",
-        // old intro: "Эта страница выводит вики-разметку для создания таблиц на",
-        equipment_table_page_name: "Equipment Table",
-        enchanted_armoire_page_name: "Enchanted Armoire",
+        intro: "Эта страница выводит вики-разметку для создания таблиц на следующих страницах:",
+        equipment_table_page_name: "Таблица снаряжения",
+        enchanted_armoire_page_name: "Зачарованный сундук",
         textarea_paste: "Скопируйте все, что находится в каждой текстовой области ниже и вставьте это в соответсвующие страницы шаблонов",
 
         total_number_armoire_items: "Общее кол-во предметов в зачарованном сундуке:",
@@ -903,7 +899,7 @@ function parseData() {
         + makeUrl(getString('equipment_table_page_name'), {type:'html'})
         + ' ' + getString('and') + ' '
         + makeUrl(getString('enchanted_armoire_page_name'), {type:'html'})
-        + '</p><p>'
+        + '.</p><p>'
         + getString('textarea_paste') +': '
         + makeUrl('equipment', {template:true, type:'html'})
         + ' ' + getString('and') + ' ' + makeUrl('armoire', {template:true, type:'html'}) + '.</p>'
