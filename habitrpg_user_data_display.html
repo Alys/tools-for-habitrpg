@@ -245,7 +245,7 @@ if (url_vars.sectionOpen) {
     sectionOpen = url_vars.sectionOpen;
     // e.g., to start with the 'Drops Received Today' section open:
     // https://oldgods.net/habitica/habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=
-    if (url_vars.sectionOpen === '#dropsTodaySection') hideDropsInDashboard = false;
+    if (sectionOpen === 'dropsTodaySection') hideDropsInDashboard = false;
 }
 function getUrlVars() {
     // Function found at http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url#answer-4656873
