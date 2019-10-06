@@ -245,6 +245,7 @@ if (url_vars.sectionOpen) {
     sectionOpen = url_vars.sectionOpen;
     // e.g., to start with the 'Drops Received Today' section open:
     // https://oldgods.net/habitica/habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=
+    if (url_vars.sectionOpen === '#dropsTodaySection') hideDropsInDashboard = false;
 }
 function getUrlVars() {
     // Function found at http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url#answer-4656873
@@ -5435,7 +5436,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.4)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.4.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5468,6 +5469,20 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.4.1 <span class="date">2019-10-06</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>When the Drops Received Today section is open by default (with <a href="habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=">this URL</a>, also show the Drop Count / Cap dashboard item by default.</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>Changed jquery link from ajax.googleapis.com to cdnjs.cloudflare.com to allow access in China.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.4 <span class="date">2019-09-29</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5481,7 +5496,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.3 <span class="date">2019-05-20</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5490,7 +5504,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.2 <span class="date">2018-06-24</span></dt>
         <dd><ul>
             <li>Feature:
