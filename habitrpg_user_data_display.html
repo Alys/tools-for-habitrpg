@@ -3218,27 +3218,32 @@ function questProgress() {
 
 
 function questsCompleted() {
-    var id            = 'questCompletedSection';
+    var id            = 'questsCompletedSection';
     var title         = 'Quests Completed';
     var orderId       = 'questsCompleted';
     var orderIdSecond = 'questSCompletedSecond';
-    var html = '<p><table id="questsCompletedSection"></table></p>';
-    var questsCompleted = [];
+    TOC[orderId]  = {'target': id, 'title':  title};
 
+    var questsCompleted = [];
     $.each(user.achievements.quests, function(index,key){
-            var newArray = [content.quests[index].text, key];
-            questsCompleted.push(newArray);
+        var newArray = [content.quests[index].text, key];
+        questsCompleted.push(newArray);
     })
-    if (html) {
-        TOC[orderId]  = {'target': id, 'title':  title};
+
+    if (questsCompleted.length) {
+        var html = '<table></table>';
         MAIN[orderId] = {'id': id, 'title': title, 'function': createQuestsCompletedTable, 'html': html };
+    }
+    else {
+        var html = '<p>You have not yet completed any ' + wiki('Quests', 'quests') + '.</p>';
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html };
     }
 
     function createQuestsCompletedTable() {
         // Use DataTables to build the table (the table tag must be
         // visible first for layout to be correct):
         $('#questsCompletedSection').show();
-        $('#questsCompletedSection').dataTable({
+        $('#questsCompletedSection table').dataTable({
             "aaData": questsCompleted,
             "aoColumnDefs":[{
                 "sTitle":"Quest name",
@@ -3251,9 +3256,9 @@ function questsCompleted() {
             }
             ],
             "iDisplayLength": 100
-            });
-            return;
-        }
+        });
+        return;
+    }
 }
 
 
@@ -6645,6 +6650,7 @@ ul#tableOfContents > li {
             <li><a href="habitrpg_user_data_display.html?sectionOpen=todosCompletedSection&uuid=">To-Dos Completed</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=">Drops Received Today</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=questProgressSection&uuid=">Quest Progress</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=questsCompletedSection&uuid=">Quests Completed</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=damageDailiesSection&uuid=">Damage from Dailies</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=statsAndStreaksSection&uuid=">Stats and Streaks Backup</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=guildsListSection&uuid=">Guilds List</a></li>
