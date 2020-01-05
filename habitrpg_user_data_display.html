@@ -25,6 +25,7 @@ Contributors:
     donoftime https://github.com/donoftime
     me_and (Adam Dinwoodie) https://github.com/me-and
     cTheDragons https://github.com/cTheDragons
+    Pitii (Piti the Grey) https://github.com/PitiTheGrey
 
 TO ADD A NEW SECTION TO THIS PAGE:
 Search through this code to find all the comments that start
@@ -550,7 +551,7 @@ function parseData() {
     collateAndDisplayTaskData();
     dropCountAndCap();
     questProgress();
-	questsCompleted();
+    questsCompleted();
     guildsList();
     analyseEquipment(); // missing gear, current gear, recommended gear
     subscriptionData();
@@ -661,7 +662,7 @@ function formatAndDisplayMAIN() {
     // if they were all visible at once):
     var keys = ['taskOverview', 'taskStatistics', 'untaggedTasks',
                 'habitTrends', 'habitHistory', 'dailiesHistory', 'todosDated',
-                'todosCompleted', 'dropsToday', 'questProgress', 'questsCompleted', 
+                'todosCompleted', 'dropsToday', 'questProgress', 'questsCompleted',
                 'damageDailies','dailiesIncomplete',//keep in that order
                 'statsAndStreaks', 'guildsList',
                 'missingEquipment', 'currentGear', 'equipmentRecommendations',
@@ -3215,44 +3216,46 @@ function questProgress() {
     }
 }
 
+
 function questsCompleted() {
     var id            = 'questCompletedSection';
     var title         = 'Quests Completed';
     var orderId       = 'questsCompleted';
     var orderIdSecond = 'questSCompletedSecond';
     var html = '<p><table id="questsCompletedSection"></table></p>';
-	var questsCompleted = [];
-	
-	$.each(user.achievements.quests, function(index,key){
+    var questsCompleted = [];
+
+    $.each(user.achievements.quests, function(index,key){
             var newArray = [content.quests[index].text, key];
-			questsCompleted.push(newArray); 
-	})
-	if (html) {
+            questsCompleted.push(newArray);
+    })
+    if (html) {
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'function': createQuestsCompletedTable, 'html': html };
     }
 
-	function createQuestsCompletedTable() {
-		// Use DataTables to build the table (the table tag must be
+    function createQuestsCompletedTable() {
+        // Use DataTables to build the table (the table tag must be
         // visible first for layout to be correct):
         $('#questsCompletedSection').show();
-		$('#questsCompletedSection').dataTable({
+        $('#questsCompletedSection').dataTable({
             "aaData": questsCompleted,
-  			"aoColumnDefs":[{
-        		"sTitle":"Quest name", 
-				"aTargets":[0], 
-				"bSortable": true
-  			},{ 
-				"sTitle":"number of completions", 
-       			"aTargets":[ 1 ], 
-				"bSortable": true
-    		}  
-  			],
-			"iDisplayLength": 100
-			});
+            "aoColumnDefs":[{
+                "sTitle":"Quest name",
+                "aTargets":[0],
+                "bSortable": true
+            },{
+                "sTitle":"number of completions",
+                "aTargets":[ 1 ],
+                "bSortable": true
+            }
+            ],
+            "iDisplayLength": 100
+            });
             return;
         }
-}  
+}
+
 
 function guildsList() {
     var id            = 'guildsListSection';
@@ -5475,7 +5478,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.4.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.5)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5508,6 +5511,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.5 <span class="date">2020-01-05</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>The <strong>Quests Completed</strong> section has been added by <a href="https://github.com/PitiTheGrey">PitiTheGrey</a> so that you can see a list of all your completed quests and how many times you've done each one. You can sort by quest name or number of completions.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.4.1 <span class="date">2019-10-06</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5521,7 +5533,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.4 <span class="date">2019-09-29</span></dt>
         <dd><ul>
             <li>Feature:
@@ -6561,10 +6572,10 @@ ul#tableOfContents > li {
             (from <a href="https://habitica.com/user/settings/api">User Icon &gt; Settings &gt; API</a> on the website or Settings &gt; API on the Android app or Settings &gt; Account Details on the iOS app)
             </legend>
             <label for="userId"><span>User ID</span>
-                <input type="text" name="userId" id="userId"/>
+                <input type="text" name="userId" id="userId" />
             </label>
             <label for="apiToken"><span>API Token</span>
-                <input type="password" name="apiToken" id="apiToken"/>
+                <input type="password" name="apiToken" id="apiToken" />
             </label>
             <input type="submit" value="Fetch My Data" />
             <p class="highlight">Privacy and security notes:</p>
@@ -6609,8 +6620,8 @@ ul#tableOfContents > li {
             <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed To-Dos that Habitica has in its archive. The To-Dos' notes and completion dates are included.</li>
             <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitica.fandom.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitica.fandom.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
             <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitica.fandom.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today, as well as the boss's HP (taken from your party's page, so this does not include any reduction from the damage you or other players have caused since the last time a party member's cron ran).</li>
-            <li><span class="subheading">Quests Completed</span>: A list of all your completed quests.</li>
-			<li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitica.fandom.com/wiki/Quests">quest</a> <a href="http://habitica.fandom.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
+            <li><span class="subheading">Quests Completed</span>: A list of all your completed quests and how many times you've done each one. You can sort by quest name or number of completions.</li>
+            <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitica.fandom.com/wiki/Quests">quest</a> <a href="http://habitica.fandom.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
             <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitica.fandom.com/wiki/Settings">restore your stats</a> and <a href="http://habitica.fandom.com/wiki/Streaks">your Dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
             <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitica.fandom.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
             <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitica.fandom.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitica.fandom.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitica.fandom.com/wiki/Pets">pet</a> and <a href="http://habitica.fandom.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
