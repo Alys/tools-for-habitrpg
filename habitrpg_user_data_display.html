@@ -761,6 +761,9 @@ openRelatedSections = function() {
     if ($('#damageDailiesSection').is(':visible')) {
         $('#dailiesIncompleteSection').show();
     }
+	if ($('#questsCompletedSection').is(':visible')) {
+        $('#questsCompletedSection').show();
+    }
     if ($('#dropsTodaySection').is(':visible')) {
         hideDropsInDashboard = false;
         $('#dropsTodayDashboard').show();
@@ -2734,14 +2737,7 @@ wiki('Tavern', 'resting in the inn') +
                                'increase your ' + intLink + before;
                 return ['',
                         'Each of your party members will receive ' +
-                        bonus + ' MP, except for yourself.',
-                        'When you cast this skill, it will initially seem ' +
-                        'as if you do receive ' +
-                        bonus + ' MP (i.e., the skill will seem to cost only ' +
-                        (30-bonus) + ' MP), but the ' +
-                        bonus + ' MP will later be removed from your account.' +
-                        ' The true cost of this skill to you is 30 MP and ' +
-                        'it benefits only your party members, not you.',
+                        bonus + ' MP, except for yourself and other mages.',
                         increase]; },
 
             'earth': function() { // Mage - Earthquake
@@ -3257,6 +3253,7 @@ function questsCompleted() {
             ],
             "iDisplayLength": 100
         });
+		$('#questsCompletedSection').hide();
         return;
     }
 }
@@ -3409,7 +3406,7 @@ function fetchGuildsListFunction() {
 
 
 function analyseEquipment() {
-    var missing = []; // gear lost due to death or rebirth
+    var missing = []; // gear lost due to death 
     var missingPretty = []; // like missing but formatted
     var owned   = []; // gear actually owned right now
     $.each(user.items.gear.owned, function(key, value){
@@ -3434,7 +3431,6 @@ function analyseEquipment() {
         var missingEquipmentObjs = [];
         var html = '';
         var reasons = wiki('Death_Mechanics', 'Death') +
-                      ( (user.achievements.rebirths > 0 ) ? ' or ' + wiki('Orb_of_Rebirth', 'Rebirth')  : '' ) +
                       ", or because a special item has been made available to you but you haven't purchased it yet";
         if (equipment.length < 4) {
             html = '<p>You are missing this equipment due to ' + reasons +
@@ -5483,7 +5479,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.5)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.6)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5515,6 +5511,21 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+        <dt>9.6 <span class="date">2020-01-20</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>The Quests Completed section no longers opens by default when refreshing the data</li>
+                </ul>
+            </li>
+			<li>Documentation:
+                <ul>
+                    <li>Noted Etheral Surge is no longer increases mana for mages (including the caster).</li>
+					<li>Remove note that missing equipment occurs with the Orb Of Rebirth</li>
+                </ul>
+            </li>
+        </ul></dd>
+
 
         <dt>9.5 <span class="date">2020-01-05</span></dt>
         <dd><ul>
