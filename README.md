@@ -1,5 +1,5 @@
 Various small scripts for working with exported data or API data from
-Habitica ( http://habitica.com/  http://habitica.wikia.com/ ).
+Habitica ( http://habitica.com/  http://habitica.fandom.com/ ).
 
 --------------------------------------------
 
@@ -21,5 +21,5 @@ TODO: Update this.
 Contact:
 
 	Alys (Alice Harris)
-	http://habitica.wikia.com/wiki/User:LadyAlys
+	http://habitica.fandom.com/wiki/User:LadyAlys
 	lady_alys@oldgods.net

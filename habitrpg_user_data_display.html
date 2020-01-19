@@ -25,6 +25,7 @@ Contributors:
     donoftime https://github.com/donoftime
     me_and (Adam Dinwoodie) https://github.com/me-and
     cTheDragons https://github.com/cTheDragons
+    Pitii (Piti the Grey) https://github.com/PitiTheGrey
 
 TO ADD A NEW SECTION TO THIS PAGE:
 Search through this code to find all the comments that start
@@ -57,7 +58,7 @@ XXX TODO: Most Recent Streak https://github.com/Alys/tools-for-habitrpg/issues/3
     <link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css" rel="stylesheet" type="text/css" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/1.6.2/remarkable.min.js"></script>
@@ -235,11 +236,17 @@ function enableShowHideToggling() {
 
 
 //////////////////////////////////////////////////////////////////////
-////   Get UUID from URL      ////////////////////////////////////////
+////   Get UUID etc from URL      ////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 var url_vars = getUrlVars();
 if (url_vars.uuid) {
     $("#userId").val(url_vars.uuid);
+}
+if (url_vars.sectionOpen) {
+    sectionOpen = url_vars.sectionOpen;
+    // e.g., to start with the 'Drops Received Today' section open:
+    // https://oldgods.net/habitica/habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=
+    if (sectionOpen === 'dropsTodaySection') hideDropsInDashboard = false;
 }
 function getUrlVars() {
     // Function found at http://stackoverflow.com/questions/4656843/jquery-get-querystring-from-url#answer-4656873
@@ -544,6 +551,7 @@ function parseData() {
     collateAndDisplayTaskData();
     dropCountAndCap();
     questProgress();
+    questsCompleted();
     guildsList();
     analyseEquipment(); // missing gear, current gear, recommended gear
     subscriptionData();
@@ -616,7 +624,7 @@ function formatAndDisplayTOC() {
             // 'HEADING To-Dos',
                 'todosDated', 'todosCompleted',
             'HEADING Drops, Quests, Damage', 'dropsToday',
-                'questProgress', 'damageDailies', 'statsAndStreaks',
+                'questProgress', 'questsCompleted', 'damageDailies', 'statsAndStreaks',
             'HEADING Other',
                 'guildsList',
                 'missingEquipment',
@@ -654,7 +662,7 @@ function formatAndDisplayMAIN() {
     // if they were all visible at once):
     var keys = ['taskOverview', 'taskStatistics', 'untaggedTasks',
                 'habitTrends', 'habitHistory', 'dailiesHistory', 'todosDated',
-                'todosCompleted', 'dropsToday', 'questProgress',
+                'todosCompleted', 'dropsToday', 'questProgress', 'questsCompleted',
                 'damageDailies','dailiesIncomplete',//keep in that order
                 'statsAndStreaks', 'guildsList',
                 'missingEquipment', 'currentGear', 'equipmentRecommendations',
@@ -3209,6 +3217,51 @@ function questProgress() {
 }
 
 
+function questsCompleted() {
+    var id            = 'questsCompletedSection';
+    var title         = 'Quests Completed';
+    var orderId       = 'questsCompleted';
+    var orderIdSecond = 'questSCompletedSecond';
+    TOC[orderId]  = {'target': id, 'title':  title};
+
+    var questsCompleted = [];
+    $.each(user.achievements.quests, function(index,key){
+        var newArray = [content.quests[index].text, key];
+        questsCompleted.push(newArray);
+    })
+
+    if (questsCompleted.length) {
+        var html = '<table></table>';
+        MAIN[orderId] = {'id': id, 'title': title, 'function': createQuestsCompletedTable, 'html': html };
+    }
+    else {
+        var html = '<p>You have not yet completed any ' + wiki('Quests', 'quests') + '.</p>';
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html };
+    }
+
+    function createQuestsCompletedTable() {
+        // Use DataTables to build the table (the table tag must be
+        // visible first for layout to be correct):
+        $('#questsCompletedSection').show();
+        $('#questsCompletedSection table').dataTable({
+            "aaData": questsCompleted,
+            "aoColumnDefs":[{
+                "sTitle":"Quest name",
+                "aTargets":[0],
+                "bSortable": true
+            },{
+                "sTitle":"number of completions",
+                "aTargets":[ 1 ],
+                "bSortable": true
+            }
+            ],
+            "iDisplayLength": 100
+        });
+        return;
+    }
+}
+
+
 function guildsList() {
     var id            = 'guildsListSection';
     var title         = 'Guilds List';
@@ -5430,7 +5483,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.3)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.5)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5463,6 +5516,41 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.5 <span class="date">2020-01-05</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>The <strong>Quests Completed</strong> section has been added by <a href="https://github.com/PitiTheGrey">PitiTheGrey</a> so that you can see a list of all your completed quests and how many times you've done each one. You can sort by quest name or number of completions.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>9.4.1 <span class="date">2019-10-06</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>When the Drops Received Today section is open by default (with <a href="habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=">this URL</a>, also show the Drop Count / Cap dashboard item by default.</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>Changed jquery link from ajax.googleapis.com to cdnjs.cloudflare.com to allow access in China.</li>
+                </ul>
+            </li>
+        </ul></dd>
+        <dt>9.4 <span class="date">2019-09-29</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>Added the ability to specify the section that should be open when you log in using the "sectionOpen=..." URL parameter. See documentation for more details.</li>
+                </ul>
+            </li>
+            <li>Code:
+                <ul>
+                    <li>Changed jquery link from ajax.googleapis.com to cdnjs.cloudflare.com to allow access in China.</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>9.3 <span class="date">2019-05-20</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5471,7 +5559,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.2 <span class="date">2018-06-24</span></dt>
         <dd><ul>
             <li>Feature:
@@ -6525,36 +6612,63 @@ ul#tableOfContents > li {
 
 
     <div>
-       <h2>What's On This Page?</h2>
-       <ul>
-            <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To-Dos, with their <a href="http://habitica.wikia.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitica.wikia.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</li>
-            <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To-Dos, and Rewards you have in total, and how many are assigned to each <a href="http://habitica.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitica.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
-            <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To-Dos, or Rewards that have not been <a href="http://habitica.wikia.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
+        <h2>What's On This Page?</h2>
+        <ul>
+            <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To-Dos, with their <a href="http://habitica.fandom.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitica.fandom.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</li>
+            <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To-Dos, and Rewards you have in total, and how many are assigned to each <a href="http://habitica.fandom.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitica.fandom.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
+            <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To-Dos, or Rewards that have not been <a href="http://habitica.fandom.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
             <li><span class="subheading">Habit Trends</span>: An interactive chart that provides a visual representation of the trends in your Habits. It gives you an idea of which Habits you are reinforcing, and which are being neglected.</li>
             <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your Habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
             <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your Dailies.</li>
-            <li><span class="subheading">Dailies Incomplete</span>: A list of Dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitica.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
+            <li><span class="subheading">Dailies Incomplete</span>: A list of Dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitica.fandom.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
             <li><span class="subheading">To-Dos with Dates</span>: A list of all To-Dos that have been given due dates, sorted by date. If there are any To-Dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
             <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed To-Dos that Habitica has in its archive. The To-Dos' notes and completion dates are included.</li>
-            <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitica.wikia.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitica.wikia.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
-            <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitica.wikia.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today, as well as the boss's HP (taken from your party's page, so this does not include any reduction from the damage you or other players have caused since the last time a party member's cron ran).</li>
-            <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitica.wikia.com/wiki/Quests">quest</a> <a href="http://habitica.wikia.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
-            <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitica.wikia.com/wiki/Settings">restore your stats</a> and <a href="http://habitica.wikia.com/wiki/Streaks">your Dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
-            <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitica.wikia.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
-            <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitica.wikia.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitica.wikia.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitica.wikia.com/wiki/Pets">pet</a> and <a href="http://habitica.wikia.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
+            <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitica.fandom.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitica.fandom.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
+            <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitica.fandom.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today, as well as the boss's HP (taken from your party's page, so this does not include any reduction from the damage you or other players have caused since the last time a party member's cron ran).</li>
+            <li><span class="subheading">Quests Completed</span>: A list of all your completed quests and how many times you've done each one. You can sort by quest name or number of completions.</li>
+            <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitica.fandom.com/wiki/Quests">quest</a> <a href="http://habitica.fandom.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
+            <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitica.fandom.com/wiki/Settings">restore your stats</a> and <a href="http://habitica.fandom.com/wiki/Streaks">your Dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
+            <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitica.fandom.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
+            <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitica.fandom.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitica.fandom.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitica.fandom.com/wiki/Pets">pet</a> and <a href="http://habitica.fandom.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
             <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
             <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes.</li>
             <li><span class="subheading">Subscription Data</span>: If you have a Habitica subscription, this section will show you the data Habitica has about your subscription. If you have been a subscriber in the past, this section might show some of your old data. If you have a current subscription that is ending in less than a week, a large orange notification will appear at the top of the page. (This banner might be a bit annoying for those who already know that their subscription is ending, and I am sorry about that, but it will last for only a week and then disappear. The banner exists for the benefit of those who don't realise the termination date is approaching, and I know from my support work that that's not uncommon.)</li>
-       </ul>
+        </ul>
         <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
 
-       <h2>Possible Future Features</h2>
-       <ul>
+        <h2>Starting with a Section Open</h2>
+        <p>Normally when you log in, you see the links that allow you to access each section with none of those sections open. If you'd prefer a particular section to be open by default every time, use one of the links below and bookmark it.</p>
+        <ul>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=taskOverviewSection&uuid=">Task Overview</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=taskStatisticsSection&uuid=">Task Statistics</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=untaggedTasksSection&uuid=">Tasks Untagged</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=habitTrendsSection&uuid=">Habit Trends</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=habitHistorySection&uuid=">Habit History</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=dailiesHistorySection&uuid=">Dailies History</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=dailiesIncompleteSection&uuid=">Dailies Incomplete</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=todosDatedSection&uuid=">To-Dos with Dates</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=todosCompletedSection&uuid=">To-Dos Completed</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=">Drops Received Today</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=questProgressSection&uuid=">Quest Progress</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=questsCompletedSection&uuid=">Quests Completed</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=damageDailiesSection&uuid=">Damage from Dailies</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=statsAndStreaksSection&uuid=">Stats and Streaks Backup</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=guildsListSection&uuid=">Guilds List</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=missingEquipmentSection&uuid=">Missing Equipment</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=currentGearSection&uuid=">Current Appearance and Gear</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=equipmentRecommendationsSection&uuid=">Equipment Recommendations</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=skillsAndBuffsSection&uuid=">Skills and Buffs</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=subscriptionDataSection&uuid=">Subscription Data</a></li>
+        </ul>
+        <p>To have your User ID specified automatically as well, click on one of those links, then edit the URL in your browser's address bar to add your User ID at the end, then bookmark that. For example, if your User ID is <em>12345678-90ab-40a4-cdef-1234567890ab</em> and you want the "Task Overview" section to be open when you log in, you would bookmark this URL: <br /><em>https://oldgods.net/habitica/habitrpg_user_data_display.html?sectionOpen=taskOverviewSection&uuid=12345678-90ab-40a4-cdef-1234567890ab</em></p>
+
+        <h2>Possible Future Features</h2>
+        <ul>
             <li>Display checklists and notes for tasks.</li>
             <li>For relevant Skills And Buffs, show how to increase the chance of a critical hit happening.</li>
             <li>Add percentages to Task Statistics.
 <!--
-<span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitica.wikia.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitica.wikia.com/wiki/Automatic_Allocation">links</a>)
+<span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitica.fandom.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitica.fandom.com/wiki/Automatic_Allocation">links</a>)
 -->
 </li>
             <li>Hide information about drops for any players who have not yet had drops enabled.</li>
@@ -6586,7 +6700,7 @@ I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-
 -->
 </li>
             <li><span class="subheading">Other Stuff?</span>: Send me ideas! Contact details are below.</li>
-       </ul>
+        </ul>
 
        <h2>Known Bugs</h2>
        <p>Internet Explorer will produce odd results if you use the "Re-Fetch Data" button. Reloading the page will fix the problem. Avoid using that button. Avoiding Internet Explorer will also work.</p>
@@ -6594,9 +6708,9 @@ I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-
        <p>Regardless of what bugs there might be, this page cannot damage your account. It does not contain any code that could result in any changes being made on Habitica.</p>
 
        <h2>Help and Contact Details</h2>
-       <p>This page has been created by <a href="http://habitica.wikia.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitica.wikia.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
+       <p>This page has been created by <a href="http://habitica.fandom.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitica.fandom.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
 
-        <p>If you have general questions about Habitica, post them to <a href="https://habitica.com/groups/tavern">Tavern Talk</a> or <a href="http://habitica.wikia.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
+        <p>If you have general questions about Habitica, post them to <a href="https://habitica.com/groups/tavern">Tavern Talk</a> or <a href="http://habitica.fandom.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
     </div>
 
     <div id="documentationAndFormClose" class="showHideToggle closer" data-target="documentationAndForm" data-resettoggletext="documentationAndFormToggle">hide documentation</div>
