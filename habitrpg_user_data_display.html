@@ -104,6 +104,7 @@ var serverPathGuildBase      = '/groups/';
 var serverPathUser           = '/user';
 var serverPathTasks          = '/tasks/user';
 var serverPathCompletedTodos = '/tasks/user?type=_allCompletedTodos';
+var clientId                 = 'd904bd62-da08-416b-a816-ba797c9ee265-DataDisplayTool';
 var userId                   = '';
 var apiToken                 = '';
 var debug                    = false;
@@ -299,6 +300,7 @@ function fetchData() {
         dataType: 'json',
         cache: false,
         beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
@@ -313,6 +315,7 @@ function fetchData() {
         dataType: 'json',
         cache: false,
         beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
@@ -327,6 +330,7 @@ function fetchData() {
         dataType: 'json',
         cache: false,
         beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
@@ -340,6 +344,9 @@ function fetchData() {
         type: 'GET',
         dataType: 'json',
         cache: true,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
+            },
         success: fetchContentSuccess,
         error: fetchFailure
     });
@@ -351,6 +358,7 @@ function fetchData() {
         dataType: 'json',
         cache: false,
         beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
@@ -365,6 +373,7 @@ function fetchData() {
         dataType: 'json',
         cache: false,
         beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
@@ -3327,6 +3336,7 @@ function fetchGuildsListFunction() {
                 dataType: 'json',
                 cache: false,
                 beforeSend: function(xhr){
+                        xhr.setRequestHeader('x-client',   clientId);
                         xhr.setRequestHeader('x-api-user', userId);
                         xhr.setRequestHeader('x-api-key',  apiToken);
                     },
@@ -5479,7 +5489,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.6)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.6.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5512,6 +5522,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.6.1 <span class="date">2020-04-25</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Added x-client header.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.6 <span class="date">2020-01-20</span></dt>
         <dd><ul>
             <li>Code:
@@ -5527,7 +5546,6 @@ ul#tableOfContents > li {
             </li>
             <li>Thanks to cTheDragons for making this version.</li>
         </ul></dd>
-
         <dt>9.5 <span class="date">2020-01-05</span></dt>
         <dd><ul>
             <li>Feature:
