@@ -3227,11 +3227,13 @@ function questsCompleted() {
     var title         = 'Quests Completed';
     var orderId       = 'questsCompleted';
     var orderIdSecond = 'questSCompletedSecond';
+    var amount = 0;
     TOC[orderId]  = {'target': id, 'title':  title};
 
     var questsCompleted = [];
     $.each(user.achievements.quests, function(index,key){
-        var newArray = [content.quests[index].text, key];
+        user.items.quests[index] > 0 ? amount = user.items.quests[index] : amount = "";
+        var newArray = [content.quests[index].text, key, content.quests[index].category, amount ];
         questsCompleted.push(newArray);
     })
 
@@ -3250,17 +3252,27 @@ function questsCompleted() {
         $('#questsCompletedSection').show();
         $('#questsCompletedSection table').dataTable({
             "aaData": questsCompleted,
-            "aoColumnDefs":[{
+            "aoColumn":[{
                 "sTitle":"Quest name",
-                "aTargets":[0],
                 "bSortable": true
             },{
                 "sTitle":"number of completions",
-                "aTargets":[ 1 ],
                 "bSortable": true
+            },{
+               "sTitle":"category",
+				"bVisible": false,
+				"bSortable": true
+			},{
+				"sTitle":"quests in inventory",
+				"defaultContent": "",
+				"bSortable": true 
             }
             ],
-            "iDisplayLength": 100
+            "sDom": 'W<"clear">lfrtip',
+			"oColumnFilterWidgets": {
+				"aiExclude": [ 0, 1, 3 ]
+				},
+            "iDisplayLength": 50
         });
         $('#questsCompletedSection').hide();
         return;
