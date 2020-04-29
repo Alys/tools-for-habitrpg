@@ -25,6 +25,7 @@ Contributors:
     donoftime https://github.com/donoftime
     me_and (Adam Dinwoodie) https://github.com/me-and
     cTheDragons https://github.com/cTheDragons
+    Pitii (Piti the Grey) https://github.com/PitiTheGrey
 
 TO ADD A NEW SECTION TO THIS PAGE:
 Search through this code to find all the comments that start
@@ -103,6 +104,7 @@ var serverPathGuildBase      = '/groups/';
 var serverPathUser           = '/user';
 var serverPathTasks          = '/tasks/user';
 var serverPathCompletedTodos = '/tasks/user?type=_allCompletedTodos';
+var clientId                 = 'd904bd62-da08-416b-a816-ba797c9ee265-DataDisplayTool';
 var userId                   = '';
 var apiToken                 = '';
 var debug                    = false;
@@ -298,6 +300,7 @@ function fetchData() {
         dataType: 'json',
         cache: false,
         beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
@@ -312,6 +315,7 @@ function fetchData() {
         dataType: 'json',
         cache: false,
         beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
@@ -326,6 +330,7 @@ function fetchData() {
         dataType: 'json',
         cache: false,
         beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
@@ -339,6 +344,9 @@ function fetchData() {
         type: 'GET',
         dataType: 'json',
         cache: true,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
+            },
         success: fetchContentSuccess,
         error: fetchFailure
     });
@@ -350,6 +358,7 @@ function fetchData() {
         dataType: 'json',
         cache: false,
         beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
@@ -364,6 +373,7 @@ function fetchData() {
         dataType: 'json',
         cache: false,
         beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client',   clientId);
                 xhr.setRequestHeader('x-api-user', userId);
                 xhr.setRequestHeader('x-api-key',  apiToken);
             },
@@ -550,7 +560,7 @@ function parseData() {
     collateAndDisplayTaskData();
     dropCountAndCap();
     questProgress();
-	questsCompleted();
+    questsCompleted();
     guildsList();
     analyseEquipment(); // missing gear, current gear, recommended gear
     subscriptionData();
@@ -661,7 +671,7 @@ function formatAndDisplayMAIN() {
     // if they were all visible at once):
     var keys = ['taskOverview', 'taskStatistics', 'untaggedTasks',
                 'habitTrends', 'habitHistory', 'dailiesHistory', 'todosDated',
-                'todosCompleted', 'dropsToday', 'questProgress', 'questsCompleted', 
+                'todosCompleted', 'dropsToday', 'questProgress', 'questsCompleted',
                 'damageDailies','dailiesIncomplete',//keep in that order
                 'statsAndStreaks', 'guildsList',
                 'missingEquipment', 'currentGear', 'equipmentRecommendations',
@@ -759,6 +769,9 @@ function wiki(wikilink, pipelink) {
 openRelatedSections = function() {
     if ($('#damageDailiesSection').is(':visible')) {
         $('#dailiesIncompleteSection').show();
+    }
+    if ($('#questsCompletedSection').is(':visible')) {
+        $('#questsCompletedSection').show();
     }
     if ($('#dropsTodaySection').is(':visible')) {
         hideDropsInDashboard = false;
@@ -2733,14 +2746,7 @@ wiki('Tavern', 'resting in the inn') +
                                'increase your ' + intLink + before;
                 return ['',
                         'Each of your party members will receive ' +
-                        bonus + ' MP, except for yourself.',
-                        'When you cast this skill, it will initially seem ' +
-                        'as if you do receive ' +
-                        bonus + ' MP (i.e., the skill will seem to cost only ' +
-                        (30-bonus) + ' MP), but the ' +
-                        bonus + ' MP will later be removed from your account.' +
-                        ' The true cost of this skill to you is 30 MP and ' +
-                        'it benefits only your party members, not you.',
+                        bonus + ' MP, except for yourself and other mages.',
                         increase]; },
 
             'earth': function() { // Mage - Earthquake
@@ -3215,44 +3221,52 @@ function questProgress() {
     }
 }
 
+
 function questsCompleted() {
-    var id            = 'questCompletedSection';
+    var id            = 'questsCompletedSection';
     var title         = 'Quests Completed';
     var orderId       = 'questsCompleted';
     var orderIdSecond = 'questSCompletedSecond';
-    var html = '<p><table id="questsCompletedSection"></table></p>';
-	var questsCompleted = [];
-	
-	$.each(user.achievements.quests, function(index,key){
-            var newArray = [content.quests[index].text, key];
-			questsCompleted.push(newArray); 
-	})
-	if (html) {
-        TOC[orderId]  = {'target': id, 'title':  title};
+    TOC[orderId]  = {'target': id, 'title':  title};
+
+    var questsCompleted = [];
+    $.each(user.achievements.quests, function(index,key){
+        var newArray = [content.quests[index].text, key];
+        questsCompleted.push(newArray);
+    })
+
+    if (questsCompleted.length) {
+        var html = '<table></table>';
         MAIN[orderId] = {'id': id, 'title': title, 'function': createQuestsCompletedTable, 'html': html };
     }
+    else {
+        var html = '<p>You have not yet completed any ' + wiki('Quests', 'quests') + '.</p>';
+        MAIN[orderId] = {'id': id, 'title': title, 'html': html };
+    }
 
-	function createQuestsCompletedTable() {
-		// Use DataTables to build the table (the table tag must be
+    function createQuestsCompletedTable() {
+        // Use DataTables to build the table (the table tag must be
         // visible first for layout to be correct):
         $('#questsCompletedSection').show();
-		$('#questsCompletedSection').dataTable({
+        $('#questsCompletedSection table').dataTable({
             "aaData": questsCompleted,
-  			"aoColumnDefs":[{
-        		"sTitle":"Quest name", 
-				"aTargets":[0], 
-				"bSortable": true
-  			},{ 
-				"sTitle":"number of completions", 
-       			"aTargets":[ 1 ], 
-				"bSortable": true
-    		}  
-  			],
-			"iDisplayLength": 100
-			});
-            return;
-        }
-}  
+            "aoColumnDefs":[{
+                "sTitle":"Quest name",
+                "aTargets":[0],
+                "bSortable": true
+            },{
+                "sTitle":"number of completions",
+                "aTargets":[ 1 ],
+                "bSortable": true
+            }
+            ],
+            "iDisplayLength": 100
+        });
+        $('#questsCompletedSection').hide();
+        return;
+    }
+}
+
 
 function guildsList() {
     var id            = 'guildsListSection';
@@ -3322,6 +3336,7 @@ function fetchGuildsListFunction() {
                 dataType: 'json',
                 cache: false,
                 beforeSend: function(xhr){
+                        xhr.setRequestHeader('x-client',   clientId);
                         xhr.setRequestHeader('x-api-user', userId);
                         xhr.setRequestHeader('x-api-key',  apiToken);
                     },
@@ -3401,7 +3416,7 @@ function fetchGuildsListFunction() {
 
 
 function analyseEquipment() {
-    var missing = []; // gear lost due to death or rebirth
+    var missing = []; // gear lost due to death 
     var missingPretty = []; // like missing but formatted
     var owned   = []; // gear actually owned right now
     $.each(user.items.gear.owned, function(key, value){
@@ -3426,7 +3441,6 @@ function analyseEquipment() {
         var missingEquipmentObjs = [];
         var html = '';
         var reasons = wiki('Death_Mechanics', 'Death') +
-                      ( (user.achievements.rebirths > 0 ) ? ' or ' + wiki('Orb_of_Rebirth', 'Rebirth')  : '' ) +
                       ", or because a special item has been made available to you but you haven't purchased it yet";
         if (equipment.length < 4) {
             html = '<p>You are missing this equipment due to ' + reasons +
@@ -5475,7 +5489,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.4.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.6.1)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5508,6 +5522,38 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.6.1 <span class="date">2020-04-25</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>Added x-client header.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
+        <dt>9.6 <span class="date">2020-01-20</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>The Quests Completed section no longer opens by default when refreshing the data.</li>
+                </ul>
+            </li>
+            <li>Documentation:
+                <ul>
+                    <li>Noted Ethereal Surge is no longer increases mana for mages (including the caster).</li>
+                    <li>Remove note that missing equipment occurs with the Orb Of Rebirth.</li>
+                </ul>
+            </li>
+            <li>Thanks to cTheDragons for making this version.</li>
+        </ul></dd>
+        <dt>9.5 <span class="date">2020-01-05</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>The <strong>Quests Completed</strong> section has been added by <a href="https://github.com/PitiTheGrey">PitiTheGrey</a> so that you can see a list of all your completed quests and how many times you've done each one. You can sort by quest name or number of completions.</li>
+                </ul>
+            </li>
+        </ul></dd>
         <dt>9.4.1 <span class="date">2019-10-06</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5521,7 +5567,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.4 <span class="date">2019-09-29</span></dt>
         <dd><ul>
             <li>Feature:
@@ -6561,10 +6606,10 @@ ul#tableOfContents > li {
             (from <a href="https://habitica.com/user/settings/api">User Icon &gt; Settings &gt; API</a> on the website or Settings &gt; API on the Android app or Settings &gt; Account Details on the iOS app)
             </legend>
             <label for="userId"><span>User ID</span>
-                <input type="text" name="userId" id="userId"/>
+                <input type="text" name="userId" id="userId" />
             </label>
             <label for="apiToken"><span>API Token</span>
-                <input type="password" name="apiToken" id="apiToken"/>
+                <input type="password" name="apiToken" id="apiToken" />
             </label>
             <input type="submit" value="Fetch My Data" />
             <p class="highlight">Privacy and security notes:</p>
@@ -6609,8 +6654,8 @@ ul#tableOfContents > li {
             <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed To-Dos that Habitica has in its archive. The To-Dos' notes and completion dates are included.</li>
             <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitica.fandom.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitica.fandom.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
             <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitica.fandom.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today, as well as the boss's HP (taken from your party's page, so this does not include any reduction from the damage you or other players have caused since the last time a party member's cron ran).</li>
-            <li><span class="subheading">Quests Completed</span>: A list of all your completed quests.</li>
-			<li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitica.fandom.com/wiki/Quests">quest</a> <a href="http://habitica.fandom.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
+            <li><span class="subheading">Quests Completed</span>: A list of all your completed quests and how many times you've done each one. You can sort by quest name or number of completions.</li>
+            <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitica.fandom.com/wiki/Quests">quest</a> <a href="http://habitica.fandom.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
             <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitica.fandom.com/wiki/Settings">restore your stats</a> and <a href="http://habitica.fandom.com/wiki/Streaks">your Dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
             <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitica.fandom.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
             <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitica.fandom.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitica.fandom.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitica.fandom.com/wiki/Pets">pet</a> and <a href="http://habitica.fandom.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
@@ -6634,6 +6679,7 @@ ul#tableOfContents > li {
             <li><a href="habitrpg_user_data_display.html?sectionOpen=todosCompletedSection&uuid=">To-Dos Completed</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=">Drops Received Today</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=questProgressSection&uuid=">Quest Progress</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=questsCompletedSection&uuid=">Quests Completed</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=damageDailiesSection&uuid=">Damage from Dailies</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=statsAndStreaksSection&uuid=">Stats and Streaks Backup</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=guildsListSection&uuid=">Guilds List</a></li>

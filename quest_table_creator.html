@@ -532,6 +532,7 @@ var questAvailability = {
 //////////////////////////////////////////////////////////////////////
 var content; // holds site-wide content (gear names and stats, quests, etc)
 var serverUrl = 'https://habitica.com:443/api/v3';
+var clientId  = 'd904bd62-da08-416b-a816-ba797c9ee265-QuestTableCreator';
 
 //////////////////////////////////////////////////////////////////////
 ////   Data Fetch Function   /////////////////////////////////////////
@@ -548,6 +549,9 @@ function fetchData() {
         data: { language: language },
         dataType: 'json',
         cache: true,
+        beforeSend: function(xhr){
+                xhr.setRequestHeader('x-client', clientId);
+            },
         success: fetchContentSuccess,
         error: fetchFailure
     });
@@ -1457,7 +1461,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 2019-12-24)</span></h1><!-- VERSION -->
+    <span>(last updated 2020-04-25)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
