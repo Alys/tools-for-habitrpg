@@ -3230,9 +3230,8 @@ function questsCompleted() {
     TOC[orderId]  = {'target': id, 'title':  title};
 
     var questsCompleted = [];
-        var amount = 0;
     $.each(user.achievements.quests, function(index,key){
-        user.items.quests[index] > 0 ? amount = user.items.quests[index] : amount = "";
+        var amount = (user.items.quests[index] > 0) ? user.items.quests[index] : "";
         var newArray = [content.quests[index].text, key, content.quests[index].category, amount];
         questsCompleted.push(newArray);
     })
@@ -5502,7 +5501,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.6.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.7)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5535,6 +5534,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.7 <span class="date">2020-05-24</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li><strong>Quests Completed</strong> section now alows filtering by quest type and shows the number of scrolls owned, thanks to <a href="https://github.com/PitiTheGrey">PitiTheGrey</a>.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.6.1 <span class="date">2020-04-25</span></dt>
         <dd><ul>
             <li>Code:
@@ -5543,7 +5551,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.6 <span class="date">2020-01-20</span></dt>
         <dd><ul>
             <li>Code:
