@@ -3,7 +3,7 @@ Habitica ( http://habitica.com/  http://habitica.fandom.com/ ).
 
 --------------------------------------------
 
-habitrpg_user_data_display.html
+`habitrpg_user_data_display.html`
 
 A stand-alone JavaScript-enabled web page that reads a user's data and
 displays such things as an unallocated points reminder, limited habit
