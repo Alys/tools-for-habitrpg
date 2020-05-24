@@ -11,7 +11,7 @@ and [Enchanted Armoire](https://habitica.fandom.com/wiki/Enchanted_Armoire) on t
 Habitica Wiki.
 
 The tool works with languages other than English by appending `?language=` and the 
-language code to the end of the URL (`?language=ru`).
+language code to the end of the URL (ex. `?language=ru`).
 
 --------------------------------------------
 
@@ -34,11 +34,14 @@ and [Enchanted Armoire](https://habitica.fandom.com/wiki/Enchanted_Armoire) on t
 Habitica Wiki.
 
 The tool works with languages other than English by appending `?language=` and the 
-language code to the end of the URL (`?language=ru`).
+language code to the end of the URL (ex. `?language=ru`).
 
 --------------------------------------------
 
-TODO: Update this.
+`task_adjustor.html`
+
+A stand-alone JavaScript-enabled web page that allows users to bulk update task
+data such as tags, difficulty, attributes, and due date.  
 
 --------------------------------------------
 
