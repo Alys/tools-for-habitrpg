@@ -1,5 +1,11 @@
-Various small scripts for working with exported data or API data from
-Habitica ( http://habitica.com/  http://habitica.fandom.com/ ).
+This repo contains various small scripts for working with exported data or
+API data from Habitica ( http://habitica.com/  http://habitica.fandom.com/ ).
+
+--------------------------------------------
+
+**UPDATE 2020-06-15:**
+
+**The default branch for this repo is now `develop` rather than `master`. This [removes racially-charged language](https://www.zdnet.com/article/github-to-replace-master-with-alternative-term-to-avoid-slavery-references/) and is the same convention used in Habitica's main repo.**
 
 --------------------------------------------
 
