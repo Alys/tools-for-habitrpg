@@ -100,7 +100,7 @@ var serverUrl                = 'https://habitica.com/api/v3';
 var serverPathContent        = '/content?language=en';
 var serverPathTavern         = '/groups/habitrpg';
 var serverPathParty          = '/groups/party';
-var serverPathGuildBase      = '/groups/';
+var serverPathGuildBase      = '/groups?type=guilds';
 var serverPathUser           = '/user';
 var serverPathTasks          = '/tasks/user';
 var serverPathCompletedTodos = '/tasks/user?type=_allCompletedTodos';
@@ -3288,7 +3288,7 @@ function guildsList() {
             '<div style="padding-bottom: 15px;">' +
             '<input id="fetchGuildsList" type="submit" value="Fetch Guilds List" />' +
             ' &nbsp; ' +
-            '<span id="fetchGuildsListProgress" class="hide">fetching guilds, please wait.<span></span></span>' +
+            '<span id="fetchGuildsListProgress" class="hide"></span>' +
             '</div>' +
             '<div style="clear:both"></div>' +
             '<div id="guildsListOutput">' +
@@ -3328,63 +3328,48 @@ $('#fetchGuildsList').click(function(event){
 });
 
 function fetchGuildsListFunction() {
-    var allGuilds = {}; // Guild names and IDs if the user requests the Guild List
     var baseGuildUrl        = 'https://habitica.com/groups/guild/';
     var baseGuildUrlStaging = 'https://habitrpg-staging.herokuapp.com/groups/guild/';
-    ajaxRunningCount = user.guilds.length;
     // user.guilds = ['00000000-0000-4000-A000-000000000000']; // FOR TESTING
     if (user.guilds.length === 0) {
         $('#guildsListOutput #guildsLink').html('<p>You have not joined any Guilds. You can find some in the <a href="https://habitica.com/groups/discovery">Discover Guilds</a> section in Habitica.</p>');
     }
     else {
-        allGuilds = {}; // reset the list for the case where the user is refetching
+        $('#fetchGuildsListProgress').text('fetching guilds, please wait.');
         $('#fetchGuildsListProgress').show();
-        for (var i=0; i<user.guilds.length; ++i) { // fetch content for one guild
-            var gid = user.guilds[i];
-            var defaultName = 'unknown name (' + gid + ')';
-            $.ajax({
-                url: serverUrl + serverPathGuildBase + gid,
-                type: 'GET',
-                dataType: 'json',
-                cache: false,
-                beforeSend: function(xhr){
-                        xhr.setRequestHeader('x-client',   clientId);
-                        xhr.setRequestHeader('x-api-user', userId);
-                        xhr.setRequestHeader('x-api-key',  apiToken);
-                    },
-                // success: fetchGuildSuccess,
-                success: function(data) {
-                    ajaxRunningCount--;
-                    $('#fetchGuildsListProgress span').append('.');
-                    allGuilds[data.data._id] = data.data.name;
-                    if (ajaxRunningCount === 0) { // all ajax calls have finished
-                        displayGuildData();
-                    }
+        $.ajax({
+            url: serverUrl + serverPathGuildBase,
+            type: 'GET',
+            dataType: 'json',
+            cache: false,
+            beforeSend: function(xhr){
+                    xhr.setRequestHeader('x-client',   clientId);
+                    xhr.setRequestHeader('x-api-user', userId);
+                    xhr.setRequestHeader('x-api-key',  apiToken);
                 },
-                error: function() { // treat as non-fatal failure
-                    ajaxRunningCount--;
-                    $('#fetchGuildsListProgress span').append('.');
-                    allGuilds[gid] = defaultName; // XXX does this work?
-                    if (ajaxRunningCount === 0) { // all ajax calls have finished
-                        displayGuildData();
-                    }
-                },
-            });
-        }
+            success: function(data) {
+                $('#fetchGuildsListProgress').hide();
+                displayGuildData(data.data);
+            },
+            error: function() {
+                $('#fetchGuildsListProgress').text('An error occurred. Your guilds could not be fetched. Please try again later. If it keeps happening, click the "show documentation" link and see the "Help and Contact Details" section.');
+            },
+        });
     }
 
-    function displayGuildData() {
-        $('#fetchGuildsListProgress').hide();
+    function displayGuildData(allGuilds) {
         var names            = [];
         var linksForNames    = {};
         var markdownForNames = {};
-        Object.keys(allGuilds).forEach(function(gid) {
-            var name = allGuilds[gid];
+        allGuilds.forEach(function(oneGuild) {
+            var gid  = oneGuild._id;
+            var name = oneGuild.name;
+            var baseName = name;
             var count = 1;
             while (linksForNames[name]) {
                 // name is already known
                 count++; // start at 2 since it's the second guild with this name
-                name = allGuilds[gid] + ' (' + count + ')';
+                name = baseName + ' (' + count + ')';
             }
             names.push(name);
             var link        = '<a href="' + baseGuildUrl        + gid + '">' + name + '</a>';
@@ -5501,7 +5486,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.7)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.8)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5534,6 +5519,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.8 <span class="date">2020-07-18</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>The <strong>Guilds List</strong> section now uses an API route that fetches all Guilds at once, instead of the old inefficient method of fetching them individually.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.7 <span class="date">2020-05-24</span></dt>
         <dd><ul>
             <li>Feature:
@@ -5542,7 +5536,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.6.1 <span class="date">2020-04-25</span></dt>
         <dd><ul>
             <li>Code:
