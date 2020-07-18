@@ -535,7 +535,7 @@ function parseData() {
 
     var computedStats        = computeStats(true);  // computed CON, INT, etc
     var computedStatsNoBuffs = computeStats(false); // ... without buffs
-    // XXX_SOON god my computedStats code is just getting worse and worse
+    // XXX_SOON my computedStats code is just getting worse and worse
 
     // When calculating drop chance for a task, some of the user's stats
     // are used. We calculate those parts of the drop chance here since
@@ -1884,7 +1884,6 @@ randomTodoHtml
     function habitHistory() {
         var html = '<p class="narrowContent">This shows your Habits, the dates you clicked on them, and the total number of plus and minus clicks on each of those dates.</p>';
         html += '<p class="narrowContent">Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
-        html += '<p class="narrowContent"><strong>As of 25 June 2018 (or a day different in some time zones), Habitica no longer records the time of day that you clicked the buttons on your Habits. All that is stored each day for each Habit is how many times you clicked the plus button and how many times you clicked the minus button. All old data containing times has been automatically converted by Habitica&apos;s staff to just contain the total number of clicks.<br /><font size="5em">If you happen to use this tool while that change is occuring on 25 June, you might not see all your data below but it will return in the new format within a day.</font><br />Technical details are available in <a href="https://github.com/HabitRPG/habitica/pull/10442">pull request 10442</a>.</strong></p>'; // XXX change this on 26 June
         html += '<ul>';
         $.each(habits, function(index, obj){
             html += collateHistoryForOneHabit(obj);
@@ -3271,8 +3270,8 @@ function questsCompleted() {
             ],
             "iDisplayLength": 25,
             "sDom": 'W<"clear">lfrtip',
-		    "oColumnFilterWidgets": {
-			    "aiExclude": [ 0, 1, 3 ]
+            "oColumnFilterWidgets": {
+                "aiExclude": [ 0, 1, 3 ]
             }
         });
         $('#questsCompletedSection').hide();
@@ -5521,6 +5520,12 @@ ul#tableOfContents > li {
 
         <dt>9.8 <span class="date">2020-07-18</span></dt>
         <dd><ul>
+            <li>Documentation:
+                <ul>
+                    <li>Adjusted the bug report section (email is the best way to reach me).</li>
+                    <li>Removed some outdated details from the section descriptions.</li>
+                </ul>
+            </li>
             <li>Code:
                 <ul>
                     <li>The <strong>Guilds List</strong> section now uses an API route that fetches all Guilds at once, instead of the old inefficient method of fetching them individually.</li>
@@ -6750,7 +6755,7 @@ I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-
        <p>Regardless of what bugs there might be, this page cannot damage your account. It does not contain any code that could result in any changes being made on Habitica.</p>
 
        <h2>Help and Contact Details</h2>
-       <p>This page has been created by <a href="http://habitica.fandom.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me, or you can comment on <a href="http://habitica.fandom.com/wiki/User_blog:LadyAlys/HabitRPG_Unofficial_User_Data_Display">this wiki blog post</a>.</p>
+       <p>This page has been created by <a href="http://habitica.fandom.com/wiki/User:LadyAlys">Alys</a> (a.k.a. Alice Harris). If you have questions, problems, or suggestions, you're welcome to contact me, although I cannot guarantee that I'll always be able to spend a lot of time on this. Email to <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a> is the best way to reach me for this tool.</p>
 
         <p>If you have general questions about Habitica, post them to <a href="https://habitica.com/groups/tavern">Tavern Talk</a> or <a href="http://habitica.fandom.com/wiki/Board:The_Quarters_-_Q_%26_A">The Quarters - Q & A board</a>.</p>
     </div>
