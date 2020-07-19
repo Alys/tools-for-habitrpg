@@ -589,9 +589,10 @@ function upperCaseFirst(word) {
 
 
 function userDataInHeader() {
-    var displayName = renderFormattedText(user.profile.name);
+    // var displayName = renderFormattedText(user.profile.name);
+    var userName = user.auth.local.username;
     $('#headerExtras').html('<div id="userNameDisplay">' +
-            displayName +
+            '@' + userName +
             '</div>' +
             '<div id="explanationAndClearLinks">' +
             '<input id="refetch" type="submit" value="' +
@@ -1756,7 +1757,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Task Adjustor
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.7.1)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.8)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -1780,6 +1781,15 @@ h2 {
     <h2>Version History</h2>
     <dl>
 
+        <dt>0.8 <span class="date">2020-06-24</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>Replaced Display Name with Username in header.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>0.7.1 <span class="date">2020-04-25</span></dt>
         <dd><ul>
             <li>Code:
@@ -1788,7 +1798,6 @@ h2 {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>0.7 <span class="date">2017-06-10</span></dt>
         <dd><ul>
             <li>Bug fix:
