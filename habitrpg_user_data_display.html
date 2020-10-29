@@ -3223,20 +3223,39 @@ function questProgress() {
 
 function questsCompleted() {
     var id            = 'questsCompletedSection';
-    var title         = 'Quests Completed';
+    var title         = 'Quests Completed and Not Completed';
     var orderId       = 'questsCompleted';
     var orderIdSecond = 'questSCompletedSecond';
     TOC[orderId]  = {'target': id, 'title':  title};
 
     var questsCompleted = [];
-    $.each(user.achievements.quests, function(index,key){
-        var amount = (user.items.quests[index] > 0) ? user.items.quests[index] : "";
-        var newArray = [content.quests[index].text, key, content.quests[index].category, amount];
+    var questsCompletedKeys = {};
+    $.each(user.achievements.quests, function(questKey,numberTimes){
+        questsCompletedKeys[questKey] = true;
+        var amount = (user.items.quests[questKey] > 0) ? user.items.quests[questKey] : "";
+        var newArray = [content.quests[questKey].text, numberTimes, content.quests[questKey].category, amount];
         questsCompleted.push(newArray);
     })
 
     if (questsCompleted.length) {
-        var html = '<table></table>';
+        var html = '<p>Quests that you have not completed are listed under this table.</p>\n' +
+                   '<table></table>\n';
+
+        html += '<h2>Quests Not Completed</h2>\n';
+        var questsNotCompleted = '';
+        $.each(content.quests, function(questKey, obj){
+            if (!questsCompletedKeys[questKey] && (!obj.category || obj.category !== 'world')) {
+                questsNotCompleted += '<li>' + obj.text + '</li>\n';
+            }
+        });
+        if (questsNotCompleted) {
+            html += '<ul>' + questsNotCompleted + '</ul>\n' +
+                    '<p>World Boss quests are not included in that list.</p>';
+        }
+        else {
+            html += '<p>You have completed all quests at least once.</p>';
+        }
+
         MAIN[orderId] = {'id': id, 'title': title, 'function': createQuestsCompletedTable, 'html': html };
     }
     else {
@@ -5485,7 +5504,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.8)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.9)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5518,6 +5537,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.9 <span class="date">2020-10-29</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>The <strong>Quests Completed</strong> section is now <strong>Quests Completed and Not Completed</strong>. All quests that you have not completed (except World Boss quests) are listed at the bottom of that section.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.8 <span class="date">2020-07-18</span></dt>
         <dd><ul>
             <li>Documentation:
@@ -5532,7 +5560,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.7 <span class="date">2020-05-24</span></dt>
         <dd><ul>
             <li>Feature:
@@ -6672,7 +6699,7 @@ ul#tableOfContents > li {
             <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed To-Dos that Habitica has in its archive. The To-Dos' notes and completion dates are included.</li>
             <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitica.fandom.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitica.fandom.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
             <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitica.fandom.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today, as well as the boss's HP (taken from your party's page, so this does not include any reduction from the damage you or other players have caused since the last time a party member's cron ran).</li>
-            <li><span class="subheading">Quests Completed</span>: A list of all your completed quests and how many times you've done each one. You can sort by quest name or number of completions.</li>
+            <li><span class="subheading">Quests Completed and Not Completed</span>: A table listing of all your completed quests and how many times you've done each one. You can sort by quest name or number of completions. Under the table is a list of quests you have not completed (World Boss quests are not included in the list).</li>
             <li><span class="subheading">Damage from Dailies</span>: This <span class="highlight">estimates</span> the amount of damage you will take at the end of the day if you do not complete any more Dailies today. It includes additional damage from a <a href="http://habitica.fandom.com/wiki/Quests">quest</a> <a href="http://habitica.fandom.com/wiki/Boss">boss</a>. Be cautious about relying on these estimates if you are low on health! Please read the warning in that section (click its "show explanation" link).</li>
             <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitica.fandom.com/wiki/Settings">restore your stats</a> and <a href="http://habitica.fandom.com/wiki/Streaks">your Dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
             <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitica.fandom.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
@@ -6697,7 +6724,7 @@ ul#tableOfContents > li {
             <li><a href="habitrpg_user_data_display.html?sectionOpen=todosCompletedSection&uuid=">To-Dos Completed</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=">Drops Received Today</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=questProgressSection&uuid=">Quest Progress</a></li>
-            <li><a href="habitrpg_user_data_display.html?sectionOpen=questsCompletedSection&uuid=">Quests Completed</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=questsCompletedSection&uuid=">Quests Completed and Not Completed</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=damageDailiesSection&uuid=">Damage from Dailies</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=statsAndStreaksSection&uuid=">Stats and Streaks Backup</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=guildsListSection&uuid=">Guilds List</a></li>
