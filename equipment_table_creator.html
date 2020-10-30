@@ -68,6 +68,7 @@ var stringsForLanguage = {
         not_applicable:        "n/a", // an abbreviation meaning 'not applicable' (recommended to use a short word)
 
         kickstarter: "Kickstarter",
+        contributor: "Contributor",
         contributor_gear: "Contributor_Rewards#Contributor_Gear",
         absurd_party_hat: "Winter_Wonderland#Absurd_Party_Hat",
         absurd_party_robes: "Winter_Wonderland#Absurd_Party_Robes",
@@ -150,6 +151,7 @@ var stringsForLanguage = {
         not_applicable:        "н/д", // an abbreviation meaning 'not applicable' (recommended to use a short word)
 
         kickstarter: "Kickstarter",
+        contributor: "Автор",
         contributor_gear: "Награды_за_вклад#Снаряжение_участника",
         absurd_party_hat: "Зимняя_страна_чудес#Праздничные_шляпы",
         absurd_party_robes: "Зимняя_страна_чудес#Праздничные_мантии",
@@ -378,6 +380,27 @@ var wikiaBaseUrl = getString('wiki_url');
 var ignore = {
     'weapon_special_3' : true, // only for Kickstarter backers and similar to shield_special_goldenknight
 };
+
+
+//////////////////////////////////////////////////////////////////////
+////    EQUIPMENT WITH A CUSTOM "CLASS" VALUE               //////////
+//////////////////////////////////////////////////////////////////////
+var customClass = {
+    'armor_special_1'  : 'contributor',
+    'head_special_1'   : 'contributor',
+    'shield_special_1' : 'contributor',
+    'weapon_special_1' : 'contributor',
+    'armor_special_0'   : 'kickstarter',
+    'head_special_0'    : 'kickstarter',
+    'shield_special_0'  : 'kickstarter',
+    'weapon_special_0'  : 'kickstarter',
+    'armor_special_ks2019'   : 'kickstarter',
+    'eyewear_special_ks2019' : 'kickstarter',
+    'head_special_ks2019'    : 'kickstarter',
+    'shield_special_ks2019'  : 'kickstarter',
+    'weapon_special_ks2019'  : 'kickstarter',
+};
+
 
 //////////////////////////////////////////////////////////////////////
 ////   RELEASE DATES FOR ENCHANTED ARMOIRE ITEMS       ///////////////
@@ -798,6 +821,7 @@ var images = {
     'weapon_special_ks2019' : 'BackerOnly-Equip-MythicGryphonGlaive.gif',
 };
 
+
 //////////////////////////////////////////////////////////////////////
 ////   WIKI LINKS FOR **SOME** EQUIPMENT PIECES        ///////////////
 ////                                                   ///////////////
@@ -808,8 +832,6 @@ var images = {
 ////   familiar with.                                  ///////////////
 //////////////////////////////////////////////////////////////////////
 var urls = {
-    'armor_special_0' : getString('kickstarter'),
-    'armor_special_1' : getString('contributor_gear'),
     'armor_special_2' : rewardPageUrls[inPageLanguage]['armor_special_2'],
     'armor_special_birthday' : getString('absurd_party_robes'),
     'armor_special_candycane' : getString('winter_special_2014'),
@@ -824,8 +846,6 @@ var urls = {
     'headAccessory_special_springMage' : getString('spring_fling'),
     'headAccessory_special_springRogue' : getString('spring_fling'),
     'headAccessory_special_springWarrior' : getString('spring_fling'),
-    'head_special_0' : getString('kickstarter'),
-    'head_special_1' : getString('contributor_gear'),
     'head_special_candycane' : getString('winter_special_2014'),
     'head_special_nye' : getString('absurd_party_hat'),
     'head_special_ski' : getString('winter_special_2014'),
@@ -835,16 +855,12 @@ var urls = {
     'head_special_springRogue' : getString('spring_fling'),
     'head_special_springWarrior' : getString('spring_fling'),
     'head_special_yeti' : getString('winter_special_2014'),
-    'shield_special_0' : getString('kickstarter'),
-    'shield_special_1' : getString('contributor_gear'),
     'shield_special_ski' : getString('winter_special_2014'),
     'shield_special_snowflake' : getString('winter_special_2014'),
     'shield_special_springHealer' : getString('spring_fling'),
     'shield_special_springRogue' : getString('spring_fling'),
     'shield_special_springWarrior' : getString('spring_fling'),
     'shield_special_yeti' : getString('winter_special_2014'),
-    'weapon_special_0' : getString('kickstarter'),
-    'weapon_special_1' : getString('contributor_gear'),
     'weapon_special_2' : rewardPageUrls[inPageLanguage]['weapon_special_2'],
     'weapon_special_3' : rewardPageUrls[inPageLanguage]['shield_special_goldenknight'],
     'shield_special_goldenknight' : rewardPageUrls[inPageLanguage]['shield_special_goldenknight'],
@@ -893,6 +909,21 @@ var urls = {
     'shield_special_fallWarrior' : getString('fall_special'),
     'shield_special_fallHealer' : getString('fall_special')
 };
+
+
+//////////////////////////////////////////////////////////////////////
+////   WIKI LINKS FOR CUSTOM "CLASS" EQUIPMENT PIECES  ///////////////
+////                                                   ///////////////
+////   This is related to the customClass variable.    ///////////////
+////   They keys here are VALUES from the customClass  ///////////////
+////   variable.                                       ///////////////
+////   The values here are strings for a wiki URL      ///////////////
+////   (similar to the values in the url variable).    ///////////////
+//////////////////////////////////////////////////////////////////////
+var urlsForCustomClassItems = {
+    'kickstarter' : getString('kickstarter'),
+    'contributor' : getString('contributor_gear'),
+}
 
 
 //////////////////////////////////////////////////////////////////////
@@ -1036,6 +1067,10 @@ function parseData() {
                 obj.specialClass = 'wizard';
             }
 
+            if (customClass[obj.key]) {
+                obj.specialClass = customClass[obj.key];
+            }
+
             if (obj.key.match(/takeThis/)) {
                 obj.specialClass = 'Take This';
             }
@@ -1113,6 +1148,10 @@ function parseData() {
         if (!url && obj.key.match(/takeThis/)) {
             url = getString('take_this_challenges');
         }
+        if (!url && customClass[obj.key]) {
+            url = urlsForCustomClassItems[ customClass[obj.key] ] || '';
+        }
+
         if (url) {
             name = '[[' + url + '|' + name + ']]';
         }
@@ -1472,7 +1511,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(last updated 2020-10-25)</span></h1><!-- VERSION -->
+    <span>(last updated 2020-10-30)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
