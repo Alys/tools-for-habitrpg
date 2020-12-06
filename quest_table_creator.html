@@ -90,6 +90,13 @@ var stringsForLanguage = {
         boss_HP:               "boss<br />HP",       // table header: starting health of boss
         boss_strength:         "boss<br />strength", // table header: strength of boss
 
+        rage_name:                "rage<br />name",          // table header: name of boss rage mechanism
+        rage_effects:             "rage<br />effects",       // table header: effects of boss rage
+        rage_bar_size:            "rage<br />bar<br />size", // table header: size of rage bar
+        rageEffect_mpDrain:       "When the Rage bar is full, the Boss will remove the party's Mana.",
+        rageEffect_progressDrain: "When the Rage bar is full, the Boss will set back the party's attack progress.",
+        rageEffect_healing_30:    "When the Rage bar is full, the Boss will heal 30% of its remaining health.",
+
         length:                "length",       // table header (HTML only): the length of time generally taken to complete a quest
         difficulty:            "difficulty",   // table header (HTML only): how difficult a quest is in terms of having to be consistent with your Dailies
         rating:                "rating",       // table header (HTML only): a merge of the length and difficulty
@@ -131,6 +138,7 @@ var stringsForLanguage = {
         easy_quests_heading:   "Easy Quests", // subsection heading used only within this page's instructions
         medium_quests_heading: "Medium Quests", // subsection heading used only within this page's instructions
         hard_quests_heading:   "Hard Quests", // subsection heading used only within this page's instructions
+        rage_quests_heading:   "Rage Quests", // subsection heading used only within this page's instructions
 
         textarea_intro:        "This textarea contains code to produce a Wikia table showing",
         all_quests:            "all quests",
@@ -258,6 +266,7 @@ var templateNamesForLanguage = {
         easy_quests:   "Quest Table Easy",
         medium_quests: "Quest Table Medium",
         hard_quests:   "Quest Table Hard",
+        rage_quests:   "Quest Table Rage",
     },
     'ru': {
         all_quests:    "Таблица квестов",
@@ -611,16 +620,24 @@ function parseData() {
                     ' class="unfilterable" | ' + getString('boss_HP'),
                     ' class="unfilterable" | ' + getString('boss_strength')
                   ];
+    var headersRageExtra = [ ' class="unfilterable" | ' + getString('name'), // also scroll image
+                             ' class="unfilterable" | ' + getString('rage_name'),
+                             ' class="unfilterable" | ' + getString('rage_bar_size'),
+                             ' class="unfilterable" | ' + getString('rage_effects')
+                           ];
 
     var headersHtml = [ getString('name'), getString('availability'), getString('type'), getString('rewards'), getString('GP'), getString('XP'), getString('boss_HP'), getString('boss_strength') ];
     headersHtml.push('<em>' + getString('length') + '</em>', '<em>' + getString('difficulty') + '</em>', '<em>' + getString('rating') + '</em>', '<em>' + getString('release_date') + '</em>');
 
     // table row for each quest:
     var releaseDateNeeded = '';
+    var rageEffectCodeNeeded = '';
     var tableRows    = { 'all':        [],
                          'easy':       [],
                          'medium':     [],
                          'hard':       [],
+                         'rage':       [],
+                         'rageExtra':  [],
                          'questLines': [],
                        };
     var tableRowsHtml    = [];
@@ -630,8 +647,9 @@ function parseData() {
         var questId = questIds[index];
         var quest = allQuests[questId];
         // devData += "    '" + questId + "': startOfTime,\n";
-        var row     = [];
-        var rowHtml = [];
+        var row          = [];
+        var rowRageExtra = [];
+        var rowHtml      = [];
 
         var questName = quest.text;
         if (language === 'en') {
@@ -640,7 +658,9 @@ function parseData() {
 
         var imageLocation = images[questId] || 'Inventory_quest_scroll_' + questId + '.png';
 
-        row.push([ makeUrl(quest.text) + '<br />' + makeImage(imageLocation, questId), 'data-sort-value="' + questName + '"' ]);
+        var cellValue = [ makeUrl(quest.text) + '<br />' + makeImage(imageLocation, questId), 'data-sort-value="' + questName + '"' ];
+        row.push(cellValue);
+        rowRageExtra.push(cellValue);
         rowHtml.push(makeUrl(quest.text, {type:'html'}) + '<br />' + makeImage(imageLocation, questId, {html:true}));
 
         var availability = '';
@@ -861,10 +881,11 @@ function parseData() {
         row.push(droppedXP);
         rowHtml.push(droppedXP);
 
-        var bossHP     = getString('not_applicable');
-        var bossHPSort = 0;
-        var bossStr    = getString('not_applicable');
-        var bossRage   = '';
+        var bossHP              = getString('not_applicable');
+        var bossHPSort          = 0;
+        var bossStr             = getString('not_applicable');
+        var bossHasRage         = false; // NB does not become true for World Bosses
+        var bossRage            = '';
         var questLength         = getString('not_applicable');
         var questLengthDetailed = getString('not_applicable');
         var questDifficulty     = getString('not_applicable');
@@ -872,8 +893,9 @@ function parseData() {
             bossHP     = quest.boss.hp || 0;
             bossHPSort = bossHP;
             bossStr  = quest.boss.str  || 0;
+            bossHasRage = quest.boss.rage && (!quest.category || quest.category !== 'world');
             bossRage = (quest.boss.rage && quest.boss.rage.value) ? +quest.boss.rage.value : 0;
-            if ((!quest.category || quest.category !== 'world')) {
+            if (!quest.category || quest.category !== 'world') {
                 if (bossHP > 999) {
                     questLength = '3. ' + getString('long');
                 }
@@ -990,6 +1012,27 @@ function parseData() {
         row.push(bossStr);
         rowHtml.push(bossStr);
 
+        if (bossHasRage) {
+            rowRageExtra.push(quest.boss.rage.title);
+            rowRageExtra.push(quest.boss.rage.value);
+
+            var effect = '';
+            if (quest.boss.rage.mpDrain) {
+                effect = getString('rageEffect_mpDrain');
+            }
+            if (quest.boss.rage.progressDrain) {
+                effect = getString('rageEffect_progressDrain');
+            }
+            if (quest.boss.rage.healing && quest.boss.rage.healing === 0.3) {
+                effect = getString('rageEffect_healing_30');
+            }
+            if (!effect) {
+                rageEffectCodeNeeded = 'The Quest Table Creator says it needs new code for Rage for "' + quest.key + '".';
+                effect = '&nbsp;';
+            }
+            rowRageExtra.push(effect);
+        }
+
         // So far, `row` contains the table cells for a Wikia table and
         // `rowHtml` contains the same cells for the HTML table.
         // We now add more fields to `rowHtml` to help with analysing the quests (difficulty, etc).
@@ -1014,9 +1057,9 @@ function parseData() {
 
         // We now have the `row` array which contains Wikia code for
         // this quest, and the `rowHtml` array which contain HTML code.
-        // We save the `row` array into one or more collections of
+        // We save the `row` array into one or more sets of
         // quests, depending on the parameters of this quest.
-        // For the HTML table, there is only one collection.
+        // For the HTML table, there is only one set.
 
         if (releaseDate === thisMonth) {
             latestQuestUpdatesNeeded += getString('new_quest') + ': <strong>' + questName + '</strong> -- ' +
@@ -1043,15 +1086,29 @@ function parseData() {
             tableRows.hard.push( convertRow(row) );
             if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('hard_quests_heading'); }
         }
+
+        if (bossHasRage) {
+            tableRows.rage.push( convertRow(row) );
+            tableRows.rageExtra.push( convertRow(rowRageExtra) );
+            if (releaseDate === thisMonth) { latestQuestUpdatesNeeded += ', ' + getString('rage_quests_heading'); }
+        }
+
         if (releaseDate === thisMonth) {
             latestQuestUpdatesNeeded += ".<br />";
         }
     }
+    if (rageEffectCodeNeeded) {
+        latestQuestUpdatesNeeded += '<strong>IMPORTANT: Please go to the <a href="https://habitica.com/groups/guild/9a163b28-ebcf-4e52-87de-5c040ed0f8f8">Wizards of the Wiki</a> guild and post this message:</strong><br /><blockquote>@alys ' + rageEffectCodeNeeded + '</blockquote><br /><br /><br />';
+    }
 
     var questTableHeader = '' +
 '\n{| class="filterable sortable" border="1" cellpadding="2" cellspacing="0" style="width: 100%; text-align: center; background: #F2F2F2; border:5px solid #F2F2F2;"' +
-'\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"' +
-    convertRow(headers, 'th');
+'\n|- style="background: #284C6D; color: #FFFFFF; white-space: nowrap;"';
+
+    var questTableHeaderRageExtra = questTableHeader;
+
+    questTableHeader          += convertRow(headers,          'th');
+    questTableHeaderRageExtra += convertRow(headersRageExtra, 'th');
 
     var questTableFooter = '' +
 '\n|- class="sortbottom"' +
@@ -1165,6 +1222,22 @@ function parseData() {
         tableRows.hard.join("") +
         questTableFooter +
         '</textarea>' +
+
+        '<h2>' + getString('rage_quests_heading') + '</h2>' +
+        '<p>' + getString('textarea_intro') + ' ' + getString('rage_quests') + '. ' + getString('textarea_paste') + ' ' +
+        makeUrl('rage_quests', {template:true, type:'html'}) +
+        '</p><textarea rows="5" cols="100" wrap="off">' +
+        questTableHeader +
+        tableRows.rage.join("") +
+        questTableFooter +
+        '\n' +
+        '<div class="mw-customtoggle-RageDetailsTable wikia-menu-button">Show/Hide the Rage details table.<br /></div>\n' +
+        '<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-RageDetailsTable">\n' +
+        questTableHeaderRageExtra +
+        tableRows.rageExtra.join("") +
+        questTableFooter +
+        '</textarea>' +
+        '</div>' +
 
         '<p>This is an HTML version of the table that shows all quests (but with some differences to the tables you\'ll find on the wiki):</p>' +
         ((TEST_MODE) ? 'START OF HTML TABLE ' + new Date() : '') +
@@ -1467,7 +1540,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 2020-11-19)</span></h1><!-- VERSION -->
+    <span>(last updated 2020-12-06)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
