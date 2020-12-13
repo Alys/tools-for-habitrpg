@@ -89,7 +89,7 @@ var tavern;   // holds tavern data
 var party;    // holds party data
 var user;     // holds user's data
 var tasksFromDb;          // holds user's tasks except for ...
-var completedTodosFromDb; // completed To-Dos
+var completedTodosFromDb; // completed To Do's
 
 
 //////////////////////////////////////////////////////////////////////
@@ -308,7 +308,7 @@ function fetchData() {
         error: fetchFailure
     });
 
-    // fetch the user's tasks (except completed To-Dos):
+    // fetch the user's tasks (except completed To Do's):
     $.ajax({
         url: serverUrl + serverPathTasks,
         type: 'GET',
@@ -323,7 +323,7 @@ function fetchData() {
         error: fetchFailure
     });
 
-    // fetch the user's completed To-Dos:
+    // fetch the user's completed To Do's:
     $.ajax({
         url: serverUrl + serverPathCompletedTodos,
         type: 'GET',
@@ -630,7 +630,7 @@ function formatAndDisplayTOC() {
             'HEADING',
             // 'HEADING Dailies',
                 'dailiesHistory', 'dailiesIncomplete',
-            // 'HEADING To-Dos',
+            // 'HEADING To Do's',
                 'todosDated', 'todosCompleted',
             'HEADING Drops, Quests, Damage', 'dropsToday',
                 'questProgress', 'questsCompleted', 'damageDailies', 'statsAndStreaks',
@@ -889,7 +889,7 @@ function getCurrentHealth() {
 function collateAndDisplayTaskData() {
     // Set up data structures for storing task information:
     var taskOrder = 0; // default order of tasks in Habitica
-    var allTasks = []; // except completed To-Dos
+    var allTasks = []; // except completed To Do's
     var untaggedTasks = {'habits':[], 'dailies':[], 'todos':[], 'rewards':[]};
     var template = {'total':0, 'con':0, 'int':0, 'per':0, 'str':0};
     var countTasks = {
@@ -1307,7 +1307,7 @@ function collateAndDisplayTaskData() {
         obj.notes = renderFormattedText(obj.notes,{'setParaClass':'taskNote'});
         obj.attributePretty = obj.attribute.toUpperCase();
         obj.typePretty   = upperCaseFirst(
-                (obj.type == 'todo') ? 'To-Do' : obj.type );
+                (obj.type == 'todo') ? 'To Do' : obj.type );
         obj.valueRounded = Math.round(obj.value * 100) / 100;
         obj.magnitude    = Math.abs(obj.valueRounded);
         obj.order        = ++taskOrder;
@@ -1445,11 +1445,11 @@ function collateAndDisplayTaskData() {
 
 
     function taskOverview() { // Displays all tasks of all kinds.
-        // Also shows one random To-Do:
+        // Also shows one random To Do:
         var randomTodoHtml = '';
         if (todos.length > 0) {
             var randomTodo = todos[Math.floor(Math.random() * todos.length)];
-            randomTodoHtml = '<h3>Random To-Do</h3><p>' +
+            randomTodoHtml = '<h3>Random To Do</h3><p>' +
                              randomTodo.text + '</p>';
         }
 
@@ -1462,7 +1462,7 @@ function collateAndDisplayTaskData() {
                    'html':
 '<div id="taskOverviewExplanationToggle" class="showHideToggle" data-target="taskOverviewExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="taskOverviewExplanation" class="hide">' +
-'   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (Habits, Dailies, and To-Dos), with their ' + wiki('Advanced Options', 'Stats') + ' and ' + wiki('Task Value', 'colours, values, and magnitudes') + ' (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in Habitica.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all Habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</p>' +
+'   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (Habits, Dailies, and To Do\'s), with their ' + wiki('Advanced Options', 'Stats') + ' and ' + wiki('Task Value', 'colours, values, and magnitudes') + ' (value and magnitude are useful for choosing tasks to cast skills on). Completed To Do\'s are not shown; completed Dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in Habitica.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all Habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your To Do list. Re-fetch your data to see a different random To Do.</p>' +
 '   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
 '</div>' +
 '<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs and createdAt strings">toggle developer data</div>' +
@@ -1613,7 +1613,7 @@ randomTodoHtml
     function taskStatistics() {
         var title = 'Task Statistics';
         var html = '<p>This table shows the number of tasks you have ' +
-            'for each kind of task (Habits, Dailies, To-Dos) ' +
+            'for each kind of task (Habits, Dailies, To Do\'s) ' +
             'and the number of tasks assigned to each ' +
             wiki('Character Stats', 'Stat') + '.';
         if (exampleTaskType && exampleAttribute) {
@@ -1641,8 +1641,8 @@ randomTodoHtml
             '<table><tr>' +
             '<th>Stat</th><th>Habits</th>' +
             '<th>Dailies - Due</th><th>Dailies - All</th>' +
-            '<th>To-Dos - Incomplete</th><th>To-Dos - Complete *</th>' +
-            '<th>To-Dos - All</th><th>Total Tasks for each Stat</th>' +
+            '<th>To Do\'s - Incomplete</th><th>To Do\'s - Complete *</th>' +
+            '<th>To Do\'s - All</th><th>Total Tasks for each Stat</th>' +
             '</tr>';
         $.each(['con','int','per','str','total'], function(index, attr){
             html += '<tr' +
@@ -1659,13 +1659,13 @@ randomTodoHtml
             html += '</tr>';
         });
         html += '</table>' +
-            '<p class="lowlight"><strong>*</strong> Your completed To-Dos ' +
+            '<p class="lowlight"><strong>*</strong> Your completed To Do\'s ' +
             'are automatically archived after three days to improve ' +
             'Habitica\'s speed and so most of them cannot be seen in ' +
             'Habitica. However, they can be exported using the ' +
             wiki('Data Export', '"User Data" export option') +
             '. This total number of completed ' +
-            'To-Dos includes those archived ones.</p>' +
+            'To Do\'s includes those archived ones.</p>' +
             '<p style="margin-top:2em">You have <span class="highlight"> ' +
             countTasks['rewards']['total'] + ' ' +
             pluralise('Reward', countTasks['rewards']['total']) +
@@ -1703,10 +1703,10 @@ randomTodoHtml
 
 
     function untaggedTasksSection() {
-        var html = formatUntaggedTasks('Habits',  untaggedTasks['habits' ]) +
-                   formatUntaggedTasks('Dailies', untaggedTasks['dailies']) +
-                   formatUntaggedTasks('To-Dos',  untaggedTasks['todos'  ]) +
-                   formatUntaggedTasks('Rewards', untaggedTasks['rewards']);
+        var html = formatUntaggedTasks('Habits',   untaggedTasks['habits' ]) +
+                   formatUntaggedTasks('Dailies',  untaggedTasks['dailies']) +
+                   formatUntaggedTasks('To Do\'s', untaggedTasks['todos'  ]) +
+                   formatUntaggedTasks('Rewards',  untaggedTasks['rewards']);
         if (! html) {
             return;
         }
@@ -2332,7 +2332,7 @@ wiki('Tavern', 'resting in the inn') +
 
     function todosDated() {
         var id      = 'todosDatedSection';
-        var title   = 'To-Dos with Dates';
+        var title   = 'To Do\'s with Dates';
         var orderId = 'todosDated';
 
         var today = myDateConverter(new Date(), 'medium');
@@ -2346,7 +2346,7 @@ wiki('Tavern', 'resting in the inn') +
         for (var i=0,ic=todos.length; i<ic; i++) {
             var obj = todos[i];
             var challenge = (obj.challenge && obj.challenge.id)
-                          ? ' <span class="challenge">(challenge To-Do)</span>'
+                          ? ' <span class="challenge">(challenge To Do)</span>'
                           : '';
             var dateClass = 'notDue';
             var dateString = '';
@@ -2356,7 +2356,7 @@ wiki('Tavern', 'resting in the inn') +
                     dateClass = 'due';
                     countDue++;
                     if (! challenge || date > lastWeek) {
-                        // An overdue To-Do is not dangerous if it is from a
+                        // An overdue To Do is not dangerous if it is from a
                         // challenge and is more than a week old (because the
                         // user probably doesn't care about it).
                         dangerTodoFound = true;
@@ -2379,13 +2379,13 @@ wiki('Tavern', 'resting in the inn') +
         var html = '<ul class="padded">' +
                    itemsDated.sort().join('') +
                    '</ul>' +
-                   '<hr /><h2>To-Dos without Dates</h2>' +
+                   '<hr /><h2>To Do\'s without Dates</h2>' +
                    '<ul class="padded">' +
                    itemsNotDated.join('') +
                    '</ul>';
         if (countDue) {
-            DASHBOARD[orderId] = {'label': 'To-Dos Due Today',
-                'hoverText': 'number of To-Dos due today or overdue ' +
+            DASHBOARD[orderId] = {'label': 'To Do\'s Due Today',
+                'hoverText': 'number of To Do\'s due today or overdue ' +
                              '(click for more information)',
                 'target': id,
                 'value': countDue,
@@ -2398,9 +2398,9 @@ wiki('Tavern', 'resting in the inn') +
 
     function todosCompletedTable() {
         var id      = 'todosCompletedSection';
-        var title   = 'To-Dos Completed';
+        var title   = 'To Do\'s Completed';
         var orderId = 'todosCompleted';
-        var html = '<p>This shows all of your completed To-Dos that Habitica has in its archive (not necessarily all the To-Dos that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/user/settings/data-export">Data Export</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
+        var html = '<p>This shows all of your completed To Do\'s that Habitica has in its archive (not necessarily all the To Do\'s that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/user/settings/data-export">Data Export</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
         '<table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
@@ -2859,9 +2859,9 @@ wiki('Tavern', 'resting in the inn') +
                         reddestHabit.text + '</span> Habit or your ' +
                         '<span class="taskName">' +
                         reddestDaily.text + '</span> Daily). <br />' +
-                        'You can also cast it on a red To-Do if you want ' +
+                        'You can also cast it on a red To Do if you want ' +
                         'to receive smaller rewards when you complete that ' +
-                        'To-Do.<br />The "Task Overview" section will show ' +
+                        'To Do.<br />The "Task Overview" section will show ' +
                         'you your reddest tasks (sort the table by value).';
                 if ((quest.content && quest.content.boss) || tavernBoss) {
                     var questIncrease = Math.round(
@@ -2874,7 +2874,7 @@ wiki('Tavern', 'resting in the inn') +
                             'damage the ' +
                             bossesWord + ' but don\'t want to adjust the ' +
                             'rewards you would receive for a task, then ' +
-                            'cast the skill on any completed To-Do or on ' +
+                            'cast the skill on any completed To Do or on ' +
                             'your bluest task (your ' +
                             '<span class="taskName">' +
                             bluestTask.text + '</span> ' +
@@ -4676,7 +4676,7 @@ function convertTasksToApiV2Format() {
             user.todos.push(allV3Tasks[id]);
         }
         else {
-            console.log("missing To-Do", id);
+            console.log("missing To Do", id);
         }
     });
     $.each(completedTodosFromDb, function(index, obj){
@@ -5545,9 +5545,10 @@ ul#tableOfContents > li {
                 <ul>
                     <li>Changed "attribute" to "stat" in all visible text and wiki links (this changed in Habitica a long time ago).</li>
                     <li>Changed "spell" to "Skill" in all visible text (another old change that had been missed here in a couple of places).</li>
+                    <li>Changed "To-Do" and "To-Dos" to "To Do" and "To Do's" in all visible text to match a recent change in Habitica.</li>
                     <li>Changed wiki Q&A board link to Habitica Help guild and changed name of Tavern from Talk to Chat (also ancient changes, previously forgotten).</li>
                     <li>Adjusted the "Starting with a Section Open" text to clarify (I hope!) that the links are pureply for bookmarking, not for use when you're already logged in.</li>
-                    <li>Added notes to "What's On This Page?" for Tasks Untagged, To-Dos with Dates, and Missing Equipment to say the section is shown only when relevant.</li>
+                    <li>Added notes to "What's On This Page?" for Tasks Untagged, To Do's with Dates, and Missing Equipment to say the section is shown only when relevant.</li>
                     <li>"Damage from Dailies" section: removed info about damage being greater if you haven't logged in for 2+ days (Habitica no longer works like that).</li>
                     <li>
                 </li>
@@ -5788,7 +5789,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Feature:
                 <ul>
-                    <li>The completed To-Dos section now shows all completed To-Dos. This might result in the tool being slower for some people. If it causes significant problems, <a href="mailto:lady_alys@oldgods.net">email Alys</a>.</li>
+                    <li>The completed To Do's section now shows all completed To Do's. This might result in the tool being slower for some people. If it causes significant problems, <a href="mailto:lady_alys@oldgods.net">email Alys</a>.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -5912,7 +5913,7 @@ ul#tableOfContents > li {
             </li>
             <li>Documentation:
                 <ul>
-                    <li>Capitalised all (I hope) instances of "Habit", "Daily", "To-Do", and "Reward", and all class names (e.g., "Rogue").</li>
+                    <li>Capitalised all (I hope) instances of "Habit", "Daily", "To Do", and "Reward", and all class names (e.g., "Rogue").</li>
                 </ul>
             </li>
         </ul></dd>
@@ -6100,9 +6101,9 @@ ul#tableOfContents > li {
                         <li>A <strong><a href="http://habitica.wikia.com/wiki/Difficulty">Difficulty</a></strong> column.</li>
                         <li><strong>Habit directions</strong>: plus and minus buttons for Habits in the "task" column.</li>
                         <li><strong>Daily repeat days</strong> in the "task" column to help you manage <a href="http://habitica.wikia.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a>.</li>
-                        <li><strong>To-Do due dates</strong> in the "task" column.</li>
+                        <li><strong>To Do due dates</strong> in the "task" column.</li>
                     </ul></li>
-                    <li>The <strong>To-Dos with Dates</strong> section now includes a separate sub-section for To-Dos without dates, in case you need to refer to your undated To-Dos while examining your dated ones. (This To-Dos with Dates section appears only if you have one or more dated To-Dos, but you can always see all To-Dos in the Task Overview, which provides sorting, searching, and filtering.)</li>
+                    <li>The <strong>To Do's with Dates</strong> section now includes a separate sub-section for To Do's without dates, in case you need to refer to your undated To Do's while examining your dated ones. (This To Do's with Dates section appears only if you have one or more dated To Do's, but you can always see all To Do's in the Task Overview, which provides sorting, searching, and filtering.)</li>
                 </ul>
             </li>
         </ul></dd>
@@ -6310,7 +6311,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed to-dos that HabitRPG has in its archive. The to-dos' notes and completion dates are included.</li>
+                    <li><span class="subheading">To Do's Completed</span>: A sortable, filterable table containing all of your completed to-dos that HabitRPG has in its archive. The to-dos' notes and completion dates are included.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -6327,7 +6328,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>(2.1.1a) For "To-Dos with Dates", if the only "due" to-dos are from challenges and are more than a week old, then the dashboard tile will be yellow rather than red, since you're likely to not care so much about those to-dos.</li>
+                    <li>(2.1.1a) For "To Do's with Dates", if the only "due" to-dos are from challenges and are more than a week old, then the dashboard tile will be yellow rather than red, since you're likely to not care so much about those to-dos.</li>
                     <li>At the bottom of the <span class="subheading">Task Overview</span> section, you will now find one randomly-selected item from your to-do list. Re-fetch your data to see a different random to-do.</li>
                 </ul>
             </li>
@@ -6336,7 +6337,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">To-Dos with Dates</span>: A list of all to-dos that have been given due dates, sorted by date. If there are any to-dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
+                    <li><span class="subheading">To Do's with Dates</span>: A list of all to-dos that have been given due dates, sorted by date. If there are any to-dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are.</li>
                     <li><span class="subheading">Current Health</span> dashboard tile now turns red when your expected damage is greater than your health.</li>
                 </ul>
             </li>
@@ -6706,15 +6707,15 @@ ul#tableOfContents > li {
     <div>
         <h2>What's On This Page?</h2>
         <ul>
-            <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To-Dos, with their <a href="http://habitica.fandom.com/wiki/Advanced_Options">Stats</a> and <a href="http://habitica.fandom.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</li>
-            <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To-Dos, and Rewards you have in total, and how many are assigned to each <a href="http://habitica.fandom.com/wiki/Advanced_Options">Stat</a>. If you have task-based <a href="http://habitica.fandom.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
-            <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To-Dos, or Rewards that have not been <a href="http://habitica.fandom.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed. This section is shown only if you have untagged tasks.</li>
+            <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To Do's, with their <a href="http://habitica.fandom.com/wiki/Advanced_Options">Stats</a> and <a href="http://habitica.fandom.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To Do's are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To Do list. Re-fetch your data to see a different random To Do.</li>
+            <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To Do's, and Rewards you have in total, and how many are assigned to each <a href="http://habitica.fandom.com/wiki/Advanced_Options">Stat</a>. If you have task-based <a href="http://habitica.fandom.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
+            <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To Do's, or Rewards that have not been <a href="http://habitica.fandom.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed. This section is shown only if you have untagged tasks.</li>
             <li><span class="subheading">Habit Trends</span>: An interactive chart that provides a visual representation of the trends in your Habits. It gives you an idea of which Habits you are reinforcing, and which are being neglected.</li>
             <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your Habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
             <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your Dailies.</li>
             <li><span class="subheading">Dailies Incomplete</span>: A list of Dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitica.fandom.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
-            <li><span class="subheading">To-Dos with Dates</span>: A list of all To-Dos that have been given due dates, sorted by date. If there are any To-Dos due today or overdue, a red tile will appear in the dashboard to tell you how many there are. This section is shown only if you have dated To Do's.</li>
-            <li><span class="subheading">To-Dos Completed</span>: A sortable, filterable table containing all of your completed To-Dos that Habitica has in its archive. The To-Dos' notes and completion dates are included.</li>
+            <li><span class="subheading">To Do's with Dates</span>: A list of all To Do's that have been given due dates, sorted by date. If there are any To Do's due today or overdue, a red tile will appear in the dashboard to tell you how many there are. This section is shown only if you have dated To Do's.</li>
+            <li><span class="subheading">To Do's Completed</span>: A sortable, filterable table containing all of your completed To Do's that Habitica has in its archive. The To Do's' notes and completion dates are included.</li>
             <li><span class="subheading">Drops Received Today</span>: The number of <a href="http://habitica.fandom.com/wiki/Drops">drops</a> you have received so far today will be shown, along with your <a href="http://habitica.fandom.com/wiki/Drops#Drop-Cap">drop-cap</a>.</li>
             <li><span class="subheading">Quest Progress</span>: If you are on a boss or collection <a href="http://habitica.fandom.com/wiki/Quests">quest</a>, you'll see an estimate of how much progress you have made so far today, as well as the boss's HP (taken from your party's page, so this does not include any reduction from the damage you or other players have caused since the last time a party member's cron ran).</li>
             <li><span class="subheading">Quests Completed and Not Completed</span>: A table listing of all your completed quests and how many times you've done each one. You can sort by quest name or number of completions. Under the table is a list of quests you have not completed (World Boss quests are not included in the list).</li>
@@ -6739,8 +6740,8 @@ ul#tableOfContents > li {
             <li><a href="habitrpg_user_data_display.html?sectionOpen=habitHistorySection&uuid=">Habit History</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=dailiesHistorySection&uuid=">Dailies History</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=dailiesIncompleteSection&uuid=">Dailies Incomplete</a></li>
-            <li><a href="habitrpg_user_data_display.html?sectionOpen=todosDatedSection&uuid=">To-Dos with Dates</a></li>
-            <li><a href="habitrpg_user_data_display.html?sectionOpen=todosCompletedSection&uuid=">To-Dos Completed</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=todosDatedSection&uuid=">To Do's with Dates</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=todosCompletedSection&uuid=">To Do's Completed</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=dropsTodaySection&uuid=">Drops Received Today</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=questProgressSection&uuid=">Quest Progress</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=questsCompletedSection&uuid=">Quests Completed and Not Completed</a></li>
@@ -6771,11 +6772,11 @@ ul#tableOfContents > li {
             <li>For Task Overview, show how much XP, GP, and MP you will gain from completing each task.</li>
             <li>Add tags to the Task Overview and possibly other sections.</li>
             <li>For Task Overview and the Dailies sections, show the dates that tasks were last completed to assist with keeping track of monthly and bi-weekly tasks.</li>
-            <li>Modify the "Random To-Do" function to also display a random Daily from those that have not been completed.</li>
-            <li>Create a "Random Task" button that displays a randomly-selected To-Do and Daily near the top of the page. Allow the button to be clicked to show different tasks without the whole page having to be refetched. Remove the random task currently shown at the bottom of the Task Overview section.</li>
+            <li>Modify the "Random To Do" function to also display a random Daily from those that have not been completed.</li>
+            <li>Create a "Random Task" button that displays a randomly-selected To Do and Daily near the top of the page. Allow the button to be clicked to show different tasks without the whole page having to be refetched. Remove the random task currently shown at the bottom of the Task Overview section.</li>
             <li>For Habit History and Untagged Tasks, apply the "longContent" class if there are more than x number of items.</li>
 <!--
-I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more Habits then last week or: how many red/orange/yellow To-Dos are done this month etc. --lightsaber
+I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more Habits then last week or: how many red/orange/yellow To Do's are done this month etc. --lightsaber
 
 @lightsaber Now those are some interesting ideas! Some I could add to my tool (anything that uses current data, or very recent data - basically any data available from the [API](https://habitica.com/static/api) ). Others could be created with a tool that also reads [exported historical data](https://habitica.com/user/settings/data-export), although the level of detail that you might want might not be stored permanently in that data. If only I had unlimited time....
 -->
