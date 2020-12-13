@@ -1952,7 +1952,7 @@ randomTodoHtml
             }
         }
         else {
-            html += '<p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span id="damageDailiesExplanationToggle" class="showHideToggle" data-target="damageDailiesExplanation" data-linktext="explanation">show explanation</span></p><ul id="damageDailiesExplanation" class="padded hide"><li>These estimates have been accurate during testing but your usage of Habitica might involve factors that were not considered, and so this information cannot be guaranteed to be correct.</li><li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you will not die.</li><li>If you have not logged in to Habitica for more than a day, the damage that you (and your fellow quest participants) will take will be <span class="highlight">much greater</span> than shown here.</li><li class="showHideToggle lowlight" data-target="damageDailiesExplanation" data-resettoggletext="damageDailiesExplanationToggle" style="list-style-type: none; padding: 8px 0 20px 0">hide explanation</li></ul>';
+            html += '<p class="lowlight">Be cautious about using this to prevent death! &nbsp; <span id="damageDailiesExplanationToggle" class="showHideToggle" data-target="damageDailiesExplanation" data-linktext="explanation">show explanation</span></p><ul id="damageDailiesExplanation" class="padded hide"><li>These estimates have been accurate during testing but your usage of Habitica might involve factors that were not considered, and so this information cannot be guaranteed to be correct.</li><li>If your health is low, it is wise to protect yourself from death even if these estimates indicate that you will not die.</li><li class="showHideToggle lowlight" data-target="damageDailiesExplanation" data-resettoggletext="damageDailiesExplanationToggle" style="list-style-type: none; padding: 8px 0 20px 0">hide explanation</li></ul>';
             var damageToUser  = 0;
             var damageToParty = 0;
             $.each(dailies, function(index, obj){
@@ -2064,9 +2064,6 @@ randomTodoHtml
         var orderId = 'dailiesIncomplete';
         // sectionOpen = id; // TST
 
-        if (sleeping) {
-            return; // can't do Dailies while resting in inn
-        }
         var dailiesIncomplete     = [];
         var dailiesIncompleteGrey = [];
         for (var i=0,ic=dailies.length; i<ic; i++) {
@@ -5539,6 +5536,11 @@ ul#tableOfContents > li {
 
         <dt>9.10 <span class="date">2020-12-13</span></dt>
         <dd><ul>
+            <li>Code:
+                <ul>
+                    <li>"Dailies Incomplete": allowed it to be shown when you are Resting in the Inn (used to be that you couldn't do Dailies at all in Habitica when Resting).</li>
+                </ul>
+            </li>
             <li>Documentation:
                 <ul>
                     <li>Changed "attribute" to "stat" in all visible text and wiki links (this changed in Habitica a long time ago).</li>
@@ -5546,6 +5548,7 @@ ul#tableOfContents > li {
                     <li>Changed wiki Q&A board link to Habitica Help guild and changed name of Tavern from Talk to Chat (also ancient changes, previously forgotten).</li>
                     <li>Adjusted the "Starting with a Section Open" text to clarify (I hope!) that the links are pureply for bookmarking, not for use when you're already logged in.</li>
                     <li>Added notes to "What's On This Page?" for Tasks Untagged, To-Dos with Dates, and Missing Equipment to say the section is shown only when relevant.</li>
+                    <li>"Damage from Dailies" section: removed info about damage being greater if you haven't logged in for 2+ days (Habitica no longer works like that).</li>
                     <li>
                 </li>
                 </ul>
