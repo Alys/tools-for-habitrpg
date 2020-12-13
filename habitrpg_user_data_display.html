@@ -1025,7 +1025,7 @@ function collateAndDisplayTaskData() {
                 if (obj.attribute != 'str') {
                     exampleFound = true; // We won't look for a better example
                     // later; we are happy with this one. We prefer to not use
-                    // strength because a less-common attribute will probably
+                    // strength because a less-common Stat will probably
                     // provide a clearer example.
                 }
             }
@@ -1462,7 +1462,7 @@ function collateAndDisplayTaskData() {
                    'html':
 '<div id="taskOverviewExplanationToggle" class="showHideToggle" data-target="taskOverviewExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="taskOverviewExplanation" class="hide">' +
-'   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (Habits, Dailies, and To-Dos), with their ' + wiki('Advanced Options', 'attributes') + ' and ' + wiki('Task Value', 'colours, values, and magnitudes') + ' (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in Habitica.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all Habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</p>' +
+'   <p class="lowlight">NOTE: This feature contains advanced JavaScript and layout options which will probably perform differently in different browsers. If you experience problems, ' + tellMe + '.</p><p>The table below shows your tasks (Habits, Dailies, and To-Dos), with their ' + wiki('Advanced Options', 'Stats') + ' and ' + wiki('Task Value', 'colours, values, and magnitudes') + ' (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are.</p><ul class="padded"><li><span class="subheading">Sorting:</span> Click on a column heading to sort the table by that column. Then, hold down your shift key and click on other column headings for a multi-column sort. The starting sort order is the order of your tasks in Habitica.</li><li><span class="subheading">Filtering:</span> Use the drop-down menus ("type", "attr.", "colour") to filter the list. Select multiple items from one menu to filter for tasks matching <span class="highlight">any</span> of those items (widen the filter). Select items from a different menu to narrow the filter. Click on the blue links that you\'ll see after you\'ve chosen a filter to remove that filter.</li><li><span class="subheading">Searching:</span> Type words in the search box to show only tasks containing all of those words. This is <span class="highlight">not</span> just for task titles; you can search on any field. The words do not have to be consecutive. Examples:<ul><li>Search for "car wash" to find the task "wash the car"</li><li>Search for "balloon habit" to find all Habits that contain the word "balloon".</li><li>Search for "14-01-30" (or "2014-01-30" or "01-30") to find tasks created on that day.</li></ul></li><li><span class="subheading">What dark magic is this?</span> <a href="http://datatables.net/">Data Tables</a> (a plug-in for jQuery, which adds advanced interaction controls to any HTML table). <a href="http://legacy.datatables.net/extras/thirdparty/ColumnFilterWidgets/DataTables/extras/ColumnFilterWidgets/">ColumnFilterWidgets</a> (an add-on for DataTables, which creates filtering widgets based on the data in table columns).</li></ul><p>Underneath this table, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</p>' +
 '   <div class="showHideToggle closer" data-target="taskOverviewExplanation" data-resettoggletext="taskOverviewExplanationToggle">hide explanation</div>' +
 '</div>' +
 '<div id="taskOverviewDeveloperDataToggle" class="showHideToggleClass" title="show/hide task IDs and createdAt strings">toggle developer data</div>' +
@@ -1615,7 +1615,7 @@ randomTodoHtml
         var html = '<p>This table shows the number of tasks you have ' +
             'for each kind of task (Habits, Dailies, To-Dos) ' +
             'and the number of tasks assigned to each ' +
-            wiki('Character Attributes', 'attribute') + '.';
+            wiki('Character Stats', 'Stat') + '.';
         if (exampleTaskType && exampleAttribute) {
             html += ' For example, you have ' +
                     countTasks[exampleTaskType]['total'] + ' ' +
@@ -1635,14 +1635,14 @@ randomTodoHtml
             html += ' been assigned to ' +
                     exampleAttribute.toUpperCase() + '.';
         }
-        html += ' Note that attributes on tasks are only relevant if you ' +
+        html += ' Note that Stats on tasks are only relevant if you ' +
             'have task-based ' + wiki('Automatic Allocation')
             + ' turned on.</p>' +
             '<table><tr>' +
-            '<th>Attribute</th><th>Habits</th>' +
+            '<th>Stat</th><th>Habits</th>' +
             '<th>Dailies - Due</th><th>Dailies - All</th>' +
             '<th>To-Dos - Incomplete</th><th>To-Dos - Complete *</th>' +
-            '<th>To-Dos - All</th><th>Total Tasks for each Attribute</th>' +
+            '<th>To-Dos - All</th><th>Total Tasks for each Stat</th>' +
             '</tr>';
         $.each(['con','int','per','str','total'], function(index, attr){
             html += '<tr' +
@@ -1680,9 +1680,9 @@ randomTodoHtml
                 '<p>When you use task-based ' +
                 wiki('Automatic Allocation', 'auto-allocation') +
                 ' you gain and lose points of training for the ' +
-                wiki('Character Attributes', 'attributes') +
+                wiki('Character Stats', 'Stats') +
                 ' you\'ve assigned to your tasks. When you ' +
-                'level up, the attribute with the most training gets a ' +
+                'level up, the Stat with the most training gets a ' +
                 'point assigned, and all training resets to 0 for the ' +
                 'next level. Your current training points are:</p>' +
                 '<table>';
@@ -2614,27 +2614,27 @@ wiki('Tavern', 'resting in the inn') +
                    'now. It also describes the skills belonging to other ' +
                    'classes and the effect they would have if you changed ' +
                    'class but kept your current ' +
-                   wiki('Character_Attributes', 'attributes') +
-                   ' (although in reality, your attributes will usually' +
+                   wiki('Character Stats', 'Stats') +
+                   ' (although in reality, your Stats will usually' +
                    ' change at least a little when you change class).';
         }
         html += ' The wiki has more information about ' +
                 wiki('Skills', 'skills') + ' and ' +
                 wiki('Buff', 'buffs') + '.</p>';
         html += '<p>Most of the skills can be made stronger by' +
-                ' increasing your attributes. Some skills are made stronger' +
+                ' increasing your Stats. Some skills are made stronger' +
                 ' by increasing only your <strong>unbuffed</strong>' +
-                ' attributes - i.e., your attributes gained from equipment' +
-                ' or attribute points. Buffs that you have already gained' +
+                ' Stats - i.e., your Stats gained from equipment' +
+                ' or Stat Points. Buffs that you have already gained' +
                 ' will not make those skills stronger.</p>';
 
         var nowMP        = Math.round(user.stats.mp  * 10) / 10;
         var maxMP        = 2 * computedStats['int'] + 30;
         var maxMPNoBuffs = 2 * computedStatsNoBuffs['int'] + 30; // XXX add perfect day buff
         var cronMP = (maxMP > 100) ? maxMP/10 : 10;
-        // XXX add unbuffed stats, put into table, add attribute links
+        // XXX add unbuffed stats, put into table, add Stat links
         html += '<p>Your current ' +
-                wiki('Character_Attributes', 'attributes') + ' and ' +
+                wiki('Character Stats', 'Stats') + ' and ' +
                 wiki('Mana Points', 'mana') + ' values are:</p>' +
                 '<ul class="attributes">' +
                 '<li><label>Strength (STR):</label> '     +
@@ -3609,7 +3609,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
               'sTitle': 'boosts stats?', 'sClass': 'center',
             },
             { 'mData' : 'attributesString',    'bVisible': false,
-              'sTitle': 'attributes', 'sClass': 'center',
+              'sTitle': 'stats', 'sClass': 'center',
             },
             // { 'mData' : 'key',        'sClass': 'center',
               // 'sTitle': 'key',
@@ -3853,10 +3853,10 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
         var html =
 '<div id="equipmentRecommendationsExplanationToggle" class="showHideToggle" data-target="equipmentRecommendationsExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="equipmentRecommendationsExplanation" class="hide">' +
-'    <p>This section helps you choose equipment to maximise specific attributes (for example, to maximise INT and CON before casting a healing spell).</p><p>By default, the table below shows you only the best equipment you have for each attribute. The attribute values include the class bonus for items belonging to your current class.</p><p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "attributes" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page).</p><p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the attribute you care most about, then highlight the top one or more items, and then if you care about another attribute too, re-sort by it and select more items.</p><p>All highlighted items are listed in a summary underneath the table, with the total attributes provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p><p>Items that you are currently wearing are marked with *</p>' +
+'    <p>This section helps you choose equipment to maximise specific Stats (for example, to maximise INT and CON before casting a healing spell).</p><p>By default, the table below shows you only the best equipment you have for each Stat. The Stat values include the class bonus for items belonging to your current class.</p><p>You can sort the table by clicking on a column heading, or filter it using the "type", "class", and "stats" drop-down menus or the "search" text box (for more information about these features read the explanation for the Task Overview section on this page).</p><p>In addition, you can click on any row to highlight that row. This will also grey-out all other equipment that cannot be used at the same time as the item you have highlighted. However, you can still click on a grey row to change the highlighting. So, to use this table, try sorting it by the Stat you care most about, then highlight the top one or more items, and then if you care about another Stat too, re-sort by it and select more items.</p><p>All highlighted items are listed in a summary underneath the table, with the total Stats provided by those items. Next to the summary, you will find a button to clear all of your highlighted selections (it also clears the summary, so make note of it first if you need to).</p><p>Items that you are currently wearing are marked with *</p>' +
 '   <div class="showHideToggle closer" data-target="equipmentRecommendationsExplanation" data-resettoggletext="equipmentRecommendationsExplanationToggle">hide explanation</div>' +
 '</div>' +
-'<div id="qualityFilter"><p id="onlyBestIsShowing">Only your best equipment is shown below. To maximise your attributes, choose from only those items.<br /><input id="showAllEquipment" type="submit" value="Show All of My Equipment" /></p><p id="allEquipmentIsShowing">All of your equipment is shown below. Use the "quality" drop-down menu to show only the best.</p></div>' +
+'<div id="qualityFilter"><p id="onlyBestIsShowing">Only your best equipment is shown below. To maximise your Stats, choose from only those items.<br /><input id="showAllEquipment" type="submit" value="Show All of My Equipment" /></p><p id="allEquipmentIsShowing">All of your equipment is shown below. Use the "quality" drop-down menu to show only the best.</p></div>' +
 '<table id="equipTable"></table>' +
 '<div id="equipmentChosen"></div>' +
 '<div class="clear"></div>';
@@ -3933,7 +3933,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
               'sTitle': 'STR',        'asSorting': ['desc','asc'],
             },
             { 'mData' : 'attributesString',    'bVisible': false,
-              'sTitle': 'attributes', 'sClass': 'center',
+              'sTitle': 'stats', 'sClass': 'center',
             },
             { 'mData' : 'quality',    'sClass': 'center',
               'sTitle': 'quality',
@@ -4185,10 +4185,10 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
                         // Use item's stats to work out if it's the best we've
                         // found so far for this type, and if so, record its data
                         // (overwriting previously-found, less-good items).
-                        // Also check to see how many kinds of attributes it
+                        // Also check to see how many kinds of Stats it
                         // gives - if more than two, we want it regardless of
-                        // whether any of the attributes are best (gear that gives
-                        // three or four attributes can be used for balanced stats).
+                        // whether any of the Stats are best (gear that gives
+                        // three or four Stats can be used for balanced stats).
                         var attributeCount = 0;
                         $.each(['con','int','per','str'], function(index, attr){
                             // NB: the adjustment above from 'weapon' to
@@ -4203,7 +4203,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
                                 attributeCount++
                             }
                         });
-                        if (attributeCount > 2) { // boosts more than 2 attributes
+                        if (attributeCount > 2) { // boosts more than 2 Stats
                             obj['quality'] = 'best';
                         }
                         else {
@@ -4290,7 +4290,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
             obj.beingWorn = true;
         }
 
-        // create a field that lists in one string the attributes
+        // create a field that lists in one string the Stats
         // given by this item (for a filter drop-down menu):
         var attrs = [];
         $.each(['con','int','per','str'], function(index, attr){
@@ -5504,7 +5504,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.9)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.10)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5536,6 +5536,17 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>9.10 <span class="date">2020-12-13</span></dt>
+        <dd><ul>
+            <li>Documentation:
+                <ul>
+                    <li>Change "attribute" to "stat" in all visible text and wiki links (this changed in Habitica a long time ago).</li>
+                    <li>
+                </li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>9.9 <span class="date">2020-10-29</span></dt>
         <dd><ul>
@@ -5745,7 +5756,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Bug fix:
                 <ul>
-                    <li>Body and back equipment that boost attributes now don't prevent your data from loading.</li>
+                    <li>Body and back equipment that boost Stats now don't prevent your data from loading.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -5950,7 +5961,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li>The <strong>Skills and Buffs</strong> section has been updated for the <a href="http://habitica.wikia.com/wiki/User_blog:LadyAlys/Skills_Rebalancing_and_Other_Changes">new skills</a>. It might be unreliable! I am still testing it with various classes and attributes. Please tell me if you notice errors.</li>
+                    <li>The <strong>Skills and Buffs</strong> section has been updated for the <a href="http://habitica.wikia.com/wiki/User_blog:LadyAlys/Skills_Rebalancing_and_Other_Changes">new skills</a>. It might be unreliable! I am still testing it with various Classes and Stats. Please tell me if you notice errors.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -5985,7 +5996,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><strong>Skills and Buffs</strong>: Now lists your current attributes, your maximum MP, and the MP that you will gain during cron. The latter two values are affected by your Intelligence, so you can use this data to tailor your attributes to maximise your MP.</li>
+                    <li><strong>Skills and Buffs</strong>: Now lists your current Stats, your maximum MP, and the MP that you will gain during cron. The latter two values are affected by your Intelligence, so you can use this data to tailor your Stats to maximise your MP.</li>
                     <li>Updated for new world boss.</li>
                 </ul>
             </li>
@@ -6092,7 +6103,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><strong>Missing Equipment</strong>: The sortable, filterable table (only visible when you have lost more than three items) now has images to help you choose equipment by prettiness, and a drop-down "attributes" menu to let you filter by the type of attribute that the equipment boosts.</li>
+                    <li><strong>Missing Equipment</strong>: The sortable, filterable table (only visible when you have lost more than three items) now has images to help you choose equipment by prettiness, and a drop-down "stats" menu to let you filter by the type of Stat that the equipment boosts.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -6206,7 +6217,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Skills and Buffs</span>: Each skill section now tells you how to increase the effects of the skill (i.e., which character attribute to maximise with equipment or points to get the most out of the skill.</li>
+                    <li><span class="subheading">Skills and Buffs</span>: Each skill section now tells you how to increase the effects of the skill (i.e., which character Stat to maximise with equipment or points to get the most out of the skill.</li>
                     <li><span class="subheading">Skills and Buffs</span>: The Chilling Frost section now tells you if you have already cast it.</li>
                 </ul>
             </li>
@@ -6215,7 +6226,7 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes. Thanks very much to Ryan for testing all of the skills and providing useful suggestions.</li>
+                    <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar Character Stats. Thanks very much to Ryan for testing all of the skills and providing useful suggestions.</li>
                 </ul>
             </li>
             <li>Code:
@@ -6421,8 +6432,8 @@ ul#tableOfContents > li {
         <dd><ul>
             <li>Features:
                 <ul>
-                    <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitica.wikia.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitica.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
-                    <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
+                    <li><span class="subheading">Task Statistics</span>: How many habits, dailies, to-dos, and rewards you have in total, and how many are assigned to each <a href="http://habitica.wikia.com/wiki/Advanced_Options">Stat</a>. If you have task-based <a href="http://habitica.wikia.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
+                    <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific Stats (for example, to maximise INT and CON before casting a healing spell).</li>
                 </ul>
             </li>
         </ul></dd>
@@ -6688,8 +6699,8 @@ ul#tableOfContents > li {
     <div>
         <h2>What's On This Page?</h2>
         <ul>
-            <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To-Dos, with their <a href="http://habitica.fandom.com/wiki/Advanced_Options">attributes</a> and <a href="http://habitica.fandom.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</li>
-            <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To-Dos, and Rewards you have in total, and how many are assigned to each <a href="http://habitica.fandom.com/wiki/Advanced_Options">attribute</a>. If you have task-based <a href="http://habitica.fandom.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
+            <li><span class="subheading">Task Overview</span>: A table listing your Habits, Dailies, and To-Dos, with their <a href="http://habitica.fandom.com/wiki/Advanced_Options">Stats</a> and <a href="http://habitica.fandom.com/wiki/Task_Value">colours, values, and magnitudes</a> (value and magnitude are useful for choosing tasks to cast skills on). Completed To-Dos are not shown; completed Dailies are. At the bottom of this section, you will find one randomly-selected item from your To-Do list. Re-fetch your data to see a different random To-Do.</li>
+            <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To-Dos, and Rewards you have in total, and how many are assigned to each <a href="http://habitica.fandom.com/wiki/Advanced_Options">Stat</a>. If you have task-based <a href="http://habitica.fandom.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
             <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To-Dos, or Rewards that have not been <a href="http://habitica.fandom.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed.</li>
             <li><span class="subheading">Habit Trends</span>: An interactive chart that provides a visual representation of the trends in your Habits. It gives you an idea of which Habits you are reinforcing, and which are being neglected.</li>
             <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your Habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
@@ -6704,8 +6715,8 @@ ul#tableOfContents > li {
             <li><span class="subheading">Stats and Streaks Backup</span>: A plain-text view of information that you might need to <a href="http://habitica.fandom.com/wiki/Settings">restore your stats</a> and <a href="http://habitica.fandom.com/wiki/Streaks">your Dailies' streaks</a> if you die through no fault of your own. This information is available <span class="highlight">only before death</span>, so you might wish to copy the information every few days.</li>
             <li><span class="subheading">Missing Equipment</span>: If you have <a href="http://habitica.fandom.com/wiki/Death_Mechanics">died</a> and lost equipment, that equipment will be listed, along with the class that it belongs to. This is to help you buy it back, if you choose to do so.</li>
             <li><span class="subheading">Current Appearance and Gear</span>: This lists the <a href="http://habitica.fandom.com/wiki/Equipment">equipment</a> you are wearing (battle gear and costume), your <a href="http://habitica.fandom.com/wiki/Profile#Avatar">avatar's appearance settings</a> (skin colour, hair, etc), and your <a href="http://habitica.fandom.com/wiki/Pets">pet</a> and <a href="http://habitica.fandom.com/wiki/Mounts">mount</a>. This lets you easily record an appearance that you especially like or a set of battle gear that gives you useful stats (e.g., you could copy and paste this section to a text file).</li>
-            <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific attributes (for example, to maximise INT and CON before casting a healing spell).</li>
-            <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character attributes.</li>
+            <li><span class="subheading">Equipment Recommendations</span>: This displays your best equipment with features that help you choose the right gear for maximising specific Stats (for example, to maximise INT and CON before casting a healing spell).</li>
+            <li><span class="subheading">Skills and Buffs</span>: A description of each of the spells for your class and the exact effect they will have if you cast them now. Also describes spells for other classes with estimates of their effects if you changed to that class while keeping similar character Stats.</li>
             <li><span class="subheading">Subscription Data</span>: If you have a Habitica subscription, this section will show you the data Habitica has about your subscription. If you have been a subscriber in the past, this section might show some of your old data. If you have a current subscription that is ending in less than a week, a large orange notification will appear at the top of the page. (This banner might be a bit annoying for those who already know that their subscription is ending, and I am sorry about that, but it will last for only a week and then disappear. The banner exists for the benefit of those who don't realise the termination date is approaching, and I know from my support work that that's not uncommon.)</li>
         </ul>
         <p>Those items will not be shown if they are not relevant to your account (e.g., if you have no untagged tasks, you will not see the untagged tasks section).</p>
@@ -6742,7 +6753,7 @@ ul#tableOfContents > li {
             <li>For relevant Skills And Buffs, show how to increase the chance of a critical hit happening.</li>
             <li>Add percentages to Task Statistics.
 <!--
-<span class="subheading">Task Attributes Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitica.fandom.com/wiki/Advanced_Options#Attributes">wiki</a> <a href="http://habitica.fandom.com/wiki/Automatic_Allocation">links</a>)
+<span class="subheading">Task Stats Percentages</span>: percentage of tasks assigned to each of CON, INT, PER, STR (<a href="http://habitica.fandom.com/wiki/Advanced_Options#Stats">wiki</a> <a href="http://habitica.fandom.com/wiki/Automatic_Allocation">links</a>)
 -->
 </li>
             <li>Hide information about drops for any players who have not yet had drops enabled.</li>
@@ -6765,7 +6776,7 @@ I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-
             <li>List how many preferred food items are needed to turn each pet into a mount.</li>
             <li>Clairvoyance: Show which Dailies will be due tomorrow. <!-- when done reply to Daniel von Pazatka Lipinski on the Trello card DAILIES v. 3 (Dailies Minimum, Does-Not-Apply Button, Weekly Rolling Over, Streak History) --></li>
             <li>Display how many and which Enchanted Armoire items you do not already have.</li>
-            <li>Improve how <strong>Equipment Recommendations</strong> handles Enchanted Armoire items. <!-- Timoteo32:    Hey darlin, I just wanted to let you know about a possible error I noticed in the User Data Tool. Under "Equipment Recommendations" my Soothing Lunar Scepter seems to be getting analyzed wrong. The stats listed are correct, but then it qualifies it as "middling" instead of "best" even though it's my best item that gives Int and Con for a Primary Weapon. I don't know how the ratings are actually done, so maybe it's "working" but misunderstanding what I'm asking. :P I think it used to show up, so either something changed or another weapon I've picked up since is trumping it somehow. I can get you screenshots if you want. :)   // me: Ugh, bugs, I hate them. Screenshots aren't necessary because I'll have much the same equipment as you. I think that one is being pushed out of the "best" category by the Blue Floppy Hat, because they have much the same stats. However both should be considered best because you can wear both at the same time. // That table was designed long before the Armoire existed and it's not holding up well under the strain of the extra, multi-attribute gear. I'll have to make modifications to the code. Any day now........ // Thanks for letting me know! I would likely never have noticed otherwise. // --></li>
+            <li>Improve how <strong>Equipment Recommendations</strong> handles Enchanted Armoire items. <!-- Timoteo32:    Hey darlin, I just wanted to let you know about a possible error I noticed in the User Data Tool. Under "Equipment Recommendations" my Soothing Lunar Scepter seems to be getting analyzed wrong. The stats listed are correct, but then it qualifies it as "middling" instead of "best" even though it's my best item that gives Int and Con for a Primary Weapon. I don't know how the ratings are actually done, so maybe it's "working" but misunderstanding what I'm asking. :P I think it used to show up, so either something changed or another weapon I've picked up since is trumping it somehow. I can get you screenshots if you want. :)   // me: Ugh, bugs, I hate them. Screenshots aren't necessary because I'll have much the same equipment as you. I think that one is being pushed out of the "best" category by the Blue Floppy Hat, because they have much the same stats. However both should be considered best because you can wear both at the same time. // That table was designed long before the Armoire existed and it's not holding up well under the strain of the extra, multi-Stat gear. I'll have to make modifications to the code. Any day now........ // Thanks for letting me know! I would likely never have noticed otherwise. // --></li>
             <li>Upgrade <a href="https://datatables.net/upgrade/1.10">Data Tables</a> to the latest version, adjust all calls to it as needed and test thoroughly.
 <!--
 - Use a CDN (https://datatables.net/manual/installation#CDN) instead of keeping a local copy. Remove the local copy from js-for-habitrpg_user_data_display.tar.gz
