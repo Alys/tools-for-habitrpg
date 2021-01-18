@@ -135,6 +135,8 @@ var stringsForLanguage = {
         equipment_table_page_name: "Equipment Table",
         enchanted_armoire_page_name: "Enchanted Armoire",
         textarea_paste: "Copy everything inside each textarea below and paste it into the appropriate template pages",
+        textarea_paste_individual: "Copy everything inside the textarea below and paste it into this template page",
+        textarea_explanation: "Don't edit the code in this textarea. Any edits you make will not be saved for future use.",
 
         total_number_armoire_items: "Total number of Enchanted Armoire items",
 
@@ -218,6 +220,8 @@ var stringsForLanguage = {
         equipment_table_page_name: "Таблица снаряжения",
         enchanted_armoire_page_name: "Зачарованный сундук",
         textarea_paste: "Скопируйте все, что находится в каждой текстовой области ниже и вставьте это в соответсвующие страницы шаблонов",
+        textarea_paste_individual: "Copy everything inside the textarea below and paste it into this template page",
+        textarea_explanation: "Don't edit the code in this textarea. Any edits you make will not be saved for future use.",
 
         total_number_armoire_items: "Общее кол-во предметов в зачарованном сундуке:",
 
@@ -1276,8 +1280,14 @@ function parseData() {
     $('#loading .good').hide();
     $('#output').html(htmlStart
                     + '<h2>' + getString('equipment_table_page_name') + ':</h2>'
+                    + '<p>' + getString('textarea_paste_individual') + ': '
+                    + makeUrl('equipment', {template:true, type:'html'}) + '</p>'
+                    + '<p>' + getString('textarea_explanation') + '</p>'
                     + equipTable
                     + '<h2>' + getString('enchanted_armoire_page_name') + ':</h2>'
+                    + '<p>' + getString('textarea_paste_individual') + ': '
+                    + '<p>' + getString('textarea_explanation') + '</p>'
+                    + makeUrl('armoire', {template:true, type:'html'}) + '</p>'
                     + '<p>' + getString('total_number_armoire_items') + ' ' + armoireCount + '</p>'
                     + armoireTable
                     + htmlEnd);
