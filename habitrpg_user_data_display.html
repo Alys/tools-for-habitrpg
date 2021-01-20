@@ -4396,7 +4396,7 @@ function subscriptionData() {
             var date = moment(plan.dateCreated);
             if (date.isValid()) {
                 table += '<tr><td>Date Created</td><td>' +
-                         date.format('YYYY-MM-DD HH:MM') +
+                         date.format('YYYY-MM-DD HH:mm') +
                          ' in your device\'s current time zone' +
                          '</td></tr>\n';
             }
@@ -4412,7 +4412,7 @@ function subscriptionData() {
                             '. See the "Subscription Data" section for more details.';
                 }
                 table += '<tr><td>Termination Date</td><td>' +
-                         date.format('YYYY-MM-DD HH:MM') +
+                         date.format('YYYY-MM-DD HH:mm') +
                          ' in your device\'s current time zone' +
                          ' (if this is too early, immediately report it in the ' +
                          'Report a Bug guild - see above for how).</td></tr>\n';
