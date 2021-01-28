@@ -424,8 +424,15 @@ function fetchData() {
                     + " 'Help and Contact Details' at the bottom of this page.";
             }
             else if (jqXHR.responseJSON.error && jqXHR.responseJSON.error === 'NotAuthorized') {
-                msg = "The User ID and/or API Token that you entered are not correct.";
                 textStatus = 'checkCredentials';
+                msg = "The User ID and/or API Token that you entered are not correct.";
+                details = "If you keep seeing this error and you are sure you are using the correct details, "
+                    + " you may be affected by"
+                    + " <a href=\"https://github.com/HabitRPG/habitica/issues/12383\">Habitica's CORS bug</a>."
+                    + "<br />Please reload the page with your browser's refresh button and try again."
+                    + "<br />You may need to reload two or three times."
+                    + "<br />If this error persists after that, contact me using the details in"
+                    + " 'Help and Contact Details' at the bottom of this page.";
             }
             else if (jqXHR.responseJSON.message) {
                 msg = jqXHR.responseJSON.message;
