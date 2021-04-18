@@ -3749,8 +3749,8 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
                 value = value.replace(/^p/, "pastel ");
             }
             if (obj[3] == 'convertNumber') {
-                value = convertCardinalToOrdinal(++value); // start from 1 not 0
-                if (value == '1st') { value += ' (none)'; }
+                value = convertCardinalToOrdinal(value); // start from 0
+                if (value == '0') { value = 'none'; }
             }
             if (obj[1] == 'skin') {
                 if ($.inArray(value, spookySkins) !== -1) {
@@ -3779,7 +3779,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
                                        + value + '</span>');
             }
         });
-        var html = '';
+        var html = '<p>NOTE: As of 2021-04-18, the bangs, hair base, flower, mustache, and beard now say "none" rather than "1st (none)" when you don\'t have them equipped. The other options for those items have had their numbers decreased by one (e.g., if an option used to say "2nd", it will now say "1st"). This is for consistency with how the wiki describes these items.</p>'; // XXX_LATER delete a few months after 2021-04-18
         if (appearance.length > 0) {
             html += '<div class="subsection">'
                   + '<p class="forCopyPaste">&nbsp;</p>'
@@ -3845,6 +3845,9 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
             var len    = numStr.length;
             var ord    = '';
             switch (last) {
+                case '0':
+                    ord = ''; // don't change 0
+                    break;
                 case '1':
                     ord = numStr.slice(-2) === '11' ? 'th' : 'st';
                     break;
@@ -5563,7 +5566,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.12)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.13)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5599,6 +5602,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.13 <span class="date">2021-04-18</span></dt>
+        <dd><ul>
+            <li>Feature adjustment:
+                <ul>
+                    <li>In the <strong>Current Appearance and Gear</strong> section, the bangs, hair base, flower, mustache, and beard now say "none" rather than "1st (none)" when you don't have them equipped. The other options for those items have had their numbers decreased by one (e.g., if an option used to say "2nd", it will now say "1st"). This is for consistency with how the wiki describes these items.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.12 <span class="date">2021-01-28</span></dt>
         <dd><ul>
             <li>Code:
@@ -5614,7 +5626,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.11 <span class="date">2021-01-19</span></dt>
         <dd><ul>
             <li>Documentation:
