@@ -3740,6 +3740,7 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
             ['hair',  'mustache',     'mustache',  'convertNumber'],
             ['hair',  'beard',        'beard',     'convertNumber'],
             ['',      'skin',         'skin colour'               ],
+            ['',      'chair',        'wheelchair'                ],
             ['',      'background',   'background'                ],
         ], function(index,obj) {
             var value;
@@ -3763,6 +3764,9 @@ wiki('Class_System#Class_Equip_Bonus', 'Class Equip Bonus') + '.</p>' +
                     value = 'basic: ' + basicSkins[value];
                 }
                 // if no match, we use the skin key (e.g., f133ee)
+            }
+            if (obj[1] == 'chair') {
+                value = value.replace('_', ' '); // handleless_black
             }
             if (obj[1] == 'background') {
                 for (var setId in content.backgrounds) {
@@ -5566,7 +5570,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.13)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.13a)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5607,6 +5611,7 @@ ul#tableOfContents > li {
             <li>Feature adjustment:
                 <ul>
                     <li>In the <strong>Current Appearance and Gear</strong> section, the bangs, hair base, flower, mustache, and beard now say "none" rather than "1st (none)" when you don't have them equipped. The other options for those items have had their numbers decreased by one (e.g., if an option used to say "2nd", it will now say "1st"). This is for consistency with how the wiki describes these items.</li>
+                    <li>9.13a: The <strong>Current Appearance and Gear</strong> section how shows the wheelchair equipped.</li>
                 </ul>
             </li>
         </ul></dd>
