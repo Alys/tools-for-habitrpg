@@ -139,6 +139,7 @@ var stringsForLanguage = {
         medium_quests_heading: "Medium Quests", // subsection heading used only within this page's instructions
         hard_quests_heading:   "Hard Quests", // subsection heading used only within this page's instructions
         rage_quests_heading:   "Rage Quests", // subsection heading used only within this page's instructions
+        show_hide_rage:        "Show/Hide the Rage details table.",
 
         textarea_intro:        "This textarea contains code to produce a Wikia table showing",
         all_quests:            "all quests",
@@ -1242,7 +1243,7 @@ function parseData() {
         tableRows.rage.join("") +
         questTableFooter +
         '\n' +
-        '<div class="mw-customtoggle-RageDetailsTable wikia-menu-button">Show/Hide the Rage details table.<br /></div>\n' +
+        '<div class="mw-customtoggle-RageDetailsTable wikia-menu-button">' + getString('show_hide_rage') + '<br /></div>\n' +
         '<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-RageDetailsTable">\n' +
         questTableHeaderRageExtra +
         tableRows.rageExtra.join("") +
