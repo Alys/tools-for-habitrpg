@@ -4446,11 +4446,8 @@ function subscriptionData() {
     var html = '<p>If you are a subscriber, this section will show you ' +
                'the data Habitica has about your subscription. ' +
                'If you think any of it is not correct, please describe ' +
-               'the problem at <a href="' +
-               'https://habitica.com/groups/guild/a29da26b-37de-4a71-b0c6-48e72a900dac' +
-               '">Help > Report a Bug</a> from the website\'s menu or ' +
-               '<strong>Guilds &gt; Report a Bug</strong> on the mobile ' +
-               'app.</p>' +
+               'the problem at Help &gt; Report a Bug on the website or ' +
+               'About &gt; Report a Bug on the mobile app.</p>' +
                '<p>If you have been a subscriber in the past, this section ' +
                'might show some of your old data but that\'s not guaranteed. ' +
                'If you think you should still be a subscriber, ' +
@@ -4482,8 +4479,8 @@ function subscriptionData() {
                 table += '<tr><td>Termination Date</td><td>' +
                          date.format('YYYY-MM-DD HH:mm') +
                          ' in your device\'s current time zone' +
-                         ' (if this is too early, immediately report it in the ' +
-                         'Report a Bug guild - see above for how).</td></tr>\n';
+                         ' (if this is too early, immediately report it as a bug' +
+                         ' - see above for how).</td></tr>\n';
             }
         }
 
@@ -4530,7 +4527,7 @@ function subscriptionData() {
         if (plan.extraMonths) {
             var value = '';
             if (plan.extraMonths < 0) {
-                value = 'Your subscription has a minor problem, which we can fix easily. Please go to the Report a Bug guild (see above for how), and paste in this text: "The Data Display Tool told me to report that my subscription has negative extraMonths." You do not need to say anything else.';
+                value = 'Your subscription has a minor problem, which we can fix easily. Please report it as a bug (see above for how), and paste in this text: "The Data Display Tool told me to report that my subscription has negative extraMonths." You do not need to say anything else.';
             }
             else if (plan.extraMonths > 0) {
                 value = plan.extraMonths.toFixed(2);
@@ -4577,7 +4574,7 @@ function subscriptionData() {
         }
 
     } catch(err) {
-        html += '<p><strong>Your subscription has unexpected information that can\'t be displayed. Please go to the Report a Bug guild (see above for how), and paste in this text: "The Data Display Tool told me to report that my subscription couldn\'t be displayed." You do not need to say anything else.</strong></p>';
+        html += '<p><strong>Your subscription has unexpected information that can\'t be displayed. Please report it as a bug (see above for how), and paste in this text: "The Data Display Tool told me to report that my subscription couldn\'t be displayed." You do not need to say anything else.</strong></p>';
         html += '<p>' + err + '</p>';
     }
 

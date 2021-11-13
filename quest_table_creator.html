@@ -139,6 +139,7 @@ var stringsForLanguage = {
         medium_quests_heading: "Medium Quests", // subsection heading used only within this page's instructions
         hard_quests_heading:   "Hard Quests", // subsection heading used only within this page's instructions
         rage_quests_heading:   "Rage Quests", // subsection heading used only within this page's instructions
+        show_hide_rage:        "Show/Hide the Rage details table.",
 
         textarea_intro:        "This textarea contains code to produce a Wikia table showing",
         all_quests:            "all quests",
@@ -613,6 +614,7 @@ var releaseDates = {
     'turquoise' : '2020-09',
     'blackPearl' : '2020-11',
     'stone' : '2021-05',
+    'solarSystem' : '2021-09',
 };
 // get the current month's date in case the latest quest
 // hasn't been added above yet:
@@ -1352,7 +1354,7 @@ function parseData() {
         tableRows.rage.join("") +
         questTableFooter +
         '\n' +
-        '<div class="mw-customtoggle-RageDetailsTable wikia-menu-button">Show/Hide the Rage details table.<br /></div>\n' +
+        '<div class="mw-customtoggle-RageDetailsTable wikia-menu-button">' + getString('show_hide_rage') + '<br /></div>\n' +
         '<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-RageDetailsTable">\n' +
         questTableHeaderRageExtra +
         tableRows.rageExtra.join("") +
@@ -1661,7 +1663,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 2021-07-26)</span></h1><!-- VERSION -->
+    <span>(last updated 2021-10-16)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
