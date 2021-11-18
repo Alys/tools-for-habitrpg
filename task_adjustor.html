@@ -706,7 +706,7 @@ function collateAndDisplayTaskData() {
         }
     });
     if (taskOrderErrors) {
-        $('#taskOrderErrorsMessage').html("Your account has a minor problem that might prevent you from sorting your tasks correctly. An admin can fix this for you. On the <a href=\"https://habitica.com/\">Habitica website</a>, go to Help &gt; Report a Bug and paste the following message into your bug report:<br /><br />" + taskOrderErrors);
+	    $('#taskOrderErrorsMessage').html("Your account has a minor problem that might prevent you from sorting your tasks correctly. Habitica's staff can fix this for you. On the <a href=\"https://habitica.com/\">Habitica website</a>, go to Help &gt; Report a Bug and paste the message below into your bug report.<hr /><br />My Habitica account has the tasksOrder bug:<br />" + taskOrderErrors + "<br /><hr />");
         $('#taskOrderErrorsMessage').removeClass('hide');
     }
     else {
@@ -1757,7 +1757,7 @@ h2 {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Task Adjustor
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.8)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="false">(v0.9)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 
@@ -1780,6 +1780,15 @@ h2 {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>0.9 <span class="date">2021-11-18</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+                    <li>Adjust the tasksOrder bug message to clarify for Habitica's staff that it's a bug they need to fix, not a problemm with this tool.</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>0.8 <span class="date">2020-06-24</span></dt>
         <dd><ul>
