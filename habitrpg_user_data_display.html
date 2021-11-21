@@ -2461,8 +2461,8 @@ wiki('Tavern', 'resting in the inn') +
         var id      = 'todosCompletedSection';
         var title   = 'To Do\'s Completed';
         var orderId = 'todosCompleted';
-        var html = '<p>This shows all of your completed To Do\'s that Habitica has in its archive (not necessarily all the To Do\'s that you have ever completed because Habitica keeps only recent ones). This is the same information that can be obtained by using the <a href = "https://habitica.com/user/settings/data-export">Data Export</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
-        '<table></table>';
+        var html = '<p>This shows all of your completed To Do\'s that Habitica has in its archive. This is not necessarily all the To Do\'s that you have ever completed because Habitica keeps only recently-completed To Do\'s in most cases (all To Do\'s for Challenges that are still running are also kept). For more information about which tasks Habitica keeps, see ' + wiki('Task History Compression') + '.<br />This is the same list of completed To Do\'s that can be obtained by using Habitica\'s <a href = "https://habitica.com/user/settings/data-export">Data Export</a> feature.</a><br /><span class="lowlight">For information about this table\'s advanced features, read the explanation for the "Task Overview" section, which has a similar table.</span></p>' +
+      '<table></table>';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'function': createTodosCompletedTable,
@@ -5567,7 +5567,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.13a)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.14)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5580,11 +5580,6 @@ ul#tableOfContents > li {
     <div class="good hide">
         <p>Please wait. Fetching data from
         <span id="serverName">Habitica</span>...</p>
-        <!--
-        <p id="specialMessage" class="lowlight narrowContent">
-<br /><em>@Ryan v3.0.1b, you're always there to answer everyone's questions and help people out. You run great challenges and crack jokes. You are a true Habit Champion and everyone's favorite cyborg, and we love you.</em><br />- Lemoness<br /><br />
-        </p>
-        -->
     </div>
     <div class="bad hide">
         <p id="badSummary">There was an error obtaining your data.</p>
@@ -5603,6 +5598,15 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.14 <span class="date">2021-11-22</span></dt>
+        <dd><ul>
+            <li>Documentation:
+                <ul>
+                    <li>In the <strong>To Do's Completed</strong> section, the explanation now has more information about which To Do's are kept by Habitica.</li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.13 <span class="date">2021-04-18</span></dt>
         <dd><ul>
             <li>Feature adjustment:
@@ -5612,7 +5616,6 @@ ul#tableOfContents > li {
                 </ul>
             </li>
         </ul></dd>
-
         <dt>9.12 <span class="date">2021-01-28</span></dt>
         <dd><ul>
             <li>Code:
