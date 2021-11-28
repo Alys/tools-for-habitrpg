@@ -858,6 +858,14 @@ function parseData() {
             etcPossible = true;
             delete items['quests'];
         }
+        if (quest.category === 'timeTravelers') {
+            if (items['eggs']) {
+                specialRewardType = getString('pet');
+            }
+            else if (items['hatchingPotions']) {
+                specialRewardType = getString('hatching_potion');
+            }
+        }
         if (etcPossible && Object.keys(items).length) {
             specialRewardType += ', ' + getString('etc');
         }
@@ -866,7 +874,7 @@ function parseData() {
             (quest.category === 'world')          ? getString('various')         :
             (quest.category === 'gold')           ? specialRewardType            :
             (quest.category === 'unlockable')     ? specialRewardType            :
-            (quest.category === 'timeTravelers')  ? getString('pet')             : // XXX_later fix this - it works for Robot but maybe not future quests
+            (quest.category === 'timeTravelers')  ? specialRewardType            :
             (quest.category === 'hatchingPotion') ? getString('hatching_potion') :
                                                     getString(quest.category); // e.g., pet
 
