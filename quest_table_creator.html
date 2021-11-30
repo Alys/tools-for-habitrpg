@@ -237,6 +237,98 @@ var stringsForLanguage = {
         medium_quests:         "только средние квесты",
         hard_quests:           "только сложные квесты",
         textarea_paste:        "Вставьте этот код в шаблон:",
+    },
+    'zh': {
+        wiki_url:              "https://habitica.fandom.com/zh/wiki/", // the part of the URL that appears in all wiki pages for this language
+
+        checkins:              "天签到", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
+        checkins_page:         "每日签到奖励", // link to the page itself above
+
+        level:                 "级",
+        equipment:             "装备",
+        scroll:                "卷轴", // as in quest scroll
+        quest_scroll:          "副本卷轴",
+        pet:                   "宠物",
+        mount:                 "坐骑",
+        egg:                   "蛋",
+        food:                  "食物",
+        hatching_potion:       "孵化药水",
+        pet_and_mount:         "宠物和坐骑",
+        GP:                    "金币", // abbreviation for Gold / Gold Points
+        XP:                    "经验", // abbreviation for Experience / Experience Points
+        gems:                  "颗宝石",
+        hourglasses:           "个沙漏",
+        world_boss:            "世界Boss", // as in 'world boss quest'
+        collection:            "收集", // as in 'collection quest'
+        boss:                  "Boss",       // as in 'boss quest'
+        rage:                  "怒气值",       // some bosses have a 'rage' meter
+        unknown:               "未知",    // used when we don't know the quest type (world boss/boss/collection) or the reward type
+
+        name:                  "名称",               // table header for the quest name column
+        availability:          "获得途径",       // table header: how / when to obtain the scroll
+        type:                  "类型",               // table header: type of quest (world boss or boss or collection)
+        rewards:               "奖励",            // table header: rewards that the quest gives
+        boss_HP:               "Boss<br />血量",       // table header: starting health of boss
+        boss_strength:         "Boss<br />力量", // table header: strength of boss
+
+        rage_name:                "怒气<br />技能<br />名称",          // table header: name of boss rage mechanism
+        rage_effects:             "怒气<br />效果",       // table header: effects of boss rage
+        rage_bar_size:            "怒气<br />条<br />长度", // table header: size of rage bar
+        rageEffect_mpDrain:       "怒气值满时，Boss会清空队伍的魔法值。",//"When the Rage bar is full, the Boss will remove the party's Mana.",
+        rageEffect_progressDrain: "怒气值满时，Boss会清空队伍的魔法值。",//"When the Rage bar is full, the Boss will set back the party's attack progress.", Translate TODO: what does this mean
+        rageEffect_healing_30:    "怒气值满时，Boss会回复剩余生命值的30%。",//"When the Rage bar is full, the Boss will heal 30% of its remaining health.",
+
+        length:                "长度",       // table header (HTML only): the length of time generally taken to complete a quest
+        difficulty:            "难度",   // table header (HTML only): how difficult a quest is in terms of having to be consistent with your Dailies
+        rating:                "评级",       // table header (HTML only): a merge of the length and difficulty
+        release_date:          "发行日期", // table header (HTML only): quest release date
+
+        previous_part:         "完成上一部",   // this text indicates that you can get the quest scroll when you complete the previous quest in the chain
+        invite_to_party:       "邀请入队", // used to indicate that you get the quest scroll when you invite someone to your party and they accept
+        create_account:        "创建账户",  // this must be identical to Habitica's `createAccountReward` translated string //Translate TODO: where is this string?
+        finished:              "已完成", // indicates that the World Boss quest has finished and is no longer available
+        only_during:           "仅限",  // used to indicate availability for quests that can be bought only during a specific Grand Gala
+
+        spring_fling:          "春季狂欢节", // the name of the spring Grand Gala (if the wiki page is named differently, add to wikiPageNameCorrections)
+        winter_wonderland:     "冬季仙境节", // the name of the winter Grand Gala (if the wiki page is named differently, add to wikiPageNameCorrections)
+        XP_GP_only:            "只有经验值<br />和金币", // the reward type for quests that give only XP and GP
+        various:               "杂类", // used to indicate the quest rewards when there's a variety of them
+        etc:                   "及其他", // added to the end of the quest's reward type when the quest gives multiple types
+        one_of_each_food:      "每种食物各一份", // a type of quest reward
+        not_applicable:        "n/a", // an abbreviation meaning 'not applicable' (recommended to use a short word)
+
+        weeks:                 "周",   // 'weeks' or a shorter word for it (as short as possible is best)
+        short:                 "短",  // describes the length of time generally taken to complete a quest
+        medium:                "中等", // as above
+        long:                  "长",   // as above
+
+        very_hard:             "极难", // describes how difficult a quest is in terms of having to be consistent with your Dailies
+        hard:                  "困难",      // as above
+        medium:                "中等",    // as above
+        easy:                  "容易",      // as above
+        trivial:               "极易",   // as above
+
+        million:               "M",  // an abbreviation for 'million' to indicate the strength of world boss or his rage
+        or:                    "或",
+        or_earlier:            "或更早",
+
+        new_quest:             "本月发行的副本", // used only within this page's instructions; will not appear on the wiki
+        tables_to_edit:        "更新这些表格：", // used only within this page's instructions; will not appear on the wiki
+        all_quests_heading:    "所有副本", // subsection heading used only within this page's instructions
+        quest_lines_heading:   "任务线副本", // subsection heading used only within this page's instructions
+        easy_quests_heading:   "简单副本", // subsection heading used only within this page's instructions
+        medium_quests_heading: "中等难度副本", // subsection heading used only within this page's instructions
+        hard_quests_heading:   "困难副本", // subsection heading used only within this page's instructions
+        rage_quests_heading:   "有怒气值的副本", // subsection heading used only within this page's instructions
+        show_hide_rage:        "显示/隐藏怒气技能细节",
+
+        textarea_intro:        "这个文本框里的代码生成的维基表格包含了",
+        all_quests:            "所有副本。",
+        quest_lines:           "任务线副本。",
+        easy_quests:           "简单副本。",
+        medium_quests:         "中等难度副本。",
+        hard_quests:           "困难副本。",
+        textarea_paste:        "将代码粘贴到这个模板：",
     }
 };
 
@@ -257,6 +349,11 @@ var regexpsForLanguage = {
         gear:            / +\((оружие для защитной руки|оружие|для защитной руки|доспехи|головной убор|двуручное оружие)\)/i,
         part:            /.*[Чч]асть [0-9]: /i,
         part_url:        /.*[Чч]асть_[0-9]:_/,
+    },
+    'zh': {
+        gear:            /(（(武器|护甲|头盔|盾牌|头饰|副手物品|副手武器)）)|( +\((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\))/i,// Translate TODO
+        part:            /.*第[0-9]部：/,
+        part_url:        /.*第[0-9]部：/ ///.*Part_[0-9]:_/,
     }
 };
 
@@ -282,6 +379,14 @@ var templateNamesForLanguage = {
         easy_quests:   "Таблица квестов/Легкие квесты",
         medium_quests: "Таблица квестов/Средние квесты",
         hard_quests:   "Таблица квестов/Сложные квесты",
+    },
+    'zh': {  // Translate Note: Sharing template names with en
+        all_quests:    "Quest Table All",
+        quest_lines:   "Quest Table Quest Lines",
+        easy_quests:   "Quest Table Easy",
+        medium_quests: "Quest Table Medium",
+        hard_quests:   "Quest Table Hard",
+        rage_quests:   "Quest Table Rage",
     }
 };
 
@@ -313,6 +418,12 @@ var rewardPageUrls = {
         head_special_2: 'Безымянный_шлем',
         armor_special_2: 'Благородная_туника_Жана_Шалара',
     },
+    'zh': {
+        shield_special_goldenknight: "Mustaine的碎石流星锤",
+        weapon_special_2: "Stephen_Weber的巨龙长矛",
+        head_special_2: "无名头盔",
+        armor_special_2: "Jean_Chalard的贵族束腰外衣",
+    }
 };
 
 
@@ -365,6 +476,7 @@ var reverseTextForLanguage = {
     },
     'level' : {
         'ru': true,
+        'zh': true
     },
 };
 

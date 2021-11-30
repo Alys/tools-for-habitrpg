@@ -226,6 +226,91 @@ var stringsForLanguage = {
         total_number_armoire_items: "Общее кол-во предметов в зачарованном сундуке:",
 
         and: "и",
+    },
+    'zh': {
+        wiki_name:             "Habitica维基", // the name of the wiki (it must contain "Habitica" and that word must not be translated)
+        wiki_url:              "https://habitica.fandom.com/zh/wiki/", // the part of the URL that appears in all wiki pages for this language
+
+        equipment:             "装备",  // Translate Note: Never used as far as I (and vs code) know, as of 2021-10
+        unknown:               "未知",    // used when we don't know the quest type (world boss/boss/collection) or the reward type
+
+        not_applicable:        "n/a", // an abbreviation meaning 'not applicable' (recommended to use a short word)
+
+        kickstarter: "Kickstarter",
+        contributor: "贡献者",
+        contributor_gear: "贡献者的福利#贡献者装备",
+        absurd_party_hat: "冬季仙境节#Absurd_Party_Hat",
+        absurd_party_robes: "冬季仙境节#Absurd_Party_Robes",
+        winter_special_2014: "冬季仙境节#Special_Class_Gear_2014",
+        winter_special_2015: "冬季仙境节#Special_Class_Gear_2015", // Translate Note: Translation for this page is imcomplete so these are left for future update
+        summer_special: "夏季嬉水节#特殊装备",
+        fall_special: "秋季庆典节#特殊装备",
+        spring_fling: "春季狂欢节",
+        take_this_challenges: "Habitica官方挑战#Take_This_挑战",
+        weapon_special_critical: "致命碎虫锤",
+
+        name: "名称",
+        image: "图片",
+        class: "职业",
+        type: "类型",
+        cost: "价格",
+        con: "体质",
+        int: "智力",
+        per: "感知",
+        str: "力量",
+        quality: "品质",
+
+        description: "描述",
+        set: "所属套装",
+        release_date: "推出<br />日期",
+
+        jan: "1月",
+        feb: "2月",
+        mar: "3月",
+        apr: "4月",
+        may: "5月",
+        jun: "6月",
+        jul: "7月",
+        aug: "8月",
+        sep: "9月",
+        oct: "10月",
+        nov: "11月",
+        dec: "12月",
+
+        best: "优秀",
+        medium: "中等",
+        stats_free: "无<br />属性",
+
+        head_accessory: "head<br />accessory",
+        back_accessory: "back<br />accessory",
+        body_accessory: "body<br />accessory",
+        head_gear: "head<br />gear",
+        armor: "armor",
+        weapon: "weapon",
+        shield: "shield",
+        eyewear: "eyewear", //Translate TODO: left alone for now before unifying translation
+
+        special: "特殊",
+        warrior: "战士",
+        mage: "法师",
+        healer: "医者",
+        rogue: "盗贼",
+        take_this: "Take This",
+        mystery: "神秘物品",
+        armoire: "魔法衣橱",
+
+        unofficial_set: "非官方套装",
+
+        intro: "本页用于生成以下页面的Fandom维基代码：", //"This page outputs the Fandom wiki code for creating the tables on these pages:",
+        equipment_table_page_name: "装备列表",//"Equipment Table",
+        enchanted_armoire_page_name: "魔法衣橱",//"Enchanted Armoire",
+        textarea_paste: "复制以下每个文本框的内容并粘贴到对应的模板页",//"Copy everything inside each textarea below and paste it into the appropriate template pages",
+        textarea_paste_individual: "复制此文本框的内容并粘贴到这个模板页",//"Copy everything inside the textarea below and paste it into this template page",
+        textarea_explanation: "请勿编辑此文本框的内容。任何更改都不会保存。",//"Don't edit the code in this textarea. Any edits you make will not be saved for future use.",
+
+        total_number_armoire_items: "魔法衣橱物品总数：",//"Total number of Enchanted Armoire items",
+
+        and: "和",
     }
 };
 
@@ -250,6 +335,13 @@ var regexpsForLanguage = {
         independent_item: /Независимый предмет/i,
         set: /(.+ [Нн]абор|[Нн]абор .+) \(предмет ([0-9]+) из ([0-9]+)/i,
         unofficial_set: /(широкополая<br \/>шляпа|Шапка(.+)кота)/i,
+    },
+    'zh': {
+        increases: /((提升|提高|增强)([0-9]|\s))|增加/,
+        armoire: "魔法衣橱：",
+        independent_item: /独立装备|独立物品/,
+        set: /((.+套装)（([0-9]+)\/([0-9]+)）)|((.+ Set) \(Item ([0-9]+) of ([0-9]+))/i,
+        unofficial_set: /(软盘帽|(.)猫帽子)/, // Translate Note: The translation of floppy hats is not unified so this is a temporary workaround
     }
 };
 
@@ -266,6 +358,8 @@ var templateNamesForLanguage = {
         armoire:   "Enchanted_Armoire_Table_Code",
     },
     'ru': {
+    },
+    'zh': {  // Sharing template names with en
     }
 };
 
@@ -297,6 +391,12 @@ var rewardPageUrls = {
         head_special_2: 'Безымянный_шлем',
         armor_special_2: 'Благородная_туника_Жана_Шалара',
     },
+    'zh': {
+        shield_special_goldenknight: "Mustaine的碎石流星锤",
+        weapon_special_2: "Stephen_Weber的巨龙长矛",
+        head_special_2: "无名头盔",
+        armor_special_2: "Jean_Chalard的贵族束腰外衣",
+    }
 };
 
 
@@ -328,6 +428,8 @@ var wikiPageNameCorrections = {
     },
     'ru': { // see comments above before adding data here
     },
+    'zh': { // see comments above before adding data here
+    },
 };
 
 
@@ -340,6 +442,9 @@ var wikiPageNameCorrections = {
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
 var reverseTextForLanguage = {
+    'zh':{
+        // Translate TODO: reverse Month and Year
+    }
 };
 
 
@@ -355,7 +460,8 @@ var translationInstructions =    // Do not translate this into other languages. 
         'Some additional strings will need to be translated too (e.g., for the table headings) so contact Alys at lady_alys@oldgods.net to discuss that.' +
     '</p>' +
     '<p>So far support exists for the languages below but others can be added!</p>' +
-    '<ul><li><a href="https://oldgods.net/habitrpg/equipment_table_creator.html?language=ru">Russian</a></li></ul>'
+    '<ul><li><a href="https://oldgods.net/habitrpg/equipment_table_creator.html?language=ru">Russian</a></li></ul>' +
+    '<ul><li><a href="https://oldgods.net/habitrpg/equipment_table_creator.html?language=zh">Chinese(Simplified)</a></li></ul>'
     ;
 
 //////////////////////////////////////////////////////////////////////
