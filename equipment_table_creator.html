@@ -437,13 +437,13 @@ var wikiPageNameCorrections = {
 ////   TRANSLATED TEXT ORDER                           ///////////////
 ////                                                   ///////////////
 ////   Some data+text phrases in some languages need   ///////////////
-////   to be reversed compared to English. Specify     ///////////////
-////   them here.                                      ///////////////
+////   to be reversed or modified in some other way    ///////////////
+////   compared to English. Specify them here.         ///////////////
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
 var reverseTextForLanguage = {
-    'zh':{
-        // Translate TODO: reverse Month and Year
+    'release_date': { // causes date format to be "2015-11" instead of "Nov 2015"
+        'zh': true,
     }
 };
 
@@ -820,6 +820,8 @@ var releaseDates = {
     'weapon_armoire_potionSkeleton' : '2021-11',
     'weapon_armoire_potionWhite' : '2021-11',
     'weapon_armoire_potionZombie' : '2021-11', 
+    'weapon_armoire_regalSceptre' : '2021-12',
+    'head_armoire_regalCrown' : '2021-12',
 };
 // get the current month's date in case the latest Enchanted Armoire
 // items haven't been added above yet:
@@ -1284,7 +1286,7 @@ function parseData() {
             releaseDate = releaseDates[obj.key] || thisMonth;
             var myRegexp = /(.+)-0?(.+)/g; // year-month
             var match = myRegexp.exec(releaseDate);
-            if (match) {
+            if (match && ! reverseTextForLanguage['release_date'][inPageLanguage]) {
                 var months = [
                     'zero',
                     getString('jan'),
@@ -1441,8 +1443,8 @@ function parseData() {
                     + equipTable
                     + '<h2>' + getString('enchanted_armoire_page_name') + ':</h2>'
                     + '<p>' + getString('textarea_paste_individual') + ': '
-                    + '<p>' + getString('textarea_explanation') + '</p>'
                     + makeUrl('armoire', {template:true, type:'html'}) + '</p>'
+                    + '<p>' + getString('textarea_explanation') + '</p>'
                     + '<p>' + getString('total_number_armoire_items') + ' ' + armoireCount + '</p>'
                     + armoireTable
                     + htmlEnd);
@@ -1685,7 +1687,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(last updated 2021-11-18)</span></h1><!-- VERSION -->
+    <span>(last updated 2021-12-30)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">

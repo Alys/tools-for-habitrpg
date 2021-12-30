@@ -58,6 +58,8 @@ var TEST_MODE = false; // causes extra text to be printed in the web page
 var stringsForLanguage = {
     // not used yet: wiki_name:        "Habitica Wiki", // the name of the wiki (it must contain "Habitica" and that word must not be translated)
     'en': {
+        open_parenthesis:      "(", // enter the symbol that your language typically uses for an opening parenthesis
+        close_parenthesis:     ")", // enter the symbol that your language typically uses for a closing parenthesis
         wiki_url:              "https://habitica.fandom.com/wiki/", // the part of the URL that appears in all wiki pages for this language
 
         checkins:              "Check-Ins", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
@@ -150,6 +152,8 @@ var stringsForLanguage = {
         textarea_paste:        "Paste this code into this template:",
     },
     'ru': {
+        open_parenthesis:      "(", // enter the symbol that your language typically uses for an opening parenthesis
+        close_parenthesis:     ")", // enter the symbol that your language typically uses for a closing parenthesis
         wiki_url:              "https://habitica.fandom.com/ru/wiki/", // the part of the URL that appears in all wiki pages for this language
 
         checkins:              "вх. в игру", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
@@ -239,6 +243,8 @@ var stringsForLanguage = {
         textarea_paste:        "Вставьте этот код в шаблон:",
     },
     'zh': {
+        open_parenthesis:      "（", // enter the symbol that your language typically uses for an opening parenthesis
+        close_parenthesis:     "）", // enter the symbol that your language typically uses for a closing parenthesis
         wiki_url:              "https://habitica.fandom.com/zh/wiki/", // the part of the URL that appears in all wiki pages for this language
 
         checkins:              "天签到", // an abbreviated name for the language-specific version of the http://habitica.fandom.com/wiki/Daily_Check-In_Incentives page
@@ -341,7 +347,7 @@ var stringsForLanguage = {
 //////////////////////////////////////////////////////////////////////
 var regexpsForLanguage = {
     'en': {
-        gear:            / +\((Shield-hand Weapon|Armor|Headgear|Weapon|Shield-Hand Item)\)/i,
+        gear:            / +\((Off-hand Weapon|Armor|Headgear|Weapon|Off-Hand Item|Back Accessory|Two-Handed Weapon)\)/i,
         part:            /.*Part [0-9]: /i,
         part_url:        /.*Part_[0-9]:_/,
     },
@@ -465,8 +471,8 @@ var wikiPageNameCorrections = {
 ////   TRANSLATED TEXT ORDER                           ///////////////
 ////                                                   ///////////////
 ////   Some data+text phrases in some languages need   ///////////////
-////   to be reversed compared to English. Specify     ///////////////
-////   them here.                                      ///////////////
+////   to be reversed or modified in some other way    ///////////////
+////   compared to English. Specify them here.         ///////////////
 ////                                                   ///////////////
 //////////////////////////////////////////////////////////////////////
 var reverseTextForLanguage = {
@@ -900,11 +906,33 @@ function parseData() {
                     var text = items[type][key]['text'];
                     if (type === 'pets') {
                         // ASSUME there's no more than one pet
-                        petName = text.replace(new RegExp(' +\\(' + getString('pet') + '\\)','i'), '');
+                        var regExpString = ' *';
+						if ( getString('open_parenthesis') === '(' ) {
+							// the type of parenthesis used in strings like "Mantis Shrimp (Pet)"
+							// has a special meaning in regexes, so we need to escape it:
+							regExpString += '\\';
+						}
+						regExpString += getString('open_parenthesis') + getString('pet');
+						if ( getString('close_parenthesis') === ')' ) {
+							regExpString += '\\';
+						}
+						regExpString += getString('close_parenthesis');
+                        petName = text.replace(new RegExp(regExpString,'i'), '');
+                        // petName = text.replace(new RegExp(' *\\(' + getString('pet') + '\\)','i'), '');
                     }
                     else if (type === 'mounts') {
                         // ASSUME there's no more than one mount
-                        mountName = text.replace(new RegExp(' +\\(' + getString('mount') + '\\)','i'), '');
+                        var regExpString = ' *';
+						if ( getString('open_parenthesis') === '(' ) {
+							regExpString += '\\';
+						}
+						regExpString += getString('open_parenthesis') + getString('mount');
+						if ( getString('close_parenthesis') === ')' ) {
+							regExpString += '\\';
+						}
+						regExpString += getString('close_parenthesis');
+                        mountName = text.replace(new RegExp(regExpString,'i'), '');
+                        // mountName = text.replace(new RegExp(' *\\(' + getString('mount') + '\\)','i'), '');
                     }
                     else {
                         if (type === 'gear') {
@@ -1671,7 +1699,7 @@ th em {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Quest Table Creator
-    <span>(last updated 2021-11-28)</span></h1><!-- VERSION -->
+    <span>(last updated 2021-12-30)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
