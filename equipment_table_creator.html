@@ -822,6 +822,9 @@ var releaseDates = {
     'weapon_armoire_potionZombie' : '2021-11', 
     'weapon_armoire_regalSceptre' : '2021-12',
     'head_armoire_regalCrown' : '2021-12',
+    'weapon_armoire_shootingStarSpell' : '2022-01',
+    'armor_armoire_shootingStarCostume' : '2022-01',
+    'head_armoire_shootingStarCrown' : '2022-01',
 };
 // get the current month's date in case the latest Enchanted Armoire
 // items haven't been added above yet:
@@ -1414,7 +1417,7 @@ function parseData() {
 
     var htmlEnd = '';
     if (releaseDateNeeded) {
-        htmlEnd  += '<p>NOTES FOR ALYS: Need release date:<br />' + releaseDateNeeded + '</p>';
+        htmlEnd  += '<p>NOTES FOR ALYS: The items below need their release dates to be added to this tool:<br />' + releaseDateNeeded + '</p>';
     }
     if (warnings) htmlEnd += '<p>WARNING:<br />' + warnings + '</p>';
     if (TEST_MODE) {
@@ -1687,7 +1690,7 @@ h1 span {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.fandom.com/">Habitica Wiki</a> Equipment Table Creator
-    <span>(last updated 2021-12-30)</span></h1><!-- VERSION -->
+    <span>(last updated 2022-01-24)</span></h1><!-- VERSION -->
 <hr class="clear" />
 
 <div id="loading">
