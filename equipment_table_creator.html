@@ -337,7 +337,7 @@ var regexpsForLanguage = {
         unofficial_set: /(широкополая<br \/>шляпа|Шапка(.+)кота)/i,
     },
     'zh': {
-        increases: /((提升|提高|增强)([0-9]|\s))|增加| Increases /,
+        increases: /((提升|提高|增强|增加)([0-9]|\s))| Increases /,
         armoire: /魔法衣橱：| Enchanted Armoire: /,
         independent_item: /独立装备|独立物品|Independent Item/i,
         set: /(.+套装|.+ Set)(?:（| \(Item )([0-9]+)(?:\/| of )([0-9]+)(?:）|)/i,
@@ -1289,7 +1289,7 @@ function parseData() {
             releaseDate = releaseDates[obj.key] || thisMonth;
             var myRegexp = /(.+)-0?(.+)/g; // year-month
             var match = myRegexp.exec(releaseDate);
-            if (match && ! reverseTextForLanguage['release_date'][inPageLanguage]) {
+            if (match) {
                 var months = [
                     'zero',
                     getString('jan'),
@@ -1307,7 +1307,13 @@ function parseData() {
                 ];
                 var monthNumber = match[2];
                 var month = months[match[2]] || match[2];
-                releaseDatePretty = month + '<br />' + match[1];//year
+                if ( ! reverseTextForLanguage['release_date'][inPageLanguage]){
+                    releaseDatePretty = month + '<br />' + match[1];//year
+                }
+                else {
+                    releaseDatePretty = match[1]+ '<br />' + month ;//year
+                }
+                
             }
             else {
                 releaseDatePretty = releaseDate;
