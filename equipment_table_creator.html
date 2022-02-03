@@ -281,14 +281,14 @@ var stringsForLanguage = {
         medium: "中等",
         stats_free: "无<br />属性",
 
-        head_accessory: "head<br />accessory",
-        back_accessory: "back<br />accessory",
-        body_accessory: "body<br />accessory",
-        head_gear: "head<br />gear",
-        armor: "armor",
-        weapon: "weapon",
-        shield: "shield",
-        eyewear: "eyewear", //Translate TODO: left alone for now before unifying translation
+        head_accessory: "头部<br />饰品",
+        back_accessory: "背部<br />饰品",
+        body_accessory: "身体<br />饰品",
+        head_gear: "头盔",
+        armor: "护甲",
+        weapon: "武器",
+        shield: "盾牌",
+        eyewear: "面部饰品", 
 
         special: "特殊",
         warrior: "战士",
@@ -337,10 +337,10 @@ var regexpsForLanguage = {
         unofficial_set: /(широкополая<br \/>шляпа|Шапка(.+)кота)/i,
     },
     'zh': {
-        increases: /((提升|提高|增强)([0-9]|\s))|增加/,
-        armoire: "魔法衣橱：",
-        independent_item: /独立装备|独立物品/,
-        set: /((.+套装)（([0-9]+)\/([0-9]+)）)|((.+ Set) \(Item ([0-9]+) of ([0-9]+))/i,
+        increases: /((提升|提高|增强)([0-9]|\s))|增加| Increases /,
+        armoire: /魔法衣橱：| Enchanted Armoire: /,
+        independent_item: /独立装备|独立物品|Independent Item/i,
+        set: /(.+套装|.+ Set)(?:（| \(Item )([0-9]+)(?:\/| of )([0-9]+)(?:）|)/i,
         unofficial_set: /(软盘帽|(.)猫帽子)/, // Translate Note: The translation of floppy hats is not unified so this is a temporary workaround
     }
 };
