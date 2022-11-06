@@ -2275,6 +2275,15 @@ randomTodoHtml
         var id      = 'dailiesHistorySection';
         var title   = 'Dailies History';
         var orderId = 'dailiesHistory';
+        
+        var weekdayArray=new Array(7);
+        weekdayArray[0]="Mo";
+        weekdayArray[1]="Tu";
+        weekdayArray[2]="We";
+        weekdayArray[3]="Th";
+        weekdayArray[4]="Fr";
+        weekdayArray[5]="Sa";
+        weekdayArray[6]="Su";
 
         // preprocess the Dailies to find all the dates on which data
         // exists, and to work out if each day was a success or fail
@@ -2334,8 +2343,10 @@ randomTodoHtml
                     missingDate = 'missingDate';
                 }
             }
+            var weekdayText = weekdayArray[date.getDay()];
             headerRow += '<th class="' + missingDate + '">' +
-                         allDatesInOrder[i] + '&nbsp;</th>';
+                         allDatesInOrder[i] + '<br/><br/>' + 
+                         weekdayText + '&nbsp;</th>';
             previousDate = date;
         }
         headerRow += '</tr></thead>';
