@@ -26,6 +26,7 @@ Contributors:
     me_and (Adam Dinwoodie) https://github.com/me-and
     cTheDragons https://github.com/cTheDragons
     Pitii (Piti the Grey) https://github.com/PitiTheGrey
+    Tenali (BlakeTCN) https://github.com/BlakeTNC
 
 TO ADD A NEW SECTION TO THIS PAGE:
 Search through this code to find all the comments that start
@@ -2275,7 +2276,7 @@ randomTodoHtml
         var id      = 'dailiesHistorySection';
         var title   = 'Dailies History';
         var orderId = 'dailiesHistory';
-        
+
         var weekdayArray=new Array(7);
         weekdayArray[0]="Mo";
         weekdayArray[1]="Tu";
@@ -2345,7 +2346,7 @@ randomTodoHtml
             }
             var weekdayText = weekdayArray[date.getDay()];
             headerRow += '<th class="' + missingDate + '">' +
-                         allDatesInOrder[i] + '<br/><br/>' + 
+                         allDatesInOrder[i] + '<br /><br />' +
                          weekdayText + '&nbsp;</th>';
             previousDate = date;
         }
@@ -3497,7 +3498,7 @@ function fetchGuildsListFunction() {
 
 
 function analyseEquipment() {
-    var missing = []; // gear lost due to death 
+    var missing = []; // gear lost due to death
     var missingPretty = []; // like missing but formatted
     var owned   = []; // gear actually owned right now
     $.each(user.items.gear.owned, function(key, value){
@@ -5578,7 +5579,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.14)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.15)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5608,6 +5609,15 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>9.15 <span class="date">2022-11-06</span></dt>
+        <dd><ul>
+            <li>Feature:
+                <ul>
+			<li>In the <strong>Dailies History</strong> section, weekday abbreviations are included at the top of each column, thanks to <a href="https://github.com/BlakeTNC">BladeTNC / Tenali</a>.</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>9.14 <span class="date">2021-11-22</span></dt>
         <dd><ul>
