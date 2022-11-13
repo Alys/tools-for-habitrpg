@@ -26,7 +26,7 @@ Contributors:
     me_and (Adam Dinwoodie) https://github.com/me-and
     cTheDragons https://github.com/cTheDragons
     Pitii (Piti the Grey) https://github.com/PitiTheGrey
-    Tenali (BlakeTCN) https://github.com/BlakeTNC
+    Tenali (BlakeTNC) https://github.com/BlakeTNC
 
 TO ADD A NEW SECTION TO THIS PAGE:
 Search through this code to find all the comments that start
@@ -2305,7 +2305,10 @@ randomTodoHtml
                     // tick off a Daily, then after the cron time (i.e., on the
                     // NEXT day), the Daily's value will be increased and that
                     // new value will be recorded with the new day's date:
-                    historyDate.setHours(historyDate.getHours() - 24);
+                    //
+                    // UPDATE: This seems to no longer be required.
+                    // historyDate.setHours(historyDate.getHours() - 24);
+                    
                     var formattedDate = myDateConverter(historyDate);
                     var value = obj.history[j].value;
                     var success = '-'; // default (Grey Daily or no data)
