@@ -2306,8 +2306,7 @@ randomTodoHtml
                     // NEXT day), the Daily's value will be increased and that
                     // new value will be recorded with the new day's date:
                     //
-                    // UPDATE: This seems to no longer be required.
-                    // historyDate.setHours(historyDate.getHours() - 24);
+                    historyDate.setHours(historyDate.getHours() - 24);
                     
                     var formattedDate = myDateConverter(historyDate);
                     var value = obj.history[j].value;
