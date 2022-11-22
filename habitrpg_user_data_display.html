@@ -819,6 +819,41 @@ function myDateConverter(date, style) { // XXX_SOON replace with moment
 }
 
 
+function formatDateFromUTC(date, style) {
+    if (typeof date === 'string' || typeof date === 'number') {
+        date = new Date(date);
+    }
+    if (!date || isNaN(date.getTime())) {
+        // Either the object that was passed in is not a Date object,
+        // OR the date string that was passed in could not be converted
+        // to a Date object, presumably because it's in a non-standard
+        // format. We handle this by using today's date. It's a nasty
+        // hack, but it's unlikely to occur, and no one's paying for
+        // anything better.
+        date = new Date();
+    }
+    
+    var y = date.getUTCFullYear();
+    var m = date.getUTCMonth() + 1;
+    var d = date.getUTCDate();
+    var H = date.getUTCHours();
+    var M = date.getUTCMinutes();
+    var S = date.getUTCSeconds();
+    var dateStr = y +
+           '-' + (m<=9 ? '0'+m : m) +
+           '-' + (d<=9 ? '0'+d : d);
+    if (style === 'short') {
+        dateStr = dateStr.replace(/^20/, ""); // remove century
+    }
+    if (style === 'long') {
+        dateStr += ' ' + (H<=9 ? '0'+H : H) +
+                   ':' + (M<=9 ? '0'+M : M) +
+                   ':' + (S<=9 ? '0'+S : S);
+    }
+    return dateStr;
+}
+
+
 function wiki(wikilink, pipelink) {
     // http://stackoverflow.com/a/1145525
     var wiki_link = wikilink.split(' ').join('_');
@@ -2299,16 +2334,21 @@ randomTodoHtml
                     // Get the date that is recorded in this history entry
                     // for this Daily:
                     var historyDate = new Date(obj.history[j].date);
-                    // Subtract one day from that date because the value assigned
-                    // to this history entry comes from the action that was
-                    // done to the Daily on the PREVIOUS day -- i.e., if you
-                    // tick off a Daily, then after the cron time (i.e., on the
-                    // NEXT day), the Daily's value will be increased and that
-                    // new value will be recorded with the new day's date:
-                    //
-                    historyDate.setHours(historyDate.getHours() - 24);
                     
-                    var formattedDate = myDateConverter(historyDate);
+                    // Format the historyDate to the user's time zone. 
+                    // This fixes a bug where the displayed dates were 
+                    // incorrect for some users.
+                    //
+                    // Old code, for reference only:
+                    // historyDate.setHours(historyDate.getHours() - 24);
+                    // var formattedDate = myDateConverter(historyDate);
+                    //
+                    var userZoneOffsetMins = user.preferences.timezoneOffset;
+                    var userZoneOffsetMills = userZoneOffsetMins * 60 * 1000;
+                    var localDateMills = historyDate - userZoneOffsetMills;
+                    var localDate = new Date(localDateMills);
+                    var formattedDate = formatDateFromUTC(localDate);
+                    
                     var value = obj.history[j].value;
                     var success = '-'; // default (Grey Daily or no data)
                     var status = 'neutral'; // default (Grey Daily or no data)
