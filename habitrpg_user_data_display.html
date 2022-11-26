@@ -819,7 +819,7 @@ function myDateConverter(date, style) { // XXX_SOON replace with moment
 }
 
 
-function formatDateFromUTC(date, style) {
+function formatDateFromUTC(date) {
     if (typeof date === 'string' || typeof date === 'number') {
         date = new Date(date);
     }
@@ -842,14 +842,6 @@ function formatDateFromUTC(date, style) {
     var dateStr = y +
            '-' + (m<=9 ? '0'+m : m) +
            '-' + (d<=9 ? '0'+d : d);
-    if (style === 'short') {
-        dateStr = dateStr.replace(/^20/, ""); // remove century
-    }
-    if (style === 'long') {
-        dateStr += ' ' + (H<=9 ? '0'+H : H) +
-                   ':' + (M<=9 ? '0'+M : M) +
-                   ':' + (S<=9 ? '0'+S : S);
-    }
     return dateStr;
 }
 
@@ -2311,14 +2303,7 @@ randomTodoHtml
         var title   = 'Dailies History';
         var orderId = 'dailiesHistory';
 
-        var weekdayArray=new Array(7);
-        weekdayArray[0]="Su";
-        weekdayArray[1]="Mo";
-        weekdayArray[2]="Tu";
-        weekdayArray[3]="We";
-        weekdayArray[4]="Th";
-        weekdayArray[5]="Fr";
-        weekdayArray[6]="Sa";
+        var weekdayArray = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
 
         // preprocess the Dailies to find all the dates on which data
         // exists, and to work out if each day was a success or fail
@@ -5623,7 +5608,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.16)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.17)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5653,6 +5638,15 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>9.17 <span class="date">2022-11-26</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+			<li>In the <strong>Dailies History</strong> section, <a href="https://github.com/BlakeTNC">BladeTNC / Tenali</a> fixed the days of the week day so that they match the dates.</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>9.16 <span class="date">2022-11-22</span></dt>
         <dd><ul>
