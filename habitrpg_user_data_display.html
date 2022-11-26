@@ -832,7 +832,7 @@ function formatDateFromUTC(date, style) {
         // anything better.
         date = new Date();
     }
-    
+
     var y = date.getUTCFullYear();
     var m = date.getUTCMonth() + 1;
     var d = date.getUTCDate();
@@ -2334,9 +2334,9 @@ randomTodoHtml
                     // Get the date that is recorded in this history entry
                     // for this Daily:
                     var historyDate = new Date(obj.history[j].date);
-                    
-                    // Format the historyDate to the user's time zone. 
-                    // This fixes a bug where the displayed dates were 
+
+                    // Format the historyDate to the user's time zone.
+                    // This fixes a bug where the displayed dates were
                     // incorrect for some users.
                     //
                     // Old code, for reference only:
@@ -2348,7 +2348,7 @@ randomTodoHtml
                     var localDateMills = historyDate - userZoneOffsetMills;
                     var localDate = new Date(localDateMills);
                     var formattedDate = formatDateFromUTC(localDate);
-                    
+
                     var value = obj.history[j].value;
                     var success = '-'; // default (Grey Daily or no data)
                     var status = 'neutral'; // default (Grey Daily or no data)
@@ -5620,7 +5620,7 @@ ul#tableOfContents > li {
 <body><div id="innerBody">
 
 <h1><a href="https://habitica.com/">Habitica</a> Official User Data Display Tool
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.15)</span></h1><!-- VERSION TOGGLE -->
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.16)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5651,11 +5651,24 @@ ul#tableOfContents > li {
     <h2>Version History</h2>
     <dl>
 
+        <dt>9.16 <span class="date">2022-11-22</span></dt>
+        <dd><ul>
+            <li>Bug fix:
+                <ul>
+                    <li>In the <strong>Dailies History</strong> section, <a href="https://github.com/BlakeTNC">BladeTNC / Tenali</a> has written a fix that may stop the wrong dates being shown for some people. If you still experience a problem with this section, please email Alys at <a href="mailto:lady_alys@oldgods.net">lady_alys@oldgods.net</a>.
+                        <ul>
+                            <li>Note that the days of the weeks may not match the dates. This is a known problem and should be fixed soon. You do not need to report it.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul></dd>
+
         <dt>9.15 <span class="date">2022-11-06</span></dt>
         <dd><ul>
             <li>Feature:
                 <ul>
-			<li>In the <strong>Dailies History</strong> section, weekday abbreviations are included at the top of each column, thanks to <a href="https://github.com/BlakeTNC">BladeTNC / Tenali</a>.</li>
+                    <li>In the <strong>Dailies History</strong> section, weekday abbreviations are included at the top of each column, thanks to <a href="https://github.com/BlakeTNC">BladeTNC / Tenali</a>.</li>
                 </ul>
             </li>
         </ul></dd>
