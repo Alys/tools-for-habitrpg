@@ -2312,19 +2312,20 @@ randomTodoHtml
         var orderId = 'dailiesHistory';
 
         var weekdayArray=new Array(7);
-        weekdayArray[0]="Mo";
-        weekdayArray[1]="Tu";
-        weekdayArray[2]="We";
-        weekdayArray[3]="Th";
-        weekdayArray[4]="Fr";
-        weekdayArray[5]="Sa";
-        weekdayArray[6]="Su";
+        weekdayArray[0]="Su";
+        weekdayArray[1]="Mo";
+        weekdayArray[2]="Tu";
+        weekdayArray[3]="We";
+        weekdayArray[4]="Th";
+        weekdayArray[5]="Fr";
+        weekdayArray[6]="Sa";
 
         // preprocess the Dailies to find all the dates on which data
         // exists, and to work out if each day was a success or fail
         // or neither (e.g., Grey Daily) based on whether the day's value
         // is higher or lower than the previous day's:
         var allDates = {};
+        var allWeekdays = {};
         for (var i=0,ic=dailies.length; i<ic; i++) {
             var obj = dailies[i];
             obj['historyItems'] = {};
@@ -2348,6 +2349,9 @@ randomTodoHtml
                     var localDateMills = historyDate - userZoneOffsetMills;
                     var localDate = new Date(localDateMills);
                     var formattedDate = formatDateFromUTC(localDate);
+                    var weekdayNumeric = localDate.getUTCDay();
+                    var weekdayText = weekdayArray[weekdayNumeric];
+                    allWeekdays[formattedDate] = weekdayText;
 
                     var value = obj.history[j].value;
                     var success = '-'; // default (Grey Daily or no data)
@@ -2385,10 +2389,9 @@ randomTodoHtml
                     missingDate = 'missingDate';
                 }
             }
-            var weekdayText = weekdayArray[date.getDay()];
             headerRow += '<th class="' + missingDate + '">' +
                          allDatesInOrder[i] + '<br /><br />' +
-                         weekdayText + '&nbsp;</th>';
+                         allWeekdays[allDatesInOrder[i]] + '&nbsp;</th>';
             previousDate = date;
         }
         headerRow += '</tr></thead>';
