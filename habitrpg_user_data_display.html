@@ -819,7 +819,7 @@ function myDateConverter(date, style) { // XXX_SOON replace with moment
 }
 
 
-function formatDateFromUTC(date) {
+function formatIsoDateString(date) {
     if (typeof date === 'string' || typeof date === 'number') {
         date = new Date(date);
     }
@@ -1970,19 +1970,161 @@ randomTodoHtml
     }
 
     function habitHistory() {
-        var html = '<p class="narrowContent">This shows your Habits, the dates you clicked on them, and the total number of plus and minus clicks on each of those dates.</p>';
-        html += '<p class="narrowContent">Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
-        html += '<ul>';
-        $.each(habits, function(index, obj){
-            html += collateHistoryForOneHabit(obj);
-        });
-        html += '</ul>';
         var id      = 'habitHistorySection';
         var title   = 'Habit History';
         var orderId = 'habitHistory';
-        TOC[orderId]  = {'target': id, 'title':  title};
-        MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
-                         'html': html};
+
+        // ### Habit History Chart ###
+
+        // Create some needed constants.
+        var todayDateObj = new Date(Date.now());
+        var todayLocalDateString = getLocalDateStringForUser_FromUtcMillsStamp(todayDateObj.getTime());
+        var oldDateString = '2000-01-01';
+        var weekdayArray = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
+
+        // Create a data structure for the chart.
+        // The desired structure is:
+        // habitsWithHistory[habitIndex]['name'] = 'Some Habit Name';
+        // habitsWithHistory[habitIndex]['entries'][historyEntryDate]['upCount'] 
+        // habitsWithHistory[habitIndex]['entries'][historyEntryDate]['downCount']
+        // habitsWithHistory[habitIndex]['entries'][historyEntryDate]['netCount']
+
+        var habitsWithHistory = [];
+        $.each(habits, function(index, habit){
+            habitsWithHistory[index] = {};
+            habitsWithHistory[index]['name'] = habit.text;
+            habitsWithHistory[index]['entries'] = getAllHistoryEntriesForOneHabit(habit);
+        });
+
+        function getAllHistoryEntriesForOneHabit(habit) {
+            var allHistoryEntriesForThisHabit = {};
+            allHistoryEntriesForThisHabit['text'] = habit.text;
+            allHistoryEntriesForThisHabit['mostRecentDate'] = oldDateString;
+            allHistoryEntriesForThisHabit['mostRecentDaysAgo'] = -1;
+            $.each(habit.history, function(index, histObj){
+                var entry = {};
+                if (typeof histObj.scoredUp !== 'undefined' && typeof histObj.scoredDown !== 'undefined') {
+                    entry['upCount'] = 0;
+                    if (habit.up) {
+                        entry['upCount'] = histObj.scoredUp;
+                    }
+                    entry['downCount'] = 0;
+                    if (habit.down) {
+                        entry['downCount'] = histObj.scoredDown;
+                    }
+                    entry['netCount'] = (entry['upCount'] - entry['downCount']);
+
+                    var entryDate = getLocalDateStringForUser_FromUtcMillsStamp(histObj.date);
+                    if(entryDate > allHistoryEntriesForThisHabit['mostRecentDate']){
+                        allHistoryEntriesForThisHabit['mostRecentDate'] = entryDate;
+                    }
+                    allHistoryEntriesForThisHabit[entryDate] = entry;
+                } 
+            });
+            if(allHistoryEntriesForThisHabit['mostRecentDate'] > oldDateString) {
+                var mostRecentLocalDateObj = new Date(allHistoryEntriesForThisHabit['mostRecentDate']);
+                var todayLocalDateObj = new Date(todayLocalDateString);
+                var mostRecentDaysAgo = (todayLocalDateObj-mostRecentLocalDateObj)/(1000*3600*24);
+                allHistoryEntriesForThisHabit['mostRecentDaysAgo'] = mostRecentDaysAgo;
+            } else {
+                allHistoryEntriesForThisHabit['mostRecentDaysAgo'] = '-';
+            }
+            return allHistoryEntriesForThisHabit;
+        }
+
+        // Create the html for the chart.
+        var maxDaysToShow = 31;
+        var headerRow = '<thead><tr><th>Days<br/>Since<br/>Active</th><th>Habit</th>';
+        for (var dateIdx=0; dateIdx<maxDaysToShow; dateIdx++) {
+            // Get the current local date and weekday.
+            var currentLocalDateObj = new Date();
+            currentLocalDateObj.setDate(todayDateObj.getDate()-dateIdx);
+            currentLocalDateString = getLocalDateStringForUser_FromUtcMillsStamp(currentLocalDateObj.getTime());
+            var weekdayString = weekdayArray[currentLocalDateObj.getDay()]
+            // Add the date to the header row.
+            var classNames = (weekdayString === 'Mo' ? 'weekstart' : '' );
+            headerRow += '<th class="' + classNames + '">' +
+                currentLocalDateString + '<br /><br />' +
+                weekdayString + '&nbsp;</th>';
+        }
+        headerRow += '</tr></thead>';
+        headerRow = headerRow.replace(/>20/g, ">'"); // remove century
+        headerRow = headerRow.replace(/-/g, "-<br />"); // line break after -
+        
+
+        var tableBody = '';
+        for (var habitIdx=0,ic=habitsWithHistory.length; habitIdx<ic; habitIdx++) {
+            var habit = habitsWithHistory[habitIdx];
+            tableBody += '<tr>'+
+                '<td>' + habit['entries']['mostRecentDaysAgo'] + '</td>'+
+                '<td><b>' + habit.name + '</b></td>';
+            for (var dateIdx=0; dateIdx<maxDaysToShow; dateIdx++) {
+                // Get the current local date.
+                var currentLocalDateObj = new Date();
+                currentLocalDateObj.setDate(todayDateObj.getDate()-dateIdx);
+                currentLocalDateString = getLocalDateStringForUser_FromUtcMillsStamp(currentLocalDateObj.getTime());
+                var weekdayString = weekdayArray[currentLocalDateObj.getDay()]
+                // Populate the cell for this habit on this date.
+                var netCount = 0;
+                if(currentLocalDateString in habit['entries']) {
+                    var entry = habit['entries'][currentLocalDateString];
+                    netCount = entry['netCount'];
+                } 
+                var formattedNetCount = '·';
+                var classNames = 'neutral';
+                if(netCount > 0) {
+                    formattedNetCount = netCount; 
+                    classNames = 'safe';
+                }
+                if(netCount < 0) {
+                    formattedNetCount = netCount; 
+                    classNames = 'danger';
+                }
+                if(weekdayString === 'Mo'){
+                    classNames += ' weekstart';
+                }
+                tableBody += '<td class="' + classNames + '">' +
+                    formattedNetCount + '</td>';
+            }
+            tableBody += '</tr>' ;
+        }
+
+        var chartOutput =
+        '<div id="habitsHistoryExplanationToggle" class="showHideToggle" data-target="habitsHistoryExplanation" data-linktext="explanation">show explanation</div>' +
+        '<div id="habitsHistoryExplanation" class="hide">' +
+        '<p>The table below shows historical data for your Habits. One month\'s worth of data is shown. (31 days.) Each cell shows the \'Net\' number of times that you clicked plus or minus for that habit, on the specified date. Positive numbers are in blue, negative numbers are in red, and zero is in yellow.'+
+        '<br/><br/>For example:' + 
+        '<ul>' + 
+        '<li> 3 \'plus\' clicks and No \'minus\' clicks = Net 3. (blue)</li>' +
+        '<li> 4 \'plus\' clicks and 2 \'minus\' clicks = Net 2. (blue)</li>' +
+        '<li> 1 \'minus\' click and No \'plus\' clicks = Net (-1). (red)</li>' +
+        '<li> No clicks = Net 0. (Zero is shown as a dot, in yellow.)</li>' +
+        '<li> 1 \'minus\' click and 1 \'plus\' click = Net 0. (Zero is shown as a dot, in yellow.)</li>' +
+        '</ul>'  +
+        ' The \'Days Since Active\' field shows the number of days since any plus/minus button was clicked for that habit. (Or a hyphen if the habit has never been active.)<br/>' +
+        'Vertical black bars indicate the start of each week. (Week start is Monday.)' +
+        '<br/><br/>' +
+        'If you scoll down past the chart area, you can view the \'Habit Details\' section.<br/>The Habit Details section contains additional information that is not in the chart.<br/> Including: The absolute number of Plus and Minus button clicks, and older history beyond 31 days.' +
+        '</p>' +
+        '<div class="showHideToggle closer" data-target="habitsHistoryExplanation" data-resettoggletext="habitsHistoryExplanationToggle">hide explanation</div>' +
+        '</div>' + 
+        '<table>' + headerRow + 
+        '<tbody>' + tableBody + '</tbody>' +
+        '</table>';
+
+        // ### Habit History Details ###
+        
+        var detailOutput =  
+                '<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>'+
+                '<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>'+
+                '<H2>Habit Details</H2>' +
+                '<p class="narrowContent">This shows your Habits, the dates you clicked on them, and the total number of plus and minus clicks on each of those dates.</p>';
+        detailOutput += '<p class="narrowContent">Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
+        detailOutput += '<ul>';
+        $.each(habits, function(index, obj){
+            detailOutput += collateHistoryForOneHabit(obj);
+        });
+        detailOutput += '</ul>';
 
         function collateHistoryForOneHabit(obj) {
             // ASSUMPTION: The history array is in chronological order (cross fingers).
@@ -2016,6 +2158,23 @@ randomTodoHtml
             }
             return '<li class="' + noHistoryClass + '">' + habitText + '</li>';
         }
+
+        var html = chartOutput + detailOutput;
+        TOC[orderId]  = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
+                        'html': html};
+    }
+
+
+    function getLocalDateStringForUser_FromUtcMillsStamp(dateStampUtcMills) {
+        // Format the date to the user's time zone.
+        var dateUTC = new Date(dateStampUtcMills);
+        var userZoneOffsetMins = user.preferences.timezoneOffset;
+        var userZoneOffsetMills = userZoneOffsetMins * 60 * 1000;
+        var localDateMills = dateUTC - userZoneOffsetMills;
+        var localDate = new Date(localDateMills);
+        var isoLocalDateString = formatIsoDateString(localDate);
+        return isoLocalDateString;
     }
 
 
@@ -2303,44 +2462,35 @@ randomTodoHtml
         var title   = 'Dailies History';
         var orderId = 'dailiesHistory';
 
+        var todayDateObj = new Date(Date.now());
+        var todayLocalDateString = getLocalDateStringForUser_FromUtcMillsStamp(todayDateObj.getTime());
         var weekdayArray = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
 
-        // preprocess the Dailies to find all the dates on which data
-        // exists, and to work out if each day was a success or fail
-        // or neither (e.g., Grey Daily) based on whether the day's value
-        // is higher or lower than the previous day's:
-        var allDates = {};
+        // Preprocess the Dailies to work out if each day was a success or fail or neither.
         var allWeekdays = {};
-        for (var i=0,ic=dailies.length; i<ic; i++) {
-            var obj = dailies[i];
-            obj['historyItems'] = {};
+        for (var dailyIdx=0,c=dailies.length; dailyIdx<c; dailyIdx++) {
+            var daily = dailies[dailyIdx];
+            daily['historyItems'] = {};
             var previousValue = null;
-            if (obj.history) {
-                for (var j=0,jc=obj.history.length; j<jc; j++) {
+            if (daily.history) {
+                for (var j=0,jc=daily.history.length; j<jc; j++) {
                     // Get the date that is recorded in this history entry
                     // for this Daily:
-                    var historyDate = new Date(obj.history[j].date);
+                    var historyDate = new Date(daily.history[j].date);
 
                     // Format the historyDate to the user's time zone.
-                    // This fixes a bug where the displayed dates were
-                    // incorrect for some users.
-                    //
-                    // Old code, for reference only:
-                    // historyDate.setHours(historyDate.getHours() - 24);
-                    // var formattedDate = myDateConverter(historyDate);
-                    //
                     var userZoneOffsetMins = user.preferences.timezoneOffset;
                     var userZoneOffsetMills = userZoneOffsetMins * 60 * 1000;
                     var localDateMills = historyDate - userZoneOffsetMills;
                     var localDate = new Date(localDateMills);
-                    var formattedDate = formatDateFromUTC(localDate);
+                    var formattedDate = formatIsoDateString(localDate);
                     var weekdayNumeric = localDate.getUTCDay();
                     var weekdayText = weekdayArray[weekdayNumeric];
                     allWeekdays[formattedDate] = weekdayText;
 
-                    var value = obj.history[j].value;
-                    var success = '-'; // default (Grey Daily or no data)
-                    var status = 'neutral'; // default (Grey Daily or no data)
+                    var value = daily.history[j].value;
+                    var success = '·'; // default
+                    var status = 'neutral'; // default
                     if ( (previousValue === null && value > 0) ||
                          (previousValue !== null && value > previousValue) ) {
                         success = '✓'; // user did the Daily
@@ -2351,53 +2501,53 @@ randomTodoHtml
                         success = 'x'; // user did not do the Daily
                         status = 'danger';
                     }
-                    obj['historyItems'][formattedDate] = [];
-                    obj['historyItems'][formattedDate]['value'] = success;
-                            // + '<br />' + (Math.round(value * 10) / 10); // TST
-                    obj['historyItems'][formattedDate]['status'] = status;
-                    allDates[formattedDate] = true;
+                    daily['historyItems'][formattedDate] = [];
+                    daily['historyItems'][formattedDate]['value'] = success;
+                    daily['historyItems'][formattedDate]['status'] = status;
                     previousValue = value;
                 }
             }
         }
-        var allDatesInOrder = Object.keys(allDates).sort().reverse();
-        var datesWithGaps = {};
-        var previousDate = null;
-        var headerRow = '<thead><tr><th>task</th>';
-        for (var i=0,ic=allDatesInOrder.length; i<ic; i++) {
-            var date = new Date(allDatesInOrder[i]);
-            var missingDate = '';
-            if (previousDate !== null) {
-                if ((previousDate - date) > 24*60*60*1000) {
-                    // there's a gap between the dates of more than one day
-                    datesWithGaps[allDatesInOrder[i]] = true;
-                    missingDate = 'missingDate';
-                }
-            }
-            headerRow += '<th class="' + missingDate + '">' +
-                         allDatesInOrder[i] + '<br /><br />' +
-                         allWeekdays[allDatesInOrder[i]] + '&nbsp;</th>';
-            previousDate = date;
+        var maxDaysToShow = 31;
+        var headerRow = '<thead><tr><th>Task</th>';
+        for (var dateIdx=0; dateIdx<maxDaysToShow; dateIdx++) {
+            // Get the current local date and weekday.
+            var currentLocalDateObj = new Date();
+            currentLocalDateObj.setDate(todayDateObj.getDate()-dateIdx);
+            currentLocalDateString = 
+            getLocalDateStringForUser_FromUtcMillsStamp(currentLocalDateObj.getTime());
+            var weekdayString = weekdayArray[currentLocalDateObj.getDay()]
+            // Add the date to the header row.
+            var weekStartClass = (weekdayString === 'Mo' ? 'weekstart' : '' );
+            headerRow += '<th class="' + weekStartClass + '">' +
+                        currentLocalDateString + '<br /><br />' +
+                        weekdayString + '&nbsp;</th>';
         }
         headerRow += '</tr></thead>';
         headerRow = headerRow.replace(/>20/g, ">'"); // remove century
         headerRow = headerRow.replace(/-/g, "-<br />"); // line break after -
+
+
         var tableBody = '';
-        for (var i=0,ic=dailies.length; i<ic; i++) {
-            var obj = dailies[i];
-            tableBody += '<tr><td>' + obj.text + '</td>';
-            for (var j=0,jc=allDatesInOrder.length; j<jc; j++) {
-                var missingDate = (datesWithGaps[allDatesInOrder[j]]) ?
-                                  'missingDate' : '';
+        for (var dailyIdx=0, c=dailies.length; dailyIdx<c; dailyIdx++) {
+            var daily = dailies[dailyIdx];
+            tableBody += '<tr><td>' + daily.text + '</td>';
+            for (var dateIdx=0; dateIdx<maxDaysToShow; dateIdx++) {
+                // Get the current local date and weekday.
+                var currentLocalDateObj = new Date();
+                currentLocalDateObj.setDate(todayDateObj.getDate()-dateIdx);
+                currentLocalDateString = 
+                getLocalDateStringForUser_FromUtcMillsStamp(currentLocalDateObj.getTime());
+                var weekdayString = weekdayArray[currentLocalDateObj.getDay()]
+                var weekStartClass = (weekdayString === 'Mo' ? 'weekstart' : '' );
+                // Populate the cells for this habit and date.
                 var status = 'neutral';
-                var value  = '-';
-                if (obj['historyItems'][allDatesInOrder[j]]) {
-                    status = obj['historyItems'][allDatesInOrder[j]]['status'];
-                    value  = obj['historyItems'][allDatesInOrder[j]]['value'];
+                var value  = '·';
+                if (daily['historyItems'][currentLocalDateString]) {
+                    status = daily['historyItems'][currentLocalDateString]['status'];
+                    value  = daily['historyItems'][currentLocalDateString]['value'];
                 }
-                tableBody += '<td class="' +
-                             status + ' ' + missingDate + '">' +
-                             value + '</td>';
+                tableBody += '<td class="' + weekStartClass + ' ' + status + '">' + value + '</td>';
             }
             tableBody += '</tr>' ;
         }
@@ -2405,21 +2555,21 @@ randomTodoHtml
         var html =
 '<div id="dailiesHistoryExplanationToggle" class="showHideToggle" data-target="dailiesHistoryExplanation" data-linktext="explanation">show explanation</div>' +
 '<div id="dailiesHistoryExplanation" class="hide">' +
-'    <p>The table below shows historical data for your Dailies. If you are a subscriber, you will see data for every day going back to the date on which you subscribed. If you are not a subscriber, you will see data for every day for the past week, but before that your data points start to be merged together (this is to save on expensive database storage space). In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the Daily, even if it was a ' +
+'<p>The table below shows historical data for your Dailies. One month\'s worth of data is shown. (31 days.) In the table are symbols indicating your actions on each day:</p><ul class="padded"><li><span class="safe">V</span> You ticked off the Daily, even if it was a ' +
 wiki('Dailies#Grey_Dailies', 'Grey Daily') +
 ', or you left the Daily incomplete but cast ' +
 wiki('Healer#Skills', 'Searing Brightness') +
 ' or ' +
 wiki('Warrior#Skills', 'Brutal Smash') +
-' on it.</li><li><span class="danger">x</span> You did not tick off the Daily but you should have (it was due that day), or you used the ' + wiki('Orb_of_Rebirth', 'Orb of Rebirth') + ' or ' + wiki('Settings#Reset_Account', 'Reset') + ' to set all your tasks back to yellow.</li><li><span class="neutral">-</span> You did not tick off the Daily on the day it was due but you took no damage from it for several possible reasons (you ticked the Daily the next morning in the ' +
+' on it.</li><li><span class="danger">x</span> You did not tick off the Daily but you should have (it was due that day), or you used the ' + wiki('Orb_of_Rebirth', 'Orb of Rebirth') + ' or ' + wiki('Settings#Reset_Account', 'Reset') + ' to set all your tasks back to yellow.</li><li><span class="neutral">·</span> You took no damage from the Daily, for one of several possible reasons. (You ticked the Daily the next morning in the ' +
 wiki('Dailies#Record_Yesterday.27s_Activities', 'Record Yesterday\'s Activity screen') +
 '; the Daily was not due that day; you ticked off all of the ' +
 wiki('Checklist#Dailies', 'checklist') +
 ' items under that Daily, although not the Daily itself; you evaded the Daily with ' +
 wiki('Rogue#Skills', 'Stealth') + '; you were ' +
 wiki('Tavern', 'resting in the inn') +
-'; you had not logged in to Habitica that day; the Daily did not yet exist on that day). This symbol will also appear frequently for old data for non-subscribers because it is not possible to correctly determine the actions you took after your data has been merged.</li></ul><p>Vertical grey bars in the table indicate gaps in the historical record (e.g., periods of a day or more in which you were resting in the inn).</p>' +
-'   <div class="showHideToggle closer" data-target="dailiesHistoryExplanation" data-resettoggletext="dailiesHistoryExplanationToggle">hide explanation</div>' +
+'; you had not logged in to Habitica that day; the Daily did not yet exist on that day). This symbol will also appear frequently for old data for non-subscribers because it is not possible to correctly determine the actions you took after your data has been merged.</li></ul><p>Vertical black bars indicate the start of each week. (Week start is Monday.)</p>' +
+'<div class="showHideToggle closer" data-target="dailiesHistoryExplanation" data-resettoggletext="dailiesHistoryExplanationToggle">hide explanation</div>' +
 '</div>' +
                    '<table>' +
                    headerRow + '<tbody>' +
@@ -2427,8 +2577,6 @@ wiki('Tavern', 'resting in the inn') +
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
-
-// LIST FORMAT FOR REASONS (INCOMPLETE): <li><span class="neutral">-</span> you did not tick off the Daily but you took no damage from it for a reason such as:<ul><li>the Daily was not due that day</li><li>you evaded the Daily with <a href="http://habitica.fandom.com/wiki/Rogue#Skills">Stealth</a></li><li>you were <a href="http://habitica.fandom.com/wiki/Tavern">resting in the inn</a></li><li>you had not logged in to Habitica that day</li><li>the Daily did not yet exist on that day</li></ul></li>      #dailiesHistorySection > ul ul { margin-left: 2em; }
     }
 
 
@@ -5232,6 +5380,39 @@ ul#tableOfContents > li {
 }
 
 
+#habitHistorySection table {
+    margin-top: 1.5em;
+    border-bottom: 1px solid #ccc;
+    border-left:   1px solid #ccc;
+}
+#habitHistorySection table th {
+    background-color: rgb(242, 242, 230); /* XXX_SOON replace with proper scrolling */
+}
+#habitHistorySection table th,
+#habitHistorySection table td {
+    text-align: center;
+    border-top:   1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+#habitHistorySection table th:nth-child(2) {
+    border-right: 0.3em solid #999;
+}
+#habitHistorySection table td:nth-child(2) {
+    text-align: left;
+    border-right: 0.3em solid #999;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 12em;
+}
+#habitHistorySection table th.weekstart {
+  border-right:  0.15em solid #000;
+}
+#habitHistorySection table td.weekstart {
+  border-right:  0.15em solid #000;
+}
+
+
 #dailiesIncompleteSection h3 {
     margin-top: 3em;
 }
@@ -5278,9 +5459,11 @@ ul#tableOfContents > li {
     overflow: hidden;
     width: 12em;
 }
-#dailiesHistorySection table th.missingDate,
-#dailiesHistorySection table td.missingDate {
-    border-left: 0.3em solid #999;
+#dailiesHistorySection table th.weekstart {
+  border-right:  0.15em solid #000;
+}
+#dailiesHistorySection table td.weekstart {
+  border-right:  0.15em solid #000;
 }
 
 
