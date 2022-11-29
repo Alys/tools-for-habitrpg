@@ -2531,7 +2531,7 @@ randomTodoHtml
         var tableBody = '';
         for (var dailyIdx=0, c=dailies.length; dailyIdx<c; dailyIdx++) {
             var daily = dailies[dailyIdx];
-            tableBody += '<tr><td>' + daily.text + '</td>';
+            tableBody += '<tr><td><b>' + daily.text + '</b></td>';
             for (var dateIdx=0; dateIdx<maxDaysToShow; dateIdx++) {
                 // Get the current local date and weekday.
                 var currentLocalDateObj = new Date();
@@ -5403,7 +5403,7 @@ ul#tableOfContents > li {
     display: inline-block;
     white-space: nowrap;
     overflow: hidden;
-    width: 12em;
+    width: 14.5em;
 }
 #habitHistorySection table th.weekstart {
   border-right:  0.15em solid #000;
@@ -5457,7 +5457,7 @@ ul#tableOfContents > li {
     display: inline-block;
     white-space: nowrap;
     overflow: hidden;
-    width: 12em;
+    width: 14.5em;
 }
 #dailiesHistorySection table th.weekstart {
   border-right:  0.15em solid #000;
