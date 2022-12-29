@@ -2149,8 +2149,6 @@ randomTodoHtml
         '</ul>'  +
         ' The \'Days Since Active\' field shows the number of days since any plus/minus button was clicked for that habit. (Or a hyphen if the habit has never been active.)<br/>' +
         'Vertical black bars indicate the start of each week. (Week start is Monday.)' +
-        '<br/><br/>' +
-        'If you scoll down past the table area, you can view the \'Habit Details\' section.<br/>The Habit Details section contains additional information that is not in the table.<br/> Including: The absolute number of Plus and Minus button clicks, and older history beyond 31 days.' +
         '</p>' +
         '<div class="showHideToggle closer" data-target="habitsHistoryExplanation" data-resettoggletext="habitsHistoryExplanationToggle">hide explanation</div>' +
         '</div>' +
@@ -2158,54 +2156,7 @@ randomTodoHtml
         '<tbody>' + tableBody + '</tbody>' +
         '</table>';
 
-        // ### Habit History Details ###
-
-        var detailOutput =
-                '<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>'+
-                '<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>'+
-                '<H2>Habit Details</H2>' +
-                '<p class="narrowContent">This shows your Habits, the dates you clicked on them, and the total number of plus and minus clicks on each of those dates.</p>';
-        detailOutput += '<p class="narrowContent">Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
-        detailOutput += '<ul>';
-        $.each(habits, function(index, obj){
-            detailOutput += collateHistoryForOneHabit(obj);
-        });
-        detailOutput += '</ul>';
-
-        function collateHistoryForOneHabit(obj) {
-            // ASSUMPTION: The history array is in chronological order (cross fingers).
-            var historyList = [];
-            $.each(obj.history, function(index, histObj){
-                if (typeof histObj.scoredUp !== 'undefined' && typeof histObj.scoredDown !== 'undefined') {
-                    var valueRounded = Math.round(histObj.value * 100) / 100;
-                    var string = moment(histObj.date).format('YYYY-MM-DD') + ' : ';
-                    if (obj.up) {
-                        string += ' up: ' + histObj.scoredUp;
-                        if (obj.down) string += '; ';
-                    }
-                    if (obj.down) {
-                        string += ' down: ' + histObj.scoredDown;
-                    }
-                    string += ' <span class="historyValue">(value: ' + valueRounded + ')</span>';
-                    historyList.push('<li>' + string + '</li>');
-                }
-            });
-
-            var habitText = obj.text;
-            var noHistoryClass = '';
-            if (historyList.length == 0) {
-                noHistoryClass = 'noHistory';
-                habitText += ' <span>(no history)</span>';
-            }
-            else {
-                historyList.reverse(); // put most recent at top
-                habitText += '<ul class="padded">' +
-                           historyList.join('') + '</ul>';
-            }
-            return '<li class="' + noHistoryClass + '">' + habitText + '</li>';
-        }
-
-        var html = tableOutput + detailOutput;
+        var html = tableOutput;
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                         'html': html};
