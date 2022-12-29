@@ -187,6 +187,7 @@ var hideDropsInDashboard = true; // changes to false as soon as the user
                                  // false through all future re-fetches
 var tellMe = '<a href="mailto:lady_alys@oldgods.net">tell me</a>';
 
+var weekdayArray = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ]; // TODO: replace this with momentjs code
 
 //////////////////////////////////////////////////////////////////////
 ////   Allow Show/Hide Toggling to work    ///////////////////////////
@@ -2027,7 +2028,6 @@ randomTodoHtml
         var todayDateObj = new Date(Date.now());
         var todayLocalDateString = getLocalDateStringForUser_FromUtcMillsStamp(todayDateObj.getTime());
         var oldDateString = '2000-01-01';
-        var weekdayArray = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
 
         // Create a data structure for the table.
         // The desired structure is:
@@ -2136,8 +2136,8 @@ randomTodoHtml
         }
 
         var tableOutput =
-        '<div id="habitsHistoryExplanationToggle" class="showHideToggle" data-target="habitsHistoryExplanation" data-linktext="explanation">show explanation</div>' +
-        '<div id="habitsHistoryExplanation" class="hide">' +
+        '<div id="habitsHistoryTableExplanationToggle" class="showHideToggle" data-target="habitsHistoryTableExplanation" data-linktext="explanation">show explanation</div>' +
+        '<div id="habitsHistoryTableExplanation" class="hide">' +
         '<p>The table below shows historical data for your Habits. One month\'s worth of data is shown. (31 days.) Each cell shows the "Net" number of times that you clicked plus or minus for that habit, on the specified date. Positive numbers are in blue, negative numbers are in red, and zero is in yellow.'+
         '<br/><br/>For example:' +
         '<ul>' +
@@ -2150,7 +2150,7 @@ randomTodoHtml
         ' The "Days Since Active" field shows the number of days since any plus/minus button was clicked for that habit. (Or a hyphen if the habit has never been active.)<br/>' +
         'Vertical black bars indicate the start of each week. (Week start is Monday.)' +
         '</p>' +
-        '<div class="showHideToggle closer" data-target="habitsHistoryExplanation" data-resettoggletext="habitsHistoryExplanationToggle">hide explanation</div>' +
+        '<div class="showHideToggle closer" data-target="habitsHistoryTableExplanation" data-resettoggletext="habitsHistoryTableExplanationToggle">hide explanation</div>' +
         '</div>' +
         '<table>' + headerRow +
         '<tbody>' + tableBody + '</tbody>' +
@@ -2457,8 +2457,6 @@ randomTodoHtml
         var id      = 'dailiesHistorySection';
         var title   = 'Dailies History';
         var orderId = 'dailiesHistory';
-
-        var weekdayArray = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
 
         // preprocess the Dailies to find all the dates on which data
         // exists, and to work out if each day was a success or fail
