@@ -688,7 +688,7 @@ function formatAndDisplayTOC() {
             'HEADING Tasks',
                 'taskOverview', 'taskStatistics', 'untaggedTasks',
             // 'HEADING Habits',
-                'habitTrends', 'habitHistory',
+                'habitTrends', 'habitHistoryList',
             'HEADING',
             // 'HEADING Dailies',
                 'dailiesHistory', 'dailiesIncomplete',
@@ -732,7 +732,7 @@ function formatAndDisplayMAIN() {
     // elements are in the order that the sections would appear on the page
     // if they were all visible at once):
     var keys = ['taskOverview', 'taskStatistics', 'untaggedTasks',
-                'habitTrends', 'habitHistory', 'dailiesHistory', 'todosDated',
+                'habitTrends', 'habitHistoryList', 'dailiesHistory', 'todosDated',
                 'todosCompleted', 'dropsToday', 'questProgress', 'questsCompleted',
                 'damageDailies','dailiesIncomplete',//keep in that order
                 'statsAndStreaks', 'guildsList',
@@ -1090,7 +1090,7 @@ function collateAndDisplayTaskData() {
     taskStatistics();
     untaggedTasksSection();
     habitTrends();
-    habitHistory();
+    habitHistoryList();
     damageFromDailies();
     dailiesIncomplete();
     dailiesHistory();
@@ -1819,7 +1819,7 @@ randomTodoHtml
     }
 
     function habitTrends() {
-        var html = '<p>The chart below provides a visual representation of the trends in your Habits as reflected by the data recorded in Habitica. Here you can get an idea of which Habits you are reinforcing, and which are being neglected. The data provided to this chart is the same as displayed in the Habit History section, limited to the last 500 entries. The Habit History section only records when a change occurs in a Habit, while the trend chart includes the values for all Habits every day, regardless if they changed.</p>';
+        var html = '<p>The chart below provides a visual representation of the trends in your Habits as reflected by the data recorded in Habitica. Here you can get an idea of which Habits you are reinforcing, and which are being neglected. The data provided to this chart is the same as displayed in the Habit History List section, limited to the last 500 entries. The Habit History List section only records when a change occurs in a Habit, while the trend chart includes the values for all Habits every day, regardless if they changed.</p>';
         html += '<p>This chart is interactive, and exposes multiple controls:<ul><li>Scroll inside the chart to <strong>zoom</strong></li><li>Click and drag (left/right) to <strong>slide</strong> along the time-axis when zoomed in</li><li><strong>Hover</strong> over a datapoint to see all the values for that day</li><li>Click the Habits in the <strong>legend</strong> to toggle their display in the chart on/off</li></ul></p>';
         html += '<button onclick="$(\'.legend-toggle\').length != 0 ? $(\'.legend-toggle\').click() : $(\'.legend span\').click();" title="This may take a few seconds with a large amount of data">Toggle All</button>';
         var habitNames = habits.reduce(function(names, item) {
@@ -1968,7 +1968,7 @@ randomTodoHtml
         }
     }
 
-    function habitHistory() {
+    function habitHistoryList() {
         var html = '<p class="narrowContent">This shows your Habits, the dates you clicked on them, and the total number of plus and minus clicks on each of those dates.</p>';
         html += '<p class="narrowContent">Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
         html += '<ul>';
@@ -1976,9 +1976,9 @@ randomTodoHtml
             html += collateHistoryForOneHabit(obj);
         });
         html += '</ul>';
-        var id      = 'habitHistorySection';
-        var title   = 'Habit History';
-        var orderId = 'habitHistory';
+        var id      = 'habitHistoryListSection';
+        var title   = 'Habit History List';
+        var orderId = 'habitHistoryList';
         TOC[orderId]  = {'target': id, 'title':  title};
         MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
                          'html': html};
@@ -5215,21 +5215,20 @@ ul#tableOfContents > li {
 }
 
 
-#habitHistorySection .historyValue {
+#habitHistoryListSection .historyValue {
     font-size: .8em;
 }
-#habitHistorySection li li {
+#habitHistoryListSection li li {
     padding: 1px 0;
 }
-#habitHistorySection .noHistory {
+#habitHistoryListSection .noHistory {
     font-weight: bold;
 }
-#habitHistorySection .noHistory span {
+#habitHistoryListSection .noHistory span {
     font-size:  .8em;
     font-style: italic;
     font-weight: normal;
 }
-
 
 #dailiesIncompleteSection h3 {
     margin-top: 3em;
@@ -5643,11 +5642,13 @@ ul#tableOfContents > li {
             <li>Features:
                 <ul>
 					<li>Removed "Official" from the page name and added the <code>:broken_heart:</code> emoji because Habitica's staff <a href="https://www.reddit.com/r/habitica/comments/zdr2la/the_staff_is_taking_moderation_inhouse_and_so_are/">fired the moderation team</a> and <a href="https://www.reddit.com/r/habitica/comments/zmsz48/habitica_received_some_troubling_reports_about/">treated the Socialites with disrespect and cruelty</a>.</li>
+					<li>Renamed the <strong>Habit History</strong> section to <strong>Habit History List</strong>.</li>
                 </ul>
             </li>
             <li>Code:
                 <ul>
 					<li>Renamed function formatDateFromUTC to formatIsoDateString (from <a href="https://github.com/Alys/tools-for-habitrpg/pull/62">PR 62 by BlakeTNC</a>).</li>
+					<li>Renamed function habitHistory to habitHistoryList.</li>
                 </ul>
             </li>
         </ul></dd>
@@ -6898,7 +6899,7 @@ ul#tableOfContents > li {
             <li><span class="subheading">Task Statistics</span>: How many Habits, Dailies, To Do's, and Rewards you have in total, and how many are assigned to each <a href="http://habitica.fandom.com/wiki/Advanced_Options">Stat</a>. If you have task-based <a href="http://habitica.fandom.com/wiki/Automatic_Allocation">auto-allocation</a> turned on, this section will also show your <span class="subheading">Training Points</span>.</li>
             <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To Do's, or Rewards that have not been <a href="http://habitica.fandom.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed. This section is shown only if you have untagged tasks.</li>
             <li><span class="subheading">Habit Trends</span>: An interactive chart that provides a visual representation of the trends in your Habits. It gives you an idea of which Habits you are reinforcing, and which are being neglected.</li>
-            <li><span class="subheading">Habit History</span>: This shows some of the dates and times you recently clicked on your Habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
+            <li><span class="subheading">Habit History List</span> (previously <span class="subheading">Habit History</span>): This shows some of the dates and times you recently clicked on your Habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
             <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your Dailies.</li>
             <li><span class="subheading">Dailies Incomplete</span>: A list of Dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitica.fandom.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
             <li><span class="subheading">To Do's with Dates</span>: A list of all To Do's that have been given due dates, sorted by date. If there are any To Do's due today or overdue, a red tile will appear in the dashboard to tell you how many there are. This section is shown only if you have dated To Do's.</li>
@@ -6924,7 +6925,7 @@ ul#tableOfContents > li {
             <li><a href="habitrpg_user_data_display.html?sectionOpen=taskStatisticsSection&uuid=">Task Statistics</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=untaggedTasksSection&uuid=">Tasks Untagged</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=habitTrendsSection&uuid=">Habit Trends</a></li>
-            <li><a href="habitrpg_user_data_display.html?sectionOpen=habitHistorySection&uuid=">Habit History</a></li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=habitHistoryListSection&uuid=">Habit History List</a> (previously Habit History)</li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=dailiesHistorySection&uuid=">Dailies History</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=dailiesIncompleteSection&uuid=">Dailies Incomplete</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=todosDatedSection&uuid=">To Do's with Dates</a></li>
@@ -6961,7 +6962,7 @@ ul#tableOfContents > li {
             <li>For Task Overview and the Dailies sections, show the dates that tasks were last completed to assist with keeping track of monthly and bi-weekly tasks.</li>
             <li>Modify the "Random To Do" function to also display a random Daily from those that have not been completed.</li>
             <li>Create a "Random Task" button that displays a randomly-selected To Do and Daily near the top of the page. Allow the button to be clicked to show different tasks without the whole page having to be refetched. Remove the random task currently shown at the bottom of the Task Overview section.</li>
-            <li>For Habit History and Untagged Tasks, apply the "longContent" class if there are more than x number of items.</li>
+            <li>For Habit History List and Untagged Tasks, apply the "longContent" class if there are more than x number of items.</li>
 <!--
 I dream of pie-charts for tracking my weekly and monthly process. Like x% healt-related tasks, x% mental-related tasks etc or: did more Habits then last week or: how many red/orange/yellow To Do's are done this month etc. --lightsaber
 
