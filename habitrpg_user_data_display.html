@@ -819,7 +819,7 @@ function myDateConverter(date, style) { // XXX_SOON replace with moment
 }
 
 
-function formatDateFromUTC(date) {
+function formatIsoDateString(date) {
     if (typeof date === 'string' || typeof date === 'number') {
         date = new Date(date);
     }
@@ -2332,7 +2332,7 @@ randomTodoHtml
                     var userZoneOffsetMills = userZoneOffsetMins * 60 * 1000;
                     var localDateMills = historyDate - userZoneOffsetMills;
                     var localDate = new Date(localDateMills);
-                    var formattedDate = formatDateFromUTC(localDate);
+                    var formattedDate = formatIsoDateString(localDate);
                     var weekdayNumeric = localDate.getUTCDay();
                     var weekdayText = weekdayArray[weekdayNumeric];
                     allWeekdays[formattedDate] = weekdayText;
@@ -5645,13 +5645,18 @@ ul#tableOfContents > li {
 					<li>Removed "Official" from the page name and added the <code>:broken_heart:</code> emoji because Habitica's staff <a href="https://www.reddit.com/r/habitica/comments/zdr2la/the_staff_is_taking_moderation_inhouse_and_so_are/">fired the moderation team</a> and <a href="https://www.reddit.com/r/habitica/comments/zmsz48/habitica_received_some_troubling_reports_about/">treated the Socialites with disrespect and cruelty</a>.</li>
                 </ul>
             </li>
+            <li>Code:
+                <ul>
+					<li>Renamed function formatDateFromUTC to formatIsoDateString (from <a href="https://github.com/Alys/tools-for-habitrpg/pull/62">PR 62 by BlakeTNC</a>).</li>
+                </ul>
+            </li>
         </ul></dd>
 
         <dt>9.17 <span class="date">2022-11-26</span></dt>
         <dd><ul>
             <li>Bug fix:
                 <ul>
-			<li>In the <strong>Dailies History</strong> section, <a href="https://github.com/BlakeTNC">BladeTNC / Tenali</a> fixed the days of the week day so that they match the dates.</li>
+					<li>In the <strong>Dailies History</strong> section, <a href="https://github.com/BlakeTNC">BladeTNC / Tenali</a> fixed the days of the week day so that they match the dates.</li>
                 </ul>
             </li>
         </ul></dd>
