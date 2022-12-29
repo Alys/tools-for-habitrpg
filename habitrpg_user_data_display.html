@@ -688,7 +688,7 @@ function formatAndDisplayTOC() {
             'HEADING Tasks',
                 'taskOverview', 'taskStatistics', 'untaggedTasks',
             // 'HEADING Habits',
-                'habitTrends', 'habitHistoryList',
+                'habitTrends', 'habitHistoryList', 'habitHistoryTable',
             'HEADING',
             // 'HEADING Dailies',
                 'dailiesHistory', 'dailiesIncomplete',
@@ -732,7 +732,7 @@ function formatAndDisplayMAIN() {
     // elements are in the order that the sections would appear on the page
     // if they were all visible at once):
     var keys = ['taskOverview', 'taskStatistics', 'untaggedTasks',
-                'habitTrends', 'habitHistoryList', 'dailiesHistory', 'todosDated',
+                'habitTrends', 'habitHistoryList', 'habitHistoryTable', 'dailiesHistory', 'todosDated',
                 'todosCompleted', 'dropsToday', 'questProgress', 'questsCompleted',
                 'damageDailies','dailiesIncomplete',//keep in that order
                 'statsAndStreaks', 'guildsList',
@@ -1091,6 +1091,7 @@ function collateAndDisplayTaskData() {
     untaggedTasksSection();
     habitTrends();
     habitHistoryList();
+    habitHistoryTable();
     damageFromDailies();
     dailiesIncomplete();
     dailiesHistory();
@@ -2015,6 +2016,210 @@ randomTodoHtml
             }
             return '<li class="' + noHistoryClass + '">' + habitText + '</li>';
         }
+    }
+
+    function habitHistoryTable() {
+        var id      = 'habitHistoryTableSection';
+        var title   = 'Habit History Table';
+        var orderId = 'habitHistoryTable';
+
+        // Create some needed constants.
+        var todayDateObj = new Date(Date.now());
+        var todayLocalDateString = getLocalDateStringForUser_FromUtcMillsStamp(todayDateObj.getTime());
+        var oldDateString = '2000-01-01';
+        var weekdayArray = [ "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" ];
+
+        // Create a data structure for the table.
+        // The desired structure is:
+        // habitsWithHistory[habitIndex]['name'] = 'Some Habit Name';
+        // habitsWithHistory[habitIndex]['entries'][historyEntryDate]['upCount']
+        // habitsWithHistory[habitIndex]['entries'][historyEntryDate]['downCount']
+        // habitsWithHistory[habitIndex]['entries'][historyEntryDate]['netCount']
+
+        var habitsWithHistory = [];
+        $.each(habits, function(index, habit){
+            habitsWithHistory[index] = {};
+            habitsWithHistory[index]['name'] = habit.text;
+            habitsWithHistory[index]['entries'] = getAllHistoryEntriesForOneHabit(habit);
+        });
+
+        function getAllHistoryEntriesForOneHabit(habit) {
+            var allHistoryEntriesForThisHabit = {};
+            allHistoryEntriesForThisHabit['text'] = habit.text;
+            allHistoryEntriesForThisHabit['mostRecentDate'] = oldDateString;
+            allHistoryEntriesForThisHabit['mostRecentDaysAgo'] = -1;
+            $.each(habit.history, function(index, histObj){
+                var entry = {};
+                if (typeof histObj.scoredUp !== 'undefined' && typeof histObj.scoredDown !== 'undefined') {
+                    entry['upCount'] = 0;
+                    if (habit.up) {
+                        entry['upCount'] = histObj.scoredUp;
+                    }
+                    entry['downCount'] = 0;
+                    if (habit.down) {
+                        entry['downCount'] = histObj.scoredDown;
+                    }
+                    entry['netCount'] = (entry['upCount'] - entry['downCount']);
+
+                    var entryDate = getLocalDateStringForUser_FromUtcMillsStamp(histObj.date);
+                    if(entryDate > allHistoryEntriesForThisHabit['mostRecentDate']){
+                        allHistoryEntriesForThisHabit['mostRecentDate'] = entryDate;
+                    }
+                    allHistoryEntriesForThisHabit[entryDate] = entry;
+                }
+            });
+            if(allHistoryEntriesForThisHabit['mostRecentDate'] > oldDateString) {
+                var mostRecentLocalDateObj = new Date(allHistoryEntriesForThisHabit['mostRecentDate']);
+                var todayLocalDateObj = new Date(todayLocalDateString);
+                var mostRecentDaysAgo = (todayLocalDateObj-mostRecentLocalDateObj)/(1000*3600*24);
+                allHistoryEntriesForThisHabit['mostRecentDaysAgo'] = mostRecentDaysAgo;
+            } else {
+                allHistoryEntriesForThisHabit['mostRecentDaysAgo'] = '-';
+            }
+            return allHistoryEntriesForThisHabit;
+        }
+
+        // Create the html for the table.
+        var maxDaysToShow = 31;
+        var headerRow = '<thead><tr><th>Days<br/>Since<br/>Active</th><th>Habit</th>';
+        for (var dateIdx=0; dateIdx<maxDaysToShow; dateIdx++) {
+            // Get the current local date and weekday.
+            var currentLocalDateObj = new Date();
+            currentLocalDateObj.setDate(todayDateObj.getDate()-dateIdx);
+            currentLocalDateString = getLocalDateStringForUser_FromUtcMillsStamp(currentLocalDateObj.getTime());
+            var weekdayString = weekdayArray[currentLocalDateObj.getDay()]
+            // Add the date to the header row.
+            var classNames = (weekdayString === 'Mo' ? 'weekstart' : '' );
+            headerRow += '<th class="' + classNames + '">' +
+                currentLocalDateString + '<br /><br />' +
+                weekdayString + '&nbsp;</th>';
+        }
+        headerRow += '</tr></thead>';
+        headerRow = headerRow.replace(/>20/g, ">'"); // remove century
+        headerRow = headerRow.replace(/-/g, "-<br />"); // line break after -
+
+        var tableBody = '';
+        for (var habitIdx=0,ic=habitsWithHistory.length; habitIdx<ic; habitIdx++) {
+            var habit = habitsWithHistory[habitIdx];
+            tableBody += '<tr>'+
+                '<td>' + habit['entries']['mostRecentDaysAgo'] + '</td>'+
+                '<td><b>' + habit.name + '</b></td>';
+            for (var dateIdx=0; dateIdx<maxDaysToShow; dateIdx++) {
+                // Get the current local date.
+                var currentLocalDateObj = new Date();
+                currentLocalDateObj.setDate(todayDateObj.getDate()-dateIdx);
+                currentLocalDateString = getLocalDateStringForUser_FromUtcMillsStamp(currentLocalDateObj.getTime());
+                var weekdayString = weekdayArray[currentLocalDateObj.getDay()]
+                // Populate the cell for this habit on this date.
+                var netCount = 0;
+                if(currentLocalDateString in habit['entries']) {
+                    var entry = habit['entries'][currentLocalDateString];
+                    netCount = entry['netCount'];
+                }
+                var formattedNetCount = '·';
+                var classNames = 'neutral';
+                if(netCount > 0) {
+                    formattedNetCount = netCount;
+                    classNames = 'safe';
+                }
+                if(netCount < 0) {
+                    formattedNetCount = netCount;
+                    classNames = 'danger';
+                }
+                if(weekdayString === 'Mo'){
+                    classNames += ' weekstart';
+                }
+                tableBody += '<td class="' + classNames + '">' +
+                    formattedNetCount + '</td>';
+            }
+            tableBody += '</tr>' ;
+        }
+
+        var tableOutput =
+        '<div id="habitsHistoryExplanationToggle" class="showHideToggle" data-target="habitsHistoryExplanation" data-linktext="explanation">show explanation</div>' +
+        '<div id="habitsHistoryExplanation" class="hide">' +
+        '<p>The table below shows historical data for your Habits. One month\'s worth of data is shown. (31 days.) Each cell shows the \'Net\' number of times that you clicked plus or minus for that habit, on the specified date. Positive numbers are in blue, negative numbers are in red, and zero is in yellow.'+
+        '<br/><br/>For example:' +
+        '<ul>' +
+        '<li> 3 \'plus\' clicks and No \'minus\' clicks = Net 3. (blue)</li>' +
+        '<li> 4 \'plus\' clicks and 2 \'minus\' clicks = Net 2. (blue)</li>' +
+        '<li> 1 \'minus\' click and No \'plus\' clicks = Net (-1). (red)</li>' +
+        '<li> No clicks = Net 0. (Zero is shown as a dot, in yellow.)</li>' +
+        '<li> 1 \'minus\' click and 1 \'plus\' click = Net 0. (Zero is shown as a dot, in yellow.)</li>' +
+        '</ul>'  +
+        ' The \'Days Since Active\' field shows the number of days since any plus/minus button was clicked for that habit. (Or a hyphen if the habit has never been active.)<br/>' +
+        'Vertical black bars indicate the start of each week. (Week start is Monday.)' +
+        '<br/><br/>' +
+        'If you scoll down past the table area, you can view the \'Habit Details\' section.<br/>The Habit Details section contains additional information that is not in the table.<br/> Including: The absolute number of Plus and Minus button clicks, and older history beyond 31 days.' +
+        '</p>' +
+        '<div class="showHideToggle closer" data-target="habitsHistoryExplanation" data-resettoggletext="habitsHistoryExplanationToggle">hide explanation</div>' +
+        '</div>' +
+        '<table>' + headerRow +
+        '<tbody>' + tableBody + '</tbody>' +
+        '</table>';
+
+        // ### Habit History Details ###
+
+        var detailOutput =
+                '<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>'+
+                '<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>'+
+                '<H2>Habit Details</H2>' +
+                '<p class="narrowContent">This shows your Habits, the dates you clicked on them, and the total number of plus and minus clicks on each of those dates.</p>';
+        detailOutput += '<p class="narrowContent">Habits with no history are highlighted in bold, in case you would like to consider them for greater focus.</p>';
+        detailOutput += '<ul>';
+        $.each(habits, function(index, obj){
+            detailOutput += collateHistoryForOneHabit(obj);
+        });
+        detailOutput += '</ul>';
+
+        function collateHistoryForOneHabit(obj) {
+            // ASSUMPTION: The history array is in chronological order (cross fingers).
+            var historyList = [];
+            $.each(obj.history, function(index, histObj){
+                if (typeof histObj.scoredUp !== 'undefined' && typeof histObj.scoredDown !== 'undefined') {
+                    var valueRounded = Math.round(histObj.value * 100) / 100;
+                    var string = moment(histObj.date).format('YYYY-MM-DD') + ' : ';
+                    if (obj.up) {
+                        string += ' up: ' + histObj.scoredUp;
+                        if (obj.down) string += '; ';
+                    }
+                    if (obj.down) {
+                        string += ' down: ' + histObj.scoredDown;
+                    }
+                    string += ' <span class="historyValue">(value: ' + valueRounded + ')</span>';
+                    historyList.push('<li>' + string + '</li>');
+                }
+            });
+
+            var habitText = obj.text;
+            var noHistoryClass = '';
+            if (historyList.length == 0) {
+                noHistoryClass = 'noHistory';
+                habitText += ' <span>(no history)</span>';
+            }
+            else {
+                historyList.reverse(); // put most recent at top
+                habitText += '<ul class="padded">' +
+                           historyList.join('') + '</ul>';
+            }
+            return '<li class="' + noHistoryClass + '">' + habitText + '</li>';
+        }
+
+        var html = tableOutput + detailOutput;
+        TOC[orderId]  = {'target': id, 'title':  title};
+        MAIN[orderId] = {'id': id, 'title': title, 'longContent': true,
+                        'html': html};
+
+		function getLocalDateStringForUser_FromUtcMillsStamp(dateStampUtcMills) {
+			// Format the date to the user's time zone.
+			var dateUTC = new Date(dateStampUtcMills);
+			var userZoneOffsetMins = user.preferences.timezoneOffset;
+			var userZoneOffsetMills = userZoneOffsetMins * 60 * 1000;
+			var localDateMills = dateUTC - userZoneOffsetMills;
+			var localDate = new Date(localDateMills);
+			var isoLocalDateString = formatIsoDateString(localDate);
+			return isoLocalDateString;
+		}
     }
 
 
@@ -5230,6 +5435,40 @@ ul#tableOfContents > li {
     font-weight: normal;
 }
 
+
+#habitHistoryTableSection table {
+    margin-top: 1.5em;
+    border-bottom: 1px solid #ccc;
+    border-left:   1px solid #ccc;
+}
+#habitHistoryTableSection table th {
+    background-color: rgb(242, 242, 230); /* XXX_SOON replace with proper scrolling */
+}
+#habitHistoryTableSection table th,
+#habitHistoryTableSection table td {
+    text-align: center;
+    border-top:   1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+#habitHistoryTableSection table th:nth-child(2) {
+    border-right: 0.3em solid #999;
+}
+#habitHistoryTableSection table td:nth-child(2) {
+    text-align: left;
+    border-right: 0.3em solid #999;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 14.5em;
+}
+#habitHistoryTableSection table th.weekstart {
+  border-right:  0.15em solid #000;
+}
+#habitHistoryTableSection table td.weekstart {
+  border-right:  0.15em solid #000;
+}
+
+
 #dailiesIncompleteSection h3 {
     margin-top: 3em;
 }
@@ -5643,6 +5882,7 @@ ul#tableOfContents > li {
                 <ul>
 					<li>Removed "Official" from the page name and added the <code>:broken_heart:</code> emoji because Habitica's staff <a href="https://www.reddit.com/r/habitica/comments/zdr2la/the_staff_is_taking_moderation_inhouse_and_so_are/">fired the moderation team</a> and <a href="https://www.reddit.com/r/habitica/comments/zmsz48/habitica_received_some_troubling_reports_about/">treated the Socialites with disrespect and cruelty</a>.</li>
 					<li>Renamed the <strong>Habit History</strong> section to <strong>Habit History List</strong>.</li>
+					<li>Added the <strong>Habit History Table</strong> section from <a href="https://github.com/Alys/tools-for-habitrpg/pull/62">PR 62 by BlakeTNC</a>. (I changed the "chart" terminology from that PR to "table" because "chart" was already used by the Habit Trends section.)</li>
                 </ul>
             </li>
             <li>Code:
@@ -6900,6 +7140,7 @@ ul#tableOfContents > li {
             <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To Do's, or Rewards that have not been <a href="http://habitica.fandom.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed. This section is shown only if you have untagged tasks.</li>
             <li><span class="subheading">Habit Trends</span>: An interactive chart that provides a visual representation of the trends in your Habits. It gives you an idea of which Habits you are reinforcing, and which are being neglected.</li>
             <li><span class="subheading">Habit History List</span> (previously <span class="subheading">Habit History</span>): This shows some of the dates and times you recently clicked on your Habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
+            <li><span class="subheading">Habit History Table</span> (created by <a href="https://github.com/Alys/tools-for-habitrpg/pull/62">BlakeTNC</span>): This shows summarised information from the Habit History List section, in a tablular format.</li>
             <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your Dailies.</li>
             <li><span class="subheading">Dailies Incomplete</span>: A list of Dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitica.fandom.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
             <li><span class="subheading">To Do's with Dates</span>: A list of all To Do's that have been given due dates, sorted by date. If there are any To Do's due today or overdue, a red tile will appear in the dashboard to tell you how many there are. This section is shown only if you have dated To Do's.</li>
@@ -6926,6 +7167,7 @@ ul#tableOfContents > li {
             <li><a href="habitrpg_user_data_display.html?sectionOpen=untaggedTasksSection&uuid=">Tasks Untagged</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=habitTrendsSection&uuid=">Habit Trends</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=habitHistoryListSection&uuid=">Habit History List</a> (previously Habit History)</li>
+            <li><a href="habitrpg_user_data_display.html?sectionOpen=habitHistoryTable&uuid=">Habit History Table</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=dailiesHistorySection&uuid=">Dailies History</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=dailiesIncompleteSection&uuid=">Dailies Incomplete</a></li>
             <li><a href="habitrpg_user_data_display.html?sectionOpen=todosDatedSection&uuid=">To Do's with Dates</a></li>
