@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Habitica User Data Display Tool</title>
+    <title>Original Habitica User Data Display Tool</title>
     <base target="_blank">
 
 <!--
@@ -27,6 +27,7 @@ Contributors:
     cTheDragons https://github.com/cTheDragons
     Pitii (Piti the Grey) https://github.com/PitiTheGrey
     Tenali (BlakeTNC) https://github.com/BlakeTNC
+    RobertSmagge https://github.com/RobertSmagge
 
 TO ADD A NEW SECTION TO THIS PAGE:
 Search through this code to find all the comments that start
@@ -5793,8 +5794,8 @@ ul#tableOfContents > li {
 </head>
 <body><div id="innerBody">
 
-	<h1><a href="https://habitica.com/">Habitica</a> User Data Display Tool <img src="js/emoji-images/pngs/broken_heart.png" width="32px" />
-    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.18)</span></h1><!-- VERSION TOGGLE -->
+	<h1>Original Habitica User Data Display Tool <img src="js/emoji-images/pngs/broken_heart.png" width="32px" />
+    <span class="showHideToggle" data-target="versionChanges" data-closemainsections="true">(v9.19)</span></h1><!-- VERSION TOGGLE -->
 <div id="headerExtras"></div>
 <hr class="clear" />
 <div id="subscriptionWarningFull" class="errorMessage"></div>
@@ -5824,6 +5825,16 @@ ul#tableOfContents > li {
 <div id="versionChanges" class="hide"><!-- VERSION SECTION -->
     <h2>Version History</h2>
     <dl>
+
+        <dt>9.19 <span class="date">2023-04-08</span></dt>
+        <dd><ul>
+            <li>Code:
+                <ul>
+					<li>Fixed an incorrect HTML closing tag (from <a href="https://github.com/Alys/tools-for-habitrpg/pull/67">PR 67 by RobertSmagge</a>).</li>
+					<li>Fixed a typo in the same line.</li>
+                </ul>
+            </li>
+        </ul></dd>
 
         <dt>9.18 <span class="date">2022-12-29</span></dt>
         <dd><ul>
@@ -7089,7 +7100,7 @@ ul#tableOfContents > li {
             <li><span class="subheading">Tasks Untagged</span>: If you have any Habits, Dailies, To Do's, or Rewards that have not been <a href="http://habitica.fandom.com/wiki/Tags">tagged</a> they will be listed. This will be useful to you only if you prefer to tag all your tasks and are looking for any you have missed. This section is shown only if you have untagged tasks.</li>
             <li><span class="subheading">Habit Trends</span>: An interactive chart that provides a visual representation of the trends in your Habits. It gives you an idea of which Habits you are reinforcing, and which are being neglected.</li>
             <li><span class="subheading">Habit History List</span> (previously <span class="subheading">Habit History</span>): This shows some of the dates and times you recently clicked on your Habits. But note the disclaimer you'll see at the top of the list! Most of your clicks can not be shown.</li>
-            <li><span class="subheading">Habit History Table</span> (created by <a href="https://github.com/Alys/tools-for-habitrpg/pull/62">BlakeTNC</a>): This shows summarised information from the Habit History List section, in a tablular format.</li>
+            <li><span class="subheading">Habit History Table</span> (created by <a href="https://github.com/Alys/tools-for-habitrpg/pull/62">BlakeTNC</a>): This shows summarised information from the Habit History List section, in a tabular format.</li>
             <li><span class="subheading">Dailies History</span>: A spreadsheet-like view showing the days on which you did and did not tick off your Dailies.</li>
             <li><span class="subheading">Dailies Incomplete</span>: A list of Dailies scheduled for today that you have not yet completed, and the estimated damage you will take from each one. It also has a separate list of <a href="http://habitica.fandom.com/wiki/Dailies#Grey_Dailies">Grey Dailies</a> that have not been completed (you don't need to do those today, but you might want to for extra rewards).</li>
             <li><span class="subheading">To Do's with Dates</span>: A list of all To Do's that have been given due dates, sorted by date. If there are any To Do's due today or overdue, a red tile will appear in the dashboard to tell you how many there are. This section is shown only if you have dated To Do's.</li>
