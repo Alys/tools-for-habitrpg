@@ -1,3 +1,13 @@
+**UPDATE 2025-10-11:**
+
+**This repo has moved to Codeberg:**
+https://codeberg.org/alys/tools-for-habitrpg
+
+This is why and how: [How and Why to Ditch GitHub](https://taggart-tech.com/migrate-to-codeberg/)
+
+--------------------------------------------
+--------------------------------------------
+
 This repo contains various small scripts for working with exported data or
 API data from Habitica ( http://habitica.com/  http://habitica.fandom.com/ ).
 
